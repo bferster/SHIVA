@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<title>SHIVA Image</title>
+	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
+ 	<link rel="stylesheet" type="text/css" href="css/jquery.ad-gallery.css">
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+ 	<script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
+ 	<script type="text/javascript" src="SHIVA_Show.js"></script>
+ 	<script type="text/javascript" src="jquery.ad-gallery.js"></script>
+ 	<style type="text/css">
+		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
+		p.pb { text-align:right; color:#999999; }
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:80px;border-radius:8px;}
+		tr.odd { background-color:#e0e0e0; }
+		.propTable { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:80px;border-radius:8px;
+				  	 background-color:#eee;border:1px solid #ccc;
+				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				  	 }
+
+
+		#gallery {
+		    padding: 24px;
+		    background: #ddd;
+		  	}
+	 	#descriptions .ad-image-description {
+			position: absolute;
+	    	}
+		#descriptions .ad-image-description .ad-description-title {
+	        display: block;
+	      	}
+  </style>
+</head>
+<body>
+	<div style="width:279px;position:absolute;top:0px;left:0px">
+    <table id="propertyTable" class="propTable" cellspacing="0" cellpadding="0" width="278">
+		<tr height='8'><td></td></tr>
+	</table> 
+   <p align='right'><span id="toolbar" >Limit by: <input type='text' size='7' id='gsite' value='loc.gov' />
+		<button type='button' id='tb1' onclick='FindImages()' style="font-size:x-large"/></button>
+	</span></p>
+		<p align="right"><img src='annotate.gif' style='vertical-align:bottom' onclick='shivaLib.Annotate()'>&nbsp;&nbsp;&nbsp;Share as: 
+		<select id='formatter' onChange='SaveData(this.value)'>
+			<option>Choose format</option>
+			<option>WordPress</option>
+			<option>Canvas</option>
+			<option>eStore</option>
+			<option>iFrame</option>
+			<option>JSON</option>
+			<option>Web-page</option>
+		</select> 
+	</p>		
+ 	<div id="helpDiv"/>
+	</div>
+	<div id="outputDiv" style="width:460px"></div>
+	<div id="containerDiv" style="position:absolute;top:0px;left:308px"></div>
+ 
+<script>
+
+	google.load('search','1');
+	google.setOnLoadCallback(onGoogleLoad);
+
+///////// GLOBALS   //////////
+
+	var shivaLib=null;
+	var shivaGroup="Image"
+	var searchControl=null;
+	var inSearch=false;
+	
+	var props={
+		dataSourceUrl: 				{	def:'', 			opt:'string',			des:'URL of image/spreadsheet'}, 
+		title: 						{	def:'', 			opt:'string',			des:'Title of image'}, 
+		width: 						{	def:'600', 			opt:'number',			des:'Width of image'}, 
+		transition: 				{	def:'fade', 		opt:'none|fade|resize|slide-hori|slide-vert',		des:'Transition style'},
+		showImage: 					{	def:'true', 		opt:'true|false',		des:'Show full image?'}, 
+		showSlide: 					{	def:'true', 		opt:'true|false',		des:'Show slideshow?'}, 
+		imgHgt: 					{	def:'60', 			opt:'number',			des:'Thumbnail height'}, 
+		ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'} 
+		}
+	
+	var helpText=new Array();
+	helpText['URL of image/spreadsheet']="Source URL of the image, if a showing a single image.<br/><br/>If using google docs for image gallery, type the URL for the Google Docs spreadsheet, or simply cut and paste the URL from the Google Docs site for the spreadsheet to use that contains data formatted for the images.<br/><br/> Each row is an image, with the image URL, the title (optional) and description (optional) in the first 3 columns.";
+	helpText['Title of image']="Title of image.";
+	helpText['Thumbnail height']="The height of the thumbnail images if an image gallery.";
+	helpText['Width of image']="The width of the image or gallery.";
+	helpText['Transition style']="How images transition if an image gallery, i.e. fade, slide, etc.";
+	helpText['Show full image?']="Show full image above thumbnails if an image gallery.";
+	helpText['Show slideshow?']="Show slideshow controls if an image gallery.";
+	helpText['OVERVIEW']="This can add one image by specifying its URL, or display an image gallery containing many images by specifying a URL to a Google doc with a list of images. Captions and titles can also be added in the doc.</br></br>The gallery has a scrollable set of thumbnails, with a large image above it. An automated sideshow with various transitions can be specified";
+	helpText['Enable user draw?']="Setting this to true will allow users to add annotations to the display.";	
+
+///// INIT  /////////////
+	
+	$(document).ready(function() {
+		$("#tb1").button({text: false, icons: { primary: "ui-icon-search"}}).css('top',6);
+  		shivaLib=new SHIVA_Show("containerDiv");
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
+	  	SetAttributes(props);
+		ReEdit();
+		ShowHelp("startup");
+		if (window.addEventListener) 
+			window.addEventListener("message",shivaEventHandler,false);
+		else
+			window.attachEvent("message",shivaEventHandler);
+	});
+
+	function shivaEventHandler(e)
+	{
+		if (e.data.indexOf("GetJSON") == 0) 
+			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
+		else if (e.data.indexOf("GetWebPage") == 0) 
+			e.source.postMessage("GetWebPage="+SaveData("Web-page"),"*");
+		else if (e.data.indexOf("GetWordPress") == 0) 
+			e.source.postMessage("GetWordPress="+SaveData("WordPress"),"*");
+		else if (e.data.indexOf("GetType") == 0) 
+			e.source.postMessage("GetType="+shivaGroup,"*");
+		else if (e.data.indexOf("PutJSON") == 0) 
+			ReEdit($.parseJSON(e.data.substr(8)));
+		shivaLib.drupalMan=e.source;
+	}
+
+	function Draw(mode)
+	{	
+		if ((shivaLib.drupalMan) && (typeof(shivaLib.drupalMan.postMessage) == "function")) 
+			shivaLib.drupalMan.postMessage("DataChanged=true","*");
+		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
+	}
+
+	function SaveData(mode)
+	{
+		return shivaLib.SaveData(mode,shivaGroup,null,props);
+	}	
+
+	function ReEdit(jsonData)
+	{
+		shivaLib.ReEdit(jsonData,props);
+		Draw();
+	}	
+
+	function ShowHelp(att)
+	{
+		if (att == "startup") 
+			$("#helpDiv").html("<br/><p class='pb'>Powered by CoffeeScripter<br/><br/>Built by SHANTI<br/>The University of Virginia</p>");
+		else
+			shivaLib.ShowHelp(att,helpText);
+		if (inSearch) 
+			Draw();
+		inSearch=false;
+	}	
+
+	function SetAttributes()
+	{
+		shivaLib.SetAttributes(props);
+	}	
+
+	function trace(str) 
+	{ 
+		console.log(str) 
+	}
+
+	function onGoogleLoad()
+	{
+		searchControl=new google.search.SearchControl();
+		var options = new google.search.SearcherOptions();
+		options.setExpandMode(google.search.SearchControl.EXPAND_MODE_OPEN);
+		img=new google.search.ImageSearch();
+		searchControl.setResultSetSize(google.search.Search.LARGE_RESULTSET);
+		img.setRestriction(google.search.ImageSearch.RESTRICT_FILETYPE,google.search.ImageSearch.FILETYPE_PNG|google.search.ImageSearch.FILETYPE_JPG|google.search.ImageSearch.FILETYPE_GIF);
+		searchControl.addSearcher(img,options);
+	}
+
+	function FindImages()
+	{
+		img.setSiteRestriction($("#gsite").val());
+		searchControl.draw(document.getElementById("containerDiv"));
+		inSearch=true;
+		}
+
+		
+</script>
+</body></html>

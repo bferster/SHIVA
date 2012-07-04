@@ -1,0 +1,259 @@
+***Data source URL***Type the URL for the Google Docs spreadsheet that contains data formatted for this type of visualization. Simply cut and paste the URL from the Google Docs site for the spreadsheet to use. You can limit the columns and rows to include by setting the Query conditions field.<br><br>If you do not provide a source, some sample data is provided to set the look and feel of the visualization element.
+
+***Data filter***Clicking on the Data Filter field will bring up a dialog box to create what is called a "query." Queries allow you to set condition(s) that need to be met before the data from a row in the spreadsheet will be included in the results. 
+
+***3D chart?***Setting the field to 'true' creates a 3D chart.
+
+***Background setting(s)***This field allows you to set a number of options about the chart's background with the following properties:<br><br>Fill color (fill=ffffff)<br>Border color (stroke=000000)<br>Border width (strokeWidth=0)<br><br>If you only set one property follow it with a comma. If you set more than one, separate them using commas:<br>i.e., fill=cccccc,stroke=000000,strokeWidth=1
+
+***Chart colors...***The ColorPicker dialog will appear and allow you to choose a series of colors, all of which will be placed in the box. Colors can be chosen by clicking on the desired color, or entering the color directly in the text box. Clicking on the close button in the dialog stops the adding process.
+
+***Date format***Use this to enter the format used to display the date information in the top right corner. Either 'MMMM dd, yyyy' or 'HH:mm MMMM dd, yyyy, depending on the type of the first column (date, or datetime, respectively).
+
+***Alpha fill 0-100***Fills in the area below the chart lines with the same color as the chart line.  A value of 0 is completely transparent. The higher the color, the more the opacity, with a value of 100 being completely opaque.
+
+***Opacity of area chart***Fills in the area below the chart lines with the same color as the chart line. A value of 0 is completely transparent. The higher the color, the more the opacity, with a value of 1 being completely opaque.
+
+***Chart area setting(s)***Use these settings to configure the placement and size of the chart area, where the chart itself is drawn, excluding axis and legends. Two formats are supported: a number, or a number followed by %. A simple number is a value in pixels; a number followed by % is a percentage. For example: left=20,top=0,width=50%,height=75%
+
+***Font name***Change font by typing the name of your font of choice into the text box. Try to use standard fonts, such as Arial, Courier, and Times Roman, to ensure that the viewer's computer has that font.
+
+***Font size***The automatic font size is 12. Change the font size by typing the font size of your choice into the text box.
+
+***Horizontal axis setting(s)***You can find information on configuring the horizontal axis settings <a href='http://code.google.com/apis/chart/interactive/docs/gallery/columnchart.html#Configuration_Options' target='_blank'> here</a>.<br/><br/><b>NOTE:</b>Remember to separate each setting with a comma. If there is only one setting, add a comma to the end. 
+
+***Legend position***Controls where the legend will be placed. Choosing 'none' will remove the legend completely.
+
+***Legend text setting(s)***Use this to specify the legend text style. The field can set the color, fontName, and fontSize. For example: color=#990000,fontName=Arial,fontSize=16
+
+***Height chart***Controls the height of your chart. Some charts have a maximum height of 400.
+
+***Stacked chart?***Changes the way your data is displayed. On area and bar charts, the areas will appear on top of one another.
+
+***Line width***Controls the width of the data lines.  
+
+***Size of points***Controls the size of the points in the chart.  
+
+***Series setting(s)***You can find information on configuring the horizontal axis settings <a href='http://code.google.com/apis/chart/interactive/docs/gallery/columnchart.html#Configuration_Options' target='_blank'> here</a>. Scroll down to Series settings.
+
+***Title above chart***Enter a title for your chart in the text box.
+
+***Title text setting(s)***Use to specify the title text style. The field can set the color, fontName, and fontSize. For example: color=990000,fontName=Arial,fontSize=16
+
+***Tooltip setting(s)***Use to specify the tooltip text style. The field can set the color, fontName, and fontSize. For example: color=990000,fontName=Arial,fontSize=16
+
+***Tooltip information***Determines what information to display when the user hovers over a pie slice.  Choose both to display both the absolute value of the slice and the percentage of the whole.  Choose value to display only the absolute value of the slice.  Choose percentage to display only the percentage of the whole represented by the slice.
+
+***Tooltip text setting(s)***Use to specify the title text style of the tooltip information. The field can set the color, fontName, and fontSize. For example: color=990000,fontName=Arial,fontSize=16
+
+***Vertical axis setting(s)***You can find information on configuring the vertical axis settings <a href='http://code.google.com/apis/chart/interactive/docs/gallery/columnchart.html#Configuration_Options' target='_blank'> here</a>. Scroll down to the Vaxis settings..<br/><br/><b>NOTE: </b>Remember to separate each setting with a comma. If there is only one setting, add a comma to the end.
+
+***Width of chart***Controls the width of your chart.  
+
+***Green zone Color***If you want to spice your gauges up, you can add minimum and maximum values for colored ranges. This lets you see if your numbers are within the colored range.<br><br>Click on the text box to choose a color for your Green Zone.
+
+***Green zone Start***If you want to spice your gauges up, you can add minimum and maximum values for colored ranges. This lets you see if your numbers are within the colored range. Leave this blank if you do not want a Green Zone.
+
+***Green zone End***If you want to spice your gauges up, you can add minimum and maximum values for colored ranges. This lets you see if your numbers are within the colored range. Leave this blank if you do not want a Green Zone.
+
+***Height of gauges***Controls the height of the chart in pixels.
+
+***Maximum gauge range***Enter a number for the maximum value of the gauge. This number can range be a positive number, negative number, or fraction of a number like .01.   
+
+***Minimum gauge range***Enter a number for the minimum value of the gauge. This number can range be a positive number, negative number, or fraction of a number like .01.   
+
+***Major tick labels...***The number of labels define the number of major ticks in all gauges. The default is five major ticks, with the labels of the minimal and maximal gauge value.<br><br>You can enter multiple numbers of major ticks by separating each number with a comma. For example, entering 2,100 in the text box will produce a gauge with major tick marks numbered 2 and 100 with nothing else in between.
+
+***Number of minor tick marks***Entering a number here will determine the number of minor tick sections in each major tick section.
+
+***Red zone Color***If you want to spice your gauges up, you can add minimum and maximum values for colored ranges. This lets you see if your numbers are within the colored range.<br><br>Click on the text box to choose a color for your Red Zone.
+
+***Red zone Start***If you want to spice your gauges up, you can add minimum and maximum values for colored ranges. This lets you see if your numbers are within the colored range. Leave this blank if you do not want a Red Zone.
+
+***Red zone End***If you want to spice your gauges up, you can add minimum and maximum values for colored ranges. This lets you see if your numbers are within the colored range.  Leave this blank if you do not want a Red Zone.
+
+***Width of gauges***Controls the width of the gauges in pixels.
+
+***Yellow zone Color***If you want to spice your gauges up, you can add minimum and maximum values for colored ranges. This lets you see if your numbers are within the colored range.<br><br>Click on the text box to choose a color for your Yellow Zone.
+
+***Yellow zone Start***If you want to spice your gauges up, you can add minimum and maximum values for colored ranges. This lets you see if your numbers are within the colored range. Leave this blank if you do not want a Yellow Zone.
+
+***Yellow zone End***If you want to spice your gauges up, you can add minimum and maximum values for colored ranges. This lets you see if your numbers are within the colored range. Leave this blank if you do not want a Yellow Zone.
+
+***Map borders resolution***Choose 'countries', 'metro', or 'provinces' from the pull-down menu.
+
+***Display style***Plot data as marker dots or colored regions. Marker dots only work when locations are specified by address, country name, region name locations, or US metropolitan area code.
+
+***Region to display***Choose a region or the whole world from the pull-down menu.
+
+***Background color***Click on the text box to open the color chart. Click on the color of your choice. The default setting is white.
+
+***Base color***Click on the text box to open the color chart. Click on the color of your choice.  The default setting is white.
+
+***Fill area under each line?***You cannot control this setting for Image Charts.
+
+***Option(s)***You can find information on configuring the horizontal axis settings <a href='http://code.google.com/apis/chart/image/docs/chart_params.html' target='_blank'> here</a>. Scroll down to Parameters settings.
+
+***Pie chart labels***You cannot control this setting for Image Charts.
+
+***Show category labels?***You cannot control this setting for Image Charts.
+
+***Show value labels?***You cannot control this setting for Image Charts.
+
+***Minimum visible slice***Determines the smallest percentage of the pie that will be visible to users.  The default setting is .001.
+
+***Pie slice text information***Determines what information from the data source is visible in the pie slices.
+
+***Pie slice text setting(s)***Use to specify the title text style of the information in pie slices. The field can set the color, fontName, and fontSize. For example: color=990000,fontName=Arial,fontSize=16
+
+***Font name***Change font by typing the name of your font of choice into the text box. It's best to use standard fonts, such as Arial, Courier, and Times Roman, to ensure that the font will display on all computers.
+
+***Title of chart***Determines text to be displayed above the chart.
+
+***Axis display interval***By default, the program determines the minimum and maximum scale values of the vertical axis when you create a chart. However, you can customize the scale to better meet your needs.
+
+***Show chart type button?***The false option hides the buttons that control the chart type (bubbles / lines / columns) at top right corner.
+
+***Show list of visible entries?***The false option hides the list of visible entities.
+
+***Show options component?***The false option disables the options compartment in the settings panel.
+
+***Show right-hand panel?***The false option hides the right hand panel.
+
+***Show title labels?***The false option hides the title label of the entities (derived from the label of the first column in the data table).
+
+***Show X metric picker?***The false option hides the metric picker for x.
+
+***Show X scale picker?***The false option hides the scale picker for x.
+
+***Show Y metric picker?***The false option hides the metric picker for y.
+
+***Show Y scale picker?***The false option hides the scale picker for y.
+
+***Allow HTML in nodes?***If set to the 'true', names that includes HTML tags will be rendered as HTML.
+
+***Allow node collapse?***Determines if double click will collapse a node.
+
+***Node size***Enter 'small', 'medium', or 'large'.
+
+***CSS node setting(s)***Utilize a class name to assign to node elements. Apply CSS to this class name to specify colors or styles for the chart elements.
+
+***CSS selectednode***Utilize a class name to assign to selected node elements. Apply CSS to this class name to specify colors or styles for selected chart elements.
+
+***Show alternating row colors?***If set to 'false', all the rows will be shown with the same background color.
+
+***Rows per page*** This sets the number of rows to show per page.
+
+***Font color***Sets the color of the font. Click to choose a color using the color picker.
+
+***Minimum color***Sets the color of the color of the smallest box in the Tree Map chart.  As the sizes of the boxes in the chart increase the color chosen will lighten. 
+
+***Font family***Change font by typing the name of your font of choice into the text box. It's best to use standard fonts, such as Arial, Courier, and Times Roman, to ensure that the font will display on all computers.
+
+***Header color***Sets the color of the header section for each node. Click to specify an HTML color value. 
+
+***Header height***Sets the height of the header section for each node, in pixels (can be zero).
+
+***Header highlight color***Sets the color of the header of a node being hovered over. Specify an HTML color value, null, or 'auto'. If null or 'auto', this value will be Header Color lightened by 35%.
+
+***Maximum color***Sets the color for a rectangle with a column 3 value of Maximum Color Value. Click to specify an HTML color value.
+
+***Maximum color value***Sets the maximum value allowed in column 3. All values greater than this will be trimmed to this value. If set to null or 'auto', it will be set to the max value in the column.
+
+***Max levels***Sets the maximum number of node levels to show in the current view. Levels will be flattened into the current plane. If your tree has more levels than this, you will have to go up or down to see them. 
+
+***Max levels to hint at***Sets how many levels of nodes beyond Max levels to show in hinted fashion. Hinted nodes are shown as shaded rectangles within a node that is within the Max levels limit.
+
+***Maximum highlight color***Sets the highlight color to use for the node with the largest value in column 3. Specify an HTML color value, null, or 'auto. If null or 'auto', this value will be the value of Maximum Color lightened by 35%.
+
+***Middle color***Sets the color for a rectangle with a column 3 value midway between Maximum Color Value and Minimum Color Value. Click to specify an HTML color value.
+
+***Middle color value***Sets the color value for a rectangle with a column 3 value midway between Maximum Color Value and Minimum Color Value. All values greater than this will be trimmed to this value. If set to null or 'auto', it will be set to the max value in the column.
+
+***Middle highlight color***Sets the highlight color to use for the node with a column 3 value near the median of Minimum Color Value and Maximum Color Value. Specify an HTML color value or 'auto'. If null or 'auto', this value will be the value of Middle color lightened by 35%. 
+
+***Minimum color value****Sets the color for a rectangle with the column 3 value of Minimum Color Value. Click to specify an HTML color value.
+
+***Minimum color value***Sets the minimum value allowed in column 3. All values less than this will be trimmed to this value. If set to null or 'auto', it will be calculated as the minimum value in the column.
+
+***Minimum highlight color***Sets the highlight color to use for the node with a column 3 value nearest to Minimum Color Value. Specify an HTML color value or 'auto'. If null or 'auto', this value will be the value of Minimum Color Value lightened by 35%.
+
+***No value color***Sets the color to use for a rectangle when a node has no value for column 3, and that node is a leaf (or contains only leaves). Click to specify an HTML color value.
+
+***No value color value***Sets the value to use for a rectangle of 'no' color when highlighted. All values greater than this will be trimmed to this value. If set to null or 'auto', it will be set to the max value in the column.
+
+***No value highlight color***Sets the color to use for a rectangle of 'no' color when highlighted. This will be the value of noColor lightened by 35%. Click to specify an HTML value.
+
+***Show tooltips?***Determines whether or not to show tooltips.
+
+***PieChart***The data should be formatted with a header row followed by a row for each slice of the pie as follows: Value:Value number of slice:Label:Label to title slice<br><br>You can find out more information on Pie Charts <a href='http://docs.google.com/support/bin/answer.py?hl=en&answer=91607' target='_blank'> here</a>.<br><br>You can find a sample spreadsheet that can be used to make a Pie Chart <a href='https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AsMQEd_YoBWldDdldlY0aW1mS0VRYWV2elRmLXNaZGc&output=html' target='_blank'> here</a>.
+
+***AnnotatedTimeLine***You can find out more information on Annotated Timelines <a href='https://docs.google.com/support/bin/answer.py?hl=en&answer=1047432&topic=1361474' target='_blank'> here</a>.<br><br>You can find a sample spreadsheet that can be used to make an Annotated Time Line <a href='https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AsMQEd_YoBWldDVMam13clF5VEQyN3RBTDIzd1JTb3c&output=html' target='_blank'> here</a>.
+
+***AreaChart***You can find out more information on Area Charts <a href='http://docs.google.com/support/bin/answer.py?hl=en&answer=190721&topic=1516' target='_blank'> here</a>.<br><br>You can find a sample spreadsheet that can be used to make an Area Chart <a href='https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AsMQEd_YoBWldHZNbGU2czNfa004UmpzeC13MkZZb0E&output=html' target='_blank'> here</a>.
+
+***BarChart***You can find out more information on Bar Charts <a href='https://docs.google.com/support/bin/answer.py?hl=en&answer=190723&topic=30240' target='_blank'> here</a>.<br><br>You can find a sample spreadsheet that can be used to make a Bar Chart <a href='https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AsMQEd_YoBWldHZNbGU2czNfa004UmpzeC13MkZZb0E&output=html' target='_blank'> here</a>.
+
+***CandlestickChart***You can find out more information on Candlestick Charts <a href='https://docs.google.com/support/bin/answer.py?answer=1409777' target='_blank'> here</a>.<br><br>You can find a sample spreadsheet that can be used to make a Candlestick Chart <a href='https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AsMQEd_YoBWldER2R0tKOGVGQWN2ZjZlRmExQ3gwRWc&output=html' target='_blank'> here</a>.
+
+***ColumnChart***You can find out more information on Column Charts <a href='http://docs.google.com/support/bin/answer.py?hl=en&answer=190722&topic=30240' target='_blank'> here</a>.<br><br>You can find a sample spreadsheet that can be used to make a Column Chart <a href='https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AsMQEd_YoBWldER2R0tKOGVGQWN2ZjZlRmExQ3gwRWc&output=html' target='_blank'> here</a>.
+
+***ComboChart***You can find out more information on Combo Charts <a href='https://docs.google.com/support/bin/answer.py?answer=1409804' target='_blank'> here</a>.<br><br>You can find a sample spreadsheet that can be used to make a Combo Chart <a href='https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AsMQEd_YoBWldER2R0tKOGVGQWN2ZjZlRmExQ3gwRWc&output=html' target='_blank'> here</a>.
+
+***Gauge***You can find out more information on Gauges <a href='http://docs.google.com/support/bin/answer.py?answer=91600&hl=en' target='_blank'> here</a>.<br><br>You can find a sample spreadsheet that can be used to make a Gauge <a href='https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AsMQEd_YoBWldGhFVGJOZGZmUGw2aHBuUmRuMndIZUE&output=html' target='_blank'> here</a>.
+
+***ImageSparkLine***You can find out more information on Image Sparklines <a href='http://docs.google.com/support/bin/answer.py?hl=en&answer=1046024' target='_blank'> here</a>.<br><br>You can find a sample spreadsheet that can be used to make an Image SparkLine <a href='https://docs.google.com/spreadsheet/pub?key=0AsMQEd_YoBWldFJXelV0N01ZdjNnRFpxeUJoOFhuOHc&output=html' target='_blank'> here</a>.
+
+***LineChart***You can find out more information on Image Charts <a href='http://docs.google.com/support/bin/answer.py?hl=en&topic=14186&answer=91606' target='_blank'> here</a>.<br><br>You can find a sample spreadsheet that can be used to make a Line Chart <a href='https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AsMQEd_YoBWldHdOX0tsU25SNmtQdGhGbnhTUXZ1S2c&output=html' target='_blank'> here</a>.
+
+***ImageChart***You can find out more information on Image Charts <a href='http://docs.google.com/support/bin/answer.py?answer=91606' target='_blank'> here</a>.<br><br>You can find a sample spreadsheet that can be used to make an Image Chart <a href='https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AsMQEd_YoBWldHdOX0tsU25SNmtQdGhGbnhTUXZ1S2c&output=html' target='_blank'> here</a>.
+
+***ScatterChart***You can find out more information on Scatter Charts <a href='http://docs.google.com/support/bin/answer.py?hl=en&answer=91608' target='_blank'> here</a>.<br><br>You can find a sample spreadsheet that can be used to make a Scatter Chart <a href='https://docs.google.com/spreadsheet/ccc?key=0AsMQEd_YoBWldGZVZml0SUpTY1VwVFZjbHpNTkI5UFE&hl=en_US#gid=0' target='_blank'> here</a>.
+
+***MotionChart***You can find out more information on Motion Charts <a href='http://docs.google.com/support/bin/answer.py?answer=91610' target='_blank'> here</a>.<br><br>You can find a sample spreadsheet that can be used to make an Motion Chart <a href='https://docs.google.com/spreadsheet/ccc?key=0AsMQEd_YoBWldEFxWHM2WVV0QXo3ZWhjUW1sZjdHUWc&hl=en_US#gid=0' target='_blank'> here</a>.
+
+***GeoChart***You can find out more information on Geo Charts <a href='http://code.google.com/apis/chart/interactive/docs/gallery/geomap.html' target='_blank'> here</a>.<br><br>You can find a sample spreadsheet that can be used to make a Geo Chart <a href='https://docs.google.com/spreadsheet/ccc?key=0AsMQEd_YoBWldFBoYjZfWkdSLVBkRTY2QTNDS2lWVWc&hl=en_US#gid=0' target='_blank'> here</a>.
+
+***OrgChart***You can find out more information on Org Charts <a href='http://docs.google.com/support/bin/answer.py?hl=en&answer=91597' target='_blank'> here</a>.<br><br>You can find a sample spreadsheet that can be used to make a Org Chart <a href='https://docs.google.com/spreadsheet/ccc?key=0AsMQEd_YoBWldDZYNmxYRFNncDE2UENKYkEwUUJ5bUE&hl=en_US#gid=0' target='_blank'> here</a>.
+
+***Table***Any data entered into a spreadsheet can be displayed here as a table.
+
+***TreeMap***You can find out more information on Tree Maps <a href='http://docs.google.com/previewtemplate?id=0As3tAuweYU9Qcm5TWDV3Sy1ZaWRxVFc4d2M5VnFobnc&mode=public' target='_blank'> here</a>.<br><br>You can find a sample spreadsheet that can be used to make a Tree Map <a href='https://docs.google.com/spreadsheet/ccc?key=0AsMQEd_YoBWldHdDWkhsQkJLQl93ZW5HQ0d1UFJfaUE&hl=en_US#gid=0' target='_blank'> here</a>.
+
+***Dot highlight***Determines which dot on the series to highlight, and corresponding values to show in the legend. Choose nearest to utilize the values closest along the X axis to the mouse.  Choose last to utilize the next set of values to the left of the mouse.
+
+***Display zoom range links?***Selecting the true option displays the zoom range lengths in the upper left hand corner of the Annotated Time Line. Your chart can be zoomed in as close as 1 day or as far out as the entire length of the time line you created.
+
+***Display separator bar?***Determines whether to display a small bar separator ( | ) between the series values and the date in the legend, where true means yes.
+
+***Display legend values?***Determines whether to display the highlighted values in the legend, where true means yes.  Move your cursor around the chart and see how the value displayed in the legend changes according to which dot your cursor has highlighted.  Dots may not display in Firefox, if this happens please switch browsers.
+
+***Display legend dots?***Determines whether to display dots next to the values in the legend text, where true means yes.  
+
+***Display exact values?***Determines whether to display a shortened, rounded version of the values on the top of the graph, to save space; false indicates that it may. For example, if set to false, 56123.45 might be displayed as 56.12k.
+
+***Display annotations?***If set to true, the chart will show annotations on top of selected values. When this option is set to true, after every numeric column, two optional annotation string columns can be added, one for the annotation title and one for the annotation text. 
+
+***Tool tip setting(s)***Allows you to put JavaScript into your chart.
+
+***Green zone color***Click on the 'Show color picker' button to choose the color for your green zone. The default color is green. When you click on the color of your choice, the color code will appear below the button. Copy and paste that color code into the text box. 
+
+***Green zone start***Sets the number value for where the green zone starts on the gauge.
+
+***Green zone end***Sets the number value for where the green zone ends on the gauge.
+
+***Red zone color***Click on the 'Show color picker' button to choose the color for your red zone. The default color is red. When you click on the color of your choice, the color code will appear below the button. Copy and paste that color code into the text box. 
+
+***Red zone start***Sets the number value for where the red zone starts on the gauge.
+
+***Red zone end***Sets the number value for where the red zone ends on the gauge.
+
+***Yellow zone color***Click on the 'Show color picker' button to choose the color for your yellow zone. The default color is yellow. When you click on the color of your choice, the color code will appear below the button. Copy and paste that color code into the text box. 
+
+***Yellow zone start***Sets the number value for where the yellow zone starts on the gauge.
+
+***Yellow zone end***Sets the number value for where the yellow zone ends on the gauge.
+
+***Enable user draw?***Setting this to true will allow users to add annotations to the display.
+
+***OVERVIEW***The SHIVA Charts tools are the perfect way to visualize data on your website. From simple line charts to complex hierarchical tree maps, SHIVA provides you with a large number of well-designed chart types. All you have to do is populate the data.<br/><br/>To get started identify an existing data source in spreadsheet form. SHIVA works with spreadsheets created or imported from Excel into Google Docs.  From within your Google Docs spreadsheet, open the File pull-down menu. Choose <b>Publish to the Web... </b>A pop-up box will open. Click the Start Publishing button. Copy the URL address that appears in the text box below.<br/><br/>From within SHIVA identify the kind of chart you want to create (annotated timeline, area chart, bar chart, etc.) from the pull-down menu.  Paste the URL address in the Data Source URL box.<br/><br/>Customize your chart with the options available.<br/><br/>

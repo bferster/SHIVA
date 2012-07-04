@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
+	<script type="text/javascript" src="http://api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
+	<script type="text/javascript" src="SHIVA_Show.js"></script>
+	<script type="text/javascript" src="SHIVA_Event.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/jquery.ad-gallery.css">
+  	<link type="text/css" rel="stylesheet" href="css/timeline1.css" media="all" id="timelineCSS"/> 
+	<style type="text/css">
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:80px;border-radius:8px;}
+		body,td,th {
+			font-family: Verdana, Geneva, sans-serif;
+			font-size:xx-small;
+			}
+		#gallery {
+		    padding: 24px;
+		    background: #ddd;
+		  	}
+	 	#descriptions .ad-image-description {
+			position: absolute;
+	    	}
+		#descriptions .ad-image-description .ad-description-title {
+	        display: block;
+	      	}
+	</style>
+	<title>SHIVA Display</title>
+</head>
+<body>
+<div style="width:600px;height:400px;position:absolute" id="containerDiv"/>	
+
+<script>
+
+	var shivaLib=null;
+	shivaGo();
+	
+	function shivaGo()
+	{
+		var pair;
+		var options=new Object();
+		var query=window.location.search.substring(1);
+		query=query.replace(/%5E/g,"^").replace(/%5e/g,"^").replace(/%C2%AE/g,"&reg").replace(/%20/g," ").replace(/%60/g,"`");
+		query=query.replace(/%3E/g,">").replace(/%3e/g,">").replace(/%3c/g,"<").replace(/%3C/g,"<").replace(/``/g,"#");;
+		var vars=query.split("&");
+		
+		for (var i=0;i<vars.length;i++) {
+			vars[i]=vars[i].replace(/\^/g,"&");
+			pair=vars[i].split("=");
+			for (j=2;j<pair.length;++j)
+				pair[1]+="="+pair[j];
+			if (pair[1]) {
+				options[pair[0]]=pair[1];
+	   			if (options[pair[1]] == 'true') 	options[pair[1]]=true;
+	   			if (options[pair[1]] == 'false') 	options[pair[1]]=false;
+	  			}
+	 		}
+		shivaLib=new SHIVA_Show("containerDiv");
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
+		if (window.addEventListener) 
+			window.addEventListener("message",shivaEventHandler,false);
+		else
+			window.attachEvent("message",shivaEventHandler);
+		if (vars.length > 2)
+			shivaLib.Draw(options);
+		if (query.indexOf("e=") != -1) {
+			var str="proxy.php?url=http://www.primaryaccess.org/REST/geteasyfile.php?id="+query.substr(2);
+			$.getJSON(str,$.proxy(shivaLib.Draw,shivaLib));	
+			}
+	}
+	
+	function shivaEventHandler(e)
+	{
+		if (e.data.indexOf("PutJSON") == 0) 
+			shivaLib.Draw($.parseJSON(e.data.substr(8)));
+	}
+
+
+
+</script>
+</body>
+</html>
+

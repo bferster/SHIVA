@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<title>SHIVA Video</title>
+ 	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
+	<script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
+	<script type="text/javascript" src="SHIVA_Show.js"></script>
+	<script type="text/javascript" src="SHIVA_Event.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<style type="text/css">
+		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
+		p.pb { text-align:right; color:#999999; }
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		tr.odd { background-color:#e0e0e0; }
+		.propTable { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:80px;border-radius:8px;
+				  	 background-color:#eee;border:1px solid #ccc;
+				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				  	 }
+	</style>
+</head>
+<body>
+	<div style="width:279px;position:absolute;top:0px;left:0px">
+    <table id="propertyTable" class="propTable" cellspacing="0" cellpadding="0" width="278">
+		<tr height='8'><td></td></tr>
+	</table> 
+		<p align="right">
+			<img src='eventsbutton.gif' style='vertical-align:middle' onclick='shivaLib.ev.EventEditor()'>&nbsp;&nbsp;&nbsp;
+			<img src='annotate.gif' style='vertical-align:bottom' onclick='shivaLib.Annotate()'>&nbsp;&nbsp;&nbsp;
+			Share as: 
+		<select id='formatter' onChange='SaveData(this.value)'>
+			<option>Choose format</option>
+			<option>WordPress</option>
+			<option>Canvas</option>
+			<option>eStore</option>
+			<option>iFrame</option>
+			<option>JSON</option>
+			<option>Web-page</option>
+		</select> 
+	</p>		
+ 	<div id="helpDiv"></div>
+	<div id="outputDiv" style="width:460px"></div>
+	</div>
+	<div id="containerDiv" style="width:600px;height:400px;position:absolute;top:0px;left:308px"></div>
+
+<script>
+
+///////// GLOBALS   //////////
+
+	var shivaLib=null;
+	var shivaGroup="Video"
+	var items=new Array();
+
+	var props={
+		dataSourceUrl: 				{	def:'zDZFcDGpL4U', 	opt:'string',			des:'Source of video'}, 
+		start: 						{	def:'0:0', 			opt:'string',			des:'Starting time (m:s)'}, 
+		end: 						{	def:'', 			opt:'string',			des:'Ending time (m:s)'}, 
+		autoplay: 					{	def:'false', 		opt:'true|false',		des:'Auto-play?'}, 
+		volume: 					{	def:'50', 			opt:'number',			des:'Audio volume'}, 
+		height:		 				{	def:'366', 			opt:'number',		 	des:'Height of player'}, 
+		width:	 					{	def:'600', 			opt:'number',		 	des:'Width of player'},
+		duration:	 				{	def:'?', 			opt:'text',		 		des:'Duration of clip'},
+		ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'}
+		}
+	
+	var helpText=new Array();
+	helpText['Source of video']="This is the unique ID YouTube assigns to the URL of a video. It is a jumble of random letters, such as this: zDZFcDGpL4U, extracted from this URL: http://www.youtube.com/watch?v=zDZFcDGpL4U.";
+	helpText['Starting time (m:s)']="Sets the starting time, in seconds, when the video will start playing.";
+	helpText['Ending time (m:s)']="Sets the ending time, in seconds, when the video will stop playing.";
+	helpText['Auto-play?']="Sets Auto-play and determines if the video will play when the page is loaded";
+	helpText['Hide controls?']="This will hide the players controls when embedded in a project.";
+	helpText['Playlists']="You can string a number of videos together by typing their IDs here, separated by commas."
+	helpText['Audio volume']="Determines the initial setting of the audio volume.";
+	helpText['Loop playlists?']="If set to 'true', playlists will play in a continuous loop.";
+	helpText['Height of player']="Sets the height of the video in pixels, including controls.";
+	helpText['Width of player']="Sets the width of the video in pixels.";
+	helpText['Duration of clip']="Shows the duration of the video clip.";	
+	helpText['Width of player']="Set the width in pixels of the video";	
+	helpText['OVERVIEW']="This will allow you to specify a video clip from YouTube to play in an embedded player. The start and ending times can be specified. In addition, you can play a sequence of videos into a playlist.";
+	helpText['Enable user draw?']="Setting this to true will allow users to add annotations to the display.";	helpText['OVERVIEW']="This will allow you to specify a video clip from YouTube or VIMEO to play in an embedded player. The start and ending times can be specified.";
+
+///////// INIT  /////////////
+
+	$(document).ready(function() {
+		shivaLib=new SHIVA_Show("containerDiv",[{shivaGroup:"Video"}]);
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
+	  	SetAttributes(props);
+		ReEdit();
+		ShowHelp("startup");
+		if (window.addEventListener) 
+			window.addEventListener("message",shivaEventHandler,false);
+		else
+			window.attachEvent("message",shivaEventHandler);
+	});
+
+	function shivaEventHandler(e)
+	{
+		if (e.data.indexOf("GetJSON") == 0) 
+			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
+		else if (e.data.indexOf("GetWebPage") == 0) 
+			e.source.postMessage("GetWebPage="+SaveData("Web-page"),"*");
+		else if (e.data.indexOf("GetWordPress") == 0) 
+			e.source.postMessage("GetWordPress="+SaveData("WordPress"),"*");
+		else if (e.data.indexOf("GetType") == 0) 
+			e.source.postMessage("GetType="+shivaGroup,"*");
+		else if (e.data.indexOf("PutJSON") == 0)
+			ReEdit($.parseJSON(e.data.substr(8)));
+		shivaLib.drupalMan=e.source;
+	}
+ 
+	function Draw(mode)
+	{	
+		if ((shivaLib.drupalMan) && (typeof(shivaLib.drupalMan.postMessage) == "function")) 
+			shivaLib.drupalMan.postMessage("DataChanged=true","*");
+		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
+	}
+
+	function SaveData(mode)
+	{
+		return shivaLib.SaveData(mode,shivaGroup,null,props);
+	}	
+
+	function ReEdit(jsonData)
+	{
+		shivaLib.ReEdit(jsonData,props);
+		Draw();
+	}	
+
+	function ShowHelp(att)
+	{
+		if (shivaLib.player){
+			if (shivaLib.player.duration) {
+				var str=Math.floor(shivaLib.player.duration()/60)+":";
+				str+=Math.ceil(shivaLib.player.duration()%60);	
+				$("#propInput7").val(str);
+				}
+			}
+		if (att == "startup") 
+			$("#helpDiv").html("<br/><p class='pb'>Powered by YouTube&trade;<br/><br/>Built by SHANTI<br/>The University of Virginia</p>");
+		else
+			shivaLib.ShowHelp(att,helpText);
+	}	
+
+	function SetAttributes()
+	{
+		shivaLib.SetAttributes(props);
+	}	
+
+	function trace(str) 
+	{ 
+		console.log(str) 
+	}
+	
+	
+</script>
+</body></html>

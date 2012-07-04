@@ -1,0 +1,106 @@
+<html>
+<head>
+<title>VisualEyes Google Earth</title>
+<script src="http://www.google.com/jsapi?key=ABQIAAAAEl4MfDNmnJSmqRhM62lbSRQ7AVySSdycEhRJxmdcOFdWAjnBjBSd_WFMB-PRHrCHTSly-cN42kvTrw"></script>
+<script type="text/javascript">
+	var shows="";
+	var url='http://www.viseyes.org/KML/VHRelocationMap.kmz';
+	var ge;      
+	var layer;
+	google.load("earth","1");      
+	function init()	{         
+		google.earth.createInstance('map3d',initCB,failureCB);
+		}
+
+	function initCB(instance) {
+		ge=instance;
+		var gops=ge.getOptions()
+		ge.getWindow().setVisibility(true);
+   		ge.getNavigationControl().setVisibility(ge.VISIBILITY_AUTO);
+    	if (shows.indexOf("b") != -1)r
+			ge.getLayerRoot().enableLayerById(ge.LAYER_BORDERS,true);
+   		if (shows.indexOf("r") != -1)
+	   		ge.getLayerRoot().enableLayerById(ge.LAYER_ROADS,true);
+   		if (shows.indexOf("t") != -1)
+	   		ge.getLayerRoot().enableLayerById(ge.LAYER_TERRAIN,true);
+   		if (shows.indexOf("3") != -1)
+	   		ge.getLayerRoot().enableLayerById(ge.LAYER_BUILDINGS,true);
+   		if (shows.indexOf("s") != -1)
+			gops.setStatusBarVisibility(true);
+   		if (shows.indexOf("l") != -1)
+			gops.setScaleLegendVisibility(true);
+		function finished(object) {
+			if (!object) {
+				setTimeout(function() {	alert("Sorry, can't find KML/KMZ file!"); },0);
+				return;
+				}
+			ge.getFeatures().appendChild(object);
+			layer=object;
+			SetStar("",4);
+			loading.src="loaded.gif";
+			if (object.getAbstractView()) 
+  				ge.getView().setAbstractView(object.getAbstractView());
+			ge.getTourPlayer().setTour(object);   
+			ge.getTourPlayer().play();
+			}
+		
+		google.earth.fetchKml(ge,url,finished);
+		} 
+	
+	function failureCB(errorCode) {
+	    }      
+	
+	google.setOnLoadCallback(init);
+	
+	
+	
+	
+	
+function SetStar(star,n)
+{
+	if (star != "") 
+		n=parseInt(star.name.charAt(3),10);	
+	layer.setOpacity(n*.2)
+	for (i=1;i<=n;++i) {
+		s="st1"+i;
+		document.getElementById(s).src="staron.gif";
+		}
+	for (i=n+1;i<6;++i) {
+		s="st1"+i;
+		document.getElementById(s).src="staroff.gif";
+		}
+}
+
+function GoThere()
+{
+	if (layer.getAbstractView()) 
+		ge.getView().setAbstractView(layer.getAbstractView());
+}
+  	 
+</script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><style type="text/css">
+<!--
+body,td,th {
+	font-family: Arial, Helvetica, sans-serif;
+}
+body {
+	background-color: #666666;
+	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+}
+.style1 {
+	font-size: x-small;
+	color: #CCCCCC;
+}
+-->
+</style></head>
+<body>
+<div align="center" > 
+	<div id="map3d" style="height: 560px; width: 800px;" /></div>
+<span class="style1">Back to start point <a onClick="GoThere()"> <img src="backbut.gif" width="11" height="12"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img name="loading" src="loading.gif" width="20" height="20" align="top">&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;Layer opacity <a onClick="SetStar('',0)"> - </a></span><img src="staroff.gif" name="st11" width="11" height="12" id="st11" onClick="SetStar(this)"/><img src="staroff.gif" name="st12" width="11" height="12" id="st12" onClick="SetStar(this)"/><img src="staroff.gif" name="st13" width="11" height="12" id="st13" onClick="SetStar(this)"/><img src="staroff.gif" name="st14" width="11" height="12" id="st14" onClick="SetStar(this)"/><img src="staroff.gif" name="st15" width="11" height="12" id="st15" onClick="SetStar(this)"/>
+</body>
+</html>
+
+

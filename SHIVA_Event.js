@@ -98,7 +98,7 @@ SHIVA_Event.prototype.EventEditor=function() 							// EDIT EVENT
 		x=x/w*_this.player.duration()*_this.scale;							// Absolute time
 		});
 	$("#shivaTimebarDiv").css("overflow","hidden"); 						// Disable spillover
-	$("#shivaTimebarDiv").click( function(e) { 								// Set time
+	$("#shivaTimebarDiv").dblclick( function(e) { 								// Set time
 		var x=e.clientX-$("#"+_this.par.container).css("left").replace(/px/,"")-8;
 		var wid=$("#shivaTimebarDiv").width();								// Width
 		x=Math.max(Math.min(x,wid),0);										// Cap 0-wid
@@ -653,7 +653,7 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 		if ((s != -1) && (e != -1))											// If well-formed
 			param=o.player.substring(s+1,e).replace(/%/g,"");				// Extract param			
 		if (o.player.toLowerCase() == "load")		this.player.load(param); // Load
-		else if (o.player.toLowerCase() == "pause")	this.player.pause();	 // Pause
+		else if (o.player.toLowerCase() == "pause")	this.player.pause();	// Pause
 		else if (o.player.toLowerCase().indexOf("play") != -1) {			// Play
 			if (param)														// If a time set
 				this.player.play(param);									// Play from that
@@ -706,7 +706,7 @@ SHIVA_Event.prototype.SpecialEvent=function(id) 						// RUN SPECIAL EVENT
 	if ((s != -1) && (e != -1))												// If well-formed
 		param=id.substring(s+1,e).replace(/%/g,"");							// Extract param			
 	if (id == "pause()")					this.player.pause();			// Pause
-	else if (id.indexOf("play(") != -1) {									// Play
+	else if (id.indexOf("play") != -1) {									// Play
 		if (param)															// If a time set
 			this.player.play(param);										// Play from that
 		else																// No time set

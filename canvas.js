@@ -23,7 +23,7 @@ SHIVA_Canvas.prototype.DrawCanvas=function(mode)						// DRAW CONTROLLED ELEMENT
 		if (this.elements[i].shivaGroup == "Control") 						// If a control
 			this.ApplyControlDefaults(i);									// Apply control defaults
 		}
-	this.SetElements(null,mode);											// Set element size,pos,alpha
+	this.SetElements(null,0);												// Set element size, pos & alpha
 }
 
 SHIVA_Canvas.prototype.ApplyControlDefaults=function(num)				// APPLY CONTROL DEFAULTS TO D's
@@ -42,8 +42,8 @@ SHIVA_Canvas.prototype.ApplyControlDefaults=function(num)				// APPLY CONTROL DE
 
 SHIVA_Canvas.prototype.ActionResponse=function(num, i, val)				// RESPOND TO ELEMENT EVENT
 {
-	var j,k,s,e,o;
-	var def,to,from,trigger;
+	var j,k,s,e,o,v;
+	var def,to,item,from,trigger;
 	from=num+"."+i;															// From address of control item
 	
 	if (val == "shivaInit") {												// If initting
@@ -54,9 +54,10 @@ SHIVA_Canvas.prototype.ActionResponse=function(num, i, val)				// RESPOND TO ELE
 	else																	// Get from event
 		def=val.toLowerCase();												// Copy as l/c
 	for (j=0;j<items.length;++j) {											// For each action	
-		to=Math.floor(items[j].to);											// Get action's to point
 		if (items[j].from != from)											// If action not linked to control item
 			continue;														// Skip
+		v=String(items[j].to).split(".");									// To array
+		to=Number(v[0]);		item=Number(v[1]);							// Split into element/item
 		trigger=items[j].trig.toLowerCase();								// Get l/c trigger
 		if (items[j].type == "set") {										// If a set
 			for (k=0;k<this.elements.length;++k) {							// For each element
@@ -73,13 +74,13 @@ SHIVA_Canvas.prototype.ActionResponse=function(num, i, val)				// RESPOND TO ELE
 					else{													// Doesn't match
 						this.elements[to].dx=Number(this.elements[to].left);	// Revert
 						this.elements[to].dy=Number(this.elements[to].top);		// to
-						this.elements[to].dw=Number(this.elements[to].wid);		// default
-						this.elements[to].da=Number(this.elements[to].alpha);	// values
-						this.elements[to].dd=Number(this.elements[to].dur);				
+						this.elements[to].dw=Number(this.elements[to].wid);		// original
+						this.elements[to].da=Number(this.elements[to].alpha);	// default
+						this.elements[to].dd=Number(this.elements[to].dur);		// values		
 						this.elements[to].dv=this.elements[to].vis;	
 						}
 					if (val != "shivaInit") 								// If not initting
-						this.SetElements(to,2);								// Set element			
+						this.SetElements(to,item);							// Set element			
 					}
 				}
 			}
@@ -88,9 +89,11 @@ SHIVA_Canvas.prototype.ActionResponse=function(num, i, val)				// RESPOND TO ELE
 			var query="";													// Assume no query
 			if ($("#curQueryDiv").text().indexOf("Use the ") == -1)			// If something set
 				query=$("#curQueryDiv").text().replace(/ LK /g," LIKE ");	// Get query
-			if (trigger == def)  											// If trigger matches setting
+			if (trigger == def) { 											// If trigger matches setting
 				if (this.elements[to].pe)									// If initted
-					this.elements[to].pe.FillElement(table,query);			// Set value
+					if (val != "shivaInit") 								// If not initting
+						this.elements[to].pe.FillElement(table,query);		// Set value
+				}
 			}
 		}
 }	
@@ -106,34 +109,35 @@ SHIVA_Canvas.prototype.CreateElement=function(num, mode)				// CREATE ELEMENT
 		$(id).on("click",null,{num:num},SelectElement);						// Click event	
 }
 
-SHIVA_Canvas.prototype.SetElements=function(num, mode)					// SET ELEMENT PARAMS
+SHIVA_Canvas.prototype.SetElements=function(num, item)					// SET ELEMENT PARAMS
 {
 	var i,offX,offY;
 	var s=0,e=this.elements.length;
-	if (num)
-		s=num,e=num+1;
+	if (num)																// If one spec'd
+		s=num,e=num-0+1;													// Do just one
 	for (i=s;i<e;++i) {														// For each element
+		if (this.elements[i].shivaGroup == "Data") 							// If a table
+			continue;														// Skip
 		id="#shel"+i;														// Element constainer div
 		if (!this.elements[i].pv) {											// If hidden
 			$(id).hide();	 												// Hide it
 			continue;														// Skip it
 			}
-//		if ((items[i].di > 0) && (mode == 2)) 								// If a sub-layer
-//			this.elements[i].pe.SetLayer(items[i].di-1,this.elements[i].dv);			// Control layer
-
-		if (this.elements[i].dv)													// If showing
+		if (item) {															// If a sub-layer
+			this.elements[i].pe.SetLayer(item-1,this.elements[i].dv);		// Control layer
+			continue;														// Skip it
+			}
+		if (this.elements[i].dv)											// If showing
 			$(id).show();													// Show it
 		else																// Visible
 			$(id).hide();													// Hide it
-		if (this.elements[i].shivaGroup == "Data") 							// If a table
-			continue;														// Skip
 		this.elements[i].pe.Resize(this.elements[i].dw);					// Resize element if width changed
 		var animObj={														// Animation poperties
-			opacity: this.elements[i].da/100,									// Opacity
-			left: this.elements[i].dx+"px",										// X
-			top: this.elements[i].dy+"px"										// Y
+			opacity: this.elements[i].da/100,								// Opacity
+			left: this.elements[i].dx+"px",									// X
+			top: this.elements[i].dy+"px"									// Y
 			}
-		$(id).animate(animObj,{duration: this.elements[i].dd*1000+1});			// Animate there
+		$(id).animate(animObj,{duration: this.elements[i].dd*1000+1});		// Animate there
 		}
 }	
 

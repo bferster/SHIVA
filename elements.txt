@@ -95,6 +95,18 @@
 	"shivaMod":"Fri, 20 Jan 2012",
 	"shivaId":"12",
 	"shivaGroup": "Data"
+	},
+	{"chartType": "Table",
+	"dataSourceUrl": "https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AsMQEd_YoBWldHZNbGU2czNfa004UmpzeC13MkZZb0E",
+	"query": "",
+	"height": "350",
+	"alternatingRowStyle": "true",
+	"pageSize": "10",
+	"width": "400",
+	"shivaTitle": "Olympic data table",
+	"shivaMod":"Fri, 20 Jan 2012",
+	"shivaId":"15",
+	"shivaGroup": "Data"
 	}
 		
 ]	

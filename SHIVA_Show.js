@@ -872,9 +872,9 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 	function DrawTimeSlider(items)
 	{
 		var str="";
-		var g=this.g;
+		var g=_this.g;
 		if (!g)
-			g=this.g=new SHIVA_Graphics();
+			g=_this.g=new SHIVA_Graphics();
 		var dd=con+"Int";
 		$(dd).remove();
 		$(con).append("<div id='"+dd.substr(1)+"'/>");
@@ -1033,7 +1033,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
     		if (v == "false") 	v=false;
 			options[o]=v;
 			}
-		if ((options.draggable) && (!this.editMode))
+		if ((options.draggable) && (!_this.editMode))
 			$(dd).draggable();
 		if (options.title)		
 			str+="<div align='center'><b>"+options.title+"</b></div><br>";
@@ -1139,7 +1139,8 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			$(dd).css("height",options.height+"px");
 			$(content).css("height",options.height-min+"px");
 			}
-		if ((options.draggable) && (!this.editMode))	$(dd).draggable();
+		if ((options.draggable) && (!_this.editMode))
+			$(dd).draggable();
 		if ((options.text) && (options.style == "Text"))				
 			$(content).html(options.text);
 		if (options.scroller)  			$(content).css("overflow","scroll").css("overflow-x","hidden"); 
@@ -1647,7 +1648,6 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
  	wrap.setOptions(ops);
     wrap.draw();
 }
-
 
 SHIVA_Show.prototype.RunGlue=function(con, item, val, group) 						//	RUN GLUE
 {

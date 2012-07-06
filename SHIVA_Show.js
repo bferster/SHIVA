@@ -1,9 +1,5 @@
 // Updated 7/5/12
 
-var curObj;
-
-
-
 function SHIVA_Show(container, options, editMode) 						// CONSTRUCTOR
 {
 	this.drupalMan=false;
@@ -20,7 +16,6 @@ function SHIVA_Show(container, options, editMode) 						// CONSTRUCTOR
 	this.ev=null;
 	this.jit=null
 	this.cvs=null
-	curObj=this;
 	if (options)
 		this.Draw(options);
 }
@@ -35,6 +30,7 @@ SHIVA_Show.prototype.Draw=function(ops) 								//	DRAW LOADER/DIRECTOR
 
 SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 {
+	var _this=this;
 	var group=ops.shivaGroup;
 	if (group == 'Visualization') 
 		this.DrawChart();
@@ -64,9 +60,10 @@ SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 	if (ud) {																// If allowing user annotation in go.htm														
 		if ((this.drupalMan) || ((window.parent) && (window.parent.name != "topWindow"))) {	
 		var h=$("#"+this.container).css("height").replace(/px/g,"");		// Get height
-		var str="<img  id='shivaAnnotateBut' src='annotate.gif' onclick='curObj.Annotate()' style='position:absolute";	
+		var str="<img  id='shivaAnnotateBut' src='annotate.gif' style='position:absolute";	
 		str+=";top:"+(h-0+12)+"px'>";										// Bottom of container div
 		$("body").append(str);												// Add button
+		$("#shivaAnnotateBut").click(function() { _this.Annotate(); });		// Click event
 		$("#shivaAnnotateBut").css('pointer-events','auto');				// Inibit pointer clicks if menu gone
 		}
 	}
@@ -825,7 +822,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 	var con="#"+container;
 	var items=new Array();
  	this.items=items;
-   	curObj=this;
+	var _this=this;
     for (var key in options) {
 		if (key.indexOf("item-") != -1) {
 			var o=new Object;
@@ -838,15 +835,15 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			}
 		}
 	if (options.chartType == "Dialog") 
-		DrawDialog(items);
+		$.proxy(DrawDialog(items),this);
 	else if (options.chartType == "Selector") 
-		DrawSelector(items);
+		$.proxy(DrawSelector(items),this);
 	else if (options.chartType == "TimeSlider")
-		DrawTimeSlider(items);
+		$.proxy(DrawTimeSlider(items),this);
 	else if (options.chartType == "TimeStepper")
-		DrawTimeStepper(items);
+		$.proxy(DrawTimeStepper(items),this);
 	else if (options.chartType == "InfoBox")
-		DrawInfoBox(items);
+		$.proxy(DrawInfoBox(items),this);
 
 	// Individual types:
 
@@ -868,7 +865,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 		$(con).html(str);		
 		$(con).css("text-align","left");		
 		$(con).css("width",((items.length*25)+80)+"px");		
-		$("#"+dd).buttonset().change(function(e) { shiva_Step(e.target.id.substr(3),curObj) });
+		$("#"+dd).buttonset().change(function(e) { shiva_Step(e.target.id.substr(3),_this) });
 		$("#stp"+i).button({ text: true, icons: { primary: "ui-icon-triangle-1-e" }});
 		}
 
@@ -1036,7 +1033,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
     		if (v == "false") 	v=false;
 			options[o]=v;
 			}
-		if ((options.draggable) && (!curObj.editMode))
+		if ((options.draggable) && (!this.editMode))
 			$(dd).draggable();
 		if (options.title)		
 			str+="<div align='center'><b>"+options.title+"</b></div><br>";
@@ -1142,7 +1139,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			$(dd).css("height",options.height+"px");
 			$(content).css("height",options.height-min+"px");
 			}
-		if ((options.draggable) && (!curObj.editMode))	$(dd).draggable();
+		if ((options.draggable) && (!this.editMode))	$(dd).draggable();
 		if ((options.text) && (options.style == "Text"))				
 			$(content).html(options.text);
 		if (options.scroller)  			$(content).css("overflow","scroll").css("overflow-x","hidden"); 
@@ -1168,7 +1165,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 		$("#shiva_stepq").remove();
 		var str="<div id='shiva_stepq'><br/><b>"+obj.items[num].label+"</b><br/>";
 		if (obj.items[num].ques.indexOf("|") != -1) {
-			str+="<select name='shiva_stepa' id='shiva_stepa' onChange='shiva_onStepAnswer("+num+","+curObj+")'>";
+			str+="<select name='shiva_stepa' id='shiva_stepa' onChange='shiva_onStepAnswer("+num+","+this+")'>";
 			var v=obj.items[num].ques.split("|");
 			for (var j=0;j<v.length;++j) {
 				str+="<option";
@@ -1183,7 +1180,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			var e="onblur";
 			if (obj.items[num].ques == "color")
 				e="onfocus";
-			str+="<input id='shiva_stepa' type='input' "+e+"='shiva_onStepAnswer("+num+","+curObj+")'></div>";
+			str+="<input id='shiva_stepa' type='input' "+e+"='shiva_onStepAnswer("+num+","+this+")'></div>";
 			$("#shiva_stepa").val(obj.items[num].ans);
 			}			
 		$("#"+obj.container).append(str);
@@ -1375,13 +1372,13 @@ SHIVA_Show.prototype.DrawTimeline=function(oldItems) 											//	DRAW TIMELINE
 		Timeline.timelines.pop();
 	this.timeLine=Timeline.create(document.getElementById(container),ops,i);
 	if (options['dataSourceUrl'])
-		GetSpreadsheetData(options['dataSourceUrl']);
+		GetSpreadsheetData(options['dataSourceUrl'],"",this);
 	else
   		this.timeLine.loadJSON("SimileTestData.js",function(json, url) {  eventSource.loadJSON(json, url); });
 		
-	function GetSpreadsheetData(file, conditions) 
+	function GetSpreadsheetData(file, conditions, _this) 
 	{
- 		lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
+  		lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
   		var query=new google.visualization.Query(lastDataUrl);
 		if (conditions)
 			query.setQuery(conditions);
@@ -1405,7 +1402,7 @@ SHIVA_Show.prototype.DrawTimeline=function(oldItems) 											//	DRAW TIMELINE
 						continue;
 					if ((key == "start") || (key == "end")) {
 						if (data.getFormattedValue(i,j))
-							o[key]=curObj.ConvertDateToJSON(data.getFormattedValue(i,j));
+							o[key]=_this.ConvertDateToJSON(data.getFormattedValue(i,j));
 						}
 					else	
 						o[key]=data.getValue(i,j);
@@ -1528,10 +1525,12 @@ SHIVA_Show.prototype.DrawMapOverlays=function(items) 										//	DRAW MAP OVERL
 
 SHIVA_Show.prototype.DrawLayerControlBox=function(items, show)			// DRAW LAYER CONTROLBOX
 {
+	var i;
 	if (show != true) {														// If not on
 		$("#shivaMapControlDiv").remove();									// Remove it
 		return;																// Quit
 		}
+	_this=this;																// Local copy of this
 	var l=$("#"+this.container).css("left").replace(/px/g,"");				// Get left
 	var t=$("#"+this.container).css("top").replace(/px/g,"");				// Get top
 	var h=$("#"+this.container).css("height").replace(/px/g,"");			// Get height
@@ -1545,15 +1544,16 @@ SHIVA_Show.prototype.DrawLayerControlBox=function(items, show)			// DRAW LAYER C
 		$("#shivaMapControlDiv").css("z-index",2001);						// Force on top
 		}
 	var str="<p style='text-shadow:1px 1px white' align='center'><b>&nbsp;&nbsp;Layer Controls&nbsp;&nbsp;</b></p>";
-	for (var i=0;i<items.length;++i) 										// For each item
+	for (i=0;i<items.length;++i) 											// For each item
 		if (items[i].layerTitle) {											// If a title defined
-			str+="&nbsp;<input type='checkbox' id='shcb'"+i+"";				// Add check
+			str+="&nbsp;<input type='checkbox' id='shcb"+i+"'";				// Add check
 			if (items[i].visible == "true")									// If initially visible
-				str+=" checked=checked";									// Set checked
-			str+=" onclick='curObj.SetLayer("+i+",this.checked.toString())' >";	// Add onclick				
-			str+=items[i].layerTitle+"&nbsp;&nbsp;<br/>";					// Add label
+				str+=" checked=checked ";									// Set checked
+			str+=">"+items[i].layerTitle+"&nbsp;&nbsp;<br/>";				// Add label
 			}
-	$("#shivaMapControlDiv").html(str+"<br/>");	
+	$("#shivaMapControlDiv").html(str+"<br/>");								// Add content	
+	for (i=0;i<items.length;++i) 											// For each item
+		$("#shcb"+i).click( function() { $.proxy(_this.SetLayer(this.id.substr(4),this.checked.toString()),_this); } );  // Add handler
 }
 
 SHIVA_Show.prototype.AddClearMapStyle=function(map)						// SET MAP STYLE
@@ -1850,7 +1850,7 @@ SHIVA_Show.prototype.ShowHelp=function(att,helpText,chartType)
 			if (helpText[att])
 				str+=helpText[att];
 			if (att.toLowerCase().indexOf("(s)") != -1) 
-				str+="<br><br><input type='button' onClick='curObj.ColorPicker(-1,-1)' value='Click to get a color number'/><div id='colorDiv'>&nbsp;<i>(Color will appear here)</i></div>";
+				str+="<br><br><input type='button' onClick='shivaLib.ColorPicker(-1,-1)' value='Click to get a color number'/><div id='colorDiv'>&nbsp;<i>(Color will appear here)</i></div>";
 			}
 		else
 			str+="Click on a label to show help."
@@ -1862,18 +1862,18 @@ SHIVA_Show.prototype.ShowHelp=function(att,helpText,chartType)
 				}
 			}
 		if (helpText["OVERVIEW"]) 
-			str+="<br/><br/><b><i>Click <a onClick='curObj.ShowOverview()'><u>here</u></a> for an overview on the entire element.</b>";
+			str+="<br/><br/><b><i>Click <a onClick='shivaLib.ShowOverview()'><u>here</u></a> for an overview on the entire element.</b>";
 		$("#helpDiv").html(str);
 }
 		
 SHIVA_Show.prototype.ShowOverview=function()
 {
-	var str="<br/><hr/><b>"+curObj.options.shivaGroup+" overview</b><br/><br/>";
+	var str="<br/><hr/><b>"+shivaLib.options.shivaGroup+" overview</b><br/><br/>";
 	str+=helpText["OVERVIEW"];
 	$("#helpDiv").html(str);
 }
 	
-SHIVA_Show.prototype.SetAttributes=function(props,items,keepData)
+SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 {
 	var i,j,k,l,o,oo,id,id2;
 	var atts=new Array();
@@ -1889,6 +1889,7 @@ SHIVA_Show.prototype.SetAttributes=function(props,items,keepData)
 			}
 		}
 	$('#propertyTable tr:gt(0)').remove();
+	
 	for (i=0;i<atts.length;++i) {
 		o=atts[i];
 		id="propInput"+i;
@@ -1897,11 +1898,11 @@ SHIVA_Show.prototype.SetAttributes=function(props,items,keepData)
 			str+="&nbsp;&nbsp;<img src='databutton.gif' title='Click to find data set' style='vertical-align:bottom' onclick='shivaLib.GetDataFromManager()'/>";
    		str+="</td><td></td><td>";
    		if (props[o].opt == "query") 
-   			str+="<input type='password' size='14' onChange='Draw()' onFocus='curObj.QueryEditor(\""+id+"\")' id='"+id+"'/>";
+   			str+="<input type='password' size='14' onChange='Draw()' onFocus='shivaLib.QueryEditor(\""+id+"\")' id='"+id+"'/>";
    		else if (props[o].opt == "color") 
-   			str+="<input size='14' onChange='Draw()' onFocus='curObj.ColorPicker(0,"+i+")' id='"+id+"'/>";
+   			str+="<input size='14' onChange='Draw()' onFocus='shivaLib.ColorPicker(0,"+i+")' id='"+id+"'/>";
   		else if (props[o].opt == "colors") 
-   			str+="<input size='14' onChange='Draw()' onFocus='curObj.ColorPicker(1,"+i+")' id='"+id+"'/>";
+   			str+="<input size='14' onChange='Draw()' onFocus='shivaLib.ColorPicker(1,"+i+")' id='"+id+"'/>";
    		else if (props[o].opt == "button") 
    			str+="<button type='button' size='14' onChange='"+o+"' id='"+id+"'>"+props[o].def+"</button>";
    		else if (props[o].opt == "slider")
@@ -1928,9 +1929,9 @@ SHIVA_Show.prototype.SetAttributes=function(props,items,keepData)
 						if (props[oo].opt != "hidden")
 							str+="<span onClick='ShowHelp(this.innerText)'>"+props[oo].des+"</span><span style='position:absolute;left:142px;'>";
 				   		if (props[oo].opt == "color") 
-	   						str+="<input size='14' onChange='Draw()' onFocus='curObj.ColorPicker(0,"+((j*100)+100+(k-i))+")' id='"+id2+"'>";
+	   						str+="<input size='14' onChange='Draw()' onFocus='shivaLib.ColorPicker(0,"+((j*100)+100+(k-i))+")' id='"+id2+"'>";
 				   		else if (props[oo].opt == "colors") 
-	   						str+="<input size='14' onChange='Draw()' onFocus='curObj.ColorPicker(2,"+((j*100)+100+(k-i))+")' id='"+id2+"'>";
+	   						str+="<input size='14' onChange='Draw()' onFocus='shivaLib.ColorPicker(2,"+((j*100)+100+(k-i))+")' id='"+id2+"'>";
 			   			else if (props[oo].opt == "button") 
    							str+="<button type='button' size='12' onChange='"+oo+"' id='"+id+"'>"+props[oo].def+"</button>";
 			   			else if (props[oo].opt == "slider")
@@ -2155,7 +2156,7 @@ SHIVA_Show.prototype.ColorPicker=function(mode, att)
 		'000000','003300','006600','009900','00CC00','00FF00','99FF00','99CC00','999900','996600','993300','990000','CC0000','CC3300','CC6600','CC9900','CCCC00','CCFF00',
 		'000000','111111','222222','333333','444444','555555','666666','777777','888888','999999','AAAAAA','BBBBBB','CCCCCC','DDDDDD','EEEEEE','FFFFFF','none','x'
 		];
-	str+="<input id='shiva_cpInput' type='input'/> <input value='ok' type='button' onClick='shiva_SetColor(-2,\""+att+"\",\""+mode+"\")'/>";
+	str+="<input id='shiva_cpInput' type='input'/> <input value='« add' type='button' onClick='shiva_SetColor(-2,\""+att+"\",\""+mode+"\")'/>";
 	for (i=0;i<13;++i) {
 		str+="<tr>";
 		for (j=0;j<18;++j)

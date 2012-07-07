@@ -135,7 +135,7 @@ SetDataChanged(false);
 				AddElement(i);	
 			Draw();
 			}
-		shivaLib.drupalMan=e.source;
+		if (shivaLib.drupalMan)	shivaLib.drupalMan=e.source;
 	}
 
 	function ShivaMessage(tab, id, cmd) 

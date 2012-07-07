@@ -130,7 +130,7 @@
 			e.source.postMessage("GetType="+shivaGroup,"*");
 		else if (e.data.indexOf("PutJSON") == 0) 
 			ReEdit($.parseJSON(e.data.substr(8)));
-		shivaLib.drupalMan=e.source;
+		if (shivaLib.drupalMan)	shivaLib.drupalMan=e.source;
 	}
  
 	function Draw(mode)

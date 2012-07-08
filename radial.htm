@@ -8,19 +8,32 @@
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
+		.commentBox { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:80px;border-radius:8px;
+				  	 background-color:#eee;border:1px solid #ccc;
+				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				  	 box-shadow:3px 3px 8px #333;
+					 position:absolute;left:20%;top:25%;width:60%;height:50%;
+				  	 }
+		.commentInnerBox { 
+				  	 background-color:white;border:1px solid #666;
+					 position:absolute;margin:8px;
+				  	 }
+		.commentBoxTitle { 
+					 font-family:Verdana,Geneva,sans-serif; font-size:x-large;
+					 text-align:center;font-weight:bold;				 
+				  	 }
+
+
 	</style>
 </head>
 <body>
 <script>
 	
-	var menuCSS={ "background-color":"#006dcc", "border":".25px  black solid", left:"400px", top:"200px", width:"100px", color:"#fff", "font-weight":"bold", "font-size":"15px"};
+	var menuCSS={ "background-color":"#006dcc", "border":".25px  black solid", left:"400px", top:"200px", width:"120px", color:"#fff", "font-weight":"bold", "font-size":"20px"};
 	
 	var testMenu={ lab:"Say",size:1, sub:[
-					{ lab:"Comment",	size:.5, sub:[
-						{ lab:"Respond",	size:.5, cb:function() { alert("Respond!!!"); }},
-						{ lab:"Question",	size:.5, cb:function() { alert("Question???"); }},
-						{ lab:"Summary",	size:.5, cb:function() { alert("Summary..."); }}
-						]},
+					{ lab:"Comment",	size:.5, cb:function() { new DSC_Comment("comment","Mable said I think the point Jake makes here truly captures the essence of what Mr. Stake\'s perception is on the topic. What are some of the concerns he is bringing up in the discussion?",81,103);}},
 					{ lab:"Feedback",	size:.5, sub:[
 						{ lab:"Agree",	size:.5, cb:function() { alert("Agree+++"); }},
 						{ lab:"Clarify",	size:.5, cb:function() { alert("Clarify???"); }},
@@ -41,6 +54,89 @@
 	$(document).ready(function() {
 		new DSC_RadialMenu("",menuCSS,testMenu);
 	});
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//   COMMENT
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+function DSC_Comment(type, text, selStart, selEnd)
+{
+	this.type=type;															// Type of comment
+	this.text=text;															// Text of comment
+	this.selStart=selStart;													// Selection start		
+	this.selEnd=selEnd;														// Selection end		
+	var dd="#DSCCommentDiv";												// Point at overall box
+	$(dd).remove();															// Remove old one, if there
+	var str="<div id='"+dd.substr(1)+"' class='commentBox'/>";				// Add comment box
+	$("body").append(str);													// Add menu div to body
+	$(dd).hide(0);															// Hide it at start
+	var wid=$(dd).width()/2-16;												// Get width
+	var hgt=$(dd).height()-16;												// Get height
+	var str="<div id='"+dd.substr(1)+"L' style='width:"+wid+"px;height:"+hgt+"px;' class='commentInnerBox' />";
+	str+=   "<div id='"+dd.substr(1)+"R' style='left:"+(wid-0+12)+"px;width:"+(wid-16)+"px;height:"+(hgt-16)+"px;padding:8px' class='commentInnerBox' />";
+	$(dd).append(str);														// Add menu div to body
+	this.AddFrom();															// Add from info	
+	this.AddComment();														// Add comment info	
+	$(dd).show(800);														// Zoom it in
+}
+
+DSC_Comment.prototype.AddFrom=function() 								//	ADD FROM
+{
+	var _this=this;															// Temporary this
+	var dd="#DSCCommentDivR";												// Point at box div
+	var wid=$(dd).width()-22;												// Get width
+	var hgt=$(dd).height()-78;												// Get height
+	var str="<p class='commentBoxTitle'>About</p>";							// Title
+	str+="<p style='margin:8px'>"+this.text+"</p>";							// Add text
+	str+="<p align='center' style='position:absolute;top:"+hgt+"px;width:"+(wid-0+22)+"px'>";										
+	str+="<br/><br/><br/><br/><button id='dscCommentCancel'>Cancel</button></p>";	// Quit button									
+	$(dd).html(str);														// Add content
+	$("#dscCommentCancel").click( function() { _this.Post("",""); });		// Handle button click
+}
+
+DSC_Comment.prototype.AddComment=function() 							//	ADD COMMENT MECHANISM
+{
+	var _this=this;															// Temporary this
+	var dd="#DSCCommentDivL";												// Point at box div
+	var str="<p class='commentBoxTitle'>I say</p>";							// Title
+	var wid=$(dd).width()-22;												// Get width
+	var hgt=$(dd).height()-78;												// Get height
+	str+="<textarea id='dscCommentResp' style='margin:8px;width:"+wid+"px;height:50%'/>";		// Add textarea
+	str+="<p align='center' style='position:absolute;top:"+hgt+"px;width:"+(wid-0+22)+"px'>";										
+	str+="<input type='radio' name='dscCommentType' id='dscCommentType1' value='comment' checked='checked'/>Comment ";
+	str+="<input type='radio' name='dscCommentType' id='dscCommentType2' value='expansion' />Expansion ";
+	str+="<input type='radio' name='dscCommentType' id='dscCommentType3' value='question' />Question<br/><br/>";
+	str+="<button id='dscCommentAdd'>Add to dscourse</button>";
+	str+="</p>";
+	$(dd).html(str);														// Add content
+	$("#dscCommentAdd").click( function() { 
+		var type="comment";													// Assume 1st
+		if ($("#dscCommentType2").attr("checked"))	type="expansion";		// Try
+		else if ($("#dscCommentTyp3").attr("checked"))	type="question";	// others
+		_this.Post($('#dscCommentResp').val(),type) });						// Handle button click
+}
+
+DSC_Comment.prototype.Post=function(comment, type) 						//	POST COMMENT
+{
+	var dd="#DSCCommentDiv";												// Point at overall box
+	if (comment) {															// If adding
+		alert("Added "+type+": "+comment)									// Post it to db
+		this.Sound("ding");													// OK
+		}
+	else
+		this.Sound("delete");												// OK
+	$(dd).hide(800);														// Hide it 
+	$(dd).remove();															// Remove it
+}
+
+DSC_Comment.prototype.Sound=function(sound)
+{	
+	var clickSound=new Audio(sound+".mp3");
+	if (!clickSound.canPlayType("audio/mpeg"))
+		clickSound=new Audio(sound+".ogg");
+	clickSound.play();
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //   RADIAL MENU  

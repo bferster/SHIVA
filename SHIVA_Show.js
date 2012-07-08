@@ -872,9 +872,6 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 	function DrawTimeSlider(items)
 	{
 		var str="";
-		var g=_this.g;
-		if (!g)
-			g=_this.g=new SHIVA_Graphics();
 		var dd=con+"Int";
 		$(dd).remove();
 		$(con).append("<div id='"+dd.substr(1)+"'/>");
@@ -927,6 +924,9 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 
 	function DrawSliderTicks()
 	{
+		var g=_this.g;
+		if (!g)
+			g=_this.g=new SHIVA_Graphics();
 		var hgt=40,wid=40,pos,val;
 		var n=Number(options.ticks);
 		var showValues=(options.showValues == "true")

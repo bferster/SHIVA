@@ -126,8 +126,7 @@ DSC_Comment.prototype.Post=function(comment, type) 						//	POST COMMENT
 		}
 	else
 		this.Sound("delete");												// OK
-	$(dd).hide(800);														// Hide it 
-	$(dd).remove();															// Remove it
+	$(dd).hide(400,function() {$(dd).remove()});							// Hide it, then remove it
 }
 
 DSC_Comment.prototype.Sound=function(sound)

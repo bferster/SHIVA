@@ -74,9 +74,11 @@
 		shivaLib.cvs=new SHIVA_Canvas();
 		shivaLib.cvs.elements=shivaLib.cvs.elements;
 		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
+
 shivaLib.cvs.elements=$.parseJSON(shivaLib.GetTextFile("elements.txt"));
 for (var i=0;i<shivaLib.cvs.elements.length;++i) AddElement(i);	
 SetDataChanged(false);
+
 		selectedItems.push(-1);
 		$("#toolbar").buttonset();
 		$("#tb1").button({text: true, icons: { primary: "ui-icon-gear"}});
@@ -201,7 +203,9 @@ SetDataChanged(false);
 					$("#elementsTable tr:eq("+i+") td").css("border","1px solid #990000");
 				}
   			}
- 		str="<tr><td width='260' align='center' onclick='LoadElement()'><br/><button id='addNewElement'>Add new element</button></td></tr>";
+ 		if (!items.length)
+			$("<tr><td>No elements have been added yet. Add elements using the button below, or you can load a demo set by selecting <b>eStore</b> in the <b>Share as:</b> pulldown menu. Log in as <i>samples</i> and select the <i>Canvas Demo</i> element.<td></tr>").appendTo("#elementsTable");
+		str="<tr><td width='260' align='center' onclick='LoadElement()'><br/><button id='addNewElement'>Add new element</button></td></tr>";
 		$(str).appendTo("#elementsTable");
  	}
 

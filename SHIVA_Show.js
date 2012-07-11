@@ -1898,11 +1898,11 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 			str+="&nbsp;&nbsp;<img src='databutton.gif' title='Click to find data set' style='vertical-align:bottom' onclick='shivaLib.GetDataFromManager()'/>";
    		str+="</td><td></td><td>";
    		if (props[o].opt == "query") 
-   			str+="<input type='password' size='14' onChange='Draw()' onFocus='shivaLib.QueryEditor(\""+id+"\")' id='"+id+"'/>";
+   			str+="<input type='password' size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.QueryEditor(\""+id+"\")' id='"+id+"'/>";
    		else if (props[o].opt == "color") 
-   			str+="<input size='14' onChange='Draw()' onFocus='shivaLib.ColorPicker(0,"+i+")' id='"+id+"'/>";
+   			str+="<input size='14' onChange='Draw()' tabIndex='-1' onFocus='shivaLib.ColorPicker(0,"+i+")' id='"+id+"'/>";
   		else if (props[o].opt == "colors") 
-   			str+="<input size='14' onChange='Draw()' onFocus='shivaLib.ColorPicker(1,"+i+")' id='"+id+"'/>";
+   			str+="<input size='14' onChange='Draw()' tabIndex='-1' onFocus='shivaLib.ColorPicker(1,"+i+")' id='"+id+"'/>";
    		else if (props[o].opt == "button") 
    			str+="<button type='button' size='14' onChange='"+o+"' id='"+id+"'>"+props[o].def+"</button>";
    		else if (props[o].opt == "slider")
@@ -1929,9 +1929,9 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 						if (props[oo].opt != "hidden")
 							str+="<span onClick='ShowHelp(this.innerText)'>"+props[oo].des+"</span><span style='position:absolute;left:142px;'>";
 				   		if (props[oo].opt == "color") 
-	   						str+="<input size='14' onChange='Draw()' onFocus='shivaLib.ColorPicker(0,"+((j*100)+100+(k-i))+")' id='"+id2+"'>";
+	   						str+="<input size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.ColorPicker(0,"+((j*100)+100+(k-i))+")' id='"+id2+"'>";
 				   		else if (props[oo].opt == "colors") 
-	   						str+="<input size='14' onChange='Draw()' onFocus='shivaLib.ColorPicker(2,"+((j*100)+100+(k-i))+")' id='"+id2+"'>";
+	   						str+="<input size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.ColorPicker(2,"+((j*100)+100+(k-i))+")' id='"+id2+"'>";
 			   			else if (props[oo].opt == "button") 
    							str+="<button type='button' size='12' onChange='"+oo+"' id='"+id+"'>"+props[oo].def+"</button>";
 			   			else if (props[oo].opt == "slider")

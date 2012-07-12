@@ -1893,16 +1893,21 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 	for (i=0;i<atts.length;++i) {
 		o=atts[i];
 		id="propInput"+i;
-   		var str="<tr><td width='12'></td><td width='200' onClick='ShowHelp(this.innerHTML)'>"+props[o].des.split("::")[0];
+   		var str="<tr style='height:26px'><td width='12'></td><td width='200' onClick='ShowHelp(this.innerHTML)'>"+props[o].des.split("::")[0];
 		if ((this.drupalMan) && (o == "dataSourceUrl")) 
 			str+="&nbsp;&nbsp;<img src='databutton.gif' title='Click to find data set' style='vertical-align:bottom' onclick='shivaLib.GetDataFromManager()'/>";
    		str+="</td><td></td><td>";
    		if (props[o].opt == "query") 
    			str+="<input type='password' size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.QueryEditor(\""+id+"\")' id='"+id+"'/>";
-   		else if (props[o].opt == "color") 
-   			str+="<input size='14' onChange='Draw()' tabIndex='-1' onFocus='shivaLib.ColorPicker(0,"+i+")' id='"+id+"'/>";
-  		else if (props[o].opt == "colors") 
-   			str+="<input size='14' onChange='Draw()' tabIndex='-1' onFocus='shivaLib.ColorPicker(1,"+i+")' id='"+id+"'/>";
+   		else if ((props[o].opt == "color") || (props[o].opt == "colors")) {
+   			str+="<div style='max-height:26px'><input size='14' onChange='Draw()' style='text-align:center' id='"+id+"'/>";
+   			str+="<div style='position:relative;border:1px solid;height:11px;width:11px;top:-19px;left:7px'"
+			if (props[o].opt == "colors")	
+  				str+=" onclick='shivaLib.ColorPicker(1,"+i+")' id='"+id+"C'/>";		   			
+			else
+ 				str+=" onclick='shivaLib.ColorPicker(0,"+i+")' id='"+id+"C'/>";		   			
+			str+="</div>"
+			}				   			
    		else if (props[o].opt == "button") 
    			str+="<button type='button' size='14' onChange='"+o+"' id='"+id+"'>"+props[o].def+"</button>";
    		else if (props[o].opt == "slider")
@@ -1928,8 +1933,11 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 						oo=atts[k];
 						if (props[oo].opt != "hidden")
 							str+="<span onClick='ShowHelp(this.innerText)'>"+props[oo].des+"</span><span style='position:absolute;left:142px;'>";
-				   		if (props[oo].opt == "color") 
-	   						str+="<input size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.ColorPicker(0,"+((j*100)+100+(k-i))+")' id='"+id2+"'>";
+				   		if (props[oo].opt == "color") {
+	   						str+="<input size='14' onChange='Draw()' style='text-align:center' id='"+id2+"'>";
+			    			str+="<div style='position:relative;border:1px solid;height:9px;width:9px;top:-15px;left:6px'"
+							str+=" onclick='shivaLib.ColorPicker(0,"+((j*100)+100+(k-i))+")' id='"+id2+"C'/>";		   			
+							}				   			
 				   		else if (props[oo].opt == "colors") 
 	   						str+="<input size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.ColorPicker(2,"+((j*100)+100+(k-i))+")' id='"+id2+"'>";
 			   			else if (props[oo].opt == "button") 
@@ -1975,8 +1983,10 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 		else
 	  		$("#"+id).val(props[o].def);  
    		if (props[o].opt == "color")
-			if (props[o].def.toLowerCase() != 'auto')
+			if (props[o].def.toLowerCase() != 'auto') {
 				$("#"+id).css('border-color',"#"+props[o].def); 
+				$("#"+id+"C").css('background-color',"#"+props[o].def); 
+				}
 		if (o == "item")
 			break;
 		}			
@@ -1989,8 +1999,10 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 		   		o=atts[k];
 		   		id2="itemInput"+j+"-"+(k-i);
 		   		if (props[o].opt == "color")
-	    			if (props[o].def.toLowerCase() != 'auto')
+	    			if (props[o].def.toLowerCase() != 'auto') {
 						$("#"+id2).css('border-color',"#"+items[j][atts[k]]); 
+						$("#"+id2+"C").css('background-color',"#"+items[j][atts[k]]); 
+						}
 				}
 			}
 		for (i=0;i<atts.length;++i)
@@ -2156,7 +2168,7 @@ SHIVA_Show.prototype.ColorPicker=function(mode, att)
 		'000000','003300','006600','009900','00CC00','00FF00','99FF00','99CC00','999900','996600','993300','990000','CC0000','CC3300','CC6600','CC9900','CCCC00','CCFF00',
 		'000000','111111','222222','333333','444444','555555','666666','777777','888888','999999','AAAAAA','BBBBBB','CCCCCC','DDDDDD','EEEEEE','FFFFFF','none','x'
 		];
-	str+="<input id='shiva_cpInput' type='input'/> <input value='« add' type='button' onClick='shiva_SetColor(-2,\""+att+"\",\""+mode+"\")'/>";
+//	str+="<input id='shiva_cpInput' type='input'/> <input value='« add' type='button' onClick='shiva_SetColor(-2,\""+att+"\",\""+mode+"\")'/>";
 	for (i=0;i<13;++i) {
 		str+="<tr>";
 		for (j=0;j<18;++j)
@@ -2208,6 +2220,7 @@ function shiva_SetColor(val, att, mode)
 	else
 		str="#propInput"+att;
 	$(str).css('border-color',"#"+val); 
+	$(str+"C").css('background-color',"#"+val); 
 	if (mode == 1) 	val=$(str).val()+val+",";
 	$(str).val(val);
 	Draw();

@@ -2023,8 +2023,6 @@ SHIVA_Show.prototype.GetDataFromManager=function()
 
 SHIVA_Show.prototype.QueryEditor=function(id)
 {
-	if (this.qe)
-		delete this.qe;
 	if ($("#propInput0").val())
 		new SHIVA_QueryEditor($("#propInput0").val(),$("#"+id).val(),id,false);
 	else
@@ -2744,6 +2742,8 @@ SHIVA_Graphics.prototype.DrawText=function(ctx, text, x, y, format) 							// DR
 function SHIVA_QueryEditor(source, query, returnID,fieldNames) 										
 {
 	this.advancedMode=false;
+	$("#dataDialogDiv").dialog("destroy");
+	$("#dataDialogDiv").remove();
 	shivaLib.qe=this;
 	if (query.indexOf("  ") == 0) 
 		this.advancedMode=true,query=query.substr(2);
@@ -2765,12 +2765,14 @@ function SHIVA_QueryEditor(source, query, returnID,fieldNames)
 					for (i=0;i<thisObj.curFields.length;++i)
 						thisObj.query=thisObj.query.replace(RegExp(thisObj.curFields[i],"g"),String.fromCharCode(i+65));
 					}
-				thisObj.query=thisObj.query.replace(/ORDER BY none/g,"");
-				if (returnID == "curQueryDiv")
-					$("#"+returnID).html(thisObj.query);
-				else if (returnID)
-					$("#"+returnID).val(thisObj.query);
-				window.postMessage("ShivaDraw","*");
+				if (!thisObj.query.match(/\?/)) {
+					thisObj.query=thisObj.query.replace(/ORDER BY none/g,"");
+					if (returnID == "curQueryDiv")
+						$("#"+returnID).html(thisObj.query);
+					else if (returnID)
+						$("#"+returnID).val(thisObj.query);
+					window.postMessage("ShivaDraw","*");
+					}
 				$(this).dialog("destroy");
 				$("#dataDialogDiv").remove();
 				$("#propInput0").trigger("onchange");

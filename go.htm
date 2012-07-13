@@ -70,6 +70,10 @@
 			var str="proxy.php?url=http://www.primaryaccess.org/REST/geteasyfile.php?id="+query.substr(2);
 			$.getJSON(str,$.proxy(shivaLib.Draw,shivaLib));	
 			}
+		if (query.indexOf("m=") != -1) {
+			var str="proxy.php?url="+query.substr(2);
+			$.getJSON(str,$.proxy(shivaLib.Draw,shivaLib));	
+			}
 	}
 	
 	function shivaEventHandler(e)

@@ -210,7 +210,7 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 	str+="<tr><td width='66%'>Type</td><td>"+this.par.MakeSelect("type",false,["ask","canvas","find","iframe","image","menu","popup","shiva","webservice"],o.type)+"</td></tr>";
 	str+="<tr><td>ID</td><td><input type='text' size='20' id='id'/></td></tr>";
 	str+="<tr><td>Title</td><td><input type='text' size='20' id='title'/></td></tr>";
-	str+="<tr><td>Image url</td><td><input type='text' size='20' id='url'/></td></tr>";
+	str+="<tr><td>Image Url</td><td><input type='text' size='20' id='url'/></td></tr>";
 	str+="<tr><td>Has scrollbar?</td><td><input type='checkbox' id='frame-scroller'/></td></tr>";
 	str+="<tr><td>Has close button?</td><td><input type='checkbox' id='frame-closer'/></td></tr>";
 	str+="<tr><td>Text</td><td><textarea rows='4' cols='20' id='text'/></td></tr>";
@@ -236,6 +236,7 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 	str+="<tr><td width='66%'>On a click</td><td><input type='text' size='20' id='click'/></td></tr>";
 	str+="<tr><td>On a hover</td><td><input type='text' size='20' id='hover'/></td></tr>";
 	str+="<tr><td>When done</td><td><input type='text' size='20' id='done'/></td></tr>";
+	str+="<tr><td>Response storage</td><td><input type='text' size='20' id='response'/></td></tr>";
 	str+="<tr><td>Player action</td><td><input type='text' size='20' id='player'/></td></tr>";
   	str+="</table></div></div>";
 	str+="<div align='center' style='px;font-size:small'><br><button id='saveBut'>Save</button>";	
@@ -297,7 +298,7 @@ SHIVA_Event.prototype.SaveEditedEvent=function(num, remove) 			// SAVE EDITED EV
 			  "start","end","fadein","fadeout",
 			  "frame-top","frame-left","frame-width","frame-height","frame-radius","frame-draggable",
 			  "frame-color","frame-background-color","frame-border","frame-opacity",
-			  "hover","click","done","player"];
+			  "hover","click","done","response","player"];
 	for (i=0;i<keys.length;++i) {											// For each var
 		val=$("#"+keys[i]).val();											// Get value
 			if (keys[i].indexOf("frame-") != -1)							// A frame
@@ -539,6 +540,7 @@ SHIVA_Event.prototype.CloseEvent=function(id) 							// CLOSE EVENT
 	if (o.type == "menu") {													// If a menu event
 		for (i=0;i<lines.length-1;++i) {									// For each line
 			if ($("#shivaMenu"+num+"-"+i).attr("checked"))	{				// If checked
+				this.SaveResponse(num,i-0+1);								// Save response
 				if ($("#shivaMenu"+num+"-"+i).val()) 						// If a go spec'd
 					this.EventRouter($("#shivaMenu"+num+"-"+i).val().replace(/\|\*/g,"|"),""); // Run events(s)
 				if ($("#shivaMenu"+num+"-"+i).val().indexOf("*") != -1) {	// If marked as the correct one
@@ -556,8 +558,9 @@ SHIVA_Event.prototype.CloseEvent=function(id) 							// CLOSE EVENT
 				this.modalEvent=-1;											// Clear modal event flag
 				}
 			}
+
 		}
-	if (o.type == "ask") {													// If a menu event
+	if (o.type == "ask") {													// If an ask event
 		var s,e,now=0;
 		if (this.player)													// If player 
 			now=this.player.currentTime();									// Get time
@@ -583,7 +586,36 @@ SHIVA_Event.prototype.CloseEvent=function(id) 							// CLOSE EVENT
 				this.modalEvent=-1;											// Clear modal event flag
 				}
 			}
+		this.SaveResponse(num,$("#shivaAskDiv-"+num).val());				// Save response
 		}
+}
+
+SHIVA_Event.prototype.SaveResponse=function(num, val) 					// SAVE RESPONSE TO ASK/MENU
+{
+	var name;
+	var o=this.events[num];													// Point at event
+	var res=o.response;														// Get response
+	var s=res.indexOf("(");													// Param start
+	var e=res.indexOf(")");													// Param end
+	if ((s != -1) && (e != -1))												// If well-formed
+		name=res.substring(s+1,e);											// Extract param			
+	else if (res.match(/\$/)) {												// If setting a user var
+		this[res]=val;														// Set it										
+		return;																// Quit														
+		}
+	else																	// Not a var or a save
+		return;																// Quit														
+	if (name.match(/\$/)) 													// If val is a variable
+		name=this[name];													// Resolve var
+	var id=o.id;															// Set id
+	if (id === "")															// If no id set
+		id=o.title;															// Try title
+	if (id === "")															// If title set
+		id=(num-0+1);														// Use num 
+	if (isNaN(id))	 id=id.replace(/'/g,"\\'")								// Remove apos's
+	if (isNaN(val))	 val=val.replace(/'/g,"\\'")							// Remove apos's
+	if (res.toLowerCase().match(/estore/))									// If saving to eStore
+		$.post("http://www.primaryaccess.org/REST/addeasyfile.php",{ email:name, type: "Response", title:id,data:val });
 }
 
 SHIVA_Event.prototype.HideAll=function() 								// HIDE ALL EVENTS

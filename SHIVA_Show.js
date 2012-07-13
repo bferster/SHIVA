@@ -1900,8 +1900,8 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
    		if (props[o].opt == "query") 
    			str+="<input type='password' size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.QueryEditor(\""+id+"\")' id='"+id+"'/>";
    		else if ((props[o].opt == "color") || (props[o].opt == "colors")) {
-   			str+="<div style='max-height:26px'><input size='14' onChange='Draw()' style='text-align:center' id='"+id+"'/>";
-   			str+="<div style='position:relative;border:1px solid;height:11px;width:11px;top:-19px;left:7px'"
+   			str+="<div style='max-height:26px'><input size='14' onChange='Draw()' style='position:relative;text-align:center;height:16px;top:2px' id='"+id+"'/>";
+   			str+="<div style='position:relative;border:1px solid;height:11px;width:11px;top:-16px;left:6px'"
 			if (props[o].opt == "colors")	
   				str+=" onclick='shivaLib.ColorPicker(1,"+i+")' id='"+id+"C'/>";		   			
 			else
@@ -1935,7 +1935,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 							str+="<span onClick='ShowHelp(this.innerText)'>"+props[oo].des+"</span><span style='position:absolute;left:142px;'>";
 				   		if (props[oo].opt == "color") {
 	   						str+="<input size='14' onChange='Draw()' style='text-align:center' id='"+id2+"'>";
-			    			str+="<div style='position:relative;border:1px solid;height:9px;width:9px;top:-15px;left:6px'"
+			    			str+="<div style='position:relative;border:1px solid;height:8px;width:9px;top:-14px;left:5px'"
 							str+=" onclick='shivaLib.ColorPicker(0,"+((j*100)+100+(k-i))+")' id='"+id2+"C'/>";		   			
 							}				   			
 				   		else if (props[oo].opt == "colors") 
@@ -1974,7 +1974,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 	   			}
 	   		}
 	   		else
-   				str+="<input size='14' onChange='Draw()' type='text' id='"+id+"' onFocus='ShowHelp(\""+props[o].des+"\")'/>";
+   				str+="<input size='14' style='height:16px' onChange='Draw()' type='text' id='"+id+"' onFocus='ShowHelp(\""+props[o].des+"\")'/>";
 		str+="<td width='12'></td ></td></tr>";
 		$(str).appendTo("#propertyTable tbody")
 	  	$("#"+id).val(props[o].def);  

@@ -1,5 +1,3 @@
-// Updated 7/5/12
-
 function SHIVA_Show(container, options, editMode) 						// CONSTRUCTOR
 {
 	this.drupalMan=false;
@@ -781,13 +779,17 @@ SHIVA_Show.prototype.DrawSubway=function(oldItems) 											//	DRAW SUBWAY
 			if (tp == "l") {	x2=x-200-w+w2;			align='right';		y2=y+((y2-y)/2); }
 			if (tp == "t") {	x2-=((x2-x)/2)+100;		align='center';		y2=y-w+w2; 		 }
 			if (tp == "b") {	x2-=((x2-x)/2)+100;		align='center';		y2=y2+w-w2; 	 }
-			str="<div style='position:absolute;width:200px;left:"+x2+"px;top:"+(y2-6)+"px;text-align:"+align+"'>";
+			str="<div id='shivaSubtx"+j+"' style='position:absolute;width:200px;left:"+x2+"px;top:"+(y2-6)+"px;text-align:"+align+"'>";
 			if (link)
 				str+="<a href='"+link+"' target='_blank' style='color:#000;text-decoration: none;'>"+lab+"</a>";
 			else
 				str+=lab;
 			$("#textLayer").append(str+"</div>");
-		}
+			if (tp == "t") 	
+				$("#shivaSubtx"+j).css("top",(y2-$("#shivaSubtx"+j).height()+4)+"px");
+			else if ((tp == "r") || (tp == "l")) 	
+				$("#shivaSubtx"+j).css("top",(y2-$("#shivaSubtx"+j).height()/2)+"px");
+			}
 	}
 
 	function DrawBack()
@@ -1572,8 +1574,6 @@ SHIVA_Show.prototype.AddClearMapStyle=function(map)						// SET MAP STYLE
 	map.mapTypes.set("LAND",clearMap);
 }
 
-
-
 //  CHART   /////////////////////////////////////////////////////////////////////////////////////////// 
 
 
@@ -2021,6 +2021,8 @@ SHIVA_Show.prototype.GetDataFromManager=function()
 	window.parent.postMessage("dataSourceUrl","*");
 }
 
+/////// QUERY EDITOR
+
 SHIVA_Show.prototype.QueryEditor=function(id)
 {
 	if ($("#propInput0").val())
@@ -2141,6 +2143,7 @@ SHIVA_Show.prototype.SecondsToTimecode=function(secs) 					// CONVERT SECONDS TO
 	return str;																// Return timecode			
 }	
 
+//////////// COLORPICKER 
 
 SHIVA_Show.prototype.ColorPicker=function(mode, att)
 {
@@ -2224,7 +2227,6 @@ function shiva_SetColor(val, att, mode)
 	Draw();
 }
 
-
 SHIVA_Show.prototype.MakeSelect=function(id, multi, items, sel, extra)
 {
 	var	str="<select id='"+id+"'";
@@ -2297,42 +2299,143 @@ SHIVA_Show.prototype.ArrayToString=function(jsonArray) 					// SAVE JSON ARRAY A
 	return str;
 }
 
-/*  GRAPHICS   ////////////////////////////////////////////////////////////////////////////////////////// 
+/////////////  EASYFILE (eStore)
 
-function CreateCanvas(id, wid, hgt, left, top) 														// ADD NEW CANVAS
-function DeleteCanvas(id) 																			// DELETE CANVAS
-function Compositing(ctx,compositeMode, alpha) 														// COMPOSITING
-function DrawBar(ctx, col, alpha, x1, y1, x2, y2, edgeCol, edgeWid) 								// DRAW RECTANGLE
-function DrawRoundBar(ctx, col, alpha, x1, y1, x2, y2, rad, edgeCol, edgeWid) 						// DRAW ROUND RECTANGLE
-function DrawLine(ctx, col, alpha, x1, y1, x2, y2, edgeWid) 										// DRAW LINE
-function DrawCircle(ctx, col, alpha, cx, cy, rad, edgeCol, edgeWid)									// DRAW CIRCLE
-function DrawWedge(ctx, col, alpha, cx, cy, rad, start, end, edgeCol, edgeWid)						// DRAW A PIE WEDGE
-function DrawTriangle(ctx, col, alpha, x, y, wid, dir)	 											// DRAW TRIANGLE
-function DrawPolygon(ctx, col, alpha, x, y,  edgeCol, edgeWid, smooth)								// DRAW POLYGON
-function SetShadow(ctx, offx, offy, blur, col, comp)	 											// SET SHADOW/COMPOSITION
-function AddGradient(ctx, id, x1, y1, x2, y2, col1, col2, r1, r2)	 								// ADD GRADIENT TO CANVAS
-function GetImage(ctx, file, left, top, wid, hgt)													// GET IMAGE
-function DrawText(ctx, text, x, y, font, col, align) 												// ADD TEXTFIELD
-function ShowSpinner(ctx, x, y, size)																// WAIT SPINNER 
-function DrawRubberLine(ctx, x1, y1, x2, y2, edgeWid) 												// DRAW RUBBER LINE
+SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MENU
+{
+	var i,email="";											
+	var v=document.cookie.split(';');										// Get cookie array
+	for (var i=0;i<v.length;i++) 											// for each cookie
+		if (v[i].indexOf("ez-email=") != -1)								// If an email set
+			email=v[i].substr(9);											// Use it
+	var str="<br/>Use <b>eStore</b> to save and load projects under your email address. When saving, type a title when asked and when loading, choose a project from a list of your saved projects.<br/>"
+		str+="<br/><table id='ez-maintbl' cellspacing=0 cellpadding=0 style='font-size:small'>";
+	str+="<tr><td width='25%'>Type email</td><td><input type='text' size='40' id='email' value='"+email+"'/></td></tr>";
+	str+="</table><div align='right' style='font-size:x-small'><br/>";	
+	if (type != "all")
+		str+=" <button id='saveBut'>Save</button>";	
+	str+=" <button id='loadBut'>Load</button>";	
+	if (type != "all")
+		str+=" <button id='linkBut'>Link</button>";	
+	str+=" <button id='cancelBut'>Cancel</button></div>";	
+	this.ShowLightBox(350,20,"SHIVA eStore",str)							// Create light box
+	$("#cancelBut").button().click(function() { $("#shivaLightBoxDiv").remove();});
+	
+	$("#saveBut").button().click(function() {								// SAVE
+		var _email=$("#email").val();										// Get email
+		var _title=$("#ez-title").val();									// Get title
+		var _type=type;														// Get type
+		if (!_email) {														// Need email
+			alert("Please type your email");								// Alertsh
+			return;															// Don't save
+			}						
+		if (((_email.toLowerCase() == "samples") && (_email != "SaMpLeS")) || // Samples
+			((_email.toLowerCase() == "canvas") && (_email != "CaNvAs"))) {	// Canvas
+			alert("Sorry, but you can't save using this name");				// Alert
+			return;															// Don't save
+			}						
+		if (!$("#ez-title").length) {										// If no title
+			str="<tr><td>Type title</td><td><input type='text' size='40' id='ez-title'/></td></tr>";
+			$(str).appendTo("#ez-maintbl tbody");							// Add title to table
+			$("#ez-title").focus();											// Focus on title
+			return;
+			}
+		if (!_title) {														// Need title
+			alert("Please type title to save under");						// Alert
+			return;															// Don't save
+			}						
+		document.cookie="ez-email="+_email;									// Save email in cookie
+		$("#shivaLightBoxDiv").remove();									// Close box						
+		str="\",\n\t\"shivaTitle\": \""+_title+"\"\n}";						// Add title
+		if (type != "Canvas") 
+			_data=_data.substr(0,_data.lastIndexOf("\""))+str;				// Remove last "\n}
+		$.post("http://www.primaryaccess.org/REST/addeasyfile.php",{ email:_email, type: _type, title:_title,data:_data.replace(/'/g,"\\'") });
+		});
+	
+	$("#loadBut").button().click(function() {								// LOAD
+		email=$("#email").val();											// Get email
+		if (!email) {														// Need email
+			alert("Please type your email");								// Alert
+			return;															// Don't save
+			}						
+		document.cookie="ez-email="+email;									// Save email in cookie
+		str="proxy.php?url=http://www.primaryaccess.org/REST/listeasyfile.php%3Femail="+email;
+		if (type != "all")													// If not loading all
+			str+="%26type="+type;											// Filter by type
+		$.getJSON(str,$.proxy(function(data) { shivaLib.ShowEasyFile(data,callback,"load"); },this));	// Get file list
+		});
+		
+	$("#linkBut").button().click(function() {								// LINK
+		email=$("#email").val();											// Get email
+		if (!email) {														// Need email
+			alert("Please type your email");								// Alert
+			return;															// Don't save
+			}						
+		document.cookie="ez-email="+email;									// Save email in cookie
+		str="proxy.php?url=http://www.primaryaccess.org/REST/listeasyfile.php%3Femail="+email+"%26type="+type;
+		$.getJSON(str,$.proxy(function(data) { shivaLib.ShowEasyFile(data,null,"link"); },this));	// Get file list
+		});
+	}
 
-// EVENTS  
+SHIVA_Show.prototype.ShowEasyFile=function(files, callback, mode) // GET DATA FROM EASYFILE
+{
+		var i;
+		var str="<br/><div style='overflow:auto;overflow-x:hidden;height:200px;font-size:x-small;padding:8px;border:1px solid #cccccc'>";
+		str+="<table id='ezFilesTable' cellspacing=0 cellpadding=4><tr><td></td></tr></table></div>";
+		$("#shivaLightContentDiv").html(str);													
+		str="<div align='right' style='font-size:x-small'><br>Show only with this in title: <input type='text' size='10' id='ezFileFilter'/>";
+		str+=" <button id='cancelBut'>Cancel</button></div>";	
+		$("#shivaLightContentDiv").append(str);
+		$("#cancelBut").button().click(function() { $("#shivaLightBoxDiv").remove();});
+		this.MakeEasyFileList(files,"",callback,mode);						// Show files
+	
+		$("#ezFileFilter").keyup($.proxy(function() {						// Add change handler
+ 			var filter=$("#ezFileFilter").val();							// Get filter
+			$("#ezFilesTable tbody").empty();								// Empty all rows
+			this.MakeEasyFileList(files,filter,callback,mode);				// Show files
+			},this));
+}
 
-function ResolveID(id)																				// CONVERT STRING ID TO DOM ID
-function AddListener(id, eventType, handler) 														// ADD EVENT LISTENER
-function RemoveListener(id, eventType, handler) 													// REMOVE EVENT LISTENER
-function SetDrag(id, mode) 																			// START/STOP DRAG
-function GetTextFile(file, callback)																// GET TEXT FILE FROM SERVER
+SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	// GET DATA FROM EASYFILE
+{
+	var i,str;
+	files.sort(function(a, b){ 												// Sort by date
+		var A=new Date(a.created.substr(0,4)+"/2012"+a.created.substr(4)+":00" );
+		var B=new Date(b.created.substr(0,4)+"/2012"+b.created.substr(4)+":00" );
+		return B-A; 
+		});												
+	for (i=0;i<files.length;++i) {											// For each file
+		if ((filter) && (files[i].title.toLowerCase().indexOf(filter.toLowerCase()) == -1)) // If  filter not in title
+			continue;														// Skip it
+		str="<tr ><td>"+files[i].created.replace(/ /,"&nbsp")+"</td>";		// Add date
+		str+="<td width='100%'><img id='ezfile-"+files[i].id+"' src='adddot.gif'  height='11'> &nbsp;";
+		str+=files[i].title+"</td></tr>";									// Add title
+		$(str).appendTo("#ezFilesTable tbody");								// Add file to table
+		$("#ezFilesTable tr:odd").addClass("odd");							// Color
+		}
+	for (i=0;i<files.length;++i) 											// For each file
+		$("#ezfile-"+files[i].id).click(function() {						// Add click handler
+			str="proxy.php?url=http://www.primaryaccess.org/REST/geteasyfile.php%3Fid="+this.id.substr(7);
+			if (mode == "link")												// If a link
+				alert("www.viseyes.org/shiva/go.htm?e="+this.id.substr(7));	// Show url
+			else{															// If a load
+				$.get(str,function(data) {									// Load data to cb
+					str=this.url;											// Get url as string
+					var id=str.substr(str.lastIndexOf("id=")+3);			// Get id
+					str="\",\n\t\"shivaID\": \""+id+"\"\n}";				// Add id
+					data=""+data;											// Cast to string
+					if (data.indexOf("Element-0") == -1)					// Not in canvas
+						data=data.substr(0,data.lastIndexOf("\""))+str;		// Remove last "\n} and add id
+					callback(data);											// Callback
+					},"text");
+				}
+			$("#shivaLightBoxDiv").remove();								// Close lightbox
+			});	
+}
 
-// DEBUG   
-
-function EnumObject(obj) 																			// DEBUG TOOL
-
-// STRING   
-
-function SecsToTime(time, frameRate) 																// CONVERT MS TO TIMECODE
-
-/////////////////////////////////////////////////////////////////////////////////////////////////// */
+/////////////////////////////////////////////////////////////////////////////////////////////////// 
+// GRAPHICS
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 function SHIVA_Graphics() 																			// CONSTRUCTOR
 {
@@ -2733,7 +2836,6 @@ SHIVA_Graphics.prototype.DrawText=function(ctx, text, x, y, format) 							// DR
 		ctx.fillText(text,x,y);	
 	} catch(e){};
 }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	QUERY EDITOR
@@ -3678,142 +3780,5 @@ SHIVA_Draw.prototype.MoveSegs=function(dx, dy, dz)						// MOVE SELECTED SEGS
 		}
 	this.DrawOverlay();														// Draw segments
 	this.DrawWireframes(false);												// Draw wireframes
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-//  EASYFILE (eStore)
-///////////////////////////////////////////////////////////////////////////////////////////////
-
-
-SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MENU
-{
-	var i,email="";											
-	var v=document.cookie.split(';');										// Get cookie array
-	for (var i=0;i<v.length;i++) 											// for each cookie
-		if (v[i].indexOf("ez-email=") != -1)								// If an email set
-			email=v[i].substr(9);											// Use it
-	var str="<br/>Use <b>eStore</b> to save and load projects under your email address. When saving, type a title when asked and when loading, choose a project from a list of your saved projects.<br/>"
-		str+="<br/><table id='ez-maintbl' cellspacing=0 cellpadding=0 style='font-size:small'>";
-	str+="<tr><td width='25%'>Type email</td><td><input type='text' size='40' id='email' value='"+email+"'/></td></tr>";
-	str+="</table><div align='right' style='font-size:x-small'><br/>";	
-	if (type != "all")
-		str+=" <button id='saveBut'>Save</button>";	
-	str+=" <button id='loadBut'>Load</button>";	
-	if (type != "all")
-		str+=" <button id='linkBut'>Link</button>";	
-	str+=" <button id='cancelBut'>Cancel</button></div>";	
-	this.ShowLightBox(350,20,"SHIVA eStore",str)							// Create light box
-	$("#cancelBut").button().click(function() { $("#shivaLightBoxDiv").remove();});
-	
-	$("#saveBut").button().click(function() {								// SAVE
-		var _email=$("#email").val();										// Get email
-		var _title=$("#ez-title").val();									// Get title
-		var _type=type;														// Get type
-		if (!_email) {														// Need email
-			alert("Please type your email");								// Alertsh
-			return;															// Don't save
-			}						
-		if (((_email.toLowerCase() == "samples") && (_email != "SaMpLeS")) || // Samples
-			((_email.toLowerCase() == "canvas") && (_email != "CaNvAs"))) {	// Canvas
-			alert("Sorry, but you can't save using this name");				// Alert
-			return;															// Don't save
-			}						
-		if (!$("#ez-title").length) {										// If no title
-			str="<tr><td>Type title</td><td><input type='text' size='40' id='ez-title'/></td></tr>";
-			$(str).appendTo("#ez-maintbl tbody");							// Add title to table
-			$("#ez-title").focus();											// Focus on title
-			return;
-			}
-		if (!_title) {														// Need title
-			alert("Please type title to save under");						// Alert
-			return;															// Don't save
-			}						
-		document.cookie="ez-email="+_email;									// Save email in cookie
-		$("#shivaLightBoxDiv").remove();									// Close box						
-		str="\",\n\t\"shivaTitle\": \""+_title+"\"\n}";						// Add title
-		if (type != "Canvas") 
-			_data=_data.substr(0,_data.lastIndexOf("\""))+str;				// Remove last "\n}
-		$.post("http://www.primaryaccess.org/REST/addeasyfile.php",{ email:_email, type: _type, title:_title,data:_data.replace(/'/g,"\\'") });
-		});
-	
-	$("#loadBut").button().click(function() {								// LOAD
-		email=$("#email").val();											// Get email
-		if (!email) {														// Need email
-			alert("Please type your email");								// Alert
-			return;															// Don't save
-			}						
-		document.cookie="ez-email="+email;									// Save email in cookie
-		str="proxy.php?url=http://www.primaryaccess.org/REST/listeasyfile.php%3Femail="+email;
-		if (type != "all")													// If not loading all
-			str+="%26type="+type;											// Filter by type
-		$.getJSON(str,$.proxy(function(data) { shivaLib.ShowEasyFile(data,callback,"load"); },this));	// Get file list
-		});
-		
-	$("#linkBut").button().click(function() {								// LINK
-		email=$("#email").val();											// Get email
-		if (!email) {														// Need email
-			alert("Please type your email");								// Alert
-			return;															// Don't save
-			}						
-		document.cookie="ez-email="+email;									// Save email in cookie
-		str="proxy.php?url=http://www.primaryaccess.org/REST/listeasyfile.php%3Femail="+email+"%26type="+type;
-		$.getJSON(str,$.proxy(function(data) { shivaLib.ShowEasyFile(data,null,"link"); },this));	// Get file list
-		});
-	}
-
-SHIVA_Show.prototype.ShowEasyFile=function(files, callback, mode) // GET DATA FROM EASYFILE
-{
-		var i;
-		var str="<br/><div style='overflow:auto;overflow-x:hidden;height:200px;font-size:x-small;padding:8px;border:1px solid #cccccc'>";
-		str+="<table id='ezFilesTable' cellspacing=0 cellpadding=4><tr><td></td></tr></table></div>";
-		$("#shivaLightContentDiv").html(str);													
-		str="<div align='right' style='font-size:x-small'><br>Show only with this in title: <input type='text' size='10' id='ezFileFilter'/>";
-		str+=" <button id='cancelBut'>Cancel</button></div>";	
-		$("#shivaLightContentDiv").append(str);
-		$("#cancelBut").button().click(function() { $("#shivaLightBoxDiv").remove();});
-		this.MakeEasyFileList(files,"",callback,mode);						// Show files
-	
-		$("#ezFileFilter").keyup($.proxy(function() {						// Add change handler
- 			var filter=$("#ezFileFilter").val();							// Get filter
-			$("#ezFilesTable tbody").empty();								// Empty all rows
-			this.MakeEasyFileList(files,filter,callback,mode);				// Show files
-			},this));
-}
-
-SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	// GET DATA FROM EASYFILE
-{
-	var i,str;
-	files.sort(function(a, b){ 												// Sort by date
-		var A=new Date(a.created.substr(0,4)+"/2012"+a.created.substr(4)+":00" );
-		var B=new Date(b.created.substr(0,4)+"/2012"+b.created.substr(4)+":00" );
-		return B-A; 
-		});												
-	for (i=0;i<files.length;++i) {											// For each file
-		if ((filter) && (files[i].title.toLowerCase().indexOf(filter.toLowerCase()) == -1)) // If  filter not in title
-			continue;														// Skip it
-		str="<tr ><td>"+files[i].created.replace(/ /,"&nbsp")+"</td>";		// Add date
-		str+="<td width='100%'><img id='ezfile-"+files[i].id+"' src='adddot.gif'  height='11'> &nbsp;";
-		str+=files[i].title+"</td></tr>";									// Add title
-		$(str).appendTo("#ezFilesTable tbody");								// Add file to table
-		$("#ezFilesTable tr:odd").addClass("odd");							// Color
-		}
-	for (i=0;i<files.length;++i) 											// For each file
-		$("#ezfile-"+files[i].id).click(function() {						// Add click handler
-			str="proxy.php?url=http://www.primaryaccess.org/REST/geteasyfile.php%3Fid="+this.id.substr(7);
-			if (mode == "link")												// If a link
-				alert("www.viseyes.org/shiva/go.htm?e="+this.id.substr(7));	// Show url
-			else{															// If a load
-				$.get(str,function(data) {									// Load data to cb
-					str=this.url;											// Get url as string
-					var id=str.substr(str.lastIndexOf("id=")+3);			// Get id
-					str="\",\n\t\"shivaID\": \""+id+"\"\n}";				// Add id
-					data=""+data;											// Cast to string
-					if (data.indexOf("Element-0") == -1)					// Not in canvas
-						data=data.substr(0,data.lastIndexOf("\""))+str;		// Remove last "\n} and add id
-					callback(data);											// Callback
-					},"text");
-				}
-			$("#shivaLightBoxDiv").remove();								// Close lightbox
-			});	
 }
 

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="UTF-8" />
 	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
 	<title>SHIVA Canvas editor</title>
 	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
@@ -23,7 +24,9 @@
 				  	 background-color:#eee;border:1px solid #ccc;
 				  	 background:-moz-linear-gradient(top,#dfdfdf,#f0f0f0);
 				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
-				  	 }
+				  	 border-collapse: collapse;
+				  	 width:278px;
+			  	 	}
 		.linkButton { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:80px;border-radius:8px;
 				  	 background-color:#eee;border:1px solid #ccc;
 				  	 background:-webkit-linear-gradient(top, #ddd 0%, #bbb 100%);
@@ -32,29 +35,28 @@
 	</style>
 </head>
 <body>
-	<div style="width:279px" align="center">
+	<div style="width:279px;text-align:center"> 
 		<span id="toolbar" style="font-size:xx-small">
 		<input type='radio' id='tb1' onclick='SetMode(0)' name='mainMen' checked='checked' /><label for='tb1'>Set</label>
 		<input type='radio' id='tb2' onclick='SetMode(1)' name='mainMen'/><label for='tb2'>Link</label>
 		<input type='radio' id='tb3' onclick='SetMode(2)' name='mainMen'/><label for='tb3'>View</label></span>
 		<br/><br/>
-	    <div id="editDiv" align="left">
-		    <table id="propertyTable" class='propTable' cellspacing="0" cellpadding="0" width="278" >
-				<tr height='8'><td></td></tr>
+	    <div id="editDiv" style="text-align:left">
+		    <table id="propertyTable" class='propTable'>
+				<tr style="height:8px"><td> </td></tr>
 			</table> 
-		<p align="right">
-			<img src='annotate.gif' style='vertical-align:bottom' onclick='shivaLib.Annotate()'>&nbsp;&nbsp;&nbsp;
-			Share as: 
-		<select id='formatter' onChange='SaveData(this.value)'>
-			<option>Choose format</option>
-			<option>eStore</option>
-			<option>JSON</option>
-		</select> 
-	</p>		
-
+		<p style="text-align:right">
+			<img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate()'>&nbsp;&nbsp; Share as: 
+			<select id='formatter' onchange='SaveData(this.value)'>
+				<option>Choose format</option>
+				<option>eStore</option>
+				<option>JSON</option>
+			</select> 
+		</p>		
 	</div>
-	<div id="canvasDiv" style="position:absolute;"></div>
- 	<div id="outputDiv" style="width:460px;"></div>
+	<div id="canvasDiv" style="position:absolute;"> </div>
+ 	<div id="outputDiv" style="width:460px;"> </div>
+	</div>
 
 <script>
 

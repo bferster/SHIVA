@@ -72,9 +72,16 @@
 			$.getJSON(str,$.proxy(shivaLib.Draw,shivaLib));	
 			}
 		if (query.indexOf("m=") != -1) {
-			var str="proxy.php?url="+query.substr(2);
-			$.getJSON(str,$.proxy(shivaLib.Draw,shivaLib));	
+			if (query.indexOf("?") == -1)
+				$.getJSON(query.substr(2)+"?callback=?");	
+			else
+				$.getJSON(query.substr(2)+"&callback=?");	
 			}
+	}
+	
+	function shivaDataWrapper(data)
+	{
+		shivaLib.Draw(data);
 	}
 	
 	function shivaEventHandler(e)

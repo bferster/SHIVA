@@ -1720,7 +1720,7 @@ SHIVA_Show.prototype.SaveData=function(mode,style,items,props,type) 				// SAVE 
 				return str;
 			$('#formatter').val(0);
 			if (mode == 'eStore')
-				return this.EasyFile(str,$.proxy(function(data) { postMessage("PutJSON="+data,"*") },this),style);
+				return this.EasyFile(str,$.proxy(function(data) { ReEdit(data) },this),style);
 			$("#helpDiv").html("");	
 			}	
 		else{
@@ -2359,12 +2359,14 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 			return;															// Don't save
 			}						
 		document.cookie="ez-email="+email;									// Save email in cookie
-		str="proxy.php?url=http://www.primaryaccess.org/REST/listeasyfile.php%3Femail="+email;
+		var dat={ email:email };											// Set emila to look for
 		if (type != "all")													// If not loading all
-			str+="%26type="+type;											// Filter by type
-		$.getJSON(str,$.proxy(function(data) { shivaLib.ShowEasyFile(data,callback,"load"); },this));	// Get file list
+			dat["type"]=type;												// Filter by type
+		str="http://www.primaryaccess.org/REST/listeasyfile.php";			// eStore list url
+		shivaLib.ezcb=callback;		shivaLib.ezmode="load";					// Set callback and mode
+		$.ajax({ url: str, data:dat, dataType:'jsonp' });					// Get jsonp
 		});
-		
+			
 	$("#linkBut").button().click(function() {								// LINK
 		email=$("#email").val();											// Get email
 		if (!email) {														// Need email
@@ -2372,8 +2374,12 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 			return;															// Don't save
 			}						
 		document.cookie="ez-email="+email;									// Save email in cookie
-		str="proxy.php?url=http://www.primaryaccess.org/REST/listeasyfile.php%3Femail="+email+"%26type="+type;
-		$.getJSON(str,$.proxy(function(data) { shivaLib.ShowEasyFile(data,null,"link"); },this));	// Get file list
+		var dat={ email:email };											// Set emila to look for
+		if (type != "all")													// If not loading all
+			dat["type"]=type;												// Filter by type
+		str="http://www.primaryaccess.org/REST/listeasyfile.php";			// eStore list url
+		shivaLib.ezcb="";		shivaLib.ezmode="link";						// Set callback and mode
+		$.ajax({ url: str, data:dat, dataType:'jsonp' });					// Get jsonp
 		});
 	}
 
@@ -2396,12 +2402,12 @@ SHIVA_Show.prototype.ShowEasyFile=function(files, callback, mode) // GET DATA FR
 			},this));
 }
 
-SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	// GET DATA FROM EASYFILE
+SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	// SHOW LIST OF FILES
 {
 	var i,str;
-	files.sort(function(a, b){ 												// Sort by date
-		var A=new Date(a.created.substr(0,4)+"/2012"+a.created.substr(4)+":00" );
-		var B=new Date(b.created.substr(0,4)+"/2012"+b.created.substr(4)+":00" );
+	files.sort(function(a, b) { 												// Sort by date
+		var A=new Date(a.created.substr(0,5)+"/2012 "+a.created.substr(6) );
+		var B=new Date(b.created.substr(0,5)+"/2012 "+b.created.substr(6) );
 		return B-A; 
 		});												
 	for (i=0;i<files.length;++i) {											// For each file
@@ -2415,25 +2421,36 @@ SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	/
 		}
 	for (i=0;i<files.length;++i) 											// For each file
 		$("#ezfile-"+files[i].id).click(function() {						// Add click handler
-			str="proxy.php?url=http://www.primaryaccess.org/REST/geteasyfile.php%3Fid="+this.id.substr(7);
+			str="http://www.primaryaccess.org/REST/geteasyfile.php?id="+this.id.substr(7);
 			if (mode == "link")												// If a link
 				alert("www.viseyes.org/shiva/go.htm?e="+this.id.substr(7));	// Show url
 			else{															// If a load
-				$.get(str,function(data) {									// Load data to cb
-					str=this.url;											// Get url as string
-					var id=str.substr(str.lastIndexOf("id=")+3);			// Get id
-					str="\",\n\t\"shivaID\": \""+id+"\"\n}";				// Add id
-					data=""+data;											// Cast to string
-					if (data.indexOf("Element-0") == -1)					// Not in canvas
-						data=data.substr(0,data.lastIndexOf("\""))+str;		// Remove last "\n} and add id
-					callback(data);											// Callback
-					},"text");
+				var dat={ id:this.id.substr(7) };							// Set id to look for
+				str="http://www.primaryaccess.org/REST/geteasyfile.php";	// eStore list url
+				shivaLib.ezcb=callback;										// Set callback
+				shivaLib.ezmode=this.id.substr(7);	 						// Set ID
+				$.ajax({ url: str, data:dat, dataType:'jsonp' });			// Get jsonp
 				}
 			$("#shivaLightBoxDiv").remove();								// Close lightbox
 			});	
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////// 
+function easyFileListWrapper(data)										// LOAD EASY FILE LIST
+{
+	shivaLib.ShowEasyFile(data,shivaLib.ezcb,shivaLib.ezmode); 				// Show list of files
+}
+
+function easyFileDataWrapper(data)										// LOAD EASY FILE DATA
+{
+	if (!data["Element-0"])													// If not a canvas element
+		data.shivaId=Number(shivaLib.ezmode);								// Set ID
+	shivaLib.ezcb(data);													// Callback
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+
+
+////////// 
 // GRAPHICS
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 

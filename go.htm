@@ -32,67 +32,76 @@
 	<title>SHIVA Display</title>
 </head>
 <body>
-<div style="width:600px;height:400px;position:absolute" id="containerDiv"/>	
+<div style="width:600px;height:400px;position:absolute" id="containerDiv">	</div>
 
 <script>
 
 	var shivaLib=null;
 	shivaGo();
 	
-	function shivaGo()
+	function shivaGo()													// DRAW ELEMENT
 	{
 		var pair;
-		var options=new Object();
-		var query=window.location.search.substring(1);
+		var options=new Object();											
+		var query=window.location.search.substring(1);						// Get query string
 		query=query.replace(/%5E/g,"^").replace(/%5e/g,"^").replace(/%C2%AE/g,"&reg").replace(/%20/g," ").replace(/%60/g,"`");
 		query=query.replace(/%3E/g,">").replace(/%3e/g,">").replace(/%3c/g,"<").replace(/%3C/g,"<").replace(/``/g,"#");;
-		var vars=query.split("&");
-		
-		for (var i=0;i<vars.length;i++) {
-			vars[i]=vars[i].replace(/\^/g,"&");
-			pair=vars[i].split("=");
-			for (j=2;j<pair.length;++j)
-				pair[1]+="="+pair[j];
-			if (pair[1]) {
-				options[pair[0]]=pair[1];
-	   			if (options[pair[1]] == 'true') 	options[pair[1]]=true;
-	   			if (options[pair[1]] == 'false') 	options[pair[1]]=false;
-	  			}
-	 		}
-		shivaLib=new SHIVA_Show("containerDiv");
-		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
-		if (window.addEventListener) 
-			window.addEventListener("message",shivaEventHandler,false);
-		else
-			window.attachEvent("message",shivaEventHandler);
-		if (vars.length > 2)
-			shivaLib.Draw(options);
-		if (query.indexOf("e=") != -1) {
-			var str="proxy.php?url=http://www.primaryaccess.org/REST/geteasyfile.php?id="+query.substr(2);
-			$.getJSON(str,$.proxy(shivaLib.Draw,shivaLib));	
-			}
-		if (query.indexOf("m=") != -1) {
-			if (query.indexOf("?") == -1)
-				$.getJSON(query.substr(2)+"?callback=?");	
-			else
-				$.getJSON(query.substr(2)+"&callback=?");	
+		var vars=query.split("&");											// Split into vars
+		if (vars.length > 2) {												// If vars on command line
+			for (var i=0;i<vars.length;i++) {								// For each var
+				vars[i]=vars[i].replace(/\^/g,"&");							// Replace "escaped" chars
+				pair=vars[i].split("=");									// Split into key/value pairs
+				for (j=2;j<pair.length;++j)									// For each part beyond 2nd 
+					pair[1]+="="+pair[j];									// Join into 2nd
+				if (pair[1]) {												// If a value
+					options[pair[0]]=pair[1];								// Set into options
+		   			if (options[pair[1]] == 'true')  options[pair[1]]=true;	// Force "true" to bool
+		   			if (options[pair[1]] == 'false') options[pair[1]]=false; // Force "false" to bool
+		  			}
+		 		}
+		 	}
+		shivaLib=new SHIVA_Show("containerDiv");							// Alloc rendering lib
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);				// If called from Drupal managrt
+		if (window.addEventListener) 										// Old style event listener
+			window.addEventListener("message",shivaEventHandler,false);		// Listen for HTML5 messages
+		else																// New style listener
+			window.attachEvent("message",shivaEventHandler);				// Listen for HTML5 messages
+		if (vars.length > 2)												// If all options set in query string
+			shivaLib.Draw(options);											// Draw it
+		else if (query.indexOf("e=") != -1) 								// If data in eStore
+			$.getJSON("http://www.primaryaccess.org/REST/geteasyfile.php?id="+query.substr(2)+"&callback=?");	// Get data from eStore
+		else if (query.indexOf("m=") != -1) {								// If data in Drupal node
+			if (query.indexOf("?") == -1)									// If no ? in url
+				$.getJSON(query.substr(2)+"?callback=?");					// Get data from node
+			else															// Already has ?, so use &
+				$.getJSON(query.substr(2)+"&callback=?");					// Get data from node
 			}
 	}
 	
-	function shivaDataWrapper(data)
+	function shivaDataWrapper(data)										// HANDLE GETJSON DATA FROM DRUPAL
 	{
-		shivaLib.Draw(data);
+		shivaLib.Draw(data);												// Draw element
+	}
+
+	function easyFileDataWrapper(data)									// HANDLE GETJSON DATA FROM ESTORE
+	{
+		shivaLib.Draw(data);												// Draw element
 	}
 	
-	function shivaEventHandler(e)
+	function shivaEventHandler(e)										// HANDLE HTML5 MESSAGES
 	{
-		if (e.data.indexOf("PutJSON") == 0) 
-			shivaLib.Draw($.parseJSON(e.data.substr(8)));
+		if (e.data.indexOf("PutJSON") == 0) 								// Incomoing JSON data
+			shivaLib.Draw($.parseJSON(e.data.substr(8)));					// Draw element
 	}
-
-
 
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
 

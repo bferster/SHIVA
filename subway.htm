@@ -122,6 +122,7 @@
 
 		shivaLib.g.AddListener("containerDiv","mouseup",onMouseUp)
 		document.onkeyup=onKeyUp;
+		document.onkeydown=onKeyDown;
 	});
 
 	function shivaEventHandler(e)
@@ -258,11 +259,21 @@
 			}
 	}
 	
+	function onKeyDown(e)	
+	{
+		if ((e.keyCode == 8) &&													
+	        (e.target.tagName != "TEXTAREA") && 								
+	        (e.target.tagName != "INPUT")) { 									
+			e.stopPropagation();												
+	        return false;
+	    	}
+	}
+
 	function onKeyUp(e)
 	{
 		if ($("#tb23").attr("checked") == "checked") {
 			var active=$("#accord").accordion("option","active");
-			if ((e.which == 192) && (active !== false)) {
+			if (((e.which == 8) || (e.which == 46)) && (active !== false)) {
 				var str=$("#itemInput"+active+"-5").val();
 				if (!str) 
 					return;

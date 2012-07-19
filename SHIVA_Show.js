@@ -3128,6 +3128,11 @@ function SHIVA_Draw(container, hidePalette) 							// CONSTRUCTOR
 	this.textAlign="Left";
 	this.textStyle="";
 	this.textSize=0;
+	this.ideaShape="Round box";
+	this.ideaGradient=true;
+	this.ideaBackCol="#cccccc";
+	this.ideaEdgeCol="#999999";
+	this.ideaEdgeWid=1;
 	this.selectedItems=new Array();
 	this.selectedDot=-1;													
 	this.segs=new Array();
@@ -3150,9 +3155,10 @@ function SHIVA_Draw(container, hidePalette) 							// CONSTRUCTOR
 	this.ctx=$("#shivaDrawCanvas")[0].getContext('2d');						// Get context
 	$("#shivaDrawDiv").css("cursor","crosshair");							// Crosshair cursor
 	$("#shivaDrawDiv").mouseup(this.onMouseUp);								// Mouseup listener
-	$("#shivaDrawDiv").mousedown(this.onMouseDown);							// Mouseup listener
-	$("#shivaDrawDiv").mousemove(this.onMouseMove);							// Mouseup listener
-	document.onkeyup=this.onKeyUp;											// Keystroke listener
+	$("#shivaDrawDiv").mousedown(this.onMouseDown);							// Mousedown listener
+	$("#shivaDrawDiv").mousemove(this.onMouseMove);							// Mousemovelistener
+	document.onkeyup=this.onKeyUp;											// Keyup listener
+	document.onkeydown=this.onKeyDown;										// Keydown listener
 }
 
 SHIVA_Draw.prototype.DrawPalette=function(tool) 						//	DRAW 
@@ -3165,7 +3171,7 @@ SHIVA_Draw.prototype.DrawPalette=function(tool) 						//	DRAW
 		var h=204;															// Default height
 		if (shivaLib.player)												// If over a player										
 			h+=16;															// Add space for start/end times
-		str="<div id='shivaDrawPaletteDiv' style='position:absolute;left:"+left+"px;top:"+(top-12+Number(hgt)-100)+"px;width:158px;height:"+h+"px'>";
+		str="<div id='shivaDrawPaletteDiv' style='position:absolute;left:"+left+"px;top:"+(top-12+Number(hgt)-100)+"px;width:180px;height:"+h+"px'>";
 		$("body").append("</div>"+str);										// Add palette to body
 		$("#shivaDrawPaletteDiv").addClass("rounded-corners").css("background-color","#eee").css('border',"1px solid #ccc");
 		$("#shivaDrawPaletteDiv").draggable();								// Make it draggable
@@ -3232,36 +3238,45 @@ SHIVA_Draw.prototype.ColorPicker=function(name) 						//	DRAW COLORPICKER
 SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW 
 {
 	var str="<p style='text-shadow:1px 1px white' align='center'><b>SHIVA Draw</b></p>";
-	str+="<img src='closedot.gif' style='position:absolute;left:142px;top:0px' onclick='shivaLib.dr.SetTool(-1)'/>";
+	str+="<img src='closedot.gif' style='position:absolute;left:164px;top:0px' onclick='shivaLib.dr.SetTool(-1)'/>";
 	str+="<table style='font-size:xx-small'>"
 	if (tool == undefined)
 		tool=this.curTool;
 	if (tool < 3) {
-		str+="<tr><td>&nbsp;&nbsp;Snap to grid</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Snap to grid?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";
 		if (tool == 2)
-			str+="<tr><td>&nbsp;&nbsp;Round box</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
+			str+="<tr><td>&nbsp;&nbsp;Round box?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
 		else if (tool == 0)
 			str+="<tr><td>&nbsp;&nbsp;Draw curves</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Color</td><td>&nbsp;<input style='width:70px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"color\")' onChange='shivaLib.dr.SetVal(\"color\",this.value)' type='text' id='color'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Visibility</td><td>&nbsp;<input style='width:70px;height:12px' onChange='shivaLib.dr.SetVal(\"alpha\",this.value)' type='range' id='alpha'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:70px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"edgeColor\")' onChange='shivaLib.dr.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Edge width</td><td>&nbsp;<input style='width:70px;height:12px' onChange='shivaLib.dr.SetVal(\"edgeWidth\",this.value)' type='range' id='edgeWidth'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"color\")' onChange='shivaLib.dr.SetVal(\"color\",this.value)' type='text' id='color'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Visibility</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"alpha\",this.value)' type='range' id='alpha'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"edgeColor\")' onChange='shivaLib.dr.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Edge width</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"edgeWidth\",this.value)' type='range' id='edgeWidth'></td></tr>";
 		}
 	else if (tool == 3) {
-		str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:70px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"boxColor\")' onChange='shivaLib.dr.SetVal(\"boxColor\",this.value)' type='text' id='boxColor'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Round box</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Visibility</td><td>&nbsp;<input style='width:70px;height:12px' onChange='shivaLib.dr.SetVal(\"alpha\",this.value)' type='range' id='alpha'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Align</td><td>&nbsp;<select style='width:70px;height:18px' onChange='shivaLib.dr.SetVal(\"textAlign\",this.value)' id='textAlign'><option>Left</option><option>Right</option><option>Center</option></select></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Text size</td><td>&nbsp;<input style='width:70px;height:12px' onChange='shivaLib.dr.SetVal(\"textSize\",this.value)' type='range' id='textSize'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Text color</td><td>&nbsp;<input style='width:70px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"textColor\")' onChange='shivaLib.dr.SetVal(\"textColor\",this.value)' type='text' id='textColor'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"boxColor\")' onChange='shivaLib.dr.SetVal(\"boxColor\",this.value)' type='text' id='boxColor'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Round box?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Visibility</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"alpha\",this.value)' type='range' id='alpha'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Align</td><td>&nbsp;<select style='width:85px;height:18px;font-size:x-small' onChange='shivaLib.dr.SetVal(\"textAlign\",this.value)' id='textAlign'><option>Left</option><option>Right</option><option>Center</option></select></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Text size</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"textSize\",this.value)' type='range' id='textSize'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Text color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"textColor\")' onChange='shivaLib.dr.SetVal(\"textColor\",this.value)' type='text' id='textColor'></td></tr>";
 		}
 	else if (tool == 4) {
-		str+="<tr><td>&nbsp;&nbsp;Snap to grid</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:70px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"edgeColor\")' onChange='shivaLib.dr.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Edge width</td><td>&nbsp;<input style='width:70px;height:12px' onChange='shivaLib.dr.SetVal(\"edgeWidth\",this.value)' type='range' id='edgeWidth'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Visibility</td><td>&nbsp;<input style='width:70px;height:12px' onChange='shivaLib.dr.SetVal(\"alpha\",this.value)' type='range' id='alpha'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Image URL</td><td>&nbsp;<input style='width:70px;height:12px' onChange='shivaLib.dr.SetVal(\"imageURL\",this.value)' type='text' id='imageURL'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Snap to grid?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"edgeColor\")' onChange='shivaLib.dr.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Edge width</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"edgeWidth\",this.value)' type='range' id='edgeWidth'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Visibility</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"alpha\",this.value)' type='range' id='alpha'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Image URL</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"imageURL\",this.value)' type='text' id='imageURL'></td></tr>";
 		}
+	else if (tool == 6) {
+		str+="<tr><td>&nbsp;&nbsp;Shape</td><td>&nbsp;<select style='width:85px;height:18px;font-size:x-small' onChange='shivaLib.dr.SetVal(\"ideaShape\",this.value)' id='ideaShape'><option>Round box</option><option>Rectangle</option><option>Circle</option></select></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaBackCol\")' onChange='shivaLib.dr.SetVal(\"ideaBackCol\",this.value)' type='text' id='ideaBackCol'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Gradient?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='ideaGradient'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaEdgeCol\")' onChange='shivaLib.dr.SetVal(\"ideaEdgeCol\",this.value)' type='text' id='ideaEdgeCol'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Edge width</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"ideaEdgeWid\",this.value)' type='range' id='ideaEdgeWid'></td></tr>";
+//		str+="<tr><td>&nbsp;&nbsp;Do</td><td>&nbsp;<select style='width:85px;height:18px;font-size:x-small' onChange=''><option> </option><option><option>New idea map</option><option>Delete idea</option><option>Delete idea map</option></select></td></tr>";
+		}
+
 	str+="</table><br/>";	
 	str+="<div style='position:absolute;left:14px;top:173px'><span id='drawToolbar' style='font-size:xx-small'>";
 	str+="<input type='radio' id='sdtb6' name='draw' onclick='shivaLib.dr.SetTool(5)'/><label for='sdtb6'>Select</label>";
@@ -3270,6 +3285,7 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 	str+="<input type='radio' id='sdtb1' name='draw' onclick='shivaLib.dr.SetTool(0)'/><label for='sdtb1'>Line</label>";
 	str+="<input type='radio' id='sdtb4' name='draw' onclick='shivaLib.dr.SetTool(3)'/><label for='sdtb4'>A</label>";
 	str+="<input type='radio' id='sdtb5' name='draw' onclick='shivaLib.dr.SetTool(4)'/><label for='sdtb5'>Image</label>";
+	str+="<input type='radio' id='sdtb7' name='draw' onclick='shivaLib.dr.SetTool(6)'/><label for='sdtb7'>Idea</label>";
 	str+="</span></div>";	
 	if (shivaLib.player) {
 		str+="<img src='startdot.gif' style='position:absolute;left:11px;top:199px'  onclick='shivaLib.dr.SetVal(\"startTime\")'/>";
@@ -3286,6 +3302,7 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 	$("#sdtb4").button({text: true });
 	$("#sdtb5").button({text: false, icons: { primary: "ui-icon-image"}});
 	$("#sdtb6").button({text: false, icons: { primary: "ui-icon-arrowthick-1-nw"}}).css("width","100");
+	$("#sdtb7").button({text: false, icons: { primary: "ui-icon-lightbulb"}}).css("width","100");
 	this.SetMenuProperties();												// Set menu properties
 }
 
@@ -3293,6 +3310,7 @@ SHIVA_Draw.prototype.SetMenuProperties=function() 						//	SET MENU PROPERTIES
 {
 	var col,tcol,txt;
 	tcol=txt=col=this.color;												// Interior color
+	gradient=true;
 	if (col == -1)	col="#fff",tcol="000",txt='none';						// If none, white chip/black text
 	$("#color").css("background-color",col); 								// Color chip
 	$("#color").css("color",tcol); 											// Color text to hide it
@@ -3322,6 +3340,22 @@ SHIVA_Draw.prototype.SetMenuProperties=function() 						//	SET MENU PROPERTIES
 	$("#textAlign").val(this.textAlign); 									// Set text align
 	$("#imageURL").val(this.imageURL); 										// Set image url
 	$("#startEndTime").text(this.startTime+" -> "+this.endTime);			// Set times
+	$("#edgeWidth").val(this.edgeWidth); 									// Set edge width
+	$("#ideaShapeCol").val(this.ideaShape); 								// Set idea shape
+	$("#ideaBackCol").val(this.ideaBackCol); 								// Set idea back col
+	if (this.ideaGradient)													// If snap
+		$("#ideaGradient").attr("checked","checked");						// Check it
+	$("#ideaEdgeWid").val(this.ideaEdgeWid); 								// Set idea edge width
+	tcol=txt=col=this.ideaBackCol;											// Back color
+	if (col == -1)	col="#fff",tcol="000",txt='none';						// If none, white chip/black text
+	$("#ideaBackCol").val(txt); 											// Set idea edge col
+	$("#ideaBackCol").css("background-color",col); 							// Color chip
+	$("#ideaBackCol").css("color",tcol); 									// Color text to hide it
+	tcol=txt=col=this.ideaEdgeCol;											// Edge color
+	if (col == -1)	col="#fff",tcol="000",txt='none';						// If none, white chip/black text
+	$("#ideaEdgeCol").val(txt); 											// Set idea edge col
+	$("#ideaEdgeCol").css("background-color",col); 							// Color chip
+	$("#ideaEdgeCol").css("color",tcol); 									// Color text to hide it
 }	
 
 SHIVA_Draw.prototype.DrawOverlay=function(num) 							// DRAW OVERLAY
@@ -3639,10 +3673,20 @@ SHIVA_Draw.prototype.onMouseMove=function(e)							// MOUSE MOVE HANDLER
 		}
 }
 
+SHIVA_Draw.prototype.onKeyDown=function(e)								// KEY DOWN HANDLER
+{
+	if ((e.keyCode == 8) &&													// Look for Del key
+        (e.target.tagName != "TEXTAREA") && 								// In text area
+        (e.target.tagName != "INPUT")) { 									// or input
+		e.stopPropagation();												// Trap it
+        return false;
+    }
+}
+
 SHIVA_Draw.prototype.onKeyUp=function(e)								// KEY UP HANDLER
 {
 	var num=shivaLib.dr.curSeg;												// Point at currently drawn seg
-	if ((e.which == 192) && (num != -1)) {									// If DEL and an active seg
+	if (((e.which == 8) || (e.which == 46)) && (num != -1)) {				// If DEL and an active seg
 		var o=shivaLib.dr.segs[num];										// Point at seg
 		o.x.pop();		o.y.pop();											// Delete last dot xy
 		shivaLib.dr.lastX=o.x[o.x.length-1];								// Set last x to end point

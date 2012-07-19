@@ -19,15 +19,15 @@
 		.sm { font-size:x-small;color:#000; }
 		tr.odd { background-color:#f0f0f0; }
 		#containerDiv-frame > div.containerDiv { padding: 10px; }
-		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:80px;border-radius:8px;}
-		.propTable { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:80px;border-radius:8px;
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		.propTable { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;
 				  	 background-color:#eee;border:1px solid #ccc;
 				  	 background:-moz-linear-gradient(top,#dfdfdf,#f0f0f0);
 				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
 				  	 border-collapse: collapse;
 				  	 width:278px;
 			  	 	}
-		.linkButton { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:80px;border-radius:8px;
+		.linkButton { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;
 				  	 background-color:#eee;border:1px solid #ccc;
 				  	 background:-webkit-linear-gradient(top, #ddd 0%, #bbb 100%);
 				  	 }
@@ -723,7 +723,7 @@ function StopItemDrag(e,ui,id)
 			selectedItems[0]=items.length;
 			items.push(o);
 			ShowElements();
-			$(id).append("<div id='dragdir' align='center' style='position:absolute;top:-16px;left:171px;width:80px;background:#eee'><font color='#990000'>Drag this over element to fill with data</font></div>");
+			$(id).append("<div id='dragdir' align='center' style='position:absolute;top:-16px;left:171px;width:8px;background:#eee'><font color='#990000'>Drag this over element to fill with data</font></div>");
 			$("#dragdir").css("border","1px solid #990000").css("padding","4px").addClass("rounded-corners");
 			shivaLib.Sound("click");
 			return;

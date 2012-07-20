@@ -1642,12 +1642,12 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
   		if (ops[o] == 'false') 	ops[o]=false;
    		}
 	var innerChartDiv=this.container+"indiv";
-	$(con).remove(innerChartDiv);
+	if (options['width'])		$(con).width(options['width']);
+	if (options['height'])		$(con).height(options['height']);
+	$(con).remove("#innerChartDiv");
 	$(con).append("<div id="+innerChartDiv+"/>")
-	$("#"+innerChartDiv).css('width',options['width']+"px");
-	$("#"+innerChartDiv).css('height',options['height']+"px");	
-	$(con).css("width",$("#"+innerChartDiv).css("width"));
-	$(con).css("height",$("#"+innerChartDiv).css("height"));
+	$("#"+innerChartDiv).width($(con).width());
+	$("#"+innerChartDiv).height($(con).height());
 	ops.containerId=innerChartDiv;
 	if (!ops.colors)	delete ops.colors;
  	if (ops.dataDataSourceUrl)	

@@ -81,7 +81,7 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
           	break;
 		case "Image": 														// Ad gallery
 			obj="jQuery.prototype.adGallery";								// Object to test for
-			var lib="jquery.ad-gallery.js";  								// Lib to load
+			var lib="jquery.ad-gallery.min.js";  							// Lib to load
            	break;
 		case "Network": 													// JIT
 			obj="$jit.id";														// Object to test for
@@ -1238,11 +1238,11 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 	if (options.dataSourceUrl.indexOf("//docs.google.com") != -1)
  	   	GetSpreadsheetData(options.dataSourceUrl,options.imgHgt,options.showImage,options.showSlide,options.transition,options.width);
  	 else if (options.dataSourceUrl) {
- 	   	$("#"+this.container).html("<img id='"+this.container+"Img' "+"width='"+options.width+"' src='"+options.dataSourceUrl+"'/>");
+	   	$("#"+this.container).html("<img id='"+this.container+"Img' "+"width='"+options.width+"' src='"+options.dataSourceUrl+"'/>");
 		$("#"+this.container).click( function() { _this.RunGlue(_this.container,-1,"clicked"); });
 		}
 		
- 	  	function GetSpreadsheetData(file,imgHgt,showImage,showSlide,trans,wid) 	{
+ 	  function GetSpreadsheetData(file,imgHgt,showImage,showSlide,trans,wid) 	{
   		var query=new google.visualization.Query(file);
    		query.send(handleQueryResponse);
  
@@ -1273,15 +1273,14 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 		for (var i=1;i<data.length;++i) {
 			str+="<li><a href='"+data[i][0]+"'><img height='"+imgHgt+" 'src='"+data[i][0]+"'";
 			if (data[i][1])
-				str+=" label='"+data[i][1]+"'";		
+				str+=" title='"+data[i][1]+"'";		
 			if (data[i][2])
 				str+=" alt='"+data[i][2]+"'";		
 	   		str+=" class='image"+i+"'></a></li>";
 	   		}
-	    str+="</ul></div></div>";
+	    str+="</ul></div></div></div>";
 	    $("#"+container).html(str);
-	    var galleries=$('.ad-gallery').adGallery();
-		    galleries[0].settings.effect=transition;
+	  	$('.ad-gallery').adGallery()[0].settings.effect=transition;
 	    $("#gallery").css("background","#ddd");
 		$(".ad-gallery").css("width",wid) 
  	}

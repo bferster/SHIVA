@@ -71,7 +71,7 @@
 	var inSearch=false;
 	
 	var props={
-		dataSourceUrl: 				{	def:'', 			opt:'string',			des:'URL of image/spreadsheet'}, 
+		dataSourceUrl: 				{	def:'', 			opt:'string',			des:'URL of image/doc'}, 
 		title: 						{	def:'', 			opt:'string',			des:'Title of image'}, 
 		width: 						{	def:'600', 			opt:'number',			des:'Width of image'}, 
 		transition: 				{	def:'fade', 		opt:'none|fade|resize|slide-hori|slide-vert',		des:'Transition style'},
@@ -82,7 +82,7 @@
 		}
 	
 	var helpText=new Array();
-	helpText['URL of image/spreadsheet']="Source URL of the image, if a showing a single image.<br/><br/>If using google docs for image gallery, type the URL for the Google Docs spreadsheet, or simply cut and paste the URL from the Google Docs site for the spreadsheet to use that contains data formatted for the images.<br/><br/>Each row is an image, with the image URL, the title (optional) and description (optional) in the first 3 columns.<br/><br/><a href='https://docs.google.com/spreadsheet/ccc?key=0AohdE1_3ZElJdGxVdFJtYVlkNkt2MHJzWEJMRkVSWWc' target='_blank'> Here</a> is a sample spreadsheet for an image gallery.";
+	helpText['URL of image/doc']="Source URL of the image, if a showing a single image.<br/><br/>If using google docs for image gallery, type the URL for the Google Docs spreadsheet, or simply cut and paste the URL from the Google Docs site for the spreadsheet to use that contains data formatted for the images.<br/><br/>Each row is an image, with the image URL, the title (optional) and description (optional) in the first 3 columns.<br/><br/><a href='https://docs.google.com/spreadsheet/ccc?key=0AohdE1_3ZElJdGxVdFJtYVlkNkt2MHJzWEJMRkVSWWc' target='_blank'> Here</a> is a sample spreadsheet for an image gallery.";
 	helpText['Orientation of timeline']="Choose whether you want the timeline to be displayed horizontally or vertically. Choose the horizontal display to display more detail on your timeline. NOTE: Not implemented yet."
 	helpText['Title of image']="Title of image.";
 	helpText['Thumbnail height']="The height of the thumbnail images if an image gallery.";

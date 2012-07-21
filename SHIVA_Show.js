@@ -131,6 +131,12 @@ function shivaJSLoaded(obj, callback) 									// RECURSE UNTIL JS METHOD/PROPER
 		setTimeout(function() { shivaJSLoaded(obj,callback); },50);			// Recurse		
 }
 
+SHIVA_Show.prototype.SendReadyMessage=function() 						// SEND READY MESSAGE TO DRUPAL MANAGER
+{
+	if ((shivaLib.drupalMan) && (typeof(shivaLib.drupalMan.postMessage) == "function")) 
+		shivaLib.drupalMan.postMessage("ShivaReady="+mode.toString(),"*");
+}
+
 SHIVA_Show.prototype.AddOverlay=function() 								// ADD OVERLAY
 {
 	var key;
@@ -324,7 +330,6 @@ SHIVA_Show.prototype.SetLayer=function(num, mode) 									// SET LAYER
 		this.DrawTimeline(this.items);
 }
 
-
 SHIVA_Show.prototype.FillElement=function(table, query) 								// FILL ELEMENT WITH DATA TABLE
 {
 	var group=this.options.shivaGroup;														// Get type
@@ -349,7 +354,6 @@ SHIVA_Show.prototype.FillElement=function(table, query) 								// FILL ELEMENT 
 		
 		}
 }
-
 
 SHIVA_Show.prototype.Annotate=function() 												// SHOW ANNOTATION PALATTE
 {
@@ -502,6 +506,7 @@ VIZ.prototype.Google2Jit=function(rs)
 			}
 			JIT[nodeID].adjacencies.push(linkObject);  
 		}
+		shivaLib.SendReadyMessage(true);									// Send ready msg to drupal manager
 	}		
 
 	this.data = [];															// Clear data array
@@ -715,7 +720,8 @@ SHIVA_Show.prototype.DrawSubway=function(oldItems) 											//	DRAW SUBWAY
 	DrawTracks();
 	DrawStations();
 	DrawLegend();
-
+	this.SendReadyMessage(true);											
+	
 	function DrawLegend()
 	{
 		var i,str;
@@ -866,6 +872,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 		$.proxy(DrawTimeStepper(items),this);
 	else if (options.chartType == "InfoBox")
 		$.proxy(DrawInfoBox(items),this);
+	this.SendReadyMessage(true);											
 
 	// Individual types:
 
@@ -1240,6 +1247,7 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
  	 else if (options.dataSourceUrl) {
 	   	$("#"+this.container).html("<img id='"+this.container+"Img' "+"width='"+options.width+"' src='"+options.dataSourceUrl+"'/>");
 		$("#"+this.container).click( function() { _this.RunGlue(_this.container,-1,"clicked"); });
+		this.SendReadyMessage(true);											
 		}
 		
  	  function GetSpreadsheetData(file,imgHgt,showImage,showSlide,trans,wid) 	{
@@ -1259,7 +1267,8 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
    				rowData.push(a);
     			}
      		AddImages(rowData,imgHgt,showImage,showSlide,trans,wid);
-   	     }
+		 	this.SendReadyMessage(true);											
+  	     }
  	}
 
    	function AddImages(data,imgHgt,showImage,showSlide,transition,wid)
@@ -1338,6 +1347,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
   	function drawOverlay()	{
    		shivaLib.DrawOverlay();
    		}		
+	this.SendReadyMessage(true);											
 }
   
 //  TIMELINE   /////////////////////////////////////////////////////////////////////////////////////////// 
@@ -1395,8 +1405,10 @@ SHIVA_Show.prototype.DrawTimeline=function(oldItems) 											//	DRAW TIMELINE
 	this.timeLine=Timeline.create(document.getElementById(container),ops,i);
 	if (options['dataSourceUrl'])
 		GetSpreadsheetData(options['dataSourceUrl'],"",this);
-	else
+	else{
   		this.timeLine.loadJSON("SimileTestData.js",function(json, url) {  eventSource.loadJSON(json, url); });
+		this.SendReadyMessage(true);											
+		}
 		
 	function GetSpreadsheetData(file, conditions, _this) 
 	{
@@ -1432,7 +1444,8 @@ SHIVA_Show.prototype.DrawTimeline=function(oldItems) 											//	DRAW TIMELINE
  				eventData.events.push(o);
   				}
  			eventSource.loadJSON(eventData,'');
-  	     }
+		 	shivaLib.SendReadyMessage(true);											
+ 	     }
   	}
 }
 
@@ -1486,6 +1499,7 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 	this.AddClearMapStyle(this.map);
 	this.DrawMapOverlays(items);
 	this.DrawLayerControlBox(items,this.options.controlbox);
+	this.SendReadyMessage(true);											
 }
 
 SHIVA_Show.prototype.AddInternalOptions=function(options,newOps) 							//	PARSE ITEMS
@@ -1668,6 +1682,7 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 	this.map=wrap;
  	wrap.setOptions(ops);
     wrap.draw();
+	this.SendReadyMessage(true);											
 }
 
 SHIVA_Show.prototype.RunGlue=function(con, item, val, group) 						//	RUN GLUE

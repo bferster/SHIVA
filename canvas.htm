@@ -76,9 +76,9 @@
 		shivaLib.cvs.elements=shivaLib.cvs.elements;
 		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
 
-shivaLib.cvs.elements=$.parseJSON(shivaLib.GetTextFile("elements.txt"));
-for (var i=0;i<shivaLib.cvs.elements.length;++i) AddElement(i);	
-SetDataChanged(false);
+//shivaLib.cvs.elements=$.parseJSON(shivaLib.GetTextFile("elements.txt"));
+//for (var i=0;i<shivaLib.cvs.elements.length;++i) AddElement(i);	
+//SetDataChanged(false);
 
 		selectedItems.push(-1);
 		$("#toolbar").buttonset();
@@ -292,7 +292,14 @@ SetDataChanged(false);
 		str+="\n}";
 		$('#formatter').val(0);
 		if (mode == "eStore")
-			return shivaLib.EasyFile(str,$.proxy(function(data) { postMessage("PutJSON="+data,"*") },this),"Canvas");
+			return shivaLib.EasyFile(str,function(data) {
+											var i,o;
+											shivaLib.cvs.elements=[];
+											for (o in data)
+												shivaLib.cvs.elements.push(data[o]);
+											for (i=0;i<shivaLib.cvs.elements.length;++i) 
+												AddElement(i);
+											},"Canvas");
 		$("#helpDiv").html("");
 		$("#outputDiv").html("<br/><br/>Embed code:<br><textarea readonly='yes' rows='6' cols='60' id='tmptxt1'>"+str+"</textarea>");
 		$("#tmptxt1").select();

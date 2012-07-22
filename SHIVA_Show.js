@@ -227,17 +227,38 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 		$("#shtx"+i).remove();												// Remove text
 		$("#shim"+i).remove();												// Remove image
 		$("#shivaIdea"+i).remove();											// Remove image
-		if (o.type == 5) {
-			str="<div id='shivaIdea"+i+"' onchange='shivaLib.dr.SetShivaText(this.value,"+i+")' ";
-			str+="style='position:absolute;padding:8px;font-family:sans-serif;width:100px;text-align:center;";
-			str+="border "+o.ideaEdgeWid+"px solid "+o.ideaEdgeCol+";background-color:"+o.ideaBackCol+";";
+		if (o.type == 5) {													// Idea map
+			var dd="#shivaIdea"+i;											// Div id										
+			str="<div id='"+dd.substr(1)+"' onchange='shivaLib.dr.SetShivaText(this.value,"+i+")' ";
+			str+="style='position:absolute;padding:8px;font-family:sans-serif;text-align:center;";
+			str+="border:1px solid "+o.ideaEdgeCol+";background-color:"+o.ideaBackCol+";color:"+o.ideaTextCol+";";
 			str+="left:"+o.ideaLeft+"px;top:"+o.ideaTop+"px;'>";
 			str+=o.text;
 			str+="</div>";		
-	//		if (o.shape == "Roundbox") {
 		
 			$("#shivaDrawDiv").append(str);									// Add div
-			$("#shivaIdea"+i).draggable();									// Draggable
+			if (o.ideaShape == "Round box") 								// Round box
+				$(dd).css("border-radius","8px");							// Small round border
+			else if (o.ideaShape == "Circle") {								// Circle
+				var w=$(dd).width();										// Get wid
+				$(dd).css("border-radius",(w/2+16)+"px");					// Set border 1/2 wid + padding
+				$(dd).css("height",w+"px");									// Hgt same as wid
+				}
+			if (o.ideaGradient) {											// If a gradient
+				if ($.browser.mozilla)										// Firefox			
+				 	$(dd).css("background","-moz-linear-gradient(top,#f0f0f0,"+o.ideaBackCol+")");
+				else														// All other browsers
+					 $(dd).css("background","-webkit-linear-gradient(top, #f0f0f0 0%,"+o.ideaBackCol+" 100%)");
+				}
+			
+			if ((shivaLib.dr) && (shivaLib.dr.curTool == 6))				// If in idea map editing mode
+				$(dd).draggable( { stop:function(event, ui) {				// Draggable
+					var num=this.id.substr(9);								// Get index
+					shivaLib.dr.segs[num].ideaLeft=ui.position.left;		// Set left
+					shivaLib.dr.segs[num].ideaTop=ui.position.top;			// Set top
+					shivaLib.dr.DrawOverlay();								// Redraw
+					}});
+					
 			continue;														// Skip it
 			}
 
@@ -3168,7 +3189,7 @@ function SHIVA_Draw(container, hidePalette) 							// CONSTRUCTOR
 	this.ideaGradient=true;
 	this.ideaBackCol="#FFF2CC";
 	this.ideaEdgeCol="#999999";
-	this.ideaEdgeWid=1;
+	this.ideaTextCol="#000000";
 	this.selectedItems=new Array();
 	this.selectedDot=-1;													
 	this.segs=new Array();
@@ -3259,12 +3280,16 @@ SHIVA_Draw.prototype.ColorPicker=function(name) 						//	DRAW COLORPICKER
 			col="#"+cols[x+(y*8)];											// Get color
 			}
 		shivaLib.dr[shivaLib.dr.colorPicker]=col;							// Set color
-		if (shivaLib.dr.curTool == 5) {										// If editing
+		if (shivaLib.dr.curTool == 5) {										// If editing 
 			if (shivaLib.dr.selectedItems.length)							// If something selected
 				shivaLib.dr.DrawMenu(shivaLib.dr.segs[shivaLib.dr.selectedItems[0]].type);	// Draw menu with this as a type
 			else															// Nothing
 				shivaLib.dr.DrawMenu(0);									// Draw menu as pencil
 			shivaLib.dr.SetVal(shivaLib.dr.colorPicker,col);				// Draw segments
+			}
+		else if (shivaLib.dr.curTool == 6) {								// If idea map 
+			shivaLib.dr.SetVal(shivaLib.dr.colorPicker,col);				// Draw segments
+			shivaLib.dr.DrawMenu();											// Draw idea menu 
 			}
 		else																// In drawing
 			shivaLib.dr.DrawMenu();											// Put up menu	
@@ -3307,10 +3332,10 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 	else if (tool == 6) {
 		this.selectedItems=[];
 		str+="<tr><td>&nbsp;&nbsp;Shape</td><td>&nbsp;<select style='width:85px;height:18px;font-size:x-small' onChange='shivaLib.dr.SetVal(\"ideaShape\",this.value)' id='ideaShape'><option>Round box</option><option>Rectangle</option><option>Circle</option></select></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaBackCol\")' onChange='shivaLib.dr.SetVal(\"ideaBackCol\",this.value)' type='text' id='ideaBackCol'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Gradient?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='ideaGradient'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaBackCol\")' type='text' id='ideaBackCol'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Gradient?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"ideaGradient\",this.checked)' type='checkbox' id='ideaGradient'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaEdgeCol\")' onChange='shivaLib.dr.SetVal(\"ideaEdgeCol\",this.value)' type='text' id='ideaEdgeCol'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Edge width</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"ideaEdgeWid\",this.value)' type='range' id='ideaEdgeWid'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Text color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaTextCol\")' onChange='shivaLib.dr.SetVal(\"ideaTextCol\",this.value)' type='text' id='ideaTextCol'></td></tr>";
 		if (this.segs.length)
 			str+="<tr><td></td><td align='right'><img src='trashdot.gif' onclick='shivaLib.dr.DeleteIdea()'/></td></tr>";
 		else
@@ -3324,7 +3349,9 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 	str+="<input type='radio' id='sdtb1' name='draw' onclick='shivaLib.dr.SetTool(0)'/><label for='sdtb1'>Line</label>";
 	str+="<input type='radio' id='sdtb4' name='draw' onclick='shivaLib.dr.SetTool(3)'/><label for='sdtb4'>A</label>";
 	str+="<input type='radio' id='sdtb5' name='draw' onclick='shivaLib.dr.SetTool(4)'/><label for='sdtb5'>Image</label>";
+////////////////////////////////////////////////////	
 //	str+="<input type='radio' id='sdtb7' name='draw' onclick='shivaLib.dr.SetTool(6)'/><label for='sdtb7'>Idea</label>";
+////////////////////////////////////////////////////
 	str+="</span></div>";	
 	if (shivaLib.player) {
 		str+="<img src='startdot.gif' style='position:absolute;left:11px;top:199px'  onclick='shivaLib.dr.SetVal(\"startTime\")'/>";
@@ -3380,11 +3407,10 @@ SHIVA_Draw.prototype.SetMenuProperties=function() 						//	SET MENU PROPERTIES
 	$("#imageURL").val(this.imageURL); 										// Set image url
 	$("#startEndTime").text(this.startTime+" -> "+this.endTime);			// Set times
 	$("#edgeWidth").val(this.edgeWidth); 									// Set edge width
-	$("#ideaShapeCol").val(this.ideaShape); 								// Set idea shape
+	$("#ideaShape").val(this.ideaShape); 									// Set idea shape
 	$("#ideaBackCol").val(this.ideaBackCol); 								// Set idea back col
 	if (this.ideaGradient)													// If snap
 		$("#ideaGradient").attr("checked","checked");						// Check it
-	$("#ideaEdgeWid").val(this.ideaEdgeWid); 								// Set idea edge width
 	tcol=txt=col=this.ideaBackCol;											// Back color
 	if (col == -1)	col="#fff",tcol="000",txt='none';						// If none, white chip/black text
 	$("#ideaBackCol").val(txt); 											// Set idea edge col
@@ -3395,6 +3421,11 @@ SHIVA_Draw.prototype.SetMenuProperties=function() 						//	SET MENU PROPERTIES
 	$("#ideaEdgeCol").val(txt); 											// Set idea edge col
 	$("#ideaEdgeCol").css("background-color",col); 							// Color chip
 	$("#ideaEdgeCol").css("color",tcol); 									// Color text to hide it
+	tcol=txt=col=this.ideaTextCol;											// Text color
+	if (col == -1)	col="#fff",tcol="000",txt='none';						// If none, white chip/black text
+	$("#ideaTextCol").val(txt); 											// Set idea edge col
+	$("#ideaTextCol").css("background-color",col); 							// Color chip
+	$("#ideaTextCol").css("color",tcol); 									// Color text to hide it
 }	
 
 SHIVA_Draw.prototype.DrawOverlay=function(num) 							// DRAW OVERLAY
@@ -3427,6 +3458,7 @@ SHIVA_Draw.prototype.SaveDrawData=function(json) 						// SAVE DRAWING AS ITEM L
 		}
 	return str;																// Return added elements
 }
+
 SHIVA_Draw.prototype.DrawWireframes=function(clear) 					// DRAW OVERLAY
 {
 	var o,i,col,scol;
@@ -3440,6 +3472,8 @@ SHIVA_Draw.prototype.DrawWireframes=function(clear) 					// DRAW OVERLAY
 				break;														// Quit
 				}
 		o=this.segs[i];														// Point at seg
+		if (o.type == 5)													// If an idea map node
+			continue;														// Skip it
 		if (o.type == 1) 													// If a circle
 			o.y[1]=o.y[0];													// Make control line horizonal
 		if (o.type < 2) 													// Lines/Circle
@@ -3593,13 +3627,28 @@ SHIVA_Draw.prototype.SetVal=function(prop, val) 						//	SET VALUE
 		this.DrawOverlay();													// Draw segments
 		this.DrawWireframes(false);											// Draw wireframes
 		}
+	else if (this.curTool == 6) {											// If in idea map
+this.selectedItems=[ "0" ];
+		for (var i=0;i<this.selectedItems.length;++i)  {					// For each selected seg
+			num=this.selectedItems[i];										// Get index
+			this.segs[num].ideaBackCol=this.ideaBackCol;					// Set prop
+			this.segs[num].ideaEdgeCol=this.ideaEdgeCol;					// Set prop
+			this.segs[num].ideaTextCol=this.ideaTextCol;					// Set prop
+			this.segs[num].ideaGradient=this.ideaGradient;					// Set prop
+			this.segs[num].ideaShape=this.ideaShape;						// Set prop
+			}
+		this.DrawOverlay();													// Draw idea map
+		}
 	}
 
 SHIVA_Draw.prototype.SetTool=function(num) 								//	SET TOOL
 {
 	$("#shivaDrawDiv").css('pointer-events','auto');						// Restore pointer clicks
 	this.curTool=num;														// Set current tool
-	$("#"+this.container).css("cursor","crosshair");						// Crosshair cursor
+	if (num == 6)															// Idea map
+		$("#shivaDrawDiv").css("cursor","auto");							// Regular cursor
+	else																	// All others
+		$("#shivaDrawDiv").css("cursor","crosshair");						// Crosshair cursor
 	if (this.curTool == -1) {												// If quitting
 		shivaLib.Sound("delete");											// Delete sound
 		$("#shivaDrawDiv").css('pointer-events','none');					// Inibit pointer clicks if menu gone
@@ -3607,6 +3656,7 @@ SHIVA_Draw.prototype.SetTool=function(num) 								//	SET TOOL
 		}
 	else																	
 		shivaLib.Sound("click");											// Click sound
+	
 	this.DrawOverlay()														// Refresh
 	this.curSeg=-1;															// Close this seg if open
 	if (this.curTool == 5) {												// Editing menu
@@ -3616,7 +3666,7 @@ SHIVA_Draw.prototype.SetTool=function(num) 								//	SET TOOL
 			this.AddSelect(-1,s,false);										// Highlight it
 			this.DrawMenu(this.segs[s].type);								// Draw menu, w/o resetting curtool
 			}
-		$("#"+this.container).css("cursor","auto");							// Regular cursor
+		$("#shivaDrawDiv").css("cursor","auto");							// Regular cursor
 		this.DrawWireframes(false);											// Show wireframes
 		}
 	else
@@ -3629,6 +3679,8 @@ SHIVA_Draw.prototype.SetTool=function(num) 								//	SET TOOL
 
 SHIVA_Draw.prototype.onMouseUp=function(e)								// MOUSE UP HANDLER
 {
+	if (shivaLib.dr.curTool == 6) 											// If in idea
+		return;																// Quit
 	shivaLib.dr.leftClick=false;											// Left button up
 	var x=e.pageX-this.offsetLeft;											// Offset X from page
 	var y=e.pageY-this.offsetTop;											// Y
@@ -3643,7 +3695,7 @@ SHIVA_Draw.prototype.onMouseUp=function(e)								// MOUSE UP HANDLER
 		shivaLib.dr.curSeg=-1;												// Close segment
 		return;																// Quit
 		}
-	if (shivaLib.dr.curTool != 5) {											// Not in edit
+	if (shivaLib.dr.curTool < 5 ) {											// Not in edit
 		if (shivaLib.dr.snap)												// If snapping
 			x=x-(x%shivaLib.dr.snapSpan),y=y-(y%shivaLib.dr.snapSpan);		// Mod down coords
 		if ((shivaLib.dr.curTool) && (e.target.id.indexOf("shtx") == -1))	// Not in line or over text
@@ -3656,6 +3708,8 @@ SHIVA_Draw.prototype.onMouseUp=function(e)								// MOUSE UP HANDLER
 
 SHIVA_Draw.prototype.onMouseDown=function(e)							// MOUSE DOWN HANDLER
 {
+	if (shivaLib.dr.curTool == 6) 											// If in idea
+		return;																// Quit
 	var x=e.pageX-this.offsetLeft;											// Offset X from page
 	var y=e.pageY-this.offsetTop;											// Y
 	shivaLib.dr.leftClick=true;												// Left button down
@@ -3676,6 +3730,8 @@ SHIVA_Draw.prototype.onMouseDown=function(e)							// MOUSE DOWN HANDLER
 
 SHIVA_Draw.prototype.onMouseMove=function(e)							// MOUSE MOVE HANDLER
 {
+	if (shivaLib.dr.curTool == 6) 											// If in idea
+		return;																// Quit
 	var x=e.pageX-this.offsetLeft;											// Offset X from page
 	var y=e.pageY-this.offsetTop;											// Y
 	if (shivaLib.dr.snap)													// If snapping
@@ -3769,14 +3825,18 @@ SHIVA_Draw.prototype.AddSelect=function(x, y, shiftKey)					// SELECT SEGMENT/DO
 	var i,j,o,seg=-1,asp;
 	var oldDot=this.selectedDot;											// Save original dot
 	this.selectedDot=-1;													// No selected dot
+	if (this.curMode == 6)													// If idea map
+		return;																// Quit
 	var last=this.selectedItems[0];											// Save selected seg
 	if (x != -1) {															// If not a forcing a selection
 		if (!shiftKey) {													// If shift key unpressed
 			this.selectedItems=[];											// Clear all previous selects
-			$("#"+this.container).css("cursor","auto");						// Default cursor
+			$("#shivaDrawDiv").css("cursor","auto");						// Default cursor
 			}
 		for (i=0;i<this.segs.length;++i) {									// For each seg
 			o=this.segs[i];													// Point at seg
+			if (o.type == 5)												// If an idea map node
+				continue;													// Skip it
 			for (j=0;j<o.x.length;++j) 										// For each dot in seg
 				if ((x > o.x[j]-6) && (x < o.x[j]+6) && (y > o.y[j]-6) && (y < o.y[j]+6)) { // If near
 					if (last == i) 											// If clicking on already selected seg 
@@ -3789,6 +3849,8 @@ SHIVA_Draw.prototype.AddSelect=function(x, y, shiftKey)					// SELECT SEGMENT/DO
 			for (i=0;i<this.segs.length;++i) {								// For each seg
 				var minx=99999,maxx=0,miny=99999,maxy=0;					// Set limits
 				o=this.segs[i];												// Point at seg
+				if (o.type == 5)											// If an idea map node
+					continue;												// Skip it
 				if (o.type == 1) {											// A circle
 					j=Math.abs(o.x[1]-o.x[0]);								// Radius
 					minx=o.x[0]-j;	maxx=o.x[1];							// X
@@ -3811,14 +3873,14 @@ SHIVA_Draw.prototype.AddSelect=function(x, y, shiftKey)					// SELECT SEGMENT/DO
 	else																	// Forcing a select
 		seg=y;																// Get it from y
 	if (seg != -1) {														// If a seg/dot selected
-		o=this.segs[seg];														// Point at seg
+		o=this.segs[seg];													// Point at seg
 		if (this.selectedDot != -1)	{										// If a specific dot selected
-			$("#"+this.container).css("cursor","crosshair");				// Crosshair cursor
+			$("#shivaDrawDiv").css("cursor","crosshair");					// Crosshair cursor
 			if (oldDot != this.selectedDot)									// If a new selection
 				shivaLib.Sound("dclick");									// Double-click
 			}
 		else{																// Whole seg
-			$("#"+this.container).css("cursor","move");						// Move cursor
+			$("#shivaDrawDiv").css("cursor","move");						// Move cursor
 			shivaLib.Sound("click");										// Click
 			}
 		this.selectedItems.push(seg);										// Add seg to selects
@@ -3858,6 +3920,8 @@ SHIVA_Draw.prototype.MoveSegs=function(dx, dy, dz)						// MOVE SELECTED SEGS
 	var i,j,o,oo;
 	for (i=0;i<this.selectedItems.length;++i) {								// For each selected element
 		o=this.segs[this.selectedItems[i]];									// Point at seg
+		if (o.type == 5)													// If an idea map node
+			continue;														// Skip it
 		if (dz) {															// If shifting order
 			if ((this.selectedItems[i]+dz < 0) || (this.selectedItems[i]+dz >= this.segs.length)) {  // If out of range
 				shivaLib.Sound("delete");									// Delete
@@ -3888,7 +3952,7 @@ SHIVA_Draw.prototype.AddIdea=function(num) 								//	ADD IDEA NODE
 	o.ideaBackCol=this.ideaBackCol;											// Box color
 	o.ideaGradient=this.ideaGradient;										// Gradient?
 	o.ideaEdgeCol=this.ideaEdgeCol;											// Edge color
-	o.ideaEdgeWid=this.ideaEdgeWid;											// Edge width
+	o.ideaTextCol=this.ideaTextCol;											// Text color
 	o.text="A new idea";													// Text
 	if (num == -1) {														// First one
 		o.ideaLeft=$("#"+this.container).width()/2;							// Center x

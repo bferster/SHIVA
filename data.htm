@@ -116,13 +116,6 @@
 
 	function ShowHelp(att)
 	{
-		if (shivaLib.player){
-			if (shivaLib.player.getDuration) {
-				var str=Math.floor(shivaLib.player.getDuration()/60)+":";
-				str+=Math.ceil(shivaLib.player.getDuration()%60);	
-				$("#propInput10").val(str);
-				}
-			}
 		if (att == "startup") 
 			$("#helpDiv").html("<br/><p class='pb'>Built by SHANTI<br/>The University of Virginia</p>");
 		else

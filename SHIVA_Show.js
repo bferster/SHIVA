@@ -178,7 +178,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 {
 	var o,i,col,ecol,ewid,a,cur,ctx,str,now,s,e;
 	var con="#"+this.container;
-	$("#shivaDrawDiv").empty();
+//	$("#shivaDrawDiv").empty();
 	if (!this.g)															// If no graphics lib
 		this.g=new SHIVA_Graphics();										// Allocate it
 	if (!$("#shivaDrawCanvas").length) {									// No canvas yet	
@@ -265,12 +265,16 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 				}
 			
 			if ((shivaLib.dr) && (shivaLib.dr.curTool == 6)) {				// If in idea map editing mode
+				$.proxy(shivaLib.dr.HighlightIdea(i),shivaLib.dr);			// Set highlight
+
 				$("#shtx"+i).resizable( { stop: function(event,ui) {		// On resize
 					var num=ui.originalElement[0].id.substr(4);				// Get index
 					shivaLib.dr.segs[num].ideaWid=ui.size.width-4;			// Set width
 					shivaLib.dr.segs[num].ideaHgt=ui.size.height-4;			// Set height
 					} });
+	
 				$(dd).draggable( { stop:function(event, ui) {				// Draggable
+					trace(2)
 					var num=this.id.substr(9);								// Get index
 					shivaLib.dr.segs[num].ideaLeft=ui.position.left;		// Set left
 					shivaLib.dr.segs[num].ideaTop=ui.position.top;			// Set top
@@ -3345,7 +3349,6 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 		str+="<tr><td>&nbsp;&nbsp;Image URL</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"imageURL\",this.value)' type='text' id='imageURL'></td></tr>";
 		}
 	else if (tool == 6) {
-		this.selectedItems=[];
 		str+="<tr><td>&nbsp;&nbsp;Shape</td><td>&nbsp;<select style='width:85px;height:18px;font-size:x-small' onChange='shivaLib.dr.SetVal(\"ideaShape\",this.value)' id='ideaShape'><option>Round box</option><option>Rectangle</option><option>Circle</option></select></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaBackCol\")' type='text' id='ideaBackCol'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Gradient?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"ideaGradient\",this.checked)' type='checkbox' id='ideaGradient'></td></tr>";
@@ -3365,9 +3368,9 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 	str+="<input type='radio' id='sdtb1' name='draw' onclick='shivaLib.dr.SetTool(0)'/><label for='sdtb1'>Line</label>";
 	str+="<input type='radio' id='sdtb4' name='draw' onclick='shivaLib.dr.SetTool(3)'/><label for='sdtb4'>A</label>";
 	str+="<input type='radio' id='sdtb5' name='draw' onclick='shivaLib.dr.SetTool(4)'/><label for='sdtb5'>Image</label>";
-////////////////////////////////////////////////////	
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 //	str+="<input type='radio' id='sdtb7' name='draw' onclick='shivaLib.dr.SetTool(6)'/><label for='sdtb7'>Idea</label>";
-////////////////////////////////////////////////////
+//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	str+="</span></div>";	
 	if (shivaLib.player) {
 		str+="<img src='startdot.gif' style='position:absolute;left:13px;top:215px'  onclick='shivaLib.dr.SetVal(\"startTime\")'/>";
@@ -3460,7 +3463,8 @@ SHIVA_Draw.prototype.SetShivaText=function(text, num)					// TEXT CHANGE HANDLER
 SHIVA_Draw.prototype.SaveDrawData=function(json) 						// SAVE DRAWING AS ITEM LIST
 {
 	var i,o,key,str="",str1;
-	for (i=0;i<this.segs.length;++i) {										// For each seg		o=this.segs[i];														// Point at it
+	for (i=0;i<this.segs.length;++i) {										// For each seg
+		o=this.segs[i];														// Point at it
 		if (json)															// If saving as JSON
 			str+="\t\"draw-"+(i+1)+"\":\"";									// Header
 		else																// As a query string
@@ -3646,7 +3650,6 @@ SHIVA_Draw.prototype.SetVal=function(prop, val) 						//	SET VALUE
 		this.DrawWireframes(false);											// Draw wireframes
 		}
 	else if (this.curTool == 6) {											// If in idea map
-this.selectedItems=[ "0" ];
 		for (var i=0;i<this.selectedItems.length;++i)  {					// For each selected seg
 			num=this.selectedItems[i];										// Get index
 			this.segs[num].ideaBackCol=this.ideaBackCol;					// Set prop
@@ -3698,8 +3701,6 @@ SHIVA_Draw.prototype.SetTool=function(num) 								//	SET TOOL
 
 SHIVA_Draw.prototype.onMouseUp=function(e)								// MOUSE UP HANDLER
 {
-	if (shivaLib.dr.curTool == 6) 											// If in idea
-		return;																// Quit
 	shivaLib.dr.leftClick=false;											// Left button up
 	var x=e.pageX-this.offsetLeft;											// Offset X from page
 	var y=e.pageY-this.offsetTop;											// Y
@@ -3720,7 +3721,7 @@ SHIVA_Draw.prototype.onMouseUp=function(e)								// MOUSE UP HANDLER
 		if ((shivaLib.dr.curTool) && (e.target.id.indexOf("shtx") == -1))	// Not in line or over text
 			shivaLib.dr.AddDot(x,y,true);									// Add coord
 		}
-	else if (shivaLib.dr.curTool == 5) 										// If in edit
+	else if (shivaLib.dr.curTool > 4) 										// If in edit/idea map
 		shivaLib.dr.AddSelect(x,y,e.shiftKey);								// Select seg/dot
 }
 
@@ -3844,13 +3845,27 @@ SHIVA_Draw.prototype.AddSelect=function(x, y, shiftKey)					// SELECT SEGMENT/DO
 	var i,j,o,seg=-1,asp;
 	var oldDot=this.selectedDot;											// Save original dot
 	this.selectedDot=-1;													// No selected dot
-	if (this.curMode == 6)													// If idea map
-		return;																// Quit
 	var last=this.selectedItems[0];											// Save selected seg
 	if (x != -1) {															// If not a forcing a selection
 		if (!shiftKey) {													// If shift key unpressed
 			this.selectedItems=[];											// Clear all previous selects
 			$("#shivaDrawDiv").css("cursor","auto");						// Default cursor
+			}
+		if (this.curTool == 6)	{											// If idea map
+			for (i=0;i<this.segs.length;++i) {								// For each seg
+				o=this.segs[i];												// Point at seg
+				if (o.type != 5)											// If an idea map node
+					continue;												// Skip it
+				this.HighlightIdea(i);										// Set highlight
+				var d=$("#shivaIdea"+i);									// Div id										
+				if ((x > o.ideaLeft) && (x < o.ideaLeft+d.width()-0+16) &&	// In h
+				    (y > o.ideaTop ) && (y < o.ideaTop+d.height()-0+16)) {	// In v
+					this.selectedItems.push(i);								// Add to selects
+					this.HighlightIdea(i);									// Set highlight
+					break;
+					}
+				}
+			return;
 			}
 		for (i=0;i<this.segs.length;++i) {									// For each seg
 			o=this.segs[i];													// Point at seg
@@ -3985,6 +4000,15 @@ SHIVA_Draw.prototype.AddIdea=function(num) 								//	ADD IDEA NODE
 	shivaLib.Sound("ding");													// Ding sound
 	this.DrawOverlay();														// Draw idea map
 	shivaLib.dr.DrawMenu();													// Put up menu	
+}
+
+SHIVA_Draw.prototype.HighlightIdea=function(num) 						//	HIGHLIGHT IDEA NODE 
+{
+	var dd="#shivaIdea"+num;												// Div id										
+	if (this.selectedItems[0] == num)										// If highlighted
+		$(dd).css("border","1px dashed red");								// Red outline
+	else																	// Not highlit
+		$(dd).css("border","1px solid "+this.segs[num].ideaEdgeCol);		// Regular border
 }
 
 SHIVA_Draw.prototype.DeleteIdea=function() 								//	DELETE IDEA NODE 

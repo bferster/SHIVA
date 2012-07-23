@@ -131,7 +131,7 @@ function shivaJSLoaded(obj, callback) 									// RECURSE UNTIL JS METHOD/PROPER
 		setTimeout(function() { shivaJSLoaded(obj,callback); },50);			// Recurse		
 }
 
-SHIVA_Show.prototype.SendReadyMessage=function() 						// SEND READY MESSAGE TO DRUPAL MANAGER
+SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE TO DRUPAL MANAGER
 {
 	if ((shivaLib.drupalMan) && (typeof(shivaLib.drupalMan.postMessage) == "function")) 
 		shivaLib.drupalMan.postMessage("ShivaReady="+mode.toString(),"*");
@@ -202,13 +202,11 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 	$("#shivaDrawCanvas").attr("height",i+"px");							// Hgt
 	$("#shivaDrawDiv").css("width",$(con).css("width"));					// Set wid
 	$("#shivaDrawDiv").css("height",i+"px");								// Hgt
-	
 	ctx=$("#shivaDrawCanvas")[0].getContext('2d');							// Get context
 	ctx.clearRect(0,0,1600,1600);											// Clear canvas
 	$("#shivaDrawDiv").css("z-index",2000);									// Force on top
 	if (!this.overlay)														// Nothing to draw
 		return;																// Quit
-	
 	for (i=0;i<this.overlay.length;++i) {									// For each seg
 		o=this.overlay[i];													// Point at it
 		if (this.player) {													// If over a player

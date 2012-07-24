@@ -845,7 +845,7 @@ SHIVA_Show.prototype.DrawSubway=function(oldItems) 											//	DRAW SUBWAY
 			if (tp == "l") {	x2=x-200-w+w2;			align='right';		y2=y+((y2-y)/2); }
 			if (tp == "t") {	x2-=((x2-x)/2)+100;		align='center';		y2=y-w+w2; 		 }
 			if (tp == "b") {	x2-=((x2-x)/2)+100;		align='center';		y2=y2+w-w2; 	 }
-			str="<div id='shivaSubtx"+j+"' style='position:absolute;width:200px;left:"+x2+"px;top:"+(y2-6)+"px;text-align:"+align+"'>";
+			str="<div id='shivaSubtx"+j+"' style='position:absolute;color:#000;width:200px;left:"+x2+"px;top:"+(y2-6)+"px;text-align:"+align+"'>";
 			if (link)
 				str+="<a href='"+link+"' target='_blank' style='color:#000;text-decoration: none;'>"+lab+"</a>";
 			else

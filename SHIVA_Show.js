@@ -244,7 +244,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 			str+="height:"+o.ideaHgt+"px;width:"+o.ideaWid+"px;color:"+o.ideaTextCol+";" // Size/color textarea
 			if (o.ideaBold)													// If bold
 				str+="font-weight:bold;";									// Add tag
-			str+="background:transparent;border:none;margin:0px;font-family:sans-serif;text-align:center;'/>";
+			str+="background:transparent;border:none;margin:0px;padding:0px;font-family:sans-serif;text-align:center;'/>";
 			$(dd).append(str);												// Add text area
 			$("#shtx"+i).html(o.text);										// Set text
 			if (o.ideaShape == "Round box") 								// Round box
@@ -264,17 +264,22 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 			if ((shivaLib.dr) && (shivaLib.dr.curTool == 6)) {				// If in idea map editing mode
 				$.proxy(shivaLib.dr.HighlightIdea(i),shivaLib.dr);			// Set highlight
 
-				$("#shtx"+i).resizable( { stop: function(event,ui) {		// On resize
+				$("#shtx"+i).resizable( { stop: function(event,ui) {		// ON RESIZE HANDLER
 					var num=ui.originalElement[0].id.substr(4);				// Get index
 					shivaLib.dr.segs[num].ideaWid=ui.size.width-4;			// Set width
 					shivaLib.dr.segs[num].ideaHgt=ui.size.height-4;			// Set height
 					} });
 	
-				$(dd).draggable( { stop:function(event, ui) {				// Draggable
+				$(dd).draggable( { stop:function(event, ui) {				// ON DRAG HANDLER
 					var num=this.id.substr(9);								// Get index
 					shivaLib.dr.segs[num].ideaLeft=ui.position.left;		// Set left
 					shivaLib.dr.segs[num].ideaTop=ui.position.top;			// Set top
-					shivaLib.dr.DrawOverlay();								// Redraw
+					}});
+	
+				$(dd).droppable( { drop:function(event, ui) {				// ON DROP HANDLER
+					var from=ui.draggable.context.id.substr(9);				// From id
+					var to=event.target.id.substr(9);						// To id
+					shivaLib.dr.IdeaDrop(from,to);							// React to drop			
 					}});
 				}	
 			continue;														// Next segment
@@ -3362,7 +3367,7 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 	str+="<input type='radio' id='sdtb4' name='draw' onclick='shivaLib.dr.SetTool(3)'/><label for='sdtb4'>A</label>";
 	str+="<input type='radio' id='sdtb5' name='draw' onclick='shivaLib.dr.SetTool(4)'/><label for='sdtb5'>Image</label>";
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-//	str+="<input type='radio' id='sdtb7' name='draw' onclick='shivaLib.dr.SetTool(6)'/><label for='sdtb7'>Idea</label>";
+	str+="<input type='radio' id='sdtb7' name='draw' onclick='shivaLib.dr.SetTool(6)'/><label for='sdtb7'>Idea</label>";
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	str+="</span></div>";	
 	if (shivaLib.player) {
@@ -4041,4 +4046,9 @@ SHIVA_Draw.prototype.DeleteIdea=function() 								//	DELETE IDEA NODE
 	this.DrawOverlay();														// Draw idea map
 	shivaLib.Sound("delete");												// Delete sound
 	shivaLib.dr.DrawMenu();													// Put up menu	
+}
+
+SHIVA_Draw.prototype.IdeaDrop=function(from, to) 						//	HANDLE IDEA NODE DRAG & DROP
+{
+	trace(from+" -> "+to);
 }

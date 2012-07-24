@@ -3245,7 +3245,7 @@ SHIVA_Draw.prototype.DrawPalette=function(tool) 						//	DRAW
 	if (top == "auto")	top=0;												// Use 0
 	var left=$("#"+this.container).css("left").replace(/px/g,"")-0+12;		// Get left
 	if ($("#shivaDrawPaletteDiv").length == 0) {							// If no palette
-		var h=220;															// Default height
+		var h=225;															// Default height
 		if (shivaLib.player)												// If over a player										
 			h+=16;															// Add space for start/end times
 		str="<div id='shivaDrawPaletteDiv' style='position:absolute;left:"+left+"px;top:"+(top-12+Number(hgt)-100)+"px;width:180px;height:"+h+"px'>";
@@ -3356,10 +3356,10 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaEdgeCol\")' onChange='shivaLib.dr.SetVal(\"ideaEdgeCol\",this.value)' type='text' id='ideaEdgeCol'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Text color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaTextCol\")' onChange='shivaLib.dr.SetVal(\"ideaTextCol\",this.value)' type='text' id='ideaTextCol'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Bold text?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"ideaBold\",this.checked)' type='checkbox' id='ideaBold'></td></tr>";
-		str+="<tr><td></td><td align='right'><img src='adddot.gif' onclick='shivaLib.dr.AddIdea(-1)'/></td></tr>";
+		str+="<tr><td></td><td><button style='font-size:xx-small' onclick='shivaLib.dr.AddIdea()'>Add new idea box</button></td></tr>";
 		}
 	str+="</table><br/>";	
-	str+="<div style='position:absolute;left:14px;top:189px'><span id='drawToolbar' style='font-size:xx-small'>";
+	str+="<div style='position:absolute;left:14px;top:194px'><span id='drawToolbar' style='font-size:xx-small'>";
 	str+="<input type='radio' id='sdtb6' name='draw' onclick='shivaLib.dr.SetTool(5)'/><label for='sdtb6'>Select</label>";
 	str+="<input type='radio' id='sdtb3' name='draw' onclick='shivaLib.dr.SetTool(2)'/><label for='sdtb3'>Box</label>";
 	str+="<input type='radio' id='sdtb2' name='draw' onclick='shivaLib.dr.SetTool(1)'/><label for='sdtb2'>Circle</label>";
@@ -3371,9 +3371,9 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 	str+="</span></div>";	
 	if (shivaLib.player) {
-		str+="<img src='startdot.gif' style='position:absolute;left:13px;top:215px'  onclick='shivaLib.dr.SetVal(\"startTime\")'/>";
-		str+="<img src='enddot.gif'   style='position:absolute;left:150px;top:216px' onclick='shivaLib.dr.SetVal(\"endTime\")'/>";
-		str+="<p id='startEndTime' align='center' style='position:absolute;left:40px;top:209px;width:108px;color:#777'/>";
+		str+="<img src='startdot.gif' style='position:absolute;left:13px;top:220px'  onclick='shivaLib.dr.SetVal(\"startTime\")'/>";
+		str+="<img src='enddot.gif'   style='position:absolute;left:150px;top:220px' onclick='shivaLib.dr.SetVal(\"endTime\")'/>";
+		str+="<p id='startEndTime' align='center' style='position:absolute;left:40px;top:214px;width:108px;color:#777'/>";
 		}
 	$("#shivaDrawPaletteDiv").html(str);	
 	$("#shivaDrawPaletteDiv").css("font-size","xx-small");	
@@ -3994,7 +3994,10 @@ SHIVA_Draw.prototype.AddIdea=function() 								//	ADD IDEA NODE
 {
 	var o=new Object;
 	var num=-1;
+	if (this.selectedItems.length)											// If highlighted
+		num=this.selectedItems[0]											// This is the parent
 	o.type=5;																// Idea map
+	o.id=this.segs.length;													// Save id
 	o.ideaParent=num;														// Parent
 	o.ideaShape=this.ideaShape;												// Box color
 	o.ideaBackCol=this.ideaBackCol;											// Box color
@@ -4003,10 +4006,14 @@ SHIVA_Draw.prototype.AddIdea=function() 								//	ADD IDEA NODE
 	o.ideaEdgeCol=this.ideaEdgeCol;											// Edge color
 	o.ideaTextCol=this.ideaTextCol;											// Text color
 	o.text="A new idea";													// Text
-	o.ideaHgt="20";	o.ideaWid="100";										// Size
+	o.ideaHgt=20;	o.ideaWid=100;											// Size
 	if (num == -1) {														// First one
 		o.ideaLeft=$("#"+this.container).width()/2;							// Center x
 		o.ideaTop=$("#"+this.container).height()/2;							// Center y
+		}
+	else{
+		o.ideaLeft=this.segs[num].ideaLeft;									// Same x
+		o.ideaTop=(this.segs[num].ideaTop+this.segs[num].ideaHgt+32);		// Put under parent
 		}
 	if (shivaLib.player)													// If over a player
 		o.s=this.startTime,o.e=this.endTime;								// Set time
@@ -4027,28 +4034,41 @@ SHIVA_Draw.prototype.HighlightIdea=function(num) 						//	HIGHLIGHT IDEA NODE
 
 SHIVA_Draw.prototype.DeleteIdea=function() 								//	DELETE IDEA NODE 
 {
-	var i,num;
 	if (!this.selectedItems.length)											// Nothing selected
 		return;																// Quit
 	num=this.selectedItems[0];												// Get index
 	$("#shivaIdea"+num).remove();											// Remove idea node
 	this.segs.splice(num,1);												// Remove seg
-
-/*
-		for (i=0;i<this.segs.length;++i) {										// For each segment
-			if (this.segs[i].parent == num) {									
-				$("#shivaIdea"+num).remove();								// Remove idea node
-				this.segs.splice(shivaLib.dr.selectedItems[num],1);			// Remove child
-				done=false;
-				break;
-				}
-*/
-	this.DrawOverlay();														// Draw idea map
+	this.DeleteIdeaChildren(num);											// Remove children recursively
 	shivaLib.Sound("delete");												// Delete sound
-	shivaLib.dr.DrawMenu();													// Put up menu	
+	this.DrawOverlay();														// Draw idea map
+	this.selectedItems=[];													// Deselect
+trace(this.segs)
 }
+
+SHIVA_Draw.prototype.DeleteIdeaChildren=function(parent) 				//	DELETE IDEA CHILD NODES RECURSIVELY
+{
+	var i;
+	trace("par="+parent)
+	for (i=0;i<this.segs.length;++i) {										// For each node
+		if (this.segs[i].type != 5)											// If not an idea node
+			continue;														// Skip it
+		if (this.segs[i].ideaParent == parent) {							// If a child of parent									
+			trace(i)
+			var id=this.segs[i].id;											// Real id
+			trace("id="+id);
+			$("#shivaIdea"+id).remove();									// Remove idea node
+			this.segs.splice(i,1);											// Remove child
+			this.DeleteIdeaChildren(id);									// Try again
+			break;
+			}
+		}
+}
+		
+		
+
 
 SHIVA_Draw.prototype.IdeaDrop=function(from, to) 						//	HANDLE IDEA NODE DRAG & DROP
 {
-	trace(from+" -> "+to);
+	this.segs[from].parent=to;
 }

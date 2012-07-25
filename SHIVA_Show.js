@@ -4065,9 +4065,6 @@ SHIVA_Draw.prototype.DeleteIdeaChildren=function(parent) 				//	DELETE IDEA CHIL
 		}
 }
 		
-		
-
-
 SHIVA_Draw.prototype.IdeaDrop=function(from, to) 						//	HANDLE IDEA NODE DRAG & DROP
 {
 	this.segs[from].parent=to;

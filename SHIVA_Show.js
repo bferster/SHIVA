@@ -1834,7 +1834,7 @@ SHIVA_Show.prototype.SaveData=function(mode,style,items,props,type) 				// SAVE 
 			if (mode == 'WordPress')
 		 		str="[iframe src='"+encodeURI(str)+"']";
 			else if ((mode == 'iFrame') || (mode == 'Drupal'))
-		 		str="<iframe width='600' height'400' src='"+encodeURI(str)+"'></iframe>";
+		 		str="<iframe width='600' height='400' src='"+encodeURI(str)+"'></iframe>";
 			}
 	$("#outputDiv").html("<br/><br/>Embed code:<br><textarea readonly='yes' rows='6' cols='60' id='tmptxt1'>"+str+"</textarea>");
 	$("#tmptxt1").select();

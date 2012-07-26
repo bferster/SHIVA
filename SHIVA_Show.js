@@ -206,6 +206,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 	$("#shivaDrawDiv").css("z-index",2000);									// Force on top
 	if (!this.overlay)														// Nothing to draw
 		return;																// Quit
+	this.DrawIdeaLinks(false);												// Draw idea link lines, if any												
 	for (i=0;i<this.overlay.length;++i) {									// For each seg
 		o=this.overlay[i];													// Point at it
 		if (this.player) {													// If over a player
@@ -238,7 +239,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 			str="<textarea";												// Assume display mode
 			if ((shivaLib.dr) && (shivaLib.dr.curTool != 6))				// If not idea editing
 				str+=" readonly='readonly'"; 								// Makes it read only
-			str+=" id='shtx"+i+"' onchange='shivaLib.dr.SetShivaText(this.value,"+i+")' style='";
+			str+=" id='shtx"+i+"' onchange='shivaLib.dr.SetShivaText(this.value,"+i+")' style='overflow:hidden;";
 			if ((shivaLib.dr) && (shivaLib.dr.curTool != 6))				// If not idea editing
 				str+="resize:none;"; 										// Remove resizer
 			str+="height:"+o.ideaHgt+"px;width:"+o.ideaWid+"px;color:"+o.ideaTextCol+";" // Size/color textarea
@@ -249,6 +250,8 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 			$("#shtx"+i).html(o.text);										// Set text
 			if (o.ideaShape == "Round box") 								// Round box
 				$(dd).css("border-radius","8px");							// Small round border
+			else if (o.ideaShape == "Oval") 								// Oval
+				$(dd).css("border-radius",$(dd).css("height"));				// Set border to height
 			else if (o.ideaShape == "Circle") {								// Circle
 				var w=$(dd).width();										// Get wid
 				$(dd).css("border-radius",(w/2+16)+"px");					// Set border 1/2 wid + padding
@@ -260,9 +263,9 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 				else														// All other browsers
 					 $(dd).css("background","-webkit-linear-gradient(top, #f0f0f0 0%,"+o.ideaBackCol+" 100%)");
 				}
-			
+
 			if ((shivaLib.dr) && (shivaLib.dr.curTool == 6)) {				// If in idea map editing mode
-				$.proxy(shivaLib.dr.HighlightIdea(i),shivaLib.dr);			// Set highlight
+				$.proxy(shivaLib.dr.HighlightIdea(),shivaLib.dr);			// Set highlight
 
 				$("#shtx"+i).resizable( { stop: function(event,ui) {		// ON RESIZE HANDLER
 					var num=ui.originalElement[0].id.substr(4);				// Get index
@@ -270,17 +273,25 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 					shivaLib.dr.segs[num].ideaHgt=ui.size.height-4;			// Set height
 					} });
 	
-				$(dd).draggable( { stop:function(event, ui) {				// ON DRAG HANDLER
-					var num=this.id.substr(9);								// Get index
-					shivaLib.dr.segs[num].ideaLeft=ui.position.left;		// Set left
-					shivaLib.dr.segs[num].ideaTop=ui.position.top;			// Set top
-					}});
+				$(dd).draggable( { drag:function(event, ui) {				// ON DRAG HANDLER
+						var num=this.id.substr(9);							// Get index
+						var dx=ui.position.left-shivaLib.dr.segs[num].ideaLeft;	// Dx
+						var dy=ui.position.top-shivaLib.dr.segs[num].ideaTop;	// Dy
+						shivaLib.dr.segs[num].ideaLeft=ui.position.left;	// Set left
+						shivaLib.dr.segs[num].ideaTop=ui.position.top;		// Set top
+						shivaLib.dr.MoveIdeaChildren(num,dx,dy);			// Move children
+						shivaLib.DrawIdeaLinks(true);						// Draw idea link lines										
+						},
+					stop:function(event, ui) {
+						shivaLib.dr.DrawOverlay();								// Redraw
+					} });
 	
 				$(dd).droppable( { drop:function(event, ui) {				// ON DROP HANDLER
 					var from=ui.draggable.context.id.substr(9);				// From id
 					var to=event.target.id.substr(9);						// To id
 					shivaLib.dr.IdeaDrop(from,to);							// React to drop			
 					}});
+	
 				}	
 			continue;														// Next segment
 			}
@@ -331,6 +342,31 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 			this.g.DrawPolygon(ctx,-1,a,o.x,o.y,ecol,Math.max(ewid,2),false);			// Use line if only 2 points
 		else																// > 2 pts
 			this.g.DrawPolygon(ctx,o.color,a,o.x,o.y,ecol,ewid,(cur == true));	// Regular poly
+		}
+}
+
+SHIVA_Show.prototype.DrawIdeaLinks=function(clear)							// DRAW IDEA LINK LINES
+{
+	var i,o,fx,fy,tx,ty;
+	var ctx=$("#shivaDrawCanvas")[0].getContext('2d');						// Get context
+	if (clear)																// If clearing the canvas
+		ctx.clearRect(0,0,1600,1600);										// Clear canvas
+	for (i=0;i<this.overlay.length;++i) {									// For each idea
+		o=this.overlay[i];													// Point at idea
+		if ((o.type != 5) || (o.ideaParent == -1))							// Not an idea node or a base node
+			continue;														// Skip it
+		dleftToRight=leftToRight=true;										// Assume l-r
+		dir2=dir=2;															// Dir divisors
+		tx=o.ideaLeft-0+(o.ideaWid/2+8);									// Cx from
+		ty=o.ideaTop-0+(o.ideaHgt/2)+12;									// Cy
+		o=this.overlay[o.ideaParent];										// Point at parent
+		fx=o.ideaLeft-0+(o.ideaWid/2+8);									// Cx to
+		fy=o.ideaTop-0+(o.ideaHgt/2+12);									// Cy
+		if (tx < fx)														// If a set and left of control
+			dleftToRight=leftToRight=false;									// Set l-r flag to false
+		var x=[fx,tx];														// line
+		var y=[fy,ty];														// line
+		this.g.DrawPolygon(ctx,-1,.75,x,y,"#666",1,true);					// Draw line
 		}
 }
 
@@ -2375,6 +2411,26 @@ SHIVA_Show.prototype.ArrayToString=function(jsonArray) 					// SAVE JSON ARRAY A
 	return str;
 }
 
+
+SHIVA_Show.prototype.Clone=function(obj) 								// CLONE OBJECT/ARRAY
+{
+    var i;
+    if (null == obj || "object" != typeof obj) return obj;					// Singleton
+	else if (obj instanceof Array) {   										// Handle Array
+	    var copy=[];														// Copy array
+        for (i=0;i<obj.length;++i) 											// For each member 
+        	copy[i]=this.Clone(obj[i]);										// Copy with recursion
+        return copy;														// Return array
+    	}
+	else if (obj instanceof Object) {   									// Handle Object
+	    var copy={};														// Copy objecy
+ 		for (var attr in obj)												// For each part
+			if (obj.hasOwnProperty(attr)) 									// ?
+				copy[attr]=this.Clone(obj[attr]);							// Copy with recursion
+        return copy;														// Return obj
+   	 	}
+}
+
 /////////////  EASYFILE (eStore)
 
 SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MENU
@@ -3193,6 +3249,7 @@ function SHIVA_Draw(container, hidePalette) 							// CONSTRUCTOR
 {
 	this.container=container;
 	this.color="-1";
+	this.clipboard=new Array();
 	this.edgeColor="#0000ff";
 	this.textColor="#000000";
 	this.boxColor="-1";
@@ -3350,7 +3407,7 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 		str+="<tr><td>&nbsp;&nbsp;Image URL</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"imageURL\",this.value)' type='text' id='imageURL'></td></tr>";
 		}
 	else if (tool == 6) {
-		str+="<tr><td>&nbsp;&nbsp;Shape</td><td>&nbsp;<select style='width:85px;height:18px;font-size:x-small' onChange='shivaLib.dr.SetVal(\"ideaShape\",this.value)' id='ideaShape'><option>Round box</option><option>Rectangle</option><option>Circle</option></select></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Shape</td><td>&nbsp;<select style='width:85px;height:18px;font-size:x-small' onChange='shivaLib.dr.SetVal(\"ideaShape\",this.value)' id='ideaShape'><option>Round box</option><option>Rectangle</option><option>Oval</option><option>Circle</option></select></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaBackCol\")' type='text' id='ideaBackCol'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Gradient?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"ideaGradient\",this.checked)' type='checkbox' id='ideaGradient'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaEdgeCol\")' onChange='shivaLib.dr.SetVal(\"ideaEdgeCol\",this.value)' type='text' id='ideaEdgeCol'></td></tr>";
@@ -3794,8 +3851,29 @@ SHIVA_Draw.prototype.onKeyDown=function(e)								// KEY DOWN HANDLER
 
 SHIVA_Draw.prototype.onKeyUp=function(e)								// KEY UP HANDLER
 {
+	var i;
 	if ((e.target.tagName == "TEXTAREA") || (e.target.tagName == "INPUT"))	// If in text entry
 		return;																// Quit
+	if ((e.which == 67) && (e.ctrlKey))	{									// Copy
+		if (shivaLib.dr.selectedItems.length) {								// If something selected
+			shivaLib.Sound("click");										// Play sound
+			shivaLib.dr.clipboard=[];										// Clear clipboard
+			}	
+		for (i=0;i<shivaLib.dr.selectedItems.length;++i) 					
+			shivaLib.dr.clipboard.push(shivaLib.Clone(shivaLib.dr.segs[shivaLib.dr.selectedItems[i]]));
+		}
+	if ((e.which == 86) && (e.ctrlKey))	{									// Paste
+		if (shivaLib.dr.clipboard.length) {									// If something in clipboard
+			shivaLib.dr.selectedItems=[];									// Clear selects
+			shivaLib.Sound("ding");											// Play sound
+			for (i=0;i<shivaLib.dr.clipboard.length;++i) {					// For each seg in clipboard				
+				shivaLib.dr.selectedItems.push(shivaLib.dr.segs.length);	// Add to selects
+				shivaLib.dr.segs.push(shivaLib.Clone(shivaLib.dr.clipboard[i])); // Add seg
+				}
+			}
+		}	
+
+
 	if (shivaLib.dr.curTool == 6) {											// In idea mode
 		num=shivaLib.dr.selectedItems[0];									// Point at 1st select
 		if (((e.which == 8) || (e.which == 46)) && (num != -1)) 			// If DEL and an active n
@@ -3860,12 +3938,10 @@ SHIVA_Draw.prototype.AddSelect=function(x, y, shiftKey)					// SELECT SEGMENT/DO
 				o=this.segs[i];												// Point at seg
 				if (o.type != 5)											// If an idea map node
 					continue;												// Skip it
-				this.HighlightIdea(i);										// Set highlight
 				var d=$("#shivaIdea"+i);									// Div id										
-				if ((x > o.ideaLeft) && (x < o.ideaLeft+d.width()-0+16) &&	// In h
-				    (y > o.ideaTop ) && (y < o.ideaTop+d.height()-0+16)) {	// In v
+				if ((x > o.ideaLeft) && (x < Number(o.ideaLeft)+Number(d.width())+16) &&	// In h
+				    (y > o.ideaTop ) && (y < Number(o.ideaTop)+Number(d.height())+16)) {	// In v
 					this.selectedItems.push(i);								// Add to selects
-					this.HighlightIdea(i);									// Set highlight
 					this.ideaShape=o.ideaShape;								// Shape
 					this.ideaBackCol=o.ideaBackCol;							// Back col
 					this.ideaGradient=o.ideaGradient;						// Gradient
@@ -3873,9 +3949,11 @@ SHIVA_Draw.prototype.AddSelect=function(x, y, shiftKey)					// SELECT SEGMENT/DO
 					this.ideaTextCol=o.ideaTextCol;							// Text col
 					this.ideaBold=o.ideaBold;								// Bold text
 					this.SetMenuProperties();								// Set menu properties
+					this.selectedItems[0]=i;								// Set select
 					break;
 					}
 				}
+				this.HighlightIdea();										// Set highlight
 				return;
 			}
 		for (i=0;i<this.segs.length;++i) {									// For each seg
@@ -4006,30 +4084,33 @@ SHIVA_Draw.prototype.AddIdea=function() 								//	ADD IDEA NODE
 	o.ideaEdgeCol=this.ideaEdgeCol;											// Edge color
 	o.ideaTextCol=this.ideaTextCol;											// Text color
 	o.text="A new idea";													// Text
-	o.ideaHgt=20;	o.ideaWid=100;											// Size
+	o.ideaHgt=21;	o.ideaWid=100;											// Size
 	if (num == -1) {														// First one
 		o.ideaLeft=$("#"+this.container).width()/2;							// Center x
 		o.ideaTop=$("#"+this.container).height()/2;							// Center y
 		}
 	else{
 		o.ideaLeft=this.segs[num].ideaLeft;									// Same x
-		o.ideaTop=(this.segs[num].ideaTop+this.segs[num].ideaHgt+32);		// Put under parent
+		o.ideaTop=(Number(this.segs[num].ideaTop)+Number(this.segs[num].ideaHgt)+32);	// Put under parent
 		}
 	if (shivaLib.player)													// If over a player
 		o.s=this.startTime,o.e=this.endTime;								// Set time
+	num=this.selectedItems[0]=this.segs.length;;							// Set select
 	this.segs.push(o);														// Add idea
 	shivaLib.Sound("ding");													// Ding sound
 	this.DrawOverlay();														// Draw idea map
-	shivaLib.dr.DrawMenu();													// Put up menu	
 }
 
-SHIVA_Draw.prototype.HighlightIdea=function(num) 						//	HIGHLIGHT IDEA NODE 
+SHIVA_Draw.prototype.HighlightIdea=function() 							//	HIGHLIGHT IDEA NODE 
 {
-	var dd="#shivaIdea"+num;												// Div id										
-	if (this.selectedItems[0] == num)										// If highlighted
-		$(dd).css("border","2px dashed red");								// Red outline
-	else																	// Not highlit
-		$(dd).css("border","1px solid "+this.segs[num].ideaEdgeCol);		// Regular border
+	var i,dd;
+	for (i=0;i<this.segs.length;++i) {										// For each seg
+		dd="#shivaIdea"+i;													// Div id										
+		if (this.selectedItems[0] == i)										// If highlighted
+			$(dd).css("border","1px dashed red");							// Red outline
+		else																// Not highlit
+			$(dd).css("border","1px solid "+this.segs[i].ideaEdgeCol);		// Regular border
+		}
 }
 
 SHIVA_Draw.prototype.DeleteIdea=function() 								//	DELETE IDEA NODE 
@@ -4037,35 +4118,54 @@ SHIVA_Draw.prototype.DeleteIdea=function() 								//	DELETE IDEA NODE
 	if (!this.selectedItems.length)											// Nothing selected
 		return;																// Quit
 	num=this.selectedItems[0];												// Get index
-	$("#shivaIdea"+num).remove();											// Remove idea node
-	this.segs.splice(num,1);												// Remove seg
-	this.DeleteIdeaChildren(num);											// Remove children recursively
-	shivaLib.Sound("delete");												// Delete sound
+	if (this.segs[num].ideaParent != -1) {									// If connected
+		shivaLib.Sound("click");											// click sound
+		this.segs[num].ideaParent=-1;										// Free float it
+		}
+	else{																	// Delete them
+		this.selectedItems=[];												// Deselect
+		$("#shivaIdea"+num).remove();										// Remove idea node
+		this.segs.splice(num,1);											// Remove seg
+		this.DeleteIdeaChildren(num);										// Remove children recursively
+		shivaLib.Sound("delete");											// Delete sound
+		}
 	this.DrawOverlay();														// Draw idea map
-	this.selectedItems=[];													// Deselect
-trace(this.segs)
 }
 
 SHIVA_Draw.prototype.DeleteIdeaChildren=function(parent) 				//	DELETE IDEA CHILD NODES RECURSIVELY
 {
 	var i;
-	trace("par="+parent)
 	for (i=0;i<this.segs.length;++i) {										// For each node
 		if (this.segs[i].type != 5)											// If not an idea node
 			continue;														// Skip it
 		if (this.segs[i].ideaParent == parent) {							// If a child of parent									
-			trace(i)
 			var id=this.segs[i].id;											// Real id
-			trace("id="+id);
 			$("#shivaIdea"+id).remove();									// Remove idea node
 			this.segs.splice(i,1);											// Remove child
-			this.DeleteIdeaChildren(id);									// Try again
+			this.DeleteIdeaChildren(id);									// Look for children
+			this.DeleteIdeaChildren(parent);								// Look for siblings
 			break;
 			}
 		}
 }
-		
+
+SHIVA_Draw.prototype.MoveIdeaChildren=function(parent, dx, dy) 			//	MOVE IDEA CHILD NODES RECURSIVELY
+{
+	var i;
+	for (i=0;i<this.segs.length;++i) {										// For each node
+		if (this.segs[i].type != 5)											// If not an idea node
+			continue;														// Skip it
+		if (this.segs[i].ideaParent == parent) {							// If a child of parent									
+			this.segs[i].ideaLeft=Number(this.segs[i].ideaLeft)+dx;			// X
+			this.segs[i].ideaTop=Number(this.segs[i].ideaTop)+dy;			// Y
+			$("#shivaIdea"+i).css("left",this.segs[i].ideaLeft+"px").css("top",this.segs[i].ideaTop+"px");
+			this.MoveIdeaChildren(i,dx,dy);									// Look for children
+			}
+		}
+}
+
 SHIVA_Draw.prototype.IdeaDrop=function(from, to) 						//	HANDLE IDEA NODE DRAG & DROP
 {
-	this.segs[from].parent=to;
+	this.segs[from].ideaParent=to;											// Connect
+	shivaLib.Sound("ding");													// Ding sound
 }

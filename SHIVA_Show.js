@@ -445,6 +445,7 @@ SHIVA_Show.prototype.Annotate=function() 												// SHOW ANNOTATION PALATTE
 
 //  NETWORK   /////////////////////////////////////////////////////////////////////////////////////////// 
 
+                                           
 SHIVA_Show.prototype.DrawNetwork=function() 												//	DRAW NETWORK
 {
 	if (!this.jit)
@@ -464,7 +465,7 @@ function VIZ(container)
 			Navigation: { enable: true, panning: true },
 			Node: 		{ CanvasStyles:{} },		
 			Edge: 		{ overridable: true, CanvasStyles: {} },
-			Label: 		{ overridable: true, type: 'Native'	},
+			Label: 		{ overridable: true, type: 'HTML'	},
 			Tips: 		{ enable: true },
 			Events: 	{ enable: true,	enableForEdges: true },
 			NodeStyles: { enable: true },
@@ -476,7 +477,7 @@ function VIZ(container)
 			Navigation: { enable: true,	panning: 'avoid nodes' },
 			Node: 		{ CanvasStyles: {} },		
 			Edge: 		{ overridable: true, CanvasStyles: {} },
-			Label: 		{ overridable: true, type: 'Native' },
+			Label: 		{ overridable: true, type: 'HTML' },
 			Tips: 		{ enable: true	},
 			Events: 	{ enable: true,	enableForEdges: true },
 			NodeStyles: { enable: true },
@@ -487,7 +488,7 @@ function VIZ(container)
 			Navigation: { enable: true, panning: true },		
 			Node: 		{ CanvasStyles: {}, transform: false },
 			Edge: 		{ overridable: true, CanvasStyles: {} },
-			Label: 		{ overridable: true, type: 'Native'	},
+			Label: 		{ overridable: true, type: 'HTML'	},
 			Tips:		{ enable: true	},
 			Events: 	{ enable: true,	enableForEdges: true },
 			NodeStyles: { enable: true	},
@@ -503,9 +504,7 @@ VIZ.prototype.Draw=function(json)
 	$('#viz_css').attr("href","css/"+this.chartType+".css");					// Set css
 	for (key in json) {															// For each property
 		val=json[key];															// Get value
-		if (key.match(/_fillStyle/))	val="#"+val;							// Add # to color						
-		if (key.match(/_strokeStyle/))	val="#"+val;							// Add # to color						
-		if (key.match(/_color/))		val="#"+val;							// Add # to color						
+		if (key.match(/_(fillStyle|strokeStyle|color)/)) val = '#' + val;
 		if (val == "true") 				val=true;								// Force bool
 		else if (val == 'false') 		val=false;								// Force bool
 		k=key.split("_");														// Split into parts
@@ -524,13 +523,14 @@ VIZ.prototype.Google2Jit=function(rs)
 {	
 	var table=rs.getDataTable();												// Get data table
 	var numRows = table.getNumberOfRows();
+	var numCols = table.getNumberOfColumns();
 	
 	// Clean up data (trim leading and ending spaces) and save to local array
 	// Crucial -- spaces will break things
 	var ROWS = [];
 	for (var i = 0; i < numRows; i++) {
 		ROWS[i] = [];
-		for (var j = 0; j < 4; j++) {
+		for (var j = 0; j < numCols; j++) {
 			var v = table.getValue(i,j);
 			if (isNaN(v)) { v = v.replace(/(^\s+|\s+$)/g,""); }
 			ROWS[i][j] = v;
@@ -554,27 +554,40 @@ VIZ.prototype.Google2Jit=function(rs)
 			CLASSES.link[c][k] = v;
 		}
 	}
-
+		
 	var JIT = {};		
 	for (var i = 0; i < numRows; i++) {
 		var rType 	= ROWS[i][0];  
 		if (rType.match(/-class/)) continue;	
-		var nodeID 	= ROWS[i][1]; 
+		var nodeID 	= ROWS[i][1];
+		
 		if (JIT[nodeID] == undefined) {
 			JIT[nodeID] 						= {};
 			JIT[nodeID].id					= nodeID;
 			JIT[nodeID].data 				= {}; // For properties
 			JIT[nodeID].adjacencies = []; // For links (note: tree viz types want 'children' here)
 		}
+		
 		if (rType.match(/^\s*node\s*$/)) {
-			JIT[nodeID].name 	= ROWS[i][2];  
-			var nodeClass 		= ROWS[i][3]; 
+			
+			if (ROWS[i][2] && !ROWS[i][2].match(/^\s*$/)) {
+				JIT[nodeID].name 	= ROWS[i][2]; 		
+			} else {
+				JIT[nodeID].name 	= nodeID; 
+			}
+			
+			var nodeClass = ROWS[i][3];
 			JIT[nodeID].data.class = nodeClass;
 			for (var k in CLASSES.node[nodeClass]) {
 				JIT[nodeID].data['$' + k] = CLASSES.node[nodeClass][k];
 			}
+
+			if (numCols > 4) {
+				JIT[nodeID].data.tip = ROWS[i][4]; 	
+			}
+			
 		} else if (rType.match(/^\s*link\s*$/)) {
-			var linkClass = ROWS[i][2]; 
+			var linkClass = ROWS[i][2];
 			var nodeTo 		= ROWS[i][3];
 			var linkObject = {'nodeTo': nodeTo, 'data': {'class': linkClass}};
 			for (var k in CLASSES.link[linkClass]) {
@@ -582,13 +595,14 @@ VIZ.prototype.Google2Jit=function(rs)
 			}
 			JIT[nodeID].adjacencies.push(linkObject);  
 		}
-		shivaLib.SendReadyMessage(true);									// Send ready msg to drupal manager
+		
+		shivaLib.SendReadyMessage(true);					// Send ready msg to drupal manager
 	}		
 
 	this.data = [];															// Clear data array
-	for (var x in JIT) this.data.push(JIT[x]);								// Turn into array
-		$jit.id(this.container).innerHTML = ''; 							// Empty div										
-	this.Init[this.chartType](this); 										// Draw it			
+	for (var x in JIT) this.data.push(JIT[x]);	// Turn into array
+		$jit.id(this.container).innerHTML = ''; 	// Empty div										
+	this.Init[this.chartType](this); 						// Draw it			
 }		
 
 VIZ.prototype.Init = {
@@ -598,30 +612,34 @@ VIZ.prototype.Init = {
 		var div 		= obj.container;
 		config.injectInto = div;							// Canvas level params set at run time
 		            
-		config.onCreateLabel = function(domElement, node){
+		config.onCreateLabel = function(domElement, node) {
+			domElement.className = 'shiva-node-label';
 			domElement.innerHTML = node.name;
 			domElement.onclick = function(){
 				rgraph.onClick(node.id,{});
 			};
-		};
-		
-		config.onPlaceLabel = function(domElement, node)
-		{
 			var style = domElement.style;
 			style.fontSize 		= config.Label.size + 'px';
-			style.color 		= config.Label.color;
+			style.color 			= config.Label.color;
 			style.fontWeight 	= config.Label.style;
 			style.fontStyle 	= config.Label.style;
 			style.fontFamily 	= config.Label.family;
 			style.textAlign 	= config.Label.textAlign;
+			style.cursor = 'crosshair';	
 			style.display = '';
-			style.cursor = 'pointer';	
+
 		};
+		
+		config.onPlaceLabel = function(domElement, node) { };
 		
 		config.Tips.onShow = function(tip, node) {
 			var count = 0;
 			node.eachAdjacency(function() { count++; });
-			tip.innerHTML = "<div class='tip-title'>" + node.name + " is a <b>" + node.data.class + "</b> with " + count + " connections.</div>";
+			if (node.data.tip) {
+				tip.innerHTML = "<div class='tip-title'>" + node.data.tip + "</div>";
+			} else {
+				tip.innerHTML = "<div class='tip-title'>" + node.name + " is a <b>" + node.data.class + "</b> with " + count + " connections.</div>";
+			}
 		};
 		 		
 		var rgraph = new $jit.RGraph(config);		
@@ -643,7 +661,6 @@ VIZ.prototype.Init = {
 		var canvasConfig = rgraph.canvas.getConfig();	
 	},
 	forcedir: function (obj) {
-	
 		var jsonData 	= obj.data;
 		var config		= obj.Config[obj.chartType];
 		var div 			= obj.container;
@@ -651,17 +668,15 @@ VIZ.prototype.Init = {
 		
 		config.onCreateLabel = function(domElement, node){
 			var style = domElement.style;
+			domElement.className = 'shiva-node-label';
 			style.fontSize 		= config.Label.size + 'px';
-			style.color 		= config.Label.color;
+			style.color 			= config.Label.color;
 			style.fontWeight 	= config.Label.style;
 			style.fontStyle 	= config.Label.style;
 			style.fontFamily 	= config.Label.family;
 			style.textAlign 	= config.Label.textAlign;
+			style.cursor = 'crosshair';
 			domElement.innerHTML = node.name;
-		};
-
-		config.onPlaceLabel = function(domElement, node){
-			var style = domElement.style;
 			var left = parseInt(style.left);
 			var top = parseInt(style.top);
 			var w = domElement.offsetWidth;
@@ -669,6 +684,8 @@ VIZ.prototype.Init = {
 			style.top = (top + 10) + 'px';
 			style.display = '';
 		};
+
+		config.onPlaceLabel = function(domElement, node) { };
 		
 		config.onMouseEnter = function() {
 			fd.canvas.getElement().style.cursor = 'move';
@@ -685,6 +702,8 @@ VIZ.prototype.Init = {
 			$jit.util.event.stop(e); //stop default touchmove event
 			this.onDragMove(node, eventInfo, e);
 		};
+		
+		/*
 		config.onClick = function(node) {
 			if(!node) return;
 			// Build the right column relations list.
@@ -694,11 +713,18 @@ VIZ.prototype.Init = {
 			node.eachAdjacency(function(adj){
 				list.push(adj.nodeTo.name);
 			});
-			};
+		};
+		*/
+			
 		config.Tips.onShow = function(tip, node) {
 			var count = 0;
 			node.eachAdjacency(function() { count++; });
-			tip.innerHTML = "<div class='tip-title'>" + node.name + " is a <b>" + node.data.class + "</b> with " + count + " connections.</div>";
+			console.log(node.data);
+			if (node.data.tip) {
+				tip.innerHTML = "<div class='tip-title'>" + node.data.tip + "</div>";
+			} else {
+				tip.innerHTML = "<div class='tip-title'>" + node.name + " is a <b>" + node.data.class + "</b> with " + count + " connections.</div>";
+			}
 		};
 
 		var fd = new $jit.ForceDirected(config);
@@ -719,25 +745,27 @@ VIZ.prototype.Init = {
 	},
 	hypertree: function (obj) {
 		var data 		= obj.data;
-		var config		= obj.Config[obj.chartType];
+		var config	= obj.Config[obj.chartType];
 		var div			= obj.container;
+	
 		config.injectInto = div;
+		
 		var divElement = document.getElementById(div);
 		config.width = divElement.offsetWidth; // - 50;
 		config.height = divElement.offsetHeight; // - 50;
-		config.onPlaceLabel = function(domElement, node) {
+		
+		config.onCreateLabel = function(domElement, node) {
+			domElement.innerHTML = node.name;
 			var style = domElement.style;
+			domElement.className = 'shiva-node-label';
 			style.fontSize 		= config.Label.size + 'px';
-			style.color 		= config.Label.color;
+			style.color 			= config.Label.color;
 			style.fontWeight 	= config.Label.style;
 			style.fontStyle 	= config.Label.style;
 			style.fontFamily 	= config.Label.family;
 			style.textAlign 	= config.Label.textAlign;
-			style.cursor = 'pointer';
+			style.cursor = 'crosshair';
 			style.display = '';
-		};
-		config.onCreateLabel = function(domElement, node) {
-			domElement.innerHTML = node.name;
 			$jit.util.addEvent(domElement, 'click', function () {
 				ht.onClick(node.id, {
 					onComplete: function() {
@@ -746,14 +774,23 @@ VIZ.prototype.Init = {
 				});
 			});
 		};
+		
+		config.onPlaceLabel = function(domElement, node) { };
+		
 		config.onComplete = function() {
 			return;
 		}
+		
 		config.Tips.onShow = function(tip, node) {
 			var count = 0;
 			node.eachAdjacency(function() { count++; });
-			tip.innerHTML = "<div class='tip-title'>" + node.name + " is a <b>" + node.data.class + "</b> with " + count + " connections.</div>";
+			if (node.data.tip) {
+				tip.innerHTML = "<div class='tip-title'>" + node.data.tip + "</div>";
+			} else {
+				tip.innerHTML = "<div class='tip-title'>" + node.name + " is a <b>" + node.data.class + "</b> with " + count + " connections.</div>";
+			}
 		};
+		
 		var ht = new $jit.Hypertree(config);
 		ht.loadJSON(data);
 		ht.refresh();

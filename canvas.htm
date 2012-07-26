@@ -96,8 +96,8 @@
 
 	function SetDataChanged(mode)
 	{
-		if ((shivaLib.drupalMan) && (typeof(shivaLib.drupalMan.postMessage) == "function")) 
-			shivaLib.drupalMan.postMessage("DataChanged="+mode.toString());
+		if (shivaLib.drupalMan)
+			window.parent.postMessage("DataChanged="+mode.toString());
 		else if (!shivaLib.drupalMan) {
 			if (window.parent)
 				if (window.parent.ShivaDataChanged)
@@ -138,8 +138,7 @@
 				AddElement(i);	
 			Draw();
 			}
-		if (shivaLib.drupalMan)	shivaLib.drupalMan=e.source;
-	}
+		}
 
 	function ShivaMessage(tab, id, cmd) 
 	{

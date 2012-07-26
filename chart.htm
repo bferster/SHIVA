@@ -318,7 +318,6 @@
 			e.source.postMessage("GetType="+shivaGroup,"*");
 		else if (e.data.indexOf("PutJSON") == 0) 
 			ReEdit($.parseJSON(e.data.substr(8)));
-		if (shivaLib.drupalMan)	shivaLib.drupalMan=e.source;
 	}
 
 	function SaveData(mode)
@@ -368,15 +367,15 @@
 
 	function Draw()
 	{	
-		if ((shivaLib.drupalMan) && (typeof(shivaLib.drupalMan.postMessage) == "function")) 
-		shivaLib.drupalMan.postMessage("DataChanged="+chartType,"*");
+		if (shivaLib.drupalMan)
+			window.parent.postMessage("DataChanged="+chartType,"*");
 		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
 	}
 
 	function ChangeChart(type)
 	{
-		if ((shivaLib.drupalMan) && (typeof(shivaLib.drupalMan.postMessage) == "function")) 
-			shivaLib.drupalMan.postMessage("ChartChanged="+type,"*");
+		if (shivaLib.drupalMan)
+			window.parent.postMessage("ChartChanged="+type,"*");
 		SetAttributes(type);	
 	}
 

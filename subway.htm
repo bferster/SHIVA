@@ -137,13 +137,12 @@
 			e.source.postMessage("GetType="+shivaGroup,"*");
 		else if (e.data.indexOf("PutJSON") == 0) 
 			ReEdit($.parseJSON(e.data.substr(8)));
-		if (shivaLib.drupalMan)	shivaLib.drupalMan=e.source;
 	}
 
 	function SetDataChanged(mode)
 	{
-		if ((shivaLib.drupalMan) && (typeof(shivaLib.drupalMan.postMessage) == "function")) 
-			shivaLib.drupalMan.postMessage("DataChanged="+mode.toString(),"*");
+		if (shivaLib.drupalMan) 
+			window.parent.postMessage("DataChanged="+mode.toString(),"*");
 		else if (!shivaLib.drupalMan) {
 			if (window.parent)
 				if (window.parent.ShivaDataChanged)

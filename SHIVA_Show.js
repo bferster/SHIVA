@@ -133,8 +133,8 @@ function shivaJSLoaded(obj, callback) 									// RECURSE UNTIL JS METHOD/PROPER
 
 SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE TO DRUPAL MANAGER
 {
-	if ((shivaLib.drupalMan) && (typeof(shivaLib.drupalMan.postMessage) == "function")) 
-		shivaLib.drupalMan.postMessage("ShivaReady="+mode.toString(),"*");
+	if (shivaLib.drupalMan) 												// If called from Drupal manager
+		window.parent.postMessage("ShivaReady="+mode.toString(),"*");		// Send message to parent wind		
 }
 
 SHIVA_Show.prototype.AddOverlay=function() 								// ADD OVERLAY

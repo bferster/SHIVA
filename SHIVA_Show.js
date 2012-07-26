@@ -442,14 +442,13 @@ SHIVA_Show.prototype.Annotate=function() 												// SHOW ANNOTATION PALATTE
 	else this.dr.DrawPalette();																// Draw palette
 	this.Sound("click");																	// Click
 }
-
+                                       
 //  NETWORK   /////////////////////////////////////////////////////////////////////////////////////////// 
 
-                                           
 SHIVA_Show.prototype.DrawNetwork=function() 												//	DRAW NETWORK
 {
 	if (!this.jit)
-		this.jit=new VIZ(this.container); 
+		this.jit=new VIZ(this.container);
 	this.jit.Draw(this.options);
 }
 
@@ -500,20 +499,28 @@ function VIZ(container)
 VIZ.prototype.Draw=function(json) 
 {
 	var k,key,val;
-	this.chartType=json.chartType;												// Chart type		
-	$('#viz_css').attr("href","css/"+this.chartType+".css");					// Set css
-	for (key in json) {															// For each property
-		val=json[key];															// Get value
-		if (key.match(/_(fillStyle|strokeStyle|color)/)) val = '#' + val;
-		if (val == "true") 				val=true;								// Force bool
-		else if (val == 'false') 		val=false;								// Force bool
-		k=key.split("_");														// Split into parts
-		if (k.length == 2) 				this.Config[this.chartType][k[0]][k[1]]=val;// 2 parts
-		else if (k.length == 3) 		this.Config[this.chartType][k[0]][k[1]][k[2]]=val; // 3 parts
-		else 							this.Config[this.chartType][key]=val;	// Just 1
+	this.chartType=json.chartType;		
+	for (key in json) {
+		
+		val=json[key];
+		if (key.match(/_(fillStyle|strokeStyle|color)/)) 	// It would be nice to inspect props here ...
+			val = '#' + val;
+		if (val == "true") 																
+			val=true;
+		else if (val == 'false') 													
+			val=false;
+		
+		k=key.split("_"); // Split key name into its implicit parts (hopefully none has more than 3)
+		if (k.length == 2) 				
+			this.Config[this.chartType][k[0]][k[1]] = val;
+		else if (k.length == 3)
+			this.Config[this.chartType][k[0]][k[1]][k[2]] = val;
+		else
+			this.Config[this.chartType][key] = val;
+		
 		}
-	new google.visualization.Query(json.dataSourceUrl).send($.proxy(this.Google2Jit,this));	// Load table
-	this.config=this.Config[this.chartType]; 									// Set config
+	new google.visualization.Query(json.dataSourceUrl).send($.proxy(this.Google2Jit,this));
+	this.config=this.Config[this.chartType]; 
 	$jit.id(this.container).style.height=this.config.height+"px";
 	$jit.id(this.container).style.width=this.config.width+"px";	
 	$jit.id(this.container).style.backgroundColor=this.config.background.CanvasStyles.fillStyle;
@@ -521,7 +528,7 @@ VIZ.prototype.Draw=function(json)
 
 VIZ.prototype.Google2Jit=function(rs)
 {	
-	var table=rs.getDataTable();												// Get data table
+	var table=rs.getDataTable();
 	var numRows = table.getNumberOfRows();
 	var numCols = table.getNumberOfColumns();
 	
@@ -603,7 +610,7 @@ VIZ.prototype.Google2Jit=function(rs)
 	for (var x in JIT) this.data.push(JIT[x]);	// Turn into array
 		$jit.id(this.container).innerHTML = ''; 	// Empty div										
 	this.Init[this.chartType](this); 						// Draw it			
-}		
+}
 
 VIZ.prototype.Init = {
 	rgraph:	function (obj) {
@@ -640,6 +647,15 @@ VIZ.prototype.Init = {
 			} else {
 				tip.innerHTML = "<div class='tip-title'>" + node.name + " is a <b>" + node.data.class + "</b> with " + count + " connections.</div>";
 			}
+			tip.style.color = 'black';
+			tip.style.fontFamily = config.Label.family;
+			tip.style.backgroundColor = 'white';
+			tip.style.padding = '1em';
+			tip.style.maxWidth = '200px';
+			tip.style.fontSize = '10pt';
+			tip.style.border = '1px solid black';
+			tip.style.opacity = '0.99';
+			tip.style.boxShadow = '#555 2px 2px 8px';
 		};
 		 		
 		var rgraph = new $jit.RGraph(config);		
@@ -703,19 +719,6 @@ VIZ.prototype.Init = {
 			this.onDragMove(node, eventInfo, e);
 		};
 		
-		/*
-		config.onClick = function(node) {
-			if(!node) return;
-			// Build the right column relations list.
-			// This is done by traversing the clicked node connections.
-			var html = "<h4>" + node.name + "</h4><b> connections:</b><ul><li>";
-			var list = [];
-			node.eachAdjacency(function(adj){
-				list.push(adj.nodeTo.name);
-			});
-		};
-		*/
-			
 		config.Tips.onShow = function(tip, node) {
 			var count = 0;
 			node.eachAdjacency(function() { count++; });
@@ -725,6 +728,15 @@ VIZ.prototype.Init = {
 			} else {
 				tip.innerHTML = "<div class='tip-title'>" + node.name + " is a <b>" + node.data.class + "</b> with " + count + " connections.</div>";
 			}
+			tip.style.color = 'black';
+			tip.style.fontFamily = config.Label.family;
+			tip.style.backgroundColor = 'white';
+			tip.style.padding = '1em';
+			tip.style.maxWidth = '200px';
+			tip.style.fontSize = '10pt';
+			tip.style.border = '1px solid black';
+			tip.style.opacity = '0.99';
+			tip.style.boxShadow = '#555 2px 2px 8px';
 		};
 
 		var fd = new $jit.ForceDirected(config);
@@ -789,6 +801,15 @@ VIZ.prototype.Init = {
 			} else {
 				tip.innerHTML = "<div class='tip-title'>" + node.name + " is a <b>" + node.data.class + "</b> with " + count + " connections.</div>";
 			}
+			tip.style.color = 'black';
+			tip.style.fontFamily = config.Label.family;
+			tip.style.backgroundColor = 'white';
+			tip.style.padding = '1em';
+			tip.style.maxWidth = '200px';
+			tip.style.fontSize = '10pt';
+			tip.style.border = '1px solid black';
+			tip.style.opacity = '0.99';
+			tip.style.boxShadow = '#555 2px 2px 8px';
 		};
 		
 		var ht = new $jit.Hypertree(config);

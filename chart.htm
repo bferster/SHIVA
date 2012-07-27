@@ -66,7 +66,6 @@
 
 ///////// GLOBALS   //////////
 
-	var g;
 	var chartType="PieChart";
 	var chartProp;
 	var curAtt=null;
@@ -346,7 +345,7 @@
 		if ((chartProp == 'AreaChart') || (chartProp == 'BarChart') || 	(chartProp == 'ColumnChart') || 
 		   (chartProp == 'ComboChart') || (chartProp == 'LineChart'))
 			chartProp="BasicLine";
-		SetAttributes(chartType);
+		SetAttributes(chartType,false);
 		shivaLib.ReEdit(jsonData,props[chartProp]);
 		for (var i=0;i<$("#chartType option").length;i++) 
 			if ($("#chartType option")[i].text.replace(/ /g,"") == chartType) {
@@ -355,6 +354,7 @@
 			  	break;
 			  }
 		chartType=chartType.replace(/ /g,"");
+		SetAttributes(chartType,true);
 	}
 
 	function ShowHelp(att)
@@ -376,10 +376,10 @@
 	{
 		if (shivaLib.drupalMan)
 			window.parent.postMessage("ChartChanged="+type,"*");
-		SetAttributes(type);	
+		SetAttributes(type,true);	
 	}
 
-	function SetAttributes(type)
+	function SetAttributes(type, drawIt)
 	{
 		chartType=type.replace(/ /g,"");			
 		ShowHelp("");
@@ -388,7 +388,8 @@
 			(chartProp == 'ColumnChart') || (chartProp == 'ComboChart') || (chartProp == 'LineChart'))
 			chartProp="BasicLine";
 		shivaLib.SetAttributes(props[chartProp]);
-		Draw();
+		if (drawIt)
+			Draw();
 	}	
 
 ///////// GUI   //////////

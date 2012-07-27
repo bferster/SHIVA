@@ -154,7 +154,7 @@
 	function Draw()
 	{	
 		if (shivaLib.drupalMan)  
-			window.parent.drupalMan.postMessage("DataChanged=true","*");
+			window.parent.postMessage("DataChanged=true","*");
 		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
 		if (shivaLib.map) {
 			projection=new ProjectionHelperOverlay(shivaLib.map);

@@ -3476,7 +3476,7 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaEdgeCol\")' onChange='shivaLib.dr.SetVal(\"ideaEdgeCol\",this.value)' type='text' id='ideaEdgeCol'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Text color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaTextCol\")' onChange='shivaLib.dr.SetVal(\"ideaTextCol\",this.value)' type='text' id='ideaTextCol'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Bold text?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"ideaBold\",this.checked)' type='checkbox' id='ideaBold'></td></tr>";
-		str+="<tr><td></td><td><button style='font-size:xx-small' onclick='shivaLib.dr.AddIdea(-1)'>Add base idea</button></td></tr>";
+		str+="<tr><td colspan='2' style='text-align:center'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button style='font-size:x-small' onclick='shivaLib.dr.AddIdea(-1)'>Add base idea</button></td></tr>";
 		}
 	str+="</table><br/>";	
 	str+="<div style='position:absolute;left:14px;top:194px'><span id='drawToolbar' style='font-size:xx-small'>";
@@ -4178,7 +4178,7 @@ SHIVA_Draw.prototype.HighlightIdea=function() 							//	HIGHLIGHT IDEA NODE
 		$(dd).css("border","1px dashed red");								// Red outline
 		var x=$(dd).width()/2;												// Center
 		var y=$(dd).height();												// Bottom
-		var str="<div id='shivaIdeaAddBut' style='position:absolute;top:"+y+"px;left:"+x+"px'><img src='adddot.gif' onmouseup='shivaLib.dr.AddIdea(0)'></div>"
+		var str="<div id='shivaIdeaAddBut' style='position:absolute;top:"+y+"px;left:"+x+"px'><img src='adddot.gif' title='Add child idea' onmouseup='shivaLib.dr.AddIdea(0)'></div>"
 		$(dd).append(str);													// Add add but
 		}
 }

@@ -3439,7 +3439,7 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 	var preface="Edit ";
 	if (tool == undefined)
 		tool=this.curTool,preface="Draw ";
-	var titles=["a line","a circle","a box","text","an image",""," an idea map"];
+	var titles=["a line","a circle","a box","text","an image",""," an Idea Map"];
 	var str="<p style='text-shadow:1px 1px white' align='center'><b>";	str+=preface+titles[tool]+"</b></p>";
 	str+="<img src='closedot.gif' style='position:absolute;left:163px;top:1px' onclick='shivaLib.dr.SetTool(-1)'/>";
 	str+="<table style='font-size:xx-small'>"

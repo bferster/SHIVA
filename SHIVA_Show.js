@@ -239,7 +239,8 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 			str="<textarea";												// Assume display mode
 			if ((shivaLib.dr) && (shivaLib.dr.curTool != 6))				// If not idea editing
 				str+=" readonly='readonly'"; 								// Makes it read only
-			str+=" id='shtx"+i+"' onchange='shivaLib.dr.SetShivaText(this.value,"+i+")' style='overflow:hidden;";
+			str+=" id='shtx"+i+"' onchange='shivaLib.dr.SetShivaText(this.value,"+i+")' "
+			str+="style='overflow:hidden;vertical-align:middle;";			// Textarea style
 			if ((shivaLib.dr) && (shivaLib.dr.curTool != 6))				// If not idea editing
 				str+="resize:none;"; 										// Remove resizer
 			str+="height:"+o.ideaHgt+"px;width:"+o.ideaWid+"px;color:"+o.ideaTextCol+";" // Size/color textarea
@@ -265,8 +266,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 				}
 
 			if ((shivaLib.dr) && (shivaLib.dr.curTool == 6)) {				// If in idea map editing mode
-				$.proxy(shivaLib.dr.HighlightIdea(),shivaLib.dr);			// Set highlight
-
+	
 				$("#shtx"+i).resizable( { stop: function(event,ui) {		// ON RESIZE HANDLER
 					var num=ui.originalElement[0].id.substr(4);				// Get index
 					shivaLib.dr.segs[num].ideaWid=ui.size.width-4;			// Set width
@@ -343,6 +343,8 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 		else																// > 2 pts
 			this.g.DrawPolygon(ctx,o.color,a,o.x,o.y,ecol,ewid,(cur == true));	// Regular poly
 		}
+	if ((shivaLib.dr) && (shivaLib.dr.curTool == 6)) 						// If in idea map editing mode
+		$.proxy(shivaLib.dr.HighlightIdea(),shivaLib.dr);					// Set highlight
 }
 
 SHIVA_Show.prototype.DrawIdeaLinks=function(clear)							// DRAW IDEA LINK LINES
@@ -3375,8 +3377,9 @@ SHIVA_Draw.prototype.DrawPalette=function(tool) 						//	DRAW
 
 SHIVA_Draw.prototype.ColorPicker=function(name) 						//	DRAW COLORPICKER
 {
-	var str="<img src='colorpicker.gif' style='position:absolute;left:3px;top:13px' />";
-	str+="<input id='shivaDrawColorInput' type='text' style='position:absolute;left:10px;top:14px;width:96px;background:transparent;border:none;'>";
+	var str="<p style='text-shadow:1px 1px white' align='center'><b>Choose a new color</b></p>";
+	str+="<img src='colorpicker.gif' style='position:absolute;left:15px;top:28px' />";
+	str+="<input id='shivaDrawColorInput' type='text' style='position:absolute;left:22px;top:29px;width:96px;background:transparent;border:none;'>";
 	$("#shivaDrawPaletteDiv").html(str);									// Fill div
 	$("#shivaDrawPaletteDiv").on("click",onColorPicker);					// Mouseup listener
 	this.colorPicker=name;													// Set var name
@@ -3394,24 +3397,24 @@ SHIVA_Draw.prototype.ColorPicker=function(name) 						//	DRAW COLORPICKER
 				 ];
 		var x=e.pageX-this.offsetLeft;										// Offset X from page
 		var y=e.pageY-this.offsetTop;										// Y
-		if ((x < 100) && (y < 30))											// In text area
+		if ((x < 112) && (y < 55))											// In text area
 			return;															// Quit
 		$("#shivaDrawPaletteDiv").off("click",this.onColorPicker);			// Remove mouseup listener
-		if ((x > 110) && (x < 130) && (y < 33))	{							// In OK area
+		if ((x > 112) && (x < 143) && (y < 48))	{							// In OK area
 			if ($("#shivaDrawColorInput").val())							// If something there
 				col="#"+$("#shivaDrawColorInput").val();					// Get value
 			else															// Blank
 				x=135;														// Force a quit
 			}
-		if ((x > 130) && (y < 33)) {										// In quit area
+		if ((x > 143) && (y < 48)) {										// In quit area
 			shivaLib.dr.DrawMenu();											// Put up menu	
 			return;															// Return
 			}
-		if (y > 178) 														// In trans area
+		if (y > 193) 														// In trans area
 			col=-1;															// Set -1
-		else if (y > 33) {													// In color grid
-			x=Math.floor((x-11)/17);										// Column
-			y=Math.floor((y-36)/17);										// Row
+		else if (y > 48) {													// In color grid
+			x=Math.floor((x-24)/17);										// Column
+			y=Math.floor((y-51)/17);										// Row
 			col="#"+cols[x+(y*8)];											// Get color
 			}
 		shivaLib.dr[shivaLib.dr.colorPicker]=col;							// Set color
@@ -3433,11 +3436,13 @@ SHIVA_Draw.prototype.ColorPicker=function(name) 						//	DRAW COLORPICKER
 
 SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW 
 {
-	var str="<p style='text-shadow:1px 1px white' align='center'><b>SHIVA Draw</b></p>";
+	var preface="Edit ";
+	if (tool == undefined)
+		tool=this.curTool,preface="Draw ";
+	var titles=["a line","a circle","a box","text","an image",""," an idea map"];
+	var str="<p style='text-shadow:1px 1px white' align='center'><b>";	str+=preface+titles[tool]+"</b></p>";
 	str+="<img src='closedot.gif' style='position:absolute;left:163px;top:1px' onclick='shivaLib.dr.SetTool(-1)'/>";
 	str+="<table style='font-size:xx-small'>"
-	if (tool == undefined)
-		tool=this.curTool;
 	if (tool < 3) {
 		str+="<tr><td>&nbsp;&nbsp;Snap to grid?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";
 		if (tool == 2)
@@ -3471,7 +3476,7 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaEdgeCol\")' onChange='shivaLib.dr.SetVal(\"ideaEdgeCol\",this.value)' type='text' id='ideaEdgeCol'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Text color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaTextCol\")' onChange='shivaLib.dr.SetVal(\"ideaTextCol\",this.value)' type='text' id='ideaTextCol'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Bold text?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"ideaBold\",this.checked)' type='checkbox' id='ideaBold'></td></tr>";
-		str+="<tr><td></td><td><button style='font-size:xx-small' onclick='shivaLib.dr.AddIdea()'>Add new idea box</button></td></tr>";
+		str+="<tr><td></td><td><button style='font-size:xx-small' onclick='shivaLib.dr.AddIdea(-1)'>Add base idea</button></td></tr>";
 		}
 	str+="</table><br/>";	
 	str+="<div style='position:absolute;left:14px;top:194px'><span id='drawToolbar' style='font-size:xx-small'>";
@@ -4124,11 +4129,10 @@ SHIVA_Draw.prototype.MoveSegs=function(dx, dy, dz)						// MOVE SELECTED SEGS
 	this.DrawWireframes(false);												// Draw wireframes
 }
 
-SHIVA_Draw.prototype.AddIdea=function() 								//	ADD IDEA NODE 
+SHIVA_Draw.prototype.AddIdea=function(num) 								//	ADD IDEA NODE 
 {
 	var o=new Object;
-	var num=-1;
-	if (this.selectedItems.length)											// If highlighted
+	if ((num != -1) && (this.selectedItems.length))							// If highlighted
 		num=this.selectedItems[0]											// This is the parent
 	o.type=5;																// Idea map
 	o.id=this.segs.length;													// Save id
@@ -4142,8 +4146,8 @@ SHIVA_Draw.prototype.AddIdea=function() 								//	ADD IDEA NODE
 	o.text="A new idea";													// Text
 	o.ideaHgt=21;	o.ideaWid=100;											// Size
 	if (num == -1) {														// First one
-		o.ideaLeft=$("#"+this.container).width()/2;							// Center x
-		o.ideaTop=$("#"+this.container).height()/2;							// Center y
+		o.ideaLeft=$("#shivaDrawDiv").width()/2;							// Center x
+		o.ideaTop=$("#shivaDrawDiv").height()/2;							// Center y
 		}
 	else{
 		o.ideaLeft=this.segs[num].ideaLeft;									// Same x
@@ -4160,12 +4164,22 @@ SHIVA_Draw.prototype.AddIdea=function() 								//	ADD IDEA NODE
 SHIVA_Draw.prototype.HighlightIdea=function() 							//	HIGHLIGHT IDEA NODE 
 {
 	var i,dd;
+	$("#shivaIdeaAddBut").remove();											// Take off add but
 	for (i=0;i<this.segs.length;++i) {										// For each seg
+		var wid=1;															// 1 pixel borders
 		dd="#shivaIdea"+i;													// Div id										
-		if (this.selectedItems[0] == i)										// If highlighted
-			$(dd).css("border","1px dashed red");							// Red outline
-		else																// Not highlit
-			$(dd).css("border","1px solid "+this.segs[i].ideaEdgeCol);		// Regular border
+		if (this.segs[i].ideaEdgeCol == -1)									// If col is none
+			$(dd).css("border","none");										// No border
+		else																// Had color
+			$(dd).css("border",wid+"px solid "+this.segs[i].ideaEdgeCol);	// Regular border
+		}
+	if (this.selectedItems.length)	{										// If highlighted
+		dd="#shivaIdea"+this.selectedItems[0];								// Div id										
+		$(dd).css("border","1px dashed red");								// Red outline
+		var x=$(dd).width()/2;												// Center
+		var y=$(dd).height();												// Bottom
+		var str="<div id='shivaIdeaAddBut' style='position:absolute;top:"+y+"px;left:"+x+"px'><img src='adddot.gif' onmouseup='shivaLib.dr.AddIdea(0)'></div>"
+		$(dd).append(str);													// Add add but
 		}
 }
 
@@ -4212,8 +4226,8 @@ SHIVA_Draw.prototype.MoveIdeaChildren=function(parent, dx, dy) 			//	MOVE IDEA C
 		if (this.segs[i].type != 5)											// If not an idea node
 			continue;														// Skip it
 		if (this.segs[i].ideaParent == parent) {							// If a child of parent									
-			this.segs[i].ideaLeft=Number(this.segs[i].ideaLeft)+dx;			// X
-			this.segs[i].ideaTop=Number(this.segs[i].ideaTop)+dy;			// Y
+			this.segs[i].ideaLeft=Number(this.segs[i].ideaLeft)+Number(dx);	// X
+			this.segs[i].ideaTop=Number(this.segs[i].ideaTop)+Number(dy);	// Y
 			$("#shivaIdea"+i).css("left",this.segs[i].ideaLeft+"px").css("top",this.segs[i].ideaTop+"px");
 			this.MoveIdeaChildren(i,dx,dy);									// Look for children
 			}

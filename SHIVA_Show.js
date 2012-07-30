@@ -1818,7 +1818,8 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 	this.map=wrap;
  	wrap.setOptions(ops);
     wrap.draw();
-	this.SendReadyMessage(true);											
+  	var _this=this;
+  	google.visualization.events.addListener(wrap,"ready", function() { _this.SendReadyMessage(true); });
 }
 
 SHIVA_Show.prototype.RunGlue=function(con, item, val, group) 						//	RUN GLUE

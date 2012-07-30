@@ -203,7 +203,7 @@
 					$("#elementsTable tr:eq("+i+") td").css("border","1px solid #990000");
 				}
   			}
- 		if (!items.length)
+ 		if (!shivaLib.cvs.elements.length)
 			$("<tr><td>No elements have been added yet. Add elements using the button below, or you can load a demo set by selecting <b>eStore</b> in the <b>Share as:</b> pulldown menu. Log in as <i>samples</i> and select the <i>Canvas Demo</i> element.<td></tr>").appendTo("#elementsTable");
 		str="<tr><td width='260' align='center' onclick='LoadElement()'><br/><button id='addNewElement'>Add new element</button></td></tr>";
 		$(str).appendTo("#elementsTable");
@@ -237,6 +237,7 @@
 	{
 		shivaLib.EasyFile("",
 				function(data) {
+					shivaLib.cvs.elements=[];
 					shivaLib.cvs.elements.push(data);
 					var i=shivaLib.cvs.elements.length-1;
 					if (!shivaLib.cvs.elements[i].shivaTitle)

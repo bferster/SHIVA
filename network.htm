@@ -190,7 +190,7 @@
 	function Draw(mode) 
 	{
 		if (shivaLib.drupalMan)
-			window.parent.drupalMan.postMessage("DataChanged=true","*");
+			window.parent.postMessage("DataChanged=true","*");
 		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
 	}
 

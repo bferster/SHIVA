@@ -1,17 +1,3 @@
-/*
-var myEvents={ events:[
-	{ type:"popup", start:"00:05", fadein:2, title:"This is a popup box", text:"This is <i>HTML formatted</i> text within a light grey box that faded in over 1 second, is draggable and has an icon.", url:"http://www.viseyes.org/shiva/icons/blue/book_alt2_16x14.png", frame: { draggable:"true",width:"150",left:"70%",closer:"true"}},
-	{ type:"image", start:"00:10", end:"00:15", click:"http://www.viseyes.org", fadein:2, fadeout:2, title:"75% opacity -- Click to go to viseyes.org", url:"http://www.viseyes.org/shiva/map.jpg", frame:{width:300,top:50,left:100,opacity:"75%" }},
-	{ type:"image", start:"00:15", end:"00:24", fadein:1, fadeout:2, hover:"mypop", title:"Video pauses<br>Hover over me!", player:"pause", url:"http://www.primaryaccess.org/test.jpg", frame:{width:120,top:20,left:"70%",color:"red" }},
-	{ type:"iframe", start:"00:25", end:"00:34", url:"http://www.primaryaccess.org", frame:{ border:"1",width:"600",left:"620",height:"600"}},
-	{ type:"menu", start:"00:35", title:"A quick quiz", done:"play()", url:"http://www.viseyes.org/shiva/icons/blue/question_mark_8x16.png", frame:{left:8,top:60,width:300},
-			       text:"When did Christopher Columbus sail to America? Hint:He sailed the ocean blue in...>>1942|popup(In the middle of WW2?)>>1493|popup(Close, but no cigar)>>1492|*popup(Yes! Columbus sailed the ocean blue in 1492)"},
-	{ type:"ask", start:"00:40", title:"Tell me about it", done:"play(5:00)", url:"http://www.viseyes.org/shiva/icons/blue/comment_stroke_16x14.png", text:"Find a scene that you think this scene reflects good instructional practice, and write a paragraph or two that describes what you saw.Hint:It is around 3:00>>2:45-3:15|popup(That's a good one!)|popup(That's not one I picked)", frame:{left:200,top:60,width:300}},
-	{ type:"popup", id:"mypop", title:"This goes away after mouse is out", url:"http://www.viseyes.org/shiva/icons/red/camera_12x12.png", frame:{top:60,left:220}}
-	]};					 
-
-*/
-
 function SHIVA_Event(parent) 											// CONSTRUCTOR
 {
 	var i;

@@ -50,6 +50,8 @@ SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 		this.DrawNetwork();
 	else if (group == 'Draw')
 		this.DrawOverlay();
+	else if (group == 'Webpage')
+		this.DrawWebpage();
 	if (ops["draw-1"])
 		this.AddOverlay();
 	var ud=ops["ud"];														// Get ud flag
@@ -176,23 +178,26 @@ SHIVA_Show.prototype.AddOverlaySeg=function(seg, init)					// ADD SEGMENT TO OVE
 
 SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 {
-	var o,i,col,ecol,ewid,a,cur,ctx,str,now,s,e;
+	var o,i,col,ecol,ewid,a,cur,ctx,str,now,s=0,e=36000;
 	var con="#"+this.container;
 	if (!this.g)															// If no graphics lib
 		this.g=new SHIVA_Graphics();										// Allocate it
 	if (!$("#shivaDrawCanvas").length) {									// No canvas yet	
+		var l=$(con).css("left");	var t=$(con).css("top");				// Get pos
+		if (l == "auto")	l="0px";										// Turn auto into 0
+		if (t == "auto")	t="0px";										// Turn auto into 0
 		str="<div id='shivaDrawDiv' style='position:absolute";				// Div
 		str+=";width:"+$(con).css("width");									// Make div
-		str+=";top:"+$(con).css("top");										// same as
-		str+=";left:"+$(con).css("left");									// container div
+		str+=";top:"+t;														// same as
+		str+=";left:"+l;													// container div
 		i=$(con).css("height").replace(/px/g,"");							// Get hgt
 		if (this.player)													// If a player object
 			i-=40;															// Don't hide controls
 		str+=";height:"+i+"px'/>";											// Set hgt
 		$('body').append(str);												// Add to dom								
 		this.g.CreateCanvas("shivaDrawCanvas","shivaDrawDiv");				// Create canvas
-		$("#shivaDrawCanvas").attr("left",$(con).css("left"));				// L
-		$("#shivaDrawCanvas").attr("top",$(con).css("top"));				// T
+		$("#shivaDrawCanvas").attr("left",l);								// Left
+		$("#shivaDrawCanvas").attr("top",t);								// Top
 		}
 	i=$(con).css("height").replace(/px/g,"");								// Get hgt
 	if (this.player)														// If a player object
@@ -211,12 +216,14 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 		o=this.overlay[i];													// Point at it
 		if (this.player) {													// If over a player
 			now=Math.floor(this.player.currentTime());						// Get time in seconds
-			v=o.s.split(":");												// Split
-			if (v.length == 1)												// No mins
-				v[1]=v[0],v[0]=0;											// Clear
-			s=Number(v[0]*60)+Number(v[1]);									// Set start
+			if (o.s) {														// If a start defined
+				v=o.s.split(":");											// Split
+				if (v.length == 1)											// No mins
+					v[1]=v[0],v[0]=0;										// Clear
+				s=Number(v[0]*60)+Number(v[1]);								// Set start
+				}
 			if (o.e == "end")	e=36000;									// End to 10 hrs
-			else{															// Get set end
+			else if (o.e) {													// Get set end
 				v=o.e.split(":");											// Split
 				if (v.length == 1)											// No mins
 					v[1]=v[0],v[0]=0;										// Clear
@@ -444,6 +451,19 @@ SHIVA_Show.prototype.Annotate=function() 												// SHOW ANNOTATION PALATTE
 	else this.dr.DrawPalette();																// Draw palette
 	this.Sound("click");																	// Click
 }
+
+
+//  WEBPAGE   /////////////////////////////////////////////////////////////////////////////////////////// 
+
+
+SHIVA_Show.prototype.DrawWebpage=function() 											//	DRAW WEBPAGE
+{
+	$("#"+this.container+"IF").remove();													// Remove old one
+	var	str="<iframe src='"+this.options.url+"' id='"+this.container+"IF' style='"; 		// Iframe
+	str+="width:"+$("#"+this.container).css("width")+";height:"+$("#"+this.container).css("height")+"'>";
+	$("#"+this.container).append(str);														// Add to container
+}
+
                                        
 //  NETWORK   /////////////////////////////////////////////////////////////////////////////////////////// 
 
@@ -1753,6 +1773,7 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 	var options=this.options;
 	var container=this.container;
 	var con="#"+container;
+  	var _this=this;
 	for (o in options) {
 		val="";
 		if (options[o]) {
@@ -1818,7 +1839,6 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 	this.map=wrap;
  	wrap.setOptions(ops);
     wrap.draw();
-  	var _this=this;
   	google.visualization.events.addListener(wrap,"ready", function() { _this.SendReadyMessage(true); });
 }
 
@@ -2648,8 +2668,6 @@ function SHIVA_Graphics() 																			// CONSTRUCTOR
 {
 	this.shadowOffX=this.shadowOffY=this.curShadowCol=this.curShadowBlur=0;	
 	this.composite="source-over";
-	this.spinnerIcon=new Image();
-	this.spinnerIcon.src="spinner.gif";
 }
 
 SHIVA_Graphics.prototype.CreateCanvas=function(id, con, wid, hgt, left, top) 							//	ADD NEW CANVAS
@@ -2920,18 +2938,6 @@ SHIVA_Graphics.prototype.GetImage=function(ctx, file, left, top, wid, hgt)						
 		ctx.drawImage(image,left,top,wid,hgt)
 		}
 	return image;
-}
-
-SHIVA_Graphics.prototype.ShowSpinner=function(ctx, x, y, size)											// WAIT SPINNER 
-{
-	if (!x) {																								
-		clearInterval(this.spinnerIcon.timer);																
-		ctx.drawImage(this.spinnerIcon,0,0,0,0);															
-		return;																								
-		}
-	if (!size)																								
-		size=36;																			
-	ctx.drawImage(this.spinnerIcon,x,y,size,size)
 }
 
 ///////// EVENTS   //////////

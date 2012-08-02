@@ -2115,7 +2115,53 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
    			str+="<textarea cols='12' rows='2' onChange='Draw()' id='"+id+"' onFocus='ShowHelp(\""+props[o].des+"\")'/>";
    		else if (props[o].opt == "hidden") 
    			str="<tr><td width='12'></td><td width='200'><input type='hidden' id='"+id+"'/>";
-   		else if (props[o].opt.indexOf('|') != -1) {
+   		else if (props[o].opt == "advanced") {
+			str="<tr><td width='12'></td><td colspan='3'><div id='accord'>";
+			k=-1;	l=0;
+			for (o in props) { 
+				++k;
+				if (props[o].opt == "advanced") {
+					j++;
+					str+="<h3><a href='#'>"+props[atts[k]].des+"</a></h3><div id='accord-"+(l++)+"'>";
+					for (j=0;j<props[o].def;++j) {
+						id2="itemInput"+l+"-"+j;
+						oo=atts[(k-0+1+j)];
+						if (props[oo].opt != "hidden")
+							str+="<span onClick='ShowHelp(this.innerText)'>"+props[oo].des+"</span><span style='position:absolute;left:142px;'>";
+				   		if (props[oo].opt == "color") {
+	   						str+="<input size='14' onChange='Draw()' style='text-align:center' id='"+id2+"'>";
+			    			str+="<div style='position:relative;border:1px solid;height:8px;width:9px;top:-16px;left:5px'"
+							str+=" onclick='shivaLib.ColorPicker(0,"+((l*100)+100-0+j)+")' id='"+id2+"C'/>";		   			
+							}				   			
+				   		else if (props[oo].opt == "colors") 
+	   						str+="<input size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.ColorPicker(2,"+((l*100)+100-0+j)+")' id='"+id2+"'>";
+			   			else if (props[oo].opt == "button") 
+   							str+="<button type='button' size='12' onChange='"+oo+"' id='"+id+"'>"+props[oo].def+"</button>";
+			   			else if (props[oo].opt == "slider")
+   							str+="<input style='width:90px' onChange='Draw(\"opacity\")' type='range' id='"+id+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";
+			   			else if (props[oo].opt == "list")
+   							str+="<textarea cols='12' rows='2' onChange='Draw()' id='"+id2+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";
+				   		else if (props[oo].opt == "hidden") 
+   							str+="<input type='hidden' id='"+id2+"'/>";
+			   			else if (props[oo].opt.indexOf('|') != -1) {
+			   				var v=props[oo].opt.split("|");
+							str+="<select id='"+id2+"' onChange='Draw()' onFocus='ShowHelp(\""+props[oo].des+"\")'>";
+							for (l=0;l<v.length;++l) {
+								if (v[l])
+									str+="<option>"+v[l]+"</option>";
+								}
+							str+="</select>";
+				   			}
+				   		else
+   							str+="<input size='14' onChange='Draw()' type='text' id='"+id2+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";
+				   		str+="</span></p>";
+				   		}
+					str+="</div>";
+					}
+				}
+			i=1000;		// Skip to end
+			}
+  		else if (props[o].opt.indexOf('|') != -1) {
    			var v=props[o].opt.split("|");
 			if (o == 'item') {
 				str="<tr><td width='12'></td><td colspan='3'><div id='accord'>";
@@ -2180,7 +2226,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 				$("#"+id).css('border-color',"#"+props[o].def); 
 				$("#"+id+"C").css('background-color',"#"+props[o].def); 
 				}
-		if (o == "item")
+		if ((o == "item") || (o == "advanced"))
 			break;
 		}			
 	str="<tr height='8'><td></td></tr>";

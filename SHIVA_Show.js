@@ -1423,7 +1423,7 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
    				rowData.push(a);
     			}
      		AddImages(rowData,imgHgt,showImage,showSlide,trans,wid);
-		 	this.SendReadyMessage(true);											
+		 	shivaLib.SendReadyMessage(true);											
   	     }
  	}
 

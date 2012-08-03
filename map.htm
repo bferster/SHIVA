@@ -44,6 +44,7 @@
 				<option>Web-page</option>
 				<option>KML</option>
 			</select> 
+		<br/><br/><label>Find on map: </label ><input size='40' id="address" style='font-size:x-small' type="text"/>&nbsp;&nbsp;
 		</p>		
 		<div id="helpDiv"> </div>
 	<div id="outputDiv" style="width:460px"> </div>
@@ -59,6 +60,7 @@
 	var shivaGroup="Map"
 	var oldEventListener=null;
 	var projection=null;
+	var geocoder=null;
 	
 	var props={
 		mapcenter: 					{	def:'38.03,-78.48,11', opt:'string',		des:'Center and zoom of map'}, 
@@ -127,6 +129,28 @@
 			window.addEventListener("message",shivaEventHandler,false);
 		else
 			window.attachEvent("message",shivaEventHandler);
+
+		$(function() {
+		    $("#address").autocomplete({
+		      source: function(request, response) {
+		        geocoder.geocode( {'address': request.term }, function(results, status) {
+		          response($.map(results, function(item) {
+		            return {
+		              label:  item.formatted_address,
+		              value: item.formatted_address,
+		              latitude: item.geometry.location.lat(),
+		              longitude: item.geometry.location.lng()
+		            }
+		          }));
+		        })
+		      },
+	     	select: function(event, ui) {
+			    var location = new google.maps.LatLng(ui.item.latitude, ui.item.longitude);
+		        shivaLib.map.setCenter(location);
+		      	}
+		    });
+  		});
+
 	});
 
 	function shivaEventHandler(e)
@@ -149,6 +173,7 @@
 	    this.setMap(map); 
 	} 
 	ProjectionHelperOverlay.prototype=new google.maps.OverlayView(); 
+	geocoder=new google.maps.Geocoder();
 	ProjectionHelperOverlay.prototype.draw=function() {};
  
 	function Draw()

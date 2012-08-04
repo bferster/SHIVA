@@ -346,9 +346,21 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 			$("#shivaDrawDiv").append(str);									// Add div
 			}
 		else if (o.x.length == 2)											// Polygon
-			this.g.DrawPolygon(ctx,-1,a,o.x,o.y,ecol,Math.max(ewid,2),false);			// Use line if only 2 points
+			this.g.DrawPolygon(ctx,-1,a,o.x,o.y,ecol,Math.max(ewid,2),false);		// Use line if only 2 points
 		else																// > 2 pts
 			this.g.DrawPolygon(ctx,o.color,a,o.x,o.y,ecol,ewid,(cur == true));	// Regular poly
+		if ((o.type == 0) && (o.arrow)) {									// If line arrow
+			var xx=[],yy=[];												// Arrow arrays
+			var n=o.x.length-1;												// Last point
+			var aa=Math.atan2(o.y[n]-o.y[n-1],o.x[n]-o.x[n-1]);				// Angle of line
+			var h=Math.max(12,ewid*4);										// Set size
+			xx[0]=o.x[n]-h*Math.cos(aa-Math.PI/6),
+			yy[0]=o.y[n]-h*Math.sin(aa-Math.PI/6);			
+ 			xx[1]=o.x[n];	yy[1]=o.y[n];									// Tip point
+			xx[2]=o.x[n]-h*Math.cos(aa+Math.PI/6),
+			yy[2]=o.y[n]-h*Math.sin(aa+Math.PI/6);			
+ 			this.g.DrawPolygon(ctx,ecol,a,xx,yy,ecol,0,false);			// Regular draw arrow
+			}
 		}
 	if ((shivaLib.dr) && (shivaLib.dr.curTool == 6)) 						// If in idea map editing mode
 		$.proxy(shivaLib.dr.HighlightIdea(),shivaLib.dr);					// Set highlight
@@ -3378,6 +3390,7 @@ function SHIVA_Draw(container, hidePalette) 							// CONSTRUCTOR
 	this.textColor="#000000";
 	this.boxColor="-1";
 	this.edgeWidth="30";
+	this.arrow=false;
 	this.alpha=100;
 	this.curTool=0;
 	this.imageURL="";
@@ -3511,8 +3524,10 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 		str+="<tr><td>&nbsp;&nbsp;Snap to grid?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";
 		if (tool == 2)
 			str+="<tr><td>&nbsp;&nbsp;Round box?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
-		else if (tool == 0)
-			str+="<tr><td>&nbsp;&nbsp;Draw curves</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
+		else if (tool == 0) {
+			str+="<tr><td>&nbsp;&nbsp;Draw curves?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
+			str+="<tr><td>&nbsp;&nbsp;Draw arrow?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"arrow\",this.checked)' type='checkbox' id='arrow'></td></tr>";
+			}		
 		str+="<tr><td>&nbsp;&nbsp;Color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"color\")' onChange='shivaLib.dr.SetVal(\"color\",this.value)' type='text' id='color'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Visibility</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"alpha\",this.value)' type='range' id='alpha'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"edgeColor\")' onChange='shivaLib.dr.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";
@@ -3597,6 +3612,7 @@ SHIVA_Draw.prototype.SetMenuProperties=function() 						//	SET MENU PROPERTIES
 	$("#boxColor").val(txt); 												// Set text
 	$("#snap").attr("checked",this.snap);									// Check it
 	$("#curve").attr("checked",this.curve);									// Check it
+	$("#arrow").attr("checked",this.arrow);									// Check it
 	$("#edgeWidth").val(this.edgeWidth); 									// Set edge width
 	$("#alpha").val(this.alpha); 											// Set alpha
 	$("#textSize").val(this.textSize); 										// Set text size
@@ -3709,6 +3725,7 @@ SHIVA_Draw.prototype.AddDot=function(x,y,up) 							// ADD DOT
 			o.color=this.color;												// Set color from property menu
 			o.edgeColor=this.edgeColor;										// Edge color
 			o.edgeWidth=this.edgeWidth;										// Width
+			o.arrow=this.arrow;												// Arrow?
 			}
 		if (o.type == 3) {													// Text
 			o.boxColor=this.boxColor;										// Box color
@@ -3775,6 +3792,7 @@ SHIVA_Draw.prototype.SetVal=function(prop, val) 						//	SET VALUE
 	this[prop]=val;															// Set property
 	if ((this.curTool < 3) && (num != -1)) {								// If in polygon, cir, or bar
 		this.segs[num].curve=this.curve;									// Set prop
+		this.segs[num].arrow=this.arrow;									// Set prop
 		this.segs[num].edgeColor=this.edgeColor;							// of each
 		this.segs[num].edgeWidth=this.edgeWidth;							// from 
 		this.segs[num].alpha=this.alpha;									// property
@@ -3804,6 +3822,7 @@ SHIVA_Draw.prototype.SetVal=function(prop, val) 						//	SET VALUE
 				this.segs[num].color=this.color;							// Set prop
 				this.segs[num].edgeColor=this.edgeColor;					// of each
 				this.segs[num].edgeWidth=this.edgeWidth;					// from 
+				this.segs[num].arrow=this.arrow;							// property
 				}
 			else if (this.segs[num].type == 3) {							// Text
 				this.segs[num].boxColor=this.boxColor;							
@@ -4137,6 +4156,7 @@ SHIVA_Draw.prototype.AddSelect=function(x, y, shiftKey)					// SELECT SEGMENT/DO
 		this.endTime=o.e;													// Everyone has end
 		this.curve=o.curve;													// Everyone has curce
 		if (o.type < 3)	{													// Line, cir, box	
+			this.arrow=o.arrow;												
 			this.curve=o.curve;												
 			this.color=o.color;							
 			this.edgeColor=o.edgeColor;

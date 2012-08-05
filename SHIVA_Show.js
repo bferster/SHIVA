@@ -1689,7 +1689,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function(items) 										//	DRAW MAP OVERL
 	var i,j,latlng,v,ops;
 	var _this=this;
 	for (i=0;i<items.length;++i) {
-		items[i].layerType = "Drawn"
+//		items[i].layerType = "Drawn"
 		ops=new Object();
 		if (items[i].obj) 
 			items[i].obj.setMap(null);

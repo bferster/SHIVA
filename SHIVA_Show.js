@@ -1689,7 +1689,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function(items) 										//	DRAW MAP OVERL
 	var i,j,latlng,v,ops;
 	var _this=this;
 	for (i=0;i<items.length;++i) {
-//		items[i].layerType="Drawn"
+		items[i].layerType = "Drawn"
 		ops=new Object();
 		if (items[i].obj) 
 			items[i].obj.setMap(null);
@@ -1766,15 +1766,15 @@ SHIVA_Show.prototype.DrawLayerControlBox=function(items, show)			// DRAW LAYER C
 
 ////////////// CUSTOM OVERLAY //////////////
 
-//	ShivaCustomMapOverlay.prototype=new google.maps.OverlayView();			
-
+	
+if ((typeof(google) == "object") && (google.maps))
+	ShivaCustomMapOverlay.prototype=new google.maps.OverlayView();			
 
 function ShivaCustomMapOverlay(bounds, data)							// CUSTOM MAP OVERLAY
 {
 var swBound = new google.maps.LatLng(62.281819, -150.287132);
 var neBound = new google.maps.LatLng(62.400471, -150.005608);
 bounds = new google.maps.LatLngBounds(swBound, neBound);
-
 	this.bounds_=bounds;													// Set bounds
   	this.data_= data;														// Drawing data
  	this.div_=null;															// Container div

@@ -1692,6 +1692,9 @@ SHIVA_Show.prototype.DrawMapOverlays=function(items) 										//	DRAW MAP OVERL
 		ops=new Object();
 		if (items[i].obj) 
 			items[i].obj.setMap(null);
+		if (items[i].layerType == "Drawn") {
+			items[i].obj=new ShivaCustomMapOverlay()
+			}
 		if (items[i].layerType == "Marker") {
 			items[i].obj=new google.maps.Marker();
 			v=items[i].layerSource.split(",")
@@ -1759,6 +1762,58 @@ SHIVA_Show.prototype.DrawLayerControlBox=function(items, show)			// DRAW LAYER C
 	for (i=0;i<items.length;++i) 											// For each item
 		$("#shcb"+i).click( function() { $.proxy(_this.SetLayer(this.id.substr(4),this.checked.toString()),_this); } );  // Add handler
 }
+
+////////////// CUSTOM OVERLAY //////////////
+
+function ShivaCustomMapOverlay(bounds, data)							// CUSTOM MAP OVERLAY
+{
+var swBound = new google.maps.LatLng(62.281819, -150.287132);
+var neBound = new google.maps.LatLng(62.400471, -150.005608);
+bounds = new google.maps.LatLngBounds(swBound, neBound);
+
+	this.bounds_=bounds;													// Set bounds
+  	this.data_= data;														// Drawing data
+ 	this.div_=null;															// Container div
+  }
+
+ShivaCustomMapOverlay.prototype=new google.maps.OverlayView();			// CONSTRUCTOR
+
+ShivaCustomMapOverlay.prototype.onAdd=function()						// ADD HANDLER
+{
+	var div=document.createElement('div');									// Layer div
+	div.style.border="none";												
+	div.style.borderWidth="0px";
+	div.style.position="absolute";
+
+var img = document.createElement("img");
+img.src="http://www.viseyes.org/shiva/map.jpg";
+img.style.width = "100%";
+img.style.height = "100%";
+div.appendChild(img);
+
+	this.div_=div;															// Set div
+	var panes=this.getPanes();												// Get list of panes
+	panes.overlayLayer.appendChild(div);									// Add to overlay pane
+}
+
+ShivaCustomMapOverlay.prototype.draw=function()							// DRAW HANDLER
+{
+	var overlayProjection=this.getProjection();								// Get current proj
+	var sw=overlayProjection.fromLatLngToDivPixel(this.bounds_.getSouthWest());  // Get corner
+	var ne=overlayProjection.fromLatLngToDivPixel(this.bounds_.getNorthEast());	 // Get corner
+	this.div_.style.left=sw.x+'px';											// Left
+	this.div_.style.top=ne.y+'px';											// Top
+	this.div_.style.width=(ne.x-sw.x)+'px';									// Width
+	this.div_.style.height=(sw.y-ne.y)+'px';								// Hgt
+}
+
+ShivaCustomMapOverlay.prototype.onRemove=function()							// REMOVE HANDLER
+{
+	this.div_.parentNode.removeChild(this.div_);
+  	this.div_=null;
+}
+
+////////////// LAND MAP ///////////////
 
 SHIVA_Show.prototype.AddClearMapStyle=function(map)						// SET MAP STYLE
 {

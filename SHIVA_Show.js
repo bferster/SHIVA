@@ -248,7 +248,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 				str+=" readonly='readonly'"; 								// Makes it read only
 			str+=" id='shtx"+i+"' onchange='shivaLib.dr.SetShivaText(this.value,"+i+")' "
 			str+="style='overflow:hidden;vertical-align:middle;";			// Textarea style
-			if ((shivaLib.dr) && (shivaLib.dr.curTool != 6))				// If not idea editing
+			if ((!shivaLib.dr) || ((shivaLib.dr) && (shivaLib.dr.curTool != 6)))	 // If not idea editing
 				str+="resize:none;"; 										// Remove resizer
 			str+="height:"+o.ideaHgt+"px;width:"+o.ideaWid+"px;color:"+o.ideaTextCol+";" // Size/color textarea
 			if (o.ideaBold)													// If bold
@@ -273,7 +273,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 				}
 
 			if ((shivaLib.dr) && (shivaLib.dr.curTool == 6)) {				// If in idea map editing mode
-	
+
 				$("#shtx"+i).resizable( { stop: function(event,ui) {		// ON RESIZE HANDLER
 					var num=ui.originalElement[0].id.substr(4);				// Get index
 					shivaLib.dr.segs[num].ideaWid=ui.size.width-4;			// Set width
@@ -308,7 +308,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 		ewid=Math.floor(o.edgeWidth/10)+1;									// Edge is .5-10							 															
 		a=Number(o.alpha)/100;												// Alpha is 0-1											
 		if (o.edgeColor == -1)	ewid=0;										// None has no width
-		if (o.x.length < 2)													// If only 1 point
+		if ((o.x) && (o.x.length < 2))										// If only 1 point
 			continue;														// Skip it
 		if (o.type == 1) 													// Circle
 			this.g.DrawCircle(ctx,o.color,a,o.x[0],o.y[0],Math.abs(o.x[0]-o.x[1]),ecol,ewid);
@@ -345,11 +345,11 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 			str+="<img id=shimi"+i+" src='"+o.imageURL+"' width='"+w+"'/>";	// Add img tag
 			$("#shivaDrawDiv").append(str);									// Add div
 			}
-		else if (o.x.length == 2)											// Polygon
-			this.g.DrawPolygon(ctx,-1,a,o.x,o.y,ecol,Math.max(ewid,2),false);		// Use line if only 2 points
-		else																// > 2 pts
+		else if ((o.x) && (o.x.length == 2))								// Polygon
+			this.g.DrawPolygon(ctx,-1,a,o.x,o.y,ecol,Math.max(ewid,2),false);	// Use line if only 2 points
+		else if (o.x) 														// > 2 pts
 			this.g.DrawPolygon(ctx,o.color,a,o.x,o.y,ecol,ewid,(cur == true));	// Regular poly
-		if ((o.type == 0) && (o.arrow)) {									// If line arrow
+		if ((o.x) && (o.type == 0) && (o.arrow)) {							// If line arrow
 			var xx=[],yy=[];												// Arrow arrays
 			var n=o.x.length-1;												// Last point
 			var aa=Math.atan2(o.y[n]-o.y[n-1],o.x[n]-o.x[n-1]);				// Angle of line
@@ -1766,9 +1766,8 @@ SHIVA_Show.prototype.DrawLayerControlBox=function(items, show)			// DRAW LAYER C
 
 ////////////// CUSTOM OVERLAY //////////////
 
-	
-if ((typeof(google) == "object") && (google.maps))
-	ShivaCustomMapOverlay.prototype=new google.maps.OverlayView();			
+if ((typeof(google) == "object") && (google.maps))							// If lib loaded
+	ShivaCustomMapOverlay.prototype=new google.maps.OverlayView();			// Inherit from Google maps overlay class
 
 function ShivaCustomMapOverlay(bounds, data)							// CUSTOM MAP OVERLAY
 {
@@ -3743,14 +3742,14 @@ SHIVA_Draw.prototype.DrawWireframes=function(clear) 					// DRAW OVERLAY
 				break;														// Quit
 				}
 		o=this.segs[i];														// Point at seg
-		if (o.type == 5)													// If an idea map node
+		if ((o.type == 5) || (!o.x))										// If an idea map node or no x's
 			continue;														// Skip it
-		if (o.type == 1) 													// If a circle
-			o.y[1]=o.y[0];													// Make control line horizonal
-		if (o.type < 2) 													// Lines/Circle
+		if (o.type == 0) 													// Lines
 			shivaLib.g.DrawPolygon(this.ctx,-1,1,o.x,o.y,col,1,false);		// Draw lines
-		if (o.type == 1) 													// Circle
+		else if (o.type == 1) {												// Circle
+			o.y[1]=o.y[0];													// Make control line horizonal
 			shivaLib.g.DrawCircle(this.ctx,-1,1,o.x[0],o.y[0],Math.abs(o.x[0]-o.x[1]),col,1);
+			}
 		else if ((o.type) && (o.type < 5))									// Box, text, image
 			shivaLib.g.DrawBar(this.ctx,-1,1,o.x[0],o.y[0],o.x[1],o.y[1],col,1);// Draw bar
 		for (j=0;j<o.x.length;++j)	{										// For each point
@@ -4159,7 +4158,7 @@ SHIVA_Draw.prototype.AddSelect=function(x, y, shiftKey)					// SELECT SEGMENT/DO
 			}
 		for (i=0;i<this.segs.length;++i) {									// For each seg
 			o=this.segs[i];													// Point at seg
-			if (o.type == 5)												// If an idea map node
+			if ((!o.x) || (o.type == 5))										// If an idea map node or no x
 				continue;													// Skip it
 			for (j=0;j<o.x.length;++j) 										// For each dot in seg
 				if ((x > o.x[j]-6) && (x < o.x[j]+6) && (y > o.y[j]-6) && (y < o.y[j]+6)) { // If near

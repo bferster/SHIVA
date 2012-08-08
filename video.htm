@@ -66,21 +66,23 @@
 		}
 	
 	var helpText=new Array();
-	helpText['Source of video']="This is the unique ID YouTube assigns to the URL of a video. It is a jumble of random letters, such as this: zDZFcDGpL4U, extracted from this URL: http://www.youtube.com/watch?v=zDZFcDGpL4U.";
-	helpText['Starting time (m:s)']="Sets the starting time, in seconds, when the video will start playing.";
-	helpText['Ending time (m:s)']="Sets the ending time, in seconds, when the video will stop playing.";
-	helpText['Auto-play?']="Sets Auto-play and determines if the video will play when the page is loaded";
+	helpText['Source of video']="This is the unique ID YouTube assigns to the URL of a video. Click on the text box to the right to type or paste the jumble of random letters, such as this: zDZFcDGpL4U, extracted from this URL: http://www.youtube.com/watch?v=zDZFcDGpL4U.";
+	helpText['Starting time (m:s)']="Sets the starting time, in seconds, when the video will start playing.  Click on the text box to the right to enter a start time.  For example, if you want the video to start at 1 minute and 45 seconds into the video type 1:45 into the text box.";
+	helpText['Ending time (m:s)']="Sets the ending time, in seconds, when the video will stop playing.  Click on the text box to the right to enter an end time.  For example, if you want the video to end at 2 minute and 50 seconds into the video type 2:50 into the text box.";
+	helpText['Auto-play?']="Sets Auto-play and determines if the video will play when the page is loaded.  Click on the pull-down menu to the right to choose 'true' or 'false'.";
 	helpText['Hide controls?']="This will hide the players controls when embedded in a project.";
 	helpText['Playlists']="You can string a number of videos together by typing their IDs here, separated by commas."
-	helpText['Audio volume']="Determines the initial setting of the audio volume.";
+	helpText['Audio volume']="Determines the initial setting of the audio volume.  Enter a number from 0 to 100 in the text box to the right.";
 	helpText['Loop playlists?']="If set to 'true', playlists will play in a continuous loop.";
-	helpText['Height of player']="Sets the height of the video in pixels, including controls.";
-	helpText['Width of player']="Sets the width of the video in pixels.";
-	helpText['Duration of clip']="Shows the duration of the video clip.";	
-	helpText['Width of player']="Set the width in pixels of the video";	
-	helpText['OVERVIEW']="This will allow you to specify a video clip from YouTube to play in an embedded player. The start and ending times can be specified. In addition, you can play a sequence of videos into a playlist.";
-	helpText['Enable user draw?']="Setting this to true will allow users to add annotations to the display.";	helpText['OVERVIEW']="This will allow you to specify a video clip from YouTube or VIMEO to play in an embedded player. The start and ending times can be specified.";
-
+	helpText['Height of player']="Sets the height of the video in pixels, including controls.  Click in the text box to the right to enter a number between 1 and 100000.";
+	helpText['Duration of clip']="Shows the duration of the video clip.  Click on the text box to the right to enter a time duration for your video.  For example, if you want the video to last for only 2 minute and 50 seconds then type 2:50 into the text box.";	
+	helpText['Width of player']="Set the width in pixels of the video.  Click in the text box to the right to enter a number between 1 and 100000.";	
+	helpText['OVERVIEW']+="Customize your timeline with the options available.  To add new bands click the + button.  Customize this band as needed.  Or remove a band by click the trash can button.<br/><br/>";
+	helpText['OVERVIEW']+="Below the customization box, click on the Save as pull-down menu. Choose how you want to save your timeline.<br/><br/>";
+	helpText['OVERVIEW']+="Want to add text, line drawings, circles or pictures to your project?  Just click on the grey colored pencil in a circle button below the attributes box and to activate the SHIVA drawing tool.<br/><br/>";
+	helpText['OVERVIEW']+="The <a href='https://wiki.shanti.virginia.edu/x/tZy1AQ' target='_blank'> UVa Knowledge Base</a> contains additional information about customizing your SHIVA Timeline Tool.";
+	helpText['Enable user draw?']="Setting this to true will allow users to add annotations to the display.";
+	
 ///////// INIT  /////////////
 
 	$(document).ready(function() {

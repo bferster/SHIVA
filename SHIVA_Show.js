@@ -1507,7 +1507,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
     if (options.autoplay == "true")
     	this.player.play();
  	this.player.on("timeupdate",drawOverlay);
-	this.player.on("loadeddata",onLoaded);
+	this.player.on("loadeddata",onVidLoaded);
 
 	if (this.ev) 
 		t=this.ev.events;
@@ -1517,7 +1517,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 	if ((t) && (t.length))	
 		this.ev.AddEvents(t);
 
- 	function onLoaded()	{
+ 	function onVidLoaded()	{
 		var v=shivaLib.options.start.split(":");
 		if (v.length == 1)
 			v[1]=v[0],v[0]=0;

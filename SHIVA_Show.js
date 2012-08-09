@@ -345,9 +345,9 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 			str+="<img id=shimi"+i+" src='"+o.imageURL+"' width='"+w+"'/>";	// Add img tag
 			$("#shivaDrawDiv").append(str);									// Add div
 			}
-		else if ((o.x) && (o.x.length == 2))								// Polygon
+		else if ((o.x) && (o.x.length == 2) && (!o.arrow))					// Polygon
 			this.g.DrawPolygon(ctx,-1,a,o.x,o.y,ecol,Math.max(ewid,2),false);	// Use line if only 2 points
-		else if (o.x) 														// > 2 pts
+		else if ((o.x) && (!o.arrow)) 										// > 2 pts
 			this.g.DrawPolygon(ctx,o.color,a,o.x,o.y,ecol,ewid,(cur == true));	// Regular poly
 		if ((o.x) && (o.type == 0) && (o.arrow)) {							// If line arrow
 			var xx=[],yy=[];												// Arrow arrays
@@ -359,7 +359,14 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
  			xx[1]=o.x[n];	yy[1]=o.y[n];									// Tip point
 			xx[2]=o.x[n]-h*Math.cos(aa+Math.PI/6),
 			yy[2]=o.y[n]-h*Math.sin(aa+Math.PI/6);			
- 			this.g.DrawPolygon(ctx,ecol,a,xx,yy,ecol,0,false);			// Regular draw arrow
+ 			this.g.DrawPolygon(ctx,ecol,a,xx,yy,ecol,0,false);				// Regular draw arrow
+			o.x[n]=((xx[2]-xx[0])/2)+xx[0];									// Mid x
+			o.y[n]=((yy[2]-yy[0])/2)+yy[0];									// Mid y
+			if (o.x.length == 2)											// Only 2 pyt
+				this.g.DrawPolygon(ctx,-1,a,o.x,o.y,ecol,Math.max(ewid,2),false);	// Use line if only 2 points
+			else
+				this.g.DrawPolygon(ctx,o.color,a,o.x,o.y,ecol,ewid,(cur == true));	// Regular poly
+			o.x[n]=xx[1];	o.y[n]=yy[1];									// Restore last point
 			}
 		}
 	if ((shivaLib.dr) && (shivaLib.dr.curTool == 6)) 						// If in idea map editing mode

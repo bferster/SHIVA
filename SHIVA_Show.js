@@ -237,7 +237,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 		$("#shivaIdea"+i).remove();											// Remove idea node
 		if (o.type == 5) {													// Idea map
 			var dd="#shivaIdea"+i;											// Div id										
-			str="<div id='"+dd.substr(1)+"' onchange='shivaLib.dr.SetShivaText(this.value,"+i+")' ";
+			str="<div id='"+dd.substr(1)+"'";
 			str+="style='position:absolute;padding:8px;font-family:sans-serif;text-align:center;";
 			str+="border:1px solid "+o.ideaEdgeCol+";background-color:"+o.ideaBackCol+";";
 			str+="left:"+o.ideaLeft+"px;top:"+o.ideaTop+"px;'>";

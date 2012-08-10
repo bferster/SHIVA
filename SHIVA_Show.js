@@ -48,8 +48,11 @@ SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 		this.DrawChart();
 	else if (group == 'Network')
 		this.DrawNetwork();
-	else if (group == 'Draw')
+	else if (group == 'Draw') {
+		if (ops.width)	$("#"+this.container).css("width",ops.width+"px");
+		if (ops.height)	$("#"+this.container).css("height",ops.height+"px");
 		this.DrawOverlay();
+		}
 	else if (group == 'Webpage')
 		this.DrawWebpage();
 	if (ops["draw-1"])

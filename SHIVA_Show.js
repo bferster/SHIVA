@@ -52,6 +52,7 @@ SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 		if (ops.width)	$("#"+this.container).css("width",ops.width+"px");
 		if (ops.height)	$("#"+this.container).css("height",ops.height+"px");
 		this.DrawOverlay();
+		this.SendReadyMessage(true);											
 		}
 	else if (group == 'Webpage')
 		this.DrawWebpage();

@@ -188,6 +188,8 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 	var l=$(con).css("left");	var t=$(con).css("top");					// Get pos
 	if (l == "auto")	l="0px";											// Turn auto into 0
 	if (t == "auto")	t="0px";											// Turn auto into 0
+	
+	trace(l)
 	i=$(con).css("height").replace(/px/g,"");								// Get hgt
 	if (this.player)														// If a player object
 		i-=40;																// Don't hide controls
@@ -200,8 +202,6 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 		$('body').append(str);												// Add to dom								
 		this.g.CreateCanvas("shivaDrawCanvas","shivaDrawDiv");				// Create canvas
 		}
-	$("#shivaDrawCanvas").attr("left",l);									// Left canvas
-	$("#shivaDrawCanvas").attr("top",t);									// Top
 	$("#shivaDrawCanvas").attr("width",$(con).css("width"));				// Wid
 	$("#shivaDrawCanvas").attr("height",i+"px");							// Hgt
 	$("#shivaDrawDiv").css("left",l+"px");									// Left div

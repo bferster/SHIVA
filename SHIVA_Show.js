@@ -188,21 +188,18 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 	var l=$(con).css("left");	var t=$(con).css("top");					// Get pos
 	if (l == "auto")	l="0px";											// Turn auto into 0
 	if (t == "auto")	t="0px";											// Turn auto into 0
+	i=$(con).css("height").replace(/px/g,"");								// Get hgt
+	if (this.player)														// If a player object
+		i-=40;																// Don't hide controls
 	if (!$("#shivaDrawCanvas").length) {									// No canvas yet	
 		str="<div id='shivaDrawDiv' style='position:absolute";				// Div
 		str+=";width:"+$(con).css("width");									// Make div
 		str+=";top:"+t;														// same as
 		str+=";left:"+l;													// container div
-		i=$(con).css("height").replace(/px/g,"");							// Get hgt
-		if (this.player)													// If a player object
-			i-=40;															// Don't hide controls
 		str+=";height:"+i+"px'/>";											// Set hgt
 		$('body').append(str);												// Add to dom								
 		this.g.CreateCanvas("shivaDrawCanvas","shivaDrawDiv");				// Create canvas
 		}
-	i=$(con).css("height").replace(/px/g,"");								// Get hgt
-	if (this.player)														// If a player object
-		i-=40;																// Don't hide controls
 	$("#shivaDrawCanvas").attr("left",l);									// Left canvas
 	$("#shivaDrawCanvas").attr("top",t);									// Top
 	$("#shivaDrawCanvas").attr("width",$(con).css("width"));				// Wid

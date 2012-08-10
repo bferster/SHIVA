@@ -185,10 +185,10 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 	var con="#"+this.container;
 	if (!this.g)															// If no graphics lib
 		this.g=new SHIVA_Graphics();										// Allocate it
+	var l=$(con).css("left");	var t=$(con).css("top");					// Get pos
+	if (l == "auto")	l="0px";											// Turn auto into 0
+	if (t == "auto")	t="0px";											// Turn auto into 0
 	if (!$("#shivaDrawCanvas").length) {									// No canvas yet	
-		var l=$(con).css("left");	var t=$(con).css("top");				// Get pos
-		if (l == "auto")	l="0px";										// Turn auto into 0
-		if (t == "auto")	t="0px";										// Turn auto into 0
 		str="<div id='shivaDrawDiv' style='position:absolute";				// Div
 		str+=";width:"+$(con).css("width");									// Make div
 		str+=";top:"+t;														// same as
@@ -199,15 +199,17 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 		str+=";height:"+i+"px'/>";											// Set hgt
 		$('body').append(str);												// Add to dom								
 		this.g.CreateCanvas("shivaDrawCanvas","shivaDrawDiv");				// Create canvas
-		$("#shivaDrawCanvas").attr("left",l);								// Left
-		$("#shivaDrawCanvas").attr("top",t);								// Top
 		}
 	i=$(con).css("height").replace(/px/g,"");								// Get hgt
 	if (this.player)														// If a player object
 		i-=40;																// Don't hide controls
-	$("#shivaDrawCanvas").attr("width",$(con).css("width"));				// Set wid
+	$("#shivaDrawCanvas").attr("left",l);									// Left canvas
+	$("#shivaDrawCanvas").attr("top",t);									// Top
+	$("#shivaDrawCanvas").attr("width",$(con).css("width"));				// Wid
 	$("#shivaDrawCanvas").attr("height",i+"px");							// Hgt
-	$("#shivaDrawDiv").css("width",$(con).css("width"));					// Set wid
+	$("#shivaDrawDiv").css("left",l+"px");									// Left div
+	$("#shivaDrawDiv").css("top",t+"px");									// Top
+	$("#shivaDrawDiv").css("width",$(con).css("width"));					// Wid
 	$("#shivaDrawDiv").css("height",i+"px");								// Hgt
 	ctx=$("#shivaDrawCanvas")[0].getContext('2d');							// Get context
 	ctx.clearRect(0,0,1600,1600);											// Clear canvas

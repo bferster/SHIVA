@@ -54,10 +54,8 @@ SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 		this.DrawOverlay();
 		this.SendReadyMessage(true);											
 		}
-	else if (group == 'Webpage') {
+	else if (group == 'Webpage')
 		this.DrawWebpage();
-		this.SendReadyMessage(true);											
-		}
 	if (ops["draw-1"])
 		this.AddOverlay();
 	var ud=ops["ud"];														// Get ud flag
@@ -486,6 +484,7 @@ SHIVA_Show.prototype.DrawWebpage=function() 											//	DRAW WEBPAGE
 	var	str="<iframe src='"+this.options.url+"' id='"+this.container+"IF' style='"; 		// Iframe
 	str+="width:"+$("#"+this.container).css("width")+";height:"+$("#"+this.container).css("height")+"'>";
 	$("#"+this.container).append(str);														// Add to container
+	this.SendReadyMessage(true);															// Send ready message									
 }
 
                                        

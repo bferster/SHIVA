@@ -57,7 +57,7 @@
 	helpText['Height of drawing']="The height of the drawing in pixels.  Click on the text box to the right to enter a number between 1 and 100000."; 
 	helpText['Width of drawing']="The width of the drawing in pixels.  Click on the text box to the right to enter a number between 1 and 100000."; 
 	helpText['Enable user draw?']="Setting this to true will allow users to add annotations to the display when published.";	
-	helpText['OVERVIEW']="Daw provides a simple annotation tool, as well as a simple idea mapping ability. Those annotations can be lines, polygons, circles, boxes, text, icons, and images.<br/><br/> The lightbulb icon provides simple way to create Idea maps. Idea maps (also known as mind maps or concept maps), consist of a series of idea boxes containing text. These idea boxes can be linked with one another, with lines showing the connections between them forming tree-like hierarchies that help show processes and relationships.";
+	helpText['OVERVIEW']="Draw provides a simple annotation tool, as well as a simple idea mapping ability. Those annotations can be lines, polygons, circles, boxes, text, icons, and images.<br/><br/> The lightbulb icon provides simple way to create Idea maps. Idea maps (also known as mind maps or concept maps), consist of a series of idea boxes containing text. These idea boxes can be linked with one another, with lines showing the connections between them forming tree-like hierarchies that help show processes and relationships.";
 
 ///// INIT  /////////////
 	
@@ -68,6 +68,8 @@
 		ReEdit();
 		ShowHelp("startup");
 		shivaLib.Annotate();
+		$("#shivaDrawPaletteDiv").css("left","45px")
+		$("#shivaDrawPaletteDiv").css("top","250px")
 		if (window.addEventListener) 
 			window.addEventListener("message",shivaEventHandler,false);
 		else

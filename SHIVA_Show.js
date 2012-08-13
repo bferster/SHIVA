@@ -189,8 +189,6 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 	var l=$(con).css("left");	var t=$(con).css("top");					// Get pos
 	if (l == "auto")	l="0px";											// Turn auto into 0
 	if (t == "auto")	t="0px";											// Turn auto into 0
-	
-	trace(l)
 	i=$(con).css("height").replace(/px/g,"");								// Get hgt
 	if (this.player)														// If a player object
 		i-=40;																// Don't hide controls
@@ -459,9 +457,8 @@ SHIVA_Show.prototype.FillElement=function(table, query) 								// FILL ELEMENT 
 			}
 		this.map.draw();																	// Redraw
 		}
-	else if (group == "Dialog") {															// Google api
-		
-		}
+	else if (group == "Dialog") {															// Infobox
+	}
 }
 
 SHIVA_Show.prototype.Annotate=function() 												// SHOW ANNOTATION PALATTE
@@ -490,7 +487,7 @@ SHIVA_Show.prototype.DrawWebpage=function() 											//	DRAW WEBPAGE
                                        
 //  NETWORK   /////////////////////////////////////////////////////////////////////////////////////////// 
 
-SHIVA_Show.prototype.DrawNetwork=function() 												//	DRAW NETWORK
+SHIVA_Show.prototype.DrawNetwork=function() 											//	DRAW NETWORK
 {
 	if (!this.jit)
 		this.jit=new VIZ(this.container);

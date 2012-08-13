@@ -26,8 +26,6 @@ function SHIVA_Event(parent) 											// CONSTRUCTOR
 	str+=";height:"+i+"px'/>";												// Set hgt
 	$('body').append(str);													// Add to dom								
 	$("#shivaEventDiv").css("z-index",1999);								// Force on top
-//	this.AddEvents(myEvents.events);										
-	
 	this.Do("Startup");														// Save undo
 }
 
@@ -235,7 +233,7 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 	this.par.ShowLightBox(350,20,title,str)									// Create light box
 	$("#saveBut").button().click(function() { _this.SaveEditedEvent(num,false); $("#shivaLightBoxDiv").remove();});
 	$("#deleteBut").button().click(function() { _this.SaveEditedEvent(num,true); $("#shivaLightBoxDiv").remove();});
-	$("#cancelBut").button().click(function() { if (newEvent)_thisSaveEditedEvent(num,true); $("#shivaLightBoxDiv").remove();});
+	$("#cancelBut").button().click(function() { if (newEvent) _this.SaveEditedEvent(num,true); $("#shivaLightBoxDiv").remove();});
 	$('#etabs').tabs();														// Init jqueryui
 	for (key in o)															// For each key
 		$("#"+key).val(o[key]);												// Set field

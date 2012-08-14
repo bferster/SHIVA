@@ -1872,7 +1872,7 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 					ops[v[0]][v[1]][v[2]]=val;						// Add third
 				}
 			}
-		if ((val.indexOf(",") != -1) && (o != "query")) {
+		if ((val.indexOf(",") != -1) && (o != "query") && (o != "title")) {
 			if (val) {
 				array=true;
 				if (val.indexOf('=') == -1)
@@ -1927,6 +1927,7 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
  		for (i=0;i<v.length;++i) 
   			ops.query+=v[i]+" ";
  		}
+ 	trace(ops)
  	var wrap=new google.visualization.ChartWrapper(ops);
 	this.map=wrap;
  	wrap.setOptions(ops);

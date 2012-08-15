@@ -1758,7 +1758,7 @@ SHIVA_Show.prototype.DrawLayerControlBox=function(items, show)			// DRAW LAYER C
 	if (t == "auto")	t=8;												// Must be a num
 	if (l == "auto")	l=8;												// Must be a num
 	if ($("#shivaMapControlDiv").length == 0) {								// If no palette
-		str="<div id='shivaMapControlDiv' style='position:absolute;left:"+l+"px;top:"+((t-0)+(h-0)+8)+"px'>";
+		str="<div id='shivaMapControlDiv' style='position:absolute;left:"+l+"px;top:"+((t-0)+(h-0)-24)+"px'>";
 		$("body").append("</div>"+str);										// Add palette to body
 		$("#shivaMapControlDiv").addClass("rounded-corners").css("background-color","#eee").css('border',"1px solid #ccc");
 		$("#shivaMapControlDiv").draggable();								// Make it draggable

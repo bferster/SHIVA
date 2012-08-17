@@ -1927,7 +1927,6 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
  		for (i=0;i<v.length;++i) 
   			ops.query+=v[i]+" ";
  		}
- 	trace(ops)
  	var wrap=new google.visualization.ChartWrapper(ops);
 	this.map=wrap;
  	wrap.setOptions(ops);
@@ -3601,7 +3600,7 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 		str+="<tr><td>&nbsp;&nbsp;Color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"color\")' onChange='shivaLib.dr.SetVal(\"color\",this.value)' type='text' id='color'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Visibility</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"alpha\",this.value)' type='range' id='alpha'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"edgeColor\")' onChange='shivaLib.dr.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Edge width</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"edgeWidth\",this.value)' type='range' id='edgeWidth'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Edge width</td><td>&nbsp;<input style='width:85px;height:12px;background-color:transparent;' onChange='shivaLib.dr.SetVal(\"edgeWidth\",this.value)' type='range' id='edgeWidth'></td></tr>";
 		}
 	else if (tool == 3) {
 		str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"boxColor\")' onChange='shivaLib.dr.SetVal(\"boxColor\",this.value)' type='text' id='boxColor'></td></tr>";

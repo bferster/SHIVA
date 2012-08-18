@@ -209,7 +209,10 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 	$("#shivaDrawDiv").css("height",i+"px");								// Hgt
 	ctx=$("#shivaDrawCanvas")[0].getContext('2d');							// Get context
 	ctx.clearRect(0,0,1600,1600);											// Clear canvas
-	$("#shivaDrawDiv").css("z-index",2000);									// Force on top
+	if ($.browser.msie)														// IE
+		$("#shivaDrawDiv").css("z-index",2);								// Force on top
+	else																	// All else
+		$("#shivaDrawDiv").css("z-index",2000);								// Force on top
 	if (!this.overlay)														// Nothing to draw
 		return;																// Quit
 	this.DrawIdeaLinks(false);												// Draw idea link lines, if any												
@@ -3757,13 +3760,7 @@ SHIVA_Draw.prototype.DrawWireframes=function(clear) 					// DRAW OVERLAY
 		o=this.segs[i];														// Point at seg
 		if ((o.type == 5) || (!o.x))										// If an idea map node or no x's
 			continue;														// Skip it
-		if (o.type == 0) 													// Lines
-			shivaLib.g.DrawPolygon(this.ctx,-1,1,o.x,o.y,col,1,false);		// Draw lines
-		else if (o.type == 1) {												// Circle
-			o.y[1]=o.y[0];													// Make control line horizonal
-			shivaLib.g.DrawCircle(this.ctx,-1,1,o.x[0],o.y[0],Math.abs(o.x[0]-o.x[1]),col,1);
-			}
-		else if ((o.type) && (o.type < 5))									// Box, text, image
+		if (o.type == 3) 													// Text
 			shivaLib.g.DrawBar(this.ctx,-1,1,o.x[0],o.y[0],o.x[1],o.y[1],col,1);// Draw bar
 		for (j=0;j<o.x.length;++j)	{										// For each point
 			scol="#fff";													// Hollow marker
@@ -3933,10 +3930,11 @@ SHIVA_Draw.prototype.SetTool=function(num) 								//	SET TOOL
 	this.curTool=num;														// Set current tool
 	if (num == 6)															// Idea map
 		$("#shivaDrawDiv").css("cursor","auto");							// Regular cursor
-	else																	// All others
+	else 																	// All others except close
 		$("#shivaDrawDiv").css("cursor","crosshair");						// Crosshair cursor
 	if (this.curTool == -1) {												// If quitting
 		shivaLib.Sound("delete");											// Delete sound
+		$("#shivaDrawDiv").css("cursor","auto");							// Regular cursor
 		$("#shivaDrawDiv").css('pointer-events','none');					// Inibit pointer clicks if menu gone
 		$("#shivaDrawPaletteDiv").remove();									// Close it
 		}
@@ -3955,7 +3953,7 @@ SHIVA_Draw.prototype.SetTool=function(num) 								//	SET TOOL
 		$("#shivaDrawDiv").css("cursor","auto");							// Regular cursor
 		this.DrawWireframes(false);											// Show wireframes
 		}
-	else
+	else (this.curTool != -1)												// If not closed
 		this.DrawMenu();													// Draw menu
 }
 
@@ -3965,6 +3963,10 @@ SHIVA_Draw.prototype.SetTool=function(num) 								//	SET TOOL
 
 SHIVA_Draw.prototype.onMouseUp=function(e)								// MOUSE UP HANDLER
 {
+	if ($("#shivaDrawPaletteDiv").length == 0) 								// If no palette
+		return true;														// Quit
+	if (shivaLib.dr.curTool == 5) 											// In edit
+		e.stopPropagation();												// Trap event
 	shivaLib.dr.leftClick=false;											// Left button up
 	var x=e.pageX-this.offsetLeft;											// Offset X from page
 	var y=e.pageY-this.offsetTop;											// Y
@@ -3977,7 +3979,7 @@ SHIVA_Draw.prototype.onMouseUp=function(e)								// MOUSE UP HANDLER
 	if (shivaLib.dr.closeOnMouseUp) {										// After a drag-draw
 		shivaLib.dr.closeOnMouseUp=false;									// Reset flag
 		shivaLib.dr.curSeg=-1;												// Close segment
-		return;																// Quit
+		return true;														// Quit
 		}
 	if (shivaLib.dr.curTool < 5 ) {											// Not in edit
 		if (shivaLib.dr.snap)												// If snapping
@@ -3987,13 +3989,16 @@ SHIVA_Draw.prototype.onMouseUp=function(e)								// MOUSE UP HANDLER
 		}
 	else if (shivaLib.dr.curTool > 4) 										// If in edit/idea map
 		shivaLib.dr.AddSelect(x,y,e.shiftKey);								// Select seg/dot
+	return (shivaLib.dr.curTool == 6);										// Set propagation
 }
 
 
 SHIVA_Draw.prototype.onMouseDown=function(e)							// MOUSE DOWN HANDLER
 {
-	if (shivaLib.dr.curTool == 6) 											// If in idea
+	if ($("#shivaDrawPaletteDiv").length == 0) 								// If no palette
 		return;																// Quit
+	if (shivaLib.dr.curTool == 6) 											// If in idea
+		return true;														// Quit
 	var x=e.pageX-this.offsetLeft;											// Offset X from page
 	var y=e.pageY-this.offsetTop;											// Y
 	shivaLib.dr.leftClick=true;												// Left button down
@@ -4003,18 +4008,22 @@ SHIVA_Draw.prototype.onMouseDown=function(e)							// MOUSE DOWN HANDLER
 	if (shivaLib.dr.curTool == 5) {											// In edit mode
 		shivaLib.dr.lastX=x;												// Save last X
 		shivaLib.dr.lastY=y;												// Y
-		return;																// Quit
+		e.stopPropagation();												// Trap event
+		return false;														// Quit
 		}
 	if (e.target.id.indexOf("shtx") != -1)									// If over text box
 		return;																// Quit
 	if (shivaLib.dr.snap)													// If snapping
 		x=x-(x%shivaLib.dr.snapSpan),y=y-(y%shivaLib.dr.snapSpan);			// Mod down coords
 	shivaLib.dr.AddDot(x,y,false);											// Add coord
+	return false;															// Stop propagation
 }
 
 SHIVA_Draw.prototype.onMouseMove=function(e)							// MOUSE MOVE HANDLER
 {
-	if (shivaLib.dr.curTool == 6) 											// If in idea
+	if ($("#shivaDrawPaletteDiv").length == 0) 								// If no palette
+		return;																// Quit
+	if ((shivaLib.dr.curTool == 6) || (shivaLib.dr.curTool == -1)) 			// If in idea or off
 		return;																// Quit
 	var x=e.pageX-this.offsetLeft;											// Offset X from page
 	var y=e.pageY-this.offsetTop;											// Y
@@ -4054,6 +4063,8 @@ SHIVA_Draw.prototype.onMouseMove=function(e)							// MOUSE MOVE HANDLER
 
 SHIVA_Draw.prototype.onKeyDown=function(e)								// KEY DOWN HANDLER
 {
+	if ($("#shivaDrawPaletteDiv").length == 0) 								// If no palette
+		return;																// Quit
 	if ((e.keyCode == 8) &&													// Look for Del key
         (e.target.tagName != "TEXTAREA") && 								// In text area
         (e.target.tagName != "INPUT")) { 									// or input
@@ -4064,6 +4075,8 @@ SHIVA_Draw.prototype.onKeyDown=function(e)								// KEY DOWN HANDLER
 
 SHIVA_Draw.prototype.onKeyUp=function(e)								// KEY UP HANDLER
 {
+	if ($("#shivaDrawPaletteDiv").length == 0) 								// If no palette
+		return;																// Quit
 	var i;
 	if ((e.target.tagName == "TEXTAREA") || (e.target.tagName == "INPUT"))	// If in text entry
 		return;																// Quit
@@ -4208,6 +4221,7 @@ SHIVA_Draw.prototype.AddSelect=function(x, y, shiftKey)					// SELECT SEGMENT/DO
 		}
 	else																	// Forcing a select
 		seg=y;																// Get it from y
+
 	if (seg != -1) {														// If a seg/dot selected
 		o=this.segs[seg];													// Point at seg
 		if (this.selectedDot != -1)	{										// If a specific dot selected

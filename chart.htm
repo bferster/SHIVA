@@ -34,7 +34,6 @@
 			<option>Combo Chart</option>
 			<option>Gauge</option>
 			<option>Geo Chart</option>
-			<option>Image Chart</option>
 			<option>Line Chart</option>
 			<option>Motion Chart</option>
 			<option>Org Chart</option>
@@ -150,23 +149,6 @@
 			region: 					{	def:'world', 	opt:'002|005|013|017|018|021|030|034|035|039|150|151|154|155|US|world', des:'Region to display'},
 			colors: 					{	def:'', 		opt:'colors',		 des:'Chart colors...'},
 			ud: 						{	def:'false', 	opt:'true|false',	 des:'Enable user draw?'}}, 
-		ImageChart:{
-			dataSourceUrl: 				{	def:'https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AsMQEd_YoBWldHdOX0tsU25SNmtQdGhGbnhTUXZ1S2c', 		opt:'string',		 des:'Data source URL'}, 
-			query: 						{	def:'', 		opt:'query',		 des:'Data filter'}, 
-			height: 					{	def:'300', 		opt:'number',		 des:'Height chart'},
-			width: 						{	def:'500', 		opt:'number',		 des:'Width of chart'},
-			backgroundColor:			{	def:'white', 	opt:'color',		 des:'Background color'},
-			color:						{	def:'Auto', 	opt:'color',		 des:'Base color'},
-			fill:						{	def:'false', 	opt:'false|true',	 des:'Fill area under each line?'},
-			legend: 					{	def:'right', 	opt:'bottom|in|none|right|top', des:'Legend position'},
-			options: 					{	def:'', 		opt:'array',		 des:'Option(s)'},
-			labels: 					{	def:'none', 	opt:'name|none|value',des:'Pie chart labels'},
-			showCategoryLabels: 		{	def:'true', 	opt:'false|true',	 des:'Show category labels?'},
-			showValueLabels: 			{	def:'true', 	opt:'false|true',	 des:'Show value labels?'},
-			title: 						{	def:'', 		opt:'string',		 des:'Title of chart'},
-			colors: 					{	def:'', 		opt:'colors',		 des:'Chart colors...'},
-			valueLabelsInterval: 		{	def:'Auto', 	opt:'string',		 des:'Axis display interval'},
-			ud: 						{	def:'false', 	opt:'true|false',	des:'Enable user draw?'}}, 
 		Gauge:{
 			dataSourceUrl: 				{	def:'https://docs.google.com/spreadsheet/pub?hl=en_US&hl=en_US&key=0AsMQEd_YoBWldGhFVGJOZGZmUGw2aHBuUmRuMndIZUE', 		opt:'string',		 des:'Data source URL'}, 
 			query: 						{	def:'', 		opt:'query',		 des:'Data filter'}, 

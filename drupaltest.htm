@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 </head>
 <body>
 <script>
@@ -28,8 +28,8 @@ var sampleData="{\"chartType\": \"BarChart\",\"areaOpacity\": \".3\",\"backgroun
 	function ShivaMessage(iFrameName,cmd) 
 	{
 	    if (cmd.indexOf("PutJSON") == 0)
-	    	cmd="PutJSON="+sampleData;
-	    var win=document.getElementById('node').contentWindow.postMessage(cmd,"*");
+	    	cmd+="="+sampleData;
+	    document.getElementById(iFrameName).contentWindow.postMessage(cmd,"*");
  	}
  </script>
 
@@ -38,7 +38,18 @@ var sampleData="{\"chartType\": \"BarChart\",\"areaOpacity\": \".3\",\"backgroun
 	<input type='button' value="Get JSON" onClick="ShivaMessage('node','GetJSON')" />
 	<input type='button' value="Put JSON" onClick="ShivaMessage('node','PutJSON')" />
 	<p><hr/></p>
-	<iframe id='node' src='go.htm' width='100%' height='500' frameborder='0' marginwidth='0' marginheight='0'/>
+	<iframe id='node' src='http://www.viseyes.org/shiva/chart.htm' width='100%' height='500' frameborder='0' marginwidth='0' marginheight='0'/>
 </body>
 </html>
+
+<!
+-- 
+	Module urls:
+	
+	Video =		video.htm
+	Draw = 		draw.htm
+	WebPage = 	webpage.htm
+	Map = 		map.htm
+	
+--->
 

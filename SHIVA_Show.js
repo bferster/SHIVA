@@ -629,7 +629,7 @@ VIZ.prototype.Google2Jit=function(rs)
 			}
 			
 			var nodeClass = ROWS[i][3];
-			JIT[nodeID].data.class = nodeClass;
+			JIT[nodeID].data.className = nodeClass;
 			for (var k in CLASSES.node[nodeClass]) {
 				JIT[nodeID].data['$' + k] = CLASSES.node[nodeClass][k];
 			}
@@ -690,7 +690,7 @@ VIZ.prototype.Init = {
 			if (node.data.tip) {
 				tip.innerHTML = "<div class='tip-title'>" + node.data.tip + "</div>";
 			} else {
-				tip.innerHTML = "<div class='tip-title'>" + node.name + " is a <b>" + node.data.class + "</b> with " + count + " connections.</div>";
+				tip.innerHTML = "<div class='tip-title'>" + node.name + " is a <b>" + node.data.className + "</b> with " + count + " connections.</div>";
 			}
 			tip.style.color = 'black';
 			tip.style.fontFamily = config.Label.family;
@@ -771,7 +771,7 @@ VIZ.prototype.Init = {
 			if (node.data.tip) {
 				tip.innerHTML = "<div class='tip-title'>" + node.data.tip + "</div>";
 			} else {
-				tip.innerHTML = "<div class='tip-title'>" + node.name + " is a <b>" + node.data.class + "</b> with " + count + " connections.</div>";
+				tip.innerHTML = "<div class='tip-title'>" + node.name + " is a <b>" + node.data.className + "</b> with " + count + " connections.</div>";
 			}
 			tip.style.color = 'black';
 			tip.style.fontFamily = config.Label.family;
@@ -844,7 +844,7 @@ VIZ.prototype.Init = {
 			if (node.data.tip) {
 				tip.innerHTML = "<div class='tip-title'>" + node.data.tip + "</div>";
 			} else {
-				tip.innerHTML = "<div class='tip-title'>" + node.name + " is a <b>" + node.data.class + "</b> with " + count + " connections.</div>";
+				tip.innerHTML = "<div class='tip-title'>" + node.name + " is a <b>" + node.data.className + "</b> with " + count + " connections.</div>";
 			}
 			tip.style.color = 'black';
 			tip.style.fontFamily = config.Label.family;

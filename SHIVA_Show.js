@@ -1486,7 +1486,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 {
 	var v,t;
 	var options=this.options;
-	options.dataSourceUrl="https://www.kaltura.com/p/2003471/sp/0/playManifest/entryId/1_uyp6bkha/format/url/flavorParamId/301961/protocol/https/video.mp4"
+//	options.dataSourceUrl="https://www.kaltura.com/p/2003471/sp/0/playManifest/entryId/1_uyp6bkha/format/url/flavorParamId/301961/protocol/https/video.mp4"
 //	options.dataSourceUrl="http://player.vimeo.com/video/17853047" 
 	
 	var container=this.container;

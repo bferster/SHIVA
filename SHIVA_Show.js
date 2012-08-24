@@ -213,6 +213,10 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 		$("#shivaDrawDiv").css("z-index",2);								// Force on top
 	else																	// All else
 		$("#shivaDrawDiv").css("z-index",2000);								// Force on top
+	if ($("#shivaDrawPaletteDiv").length)									// If palette is up
+		$("#shivaDrawDiv").css('pointer-events','auto');					// Enable pointer clicks 
+	else																	// If menu gone
+		$("#shivaDrawDiv").css('pointer-events','none');					// Inibit pointer clicks 
 	if (!this.overlay)														// Nothing to draw
 		return;																// Quit
 	this.DrawIdeaLinks(false);												// Draw idea link lines, if any												
@@ -1482,7 +1486,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 {
 	var v,t;
 	var options=this.options;
-//	options.dataSourceUrl="https://www.kaltura.com/p/2003471/sp/0/playManifest/entryId/1_uyp6bkha/format/url/flavorParamId/301961/protocol/https/video.mp4"
+	options.dataSourceUrl="https://www.kaltura.com/p/2003471/sp/0/playManifest/entryId/1_uyp6bkha/format/url/flavorParamId/301961/protocol/https/video.mp4"
 //	options.dataSourceUrl="http://player.vimeo.com/video/17853047" 
 	
 	var container=this.container;
@@ -1513,7 +1517,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 			v[1]=v[0],v[0]=0;
     	this.player.cue(Number(v[0]*60)+Number(v[1]),function() { this.pause()} );
     	}
- 	this.player.on("timeupdate",drawOverlay);
+	this.player.on("timeupdate",drawOverlay);
 	this.player.on("loadeddata",onVidLoaded);
 
 	if (this.ev) 

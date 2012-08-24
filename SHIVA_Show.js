@@ -1450,7 +1450,7 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
   	     }
  	}
 
-   	function AddImages(data,imgHgt,showImage,showSlide,transition,wid)
+   	function AddImages(data, imgHgt, showImage, showSlide, transition, wid)
  	{
 		var str="<div id='gallery' class='ad-gallery'>"
 		if (showImage == "true")
@@ -1482,6 +1482,9 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 {
 	var v,t;
 	var options=this.options;
+//	options.dataSourceUrl="https://www.kaltura.com/p/2003471/sp/0/playManifest/entryId/1_uyp6bkha/format/url/flavorParamId/301961/protocol/https/video.mp4"
+//	options.dataSourceUrl="http://player.vimeo.com/video/17853047" 
+	
 	var container=this.container;
 	var con="#"+container;
 	if (typeof(Popcorn) != "function")
@@ -1495,9 +1498,13 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		base="http://vimeo.com/";
 	else if ((options.dataSourceUrl.match(/http/g)) && (!options.dataSourceUrl.match(/youtube/g)))
 		base="";
-	if (this.player)
-     	this.player.destroy(),this.player=null;
-	if (!this.player)
+	
+	if (this.player) {
+    	this.player.destroy();
+    	$(con).empty();
+    	this.player=null;
+    	}
+  	if (!this.player)
 		this.player=Popcorn.smart(con,base+options.dataSourceUrl);
 	this.player.media.src=base+options.dataSourceUrl;
 	if (options.end) {
@@ -1506,8 +1513,6 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 			v[1]=v[0],v[0]=0;
     	this.player.cue(Number(v[0]*60)+Number(v[1]),function() { this.pause()} );
     	}
-    if (options.autoplay == "true")
-    	this.player.play();
  	this.player.on("timeupdate",drawOverlay);
 	this.player.on("loadeddata",onVidLoaded);
 
@@ -1525,6 +1530,10 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 			v[1]=v[0],v[0]=0;
     	shivaLib.player.currentTime(Number(v[0]*60)+Number(v[1]));
 		shivaLib.player.volume(shivaLib.options.volume/100);
+	   	if (shivaLib.options.autoplay == "true")
+    		shivaLib.player.play();
+    	else
+     		shivaLib.player.pause();
 	}
 
   	function drawOverlay()	{
@@ -1685,7 +1694,7 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 	this.SendReadyMessage(true);											
 }
 
-SHIVA_Show.prototype.AddInternalOptions=function(options,newOps) 							//	PARSE ITEMS
+SHIVA_Show.prototype.AddInternalOptions=function(options, newOps) 							//	PARSE ITEMS
 {
 	var i,vv;
 	if (newOps) {
@@ -1941,7 +1950,7 @@ SHIVA_Show.prototype.RunGlue=function(con, item, val, group) 						//	RUN GLUE
 	RunGlue(con,item,val,group);														// Call global function
 }
 
-SHIVA_Show.prototype.SaveData=function(mode,style,items,props,type) 				// SAVE DATA FROM FROM TO JSON, ETC
+SHIVA_Show.prototype.SaveData=function(mode, style, items, props, type) 			// SAVE DATA FROM FROM TO JSON, ETC
 {
 		var i,j,k,o,str1;
 		var ovr=""
@@ -2125,7 +2134,7 @@ SHIVA_Show.prototype.ReEdit=function(jsonData, propertyList)
 	return items;
 }
 
-SHIVA_Show.prototype.ShowHelp=function(att,helpText,chartType)
+SHIVA_Show.prototype.ShowHelp=function(att, helpText, chartType)
 	{
 		var v;
 		var str="<br/><hr/>";

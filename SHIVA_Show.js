@@ -2134,9 +2134,10 @@ SHIVA_Show.prototype.ShowHelp=function(att,helpText,chartType)
 		if (att) {
 			if (att.charAt(0) == ' ')
 				att=att.substr(1)
-			str+="<b>How to set "+att+"</b><br/><br/>";
-			if (helpText[att])
-				str+=helpText[att];
+			v=att.split("&nbsp;");
+			str+="<b>How to set "+v[0]+"</b><br/><br/>";
+			if (helpText[v[0]])
+				str+=helpText[v[0]];
 			if (att.toLowerCase().indexOf("(s)") != -1) 
 				str+="<br><br><input type='button' onClick='shivaLib.ColorPicker(-1,-1)' value='Click to get a color number'/><div id='colorDiv'>&nbsp;<i>(Color will appear here)</i></div>";
 			}
@@ -2182,7 +2183,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 		o=atts[i];
 		id="propInput"+i;
    		var str="<tr style='height:26px'><td width='12'></td><td width='200' onClick='ShowHelp(this.innerHTML)'>"+props[o].des.split("::")[0];
-		if ((this.drupalMan) && (o == "dataSourceUrl")) 
+	if ((this.drupalMan) && (o == "dataSourceUrl")) 
 			str+="&nbsp;&nbsp;<img src='databutton.gif' title='Click to find data set' style='vertical-align:bottom' onclick='shivaLib.GetDataFromManager()'/>";
    		str+="</td><td></td><td>";
    		if (props[o].opt == "query") 

@@ -1500,8 +1500,6 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 	if (!this.player)
 		this.player=Popcorn.smart(con,base+options.dataSourceUrl);
 	this.player.media.src=base+options.dataSourceUrl;
-	this.player.loop(options.loop == "true");
-	this.player.volume(options.volume/100);
 	if (options.end) {
 		v=options.end.split(":");
 		if (v.length == 1)
@@ -1526,6 +1524,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		if (v.length == 1)
 			v[1]=v[0],v[0]=0;
     	shivaLib.player.currentTime(Number(v[0]*60)+Number(v[1]));
+		shivaLib.player.volume(shivaLib.options.volume/100);
 	}
 
   	function drawOverlay()	{

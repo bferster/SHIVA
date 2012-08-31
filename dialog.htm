@@ -42,15 +42,8 @@
 			<button type='button' id='tb3' onclick='RemoveItem()'> </button>
 			<button type='button' id='tb4' onclick='AddNewItem()'> </button>
 		</span></p>
-		<p style="text-align:right">Share as: 
-			<select id='formatter' onchange="SaveData(this.value)">
-				<option>Choose format</option>
-				<option>WordPress</option>
-				<option>eStore</option>
-				<option>iFrame</option>
-				<option>JSON</option>
-				<option>Web-page</option>
-			</select> 
+		<p style="text-align:right">
+			<span id='saveAsDiv'></span>
 			<span id="samplesDiv"><br/><br/><a onClick='ShowSample()'><i>Click <u>here</u> to add samples</i></a></span>
 		</p>		
   	<div id="helpDiv" style="width:276px;"> </div>
@@ -174,6 +167,17 @@
 			window.addEventListener("message",shivaEventHandler,false);
 		else
 			window.attachEvent("message",shivaEventHandler);
+		if (!shivaLib.drupalMan) {
+			var str="Share as: <select id='formatter' onChange='SaveData(this.value)'>";
+			str+="<option>Choose format</option>";
+			str+="<option>WordPress</option>";
+			str+="<option>eStore</option>";
+			str+="<option>iFrame</option>";
+			str+="<option>JSON</option>";
+			str+="<option>Web-page</option>";
+			str+="</select>"; 
+			$("#saveAsDiv").html(str);
+			}
 	 });
 
 	function shivaEventHandler(e)

@@ -29,15 +29,8 @@
 	</table> 
 		<p style="text-align:right">
 			<img src='eventsbutton.gif' style='vertical-align:middle' alt='Event editor' onclick='shivaLib.ev.EventEditor()'>&nbsp;&nbsp;&nbsp;
-			<img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate()'>&nbsp;&nbsp;&nbsp;
-			Share as: <select id='formatter' onChange='SaveData(this.value)'>
-			<option>Choose format</option>
-			<option>WordPress</option>
-			<option>eStore</option>
-			<option>iFrame</option>
-			<option>JSON</option>
-			<option>Web-page</option>
-		</select> 
+			<img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate()'>
+			<span id='saveAsDiv'></span>
 	</p>		
  	<div id="helpDiv"></div>
 	<p>&nbsp;</p><p>&nbsp;</p>
@@ -95,6 +88,17 @@
 			window.addEventListener("message",shivaEventHandler,false);
 		else
 			window.attachEvent("message",shivaEventHandler);
+		if (!shivaLib.drupalMan) {
+			var str="&nbsp;&nbsp;Share as: <select id='formatter' onChange='SaveData(this.value)'>";
+			str+="<option>Choose format</option>";
+			str+="<option>WordPress</option>";
+			str+="<option>eStore</option>";
+			str+="<option>iFrame</option>";
+			str+="<option>JSON</option>";
+			str+="<option>Web-page</option>";
+			str+="</select>"; 
+			$("#saveAsDiv").html(str);
+			}
 	});
 
 	function shivaEventHandler(e)

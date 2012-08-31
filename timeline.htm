@@ -29,19 +29,12 @@
     <table id="propertyTable" class="propTable">
 		<tr style="height:8px"><td> </td></tr>
 	</table> 
-   <p style="text-align:right"><span id="toolbar" style="font-size:medium" >
+   <p style="text-align:right"><span style="vertical-align:50%">Bands </span><span id="toolbar" style="font-size:medium" >
 		<button type='button' id='tb1' onclick='RemoveItem()'> </button>
 		<button type='button' id='tb2' onclick='AddNewItem()'> </button>
 	</span></p>
-		<p style="text-align:right"><img src='annotate.gif' alt='Annotate' style='vertical-align:bottom' onclick='shivaLib.Annotate()'>&nbsp;&nbsp; Share as: 
-		<select id='formatter' onchange='SaveData(this.value)'>
-			<option>Choose format</option>
-			<option>WordPress</option>
-			<option>eStore</option>
-			<option>iFrame</option>
-			<option>JSON</option>
-			<option>Web-page</option>
-		</select> 
+		<p style="text-align:right"><img src='annotate.gif' alt='Annotate' style='vertical-align:bottom' onclick='shivaLib.Annotate()'>
+		<span id='saveAsDiv'></span>
 		</p>		
 	<div id="helpDiv"> </div>
 	<br/></br/>
@@ -121,6 +114,17 @@
 			window.addEventListener("message",shivaEventHandler,false);
 		else
 			window.attachEvent("message",shivaEventHandler);
+		if (!shivaLib.drupalMan) {
+			var str="&nbsp;&nbsp;Share as: <select id='formatter' onChange='SaveData(this.value)'>";
+			str+="<option>Choose format</option>";
+			str+="<option>WordPress</option>";
+			str+="<option>eStore</option>";
+			str+="<option>iFrame</option>";
+			str+="<option>JSON</option>";
+			str+="<option>Web-page</option>";
+			str+="</select>"; 
+			$("#saveAsDiv").html(str);
+			}
 	});
 
 	function shivaEventHandler(e)

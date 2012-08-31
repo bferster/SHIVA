@@ -28,22 +28,14 @@
 	    <table id="propertyTable" class="propTable">
 			<tr style="height:8px"><td> </td></tr>
 		</table>
-	   <p style="text-align:right"><span id="toolbar" style="font-size:medium" >
+	   <p style="text-align:right"><span style="vertical-align:50%">Layers </span><span id="toolbar" style="font-size:medium" >
 			<button type='button' id='tb1' onclick='ShiftItem(-1)'> </button>
 			<button type='button' id='tb2' onclick='ShiftItem(1)'> </button>
 			<button type='button' id='tb3' onclick='RemoveItem()'> </button>
 			<button type='button' id='tb4' onclick='AddNewItem()'> </button>
 		</span></p>
-		<p style="text-align:right"><img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate()'>&nbsp;&nbsp; Share as: 
-		<select id='formatter' onchange='SaveData(this.value)'>
-				<option>Choose format</option>
-				<option>WordPress</option>
-				<option>eStore</option>
-				<option>iFrame</option>
-				<option>JSON</option>
-				<option>Web-page</option>
-				<option>KML</option>
-			</select> 
+		<p style="text-align:right"><img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate()'>
+		<span id='saveAsDiv'></span>
 		<br/><br/><label>Find on map: </label ><input size='40' id="address" style='font-size:x-small' type="text"/>&nbsp;&nbsp;
 		</p>		
 		<div id="helpDiv"> </div>
@@ -132,6 +124,17 @@
 			window.addEventListener("message",shivaEventHandler,false);
 		else
 			window.attachEvent("message",shivaEventHandler);
+		if (!shivaLib.drupalMan) {
+			var str="&nbsp;&nbsp;Share as: <select id='formatter' onChange='SaveData(this.value)'>";
+			str+="<option>Choose format</option>";
+			str+="<option>WordPress</option>";
+			str+="<option>eStore</option>";
+			str+="<option>iFrame</option>";
+			str+="<option>JSON</option>";
+			str+="<option>Web-page</option>";
+			str+="</select>"; 
+			$("#saveAsDiv").html(str);
+			}
 
 		$(function() {
 		    $("#address").autocomplete({

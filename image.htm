@@ -42,16 +42,9 @@
    <p style="text-align:right"><span id="toolbar" >Limit by: <input type='text' size='7' id='gsite' value='loc.gov' />
 		<button type='button' id='tb1' onclick='FindImages()' style="font-size:x-large"> </button>
 	</span></p>
-		<p style="text-align:right"><img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate()'>&nbsp;&nbsp; Share as: 
-		<select id='formatter' onchange='SaveData(this.value)'>
-			<option>Choose format</option>
-			<option>WordPress</option>
-			<option>eStore</option>
-			<option>iFrame</option>
-			<option>JSON</option>
-			<option>Web-page</option>
-		</select> 
-	</p>		
+		<p style="text-align:right"><img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate()'>
+		<span id='saveAsDiv'></span>
+		</p>		
  	<div id="helpDiv"> </div>
 	<div id="outputDiv" style="width:460px"> </div>
 	</div>
@@ -104,6 +97,17 @@
 			window.addEventListener("message",shivaEventHandler,false);
 		else
 			window.attachEvent("message",shivaEventHandler);
+		if (!shivaLib.drupalMan) {
+			var str="&nbsp;&nbsp;Share as: <select id='formatter' onChange='SaveData(this.value)'>";
+			str+="<option>Choose format</option>";
+			str+="<option>WordPress</option>";
+			str+="<option>eStore</option>";
+			str+="<option>iFrame</option>";
+			str+="<option>JSON</option>";
+			str+="<option>Web-page</option>";
+			str+="</select>"; 
+			$("#saveAsDiv").html(str);
+			}
 	});
 
 	function shivaEventHandler(e)

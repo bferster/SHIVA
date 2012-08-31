@@ -1486,11 +1486,12 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 {
 	var v,t;
 	var options=this.options;
-//	options.dataSourceUrl="https://www.kaltura.com/p/2003471/sp/0/playManifest/entryId/1_uyp6bkha/format/url/flavorParamId/301961/protocol/https/video.mp4"
-//	options.dataSourceUrl="http://player.vimeo.com/video/17853047" 
+//	options.dataSourceUrl="kaltura_player_1_uyp6bkha"; 
+//	options.dataSourceUrl="http://player.vimeo.com/video/17853047"; 
 	
 	var container=this.container;
 	var con="#"+container;
+	var id=options.dataSourceUrl;
 	if (typeof(Popcorn) != "function")
 		return;
 	if (typeof(Popcorn.smart) != "function")
@@ -1500,17 +1501,22 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 	$(con).css("height",options.height+"px");
 	if ((options.dataSourceUrl.match(/vimeo/)) || (!isNaN(options.dataSourceUrl)))
 		base="http://vimeo.com/";
+	else if (options.dataSourceUrl.match(/kaltura/)) {
+		var s=options.dataSourceUrl.indexOf("kaltura_player_");
+		id=options.dataSourceUrl.substring(s+15);
+		id="https://www.kaltura.com/p/2003471/sp/0/playManifest/entryId/"+id+"/format/url/flavorParamId/301961/protocol/https/video.mp4"
+		base=""
+		}
 	else if ((options.dataSourceUrl.match(/http/g)) && (!options.dataSourceUrl.match(/youtube/g)))
 		base="";
-	
 	if (this.player) {
     	this.player.destroy();
     	$(con).empty();
     	this.player=null;
     	}
   	if (!this.player)
-		this.player=Popcorn.smart(con,base+options.dataSourceUrl);
-	this.player.media.src=base+options.dataSourceUrl;
+		this.player=Popcorn.smart(con,base+id);
+	this.player.media.src=base+id;
 	if (options.end) {
 		v=options.end.split(":");
 		if (v.length == 1)
@@ -1538,7 +1544,8 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
     		shivaLib.player.play();
     	else
      		shivaLib.player.pause();
-	}
+		$("#shivaEventDiv").height(shivaLib.player.media.clientHeight-40);
+   	}
 
   	function drawOverlay()	{
    		shivaLib.DrawOverlay();

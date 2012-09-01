@@ -18,8 +18,6 @@ function SHIVA_Show(container, options, editMode) 						// CONSTRUCTOR
 		this.Draw(options);
 }
 
-
-
 SHIVA_Show.prototype.Draw=function(ops) 								//	DRAW LOADER/DIRECTOR
 {
 	if (!ops)
@@ -2335,12 +2333,42 @@ SHIVA_Show.prototype.SetAdvancedAttributes=function(prop, baseVar) 		// ADVANCED
 	$("#advAttDialogDiv").remove();											// Remove any added parts
 	str="<table>"															// Table header
 	switch(baseVar) {														// Route on var
+		case "legendTextStyle": 																				
+		case "titleTextStyle": 																				
 		case "pieSliceTextStyle": 																				
-			title="Set pie slice text settings";							// Dialog title
+		case "tooltipTextStyle": 																				
 			aProps= { 	fontName: 	{ opt:'string',	 des:'Font'},			// Sub-items
 						fontSize: 	{ opt:'string',	 des:'Size'},
 						color: 		{ opt:'color',	 des:'Color'}
-					}			
+						}			
+			break;
+		case "chartArea": 																				
+			aProps= { 	left: 	{ opt:'string',	 des:'Left'},				// Sub-items
+						top: 	{ opt:'string',	 des:'Top'},
+						height: { opt:'string',	 des:'Height'},
+						width: 	{ opt:'strinh',	 des:'Width'}
+						}			
+			break;
+		case "backgroundColor": 																				
+			aProps= { 	fill: 		{ opt:'color',	 des:'Fill color'},		// Sub-items
+						stroke: 	{ opt:'color',	 des:'Border color'},
+						strokeWidth:{ opt:'string',	 des:'Border width'}
+						}			
+			break;
+		case "vAxis": 	
+		case "hAxis":																			
+			aProps= { 	baseline: 		{ opt:'string',	 des:'Baseline'},		// Sub-items
+						baselineColor: 	{ opt:'color',	 des:'Baseline color'},
+						direction:		{ opt:'string',	 des:'Direction'},
+						format:			{ opt:'string',	 des:'Axis lable format'},
+						direction:		{ opt:'string',	 des:'Direction'},
+						logScale:		{ opt:'string',	 des:'Log scale?'},
+						testPosition:	{ opt:'string',	 des:'Text position'},
+						title:			{ opt:'string',	 des:'Axis title'},
+						maxValue:		{ opt:'string',	 des:'Max value'},
+						minValue:		{ opt:'string',	 des:'Min value'},
+						slantedText:	{ opt:'string',	 des:'Slanted text'}
+						}			
 			break;
 			}
 		for (o in aProps) {													// For each sub-item
@@ -2356,7 +2384,7 @@ SHIVA_Show.prototype.SetAdvancedAttributes=function(prop, baseVar) 		// ADVANCED
 			}
 	
 	var ops={ 																// Dialog options
-		width:'auto',height:'auto',modal:true,title:title,position:[330,40],
+		width:'auto',height:'auto',modal:true,title:"Set "+baseVar,position:[300,350],
 		buttons: {
 			OK: function() {												// On OK button
 				str="";														// No text yet

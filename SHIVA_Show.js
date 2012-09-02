@@ -2328,7 +2328,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 
 SHIVA_Show.prototype.SetAdvancedAttributes=function(prop, baseVar) 		// ADVANCED OPTIONS									
 {
-	var str,title,aProps;
+	var str,title,aProps,v,i;
 	$("#advAttDialogDiv").dialog("destroy");								// Kill old dialog is there							
 	$("#advAttDialogDiv").remove();											// Remove any added parts
 	str="<table>"															// Table header
@@ -2406,6 +2406,9 @@ SHIVA_Show.prototype.SetAdvancedAttributes=function(prop, baseVar) 		// ADVANCED
 	$("body").append("<div id='advAttDialogDiv'/>");						// Add div for dialog
 	$("#advAttDialogDiv").dialog(ops);										// Add dialog
 	$("#advAttDialogDiv").html(str+"</table>");								// Fill dialog
+	v=$("#"+prop).val().split(",");											// Split sub-items by comma
+	for (i=0;i<v.length-1;++i)												// For each sub-item
+		$("#"+baseVar+v[i].split("=")[0]).val(v[i].split("=")[1]);			// Set last value
 }
 
 SHIVA_Show.prototype.GetDataFromManager=function()

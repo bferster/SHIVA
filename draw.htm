@@ -97,14 +97,12 @@
 
 	function Draw(mode)
 	{	
-		if (shivaLib.drupalMan)
-			window.parent.postMessage("DataChanged=true","*");
 		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
 	}
 
 	function SaveData(mode)
 	{
-		return shivaLib.SaveData(mode,shivaGroup,null,props);
+		return shivaLib.SaveData(mode,shivaGroup,null,props,chartType);
 	}	
 
 	function ReEdit(jsonData)

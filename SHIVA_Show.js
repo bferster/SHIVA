@@ -1432,6 +1432,8 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 		$("#"+this.container).click( function() { _this.RunGlue(_this.container,-1,"clicked"); });
 		this.SendReadyMessage(true);											
 		}
+	else
+		this.SendReadyMessage(true);											
 		
  	  function GetSpreadsheetData(file,imgHgt,showImage,showSlide,trans,wid) 	{
   		var query=new google.visualization.Query(file);

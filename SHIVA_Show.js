@@ -83,15 +83,15 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
           	break;
 		case "Video": 														// Popcorn
 			obj="Popcorn.smart";											// Object to test for
-			var lib="http://popcornjs.org/code/dist/popcorn-complete.min.js";  // Lib to load
+			lib="http://popcornjs.org/code/dist/popcorn-complete.min.js";  // Lib to load
           	break;
 		case "Image": 														// Ad gallery
 			obj="jQuery.prototype.adGallery";								// Object to test for
-			var lib="jquery.ad-gallery.min.js";  							// Lib to load
+			lib="jquery.ad-gallery.min.js";  								// Lib to load
            	break;
 		case "Network": 													// JIT
-			obj="$jit.id";														// Object to test for
-			var lib="jit-yc.js";  											// Lib to load
+			obj="$jit.id";													// Object to test for
+			lib="jit-yc.js";  												// Lib to load
            	break;
 		case "Map": 														// Google maps		
   			obj="google.maps.Map";											// Object to test for

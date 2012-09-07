@@ -2486,14 +2486,19 @@ SHIVA_Show.prototype.ShowLightBox=function(width, top, title, content)
 	str="<div id='shivaLightBoxDiv' style='position:fixed;width:100%;height:100%;";	
 	str+="background:url(overlay.png) repeat;top:0px;left:0px';</div>";
 	$("body").append(str);														
+	str="<div id='shivaLightBoxIntDiv' style='position:absolute;padding:10px;width:"+width;
+	if (width != "auto") 
+		str+="px";	
+	else
+		width=400;
 	var x=($("#shivaLightBoxDiv").width()-width)/2;
-	str="<div id='shivaLightBoxIntDiv' style='position:absolute;width:"+width+"px;padding:10px;";	
-	str+="border-radius:12px;moz-border-radius:12px;z-index:2003;"
+	str+=";border-radius:12px;moz-border-radius:12px;z-index:2003;"
 	str+="border:1px solid; left:"+x+"px;top:"+top+"%;background-color:#f8f8f8'>";
 	str+="<img src='shivalogo32.png' style='vertical-align:-30%'/>&nbsp;&nbsp;";								
 	str+="<span style='font-size:large;text-shadow:1px 1px #ccc'><b>"+title+"</b></span>";
 	str+="<div id='shivaLightContentDiv'>"+content+"</div>";					
-	$("#shivaLightBoxDiv").append(str);													
+	$("#shivaLightBoxDiv").append(str);	
+						
 }
 
 SHIVA_Show.prototype.Prompt=function(title, message, def, id)

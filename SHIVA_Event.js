@@ -77,20 +77,22 @@ SHIVA_Event.prototype.EventEditor=function() 							// EDIT EVENT
 	str+="border-radius:3px;-moz-border-radius:3px;background-color:#999'/>";
 	str+="<img src='addeventdot.gif' style='position:absolute;left:"+(w-8)+"px;top:33px' onclick='shivaLib.ev.EditEvent(-1)'/>";
 	$("#shivaEventEditorDiv").append(str);
-	$("#shivaTimebarDiv").bind("click",function(e) { 						// Handle click stop
+	$("#shivaTimebarDiv").css("overflow","hidden"); 						// Disable spillover
+	$("#shivaEventEditorDiv").slideDown();									// Slide it on
+	this.DrawEventDots();													// Draw doys
+	
+	$("#shivaTimebarDiv").bind("click",function(e) { 					// HANDLE CLICK STOP
 		var x=e.pageX-8-$("#shivaEventEditorDiv").css("left").replace(/px/,"")	// Position in bar
 		x=x/w*_this.player.duration()*_this.scale;							// Absolute time
 		});
-	$("#shivaTimebarDiv").css("overflow","hidden"); 						// Disable spillover
-	$("#shivaTimebarDiv").dblclick( function(e) { 								// Set time
+	
+	$("#shivaTimebarDiv").dblclick( function(e) { 						// SET TIME
 		var x=e.clientX-$("#"+_this.par.container).css("left").replace(/px/,"")-8;
 		var wid=$("#shivaTimebarDiv").width();								// Width
 		x=Math.max(Math.min(x,wid),0);										// Cap 0-wid
 		x=x/wid*_this.player.duration()*_this.scale;						// Absolute time from bar
 		_this.player.currentTime(x);										// Set time
 		});
-	$("#shivaEventEditorDiv").slideDown();									// Slide it on
-	this.DrawEventDots();													// Draw doys
 }
 
 SHIVA_Event.prototype.DrawEventDots=function() 							// DRAW EVENT DOTS
@@ -158,7 +160,7 @@ SHIVA_Event.prototype.DrawEventDots=function() 							// DRAW EVENT DOTS
 
 SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 {
-	var i,title;
+	var i,v,title;
 	var newEvent=false;														// Just editing
 	var _this=this;															// Save 'this' locally
 	if (num == -1) {														// If adding a new one
@@ -189,19 +191,13 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 	str+="<tr><td>Fade in (secs)</td><td><input type='text' size='8' id='fadein'/></td></tr>";
 	str+="<tr><td>Fade out (secs)</td><td><input type='text' size='8' id='fadeout'/></td></tr>";
 	str+="</table></div>";
-  	str+="<div id='content'><table cellspacing=0 cellpadding=0 style='font-size:small' width='100%'>";
-
-	str+="<tr><td width='66%'>Type</td><td>"+this.par.MakeSelect("type",false,["ask","canvas","find","iframe","image","menu","popup","shiva","webservice"],o.type)+"</td></tr>";
-	str+="<tr><td>ID</td><td><input type='text' size='20' id='id'/></td></tr>";
-	str+="<tr><td>Title</td><td><input type='text' size='20' id='title'/></td></tr>";
-	str+="<tr><td>Image Url</td><td><input type='text' size='20' id='url'/></td></tr>";
-	str+="<tr><td>Has scrollbar?</td><td><input type='checkbox' id='frame-scroller'/></td></tr>";
-	str+="<tr><td>Has close button?</td><td><input type='checkbox' id='frame-closer'/></td></tr>";
-	str+="<tr><td>Text</td><td><textarea rows='4' cols='20' id='text'/></td></tr>";
-  	str+="</table></div>";
+  
+   	str+="<div id='content'>";
+	str+=this.SetContentPanel(o.type);
+  	str+="</div>";
 	
 	str+="<div id='shapes'><table cellspacing=0 cellpadding=0 style='font-size:small' width='100%'>";
-	str+="<tr><td width='66%'>Top</td><td><input type='text' size='10' id='frame-top'/></td></tr>";
+	str+="<tr><td>Top</td><td><input type='text' size='10' id='frame-top'/></td></tr>";
 	str+="<tr><td>Left</td><td><input type='text' size='10' id='frame-left'/></td></tr>";
 	str+="<tr><td>Width</td><td><input type='text' size='10' id='frame-width' value='auto'/></td></tr>";
 	str+="<tr><td>Height</td><td><input type='text' size='10' id='frame-height' value='auto'/></td></tr>";
@@ -210,14 +206,14 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
   	str+="</table></div>";
  
   	str+="<div id='colors'><table cellspacing=0 cellpadding=0 style='font-size:small' width='100%'>";
-	str+="<tr><td width='66%'>Text color</td><td><input type='text' size='10' value='black' id='frame-color'/></td></tr>";
-	str+="<tr><td>Background color</td><td><input type='text' size='10' id='frame-background-color'/></td></tr>";
-	str+="<tr><td>Border</td><td><input type='text' size='10' id='frame-border' value='1px solid'/></td> </tr>";
+	str+="<tr><td>Text color</td><td><input type='text' size='15' value='black' id='frame-color'/></td></tr>";
+	str+="<tr><td>Background color</td><td><input type='text' size='15' id='frame-background-color'/></td></tr>";
+	str+="<tr><td>Border</td><td><input type='text' size='15' id='frame-border' value='1px solid'/></td> </tr>";
 	str+="<tr><td>Opacity (0-100%)</td><td><input type='range' id='frame-opacity' value='100%'/></td></tr>";
   	str+="</table></div>";
  
 	str+="<div id='actions'><table cellspacing=0 cellpadding=0 style='font-size:small' width='100%'>";
-	str+="<tr><td width='66%'>On a click</td><td><input type='text' size='20' id='click'/></td></tr>";
+	str+="<tr><td>On a click</td><td><input type='text' size='20' id='click'/></td></tr>";
 	str+="<tr><td>On a hover</td><td><input type='text' size='20' id='hover'/></td></tr>";
 	str+="<tr><td>When done</td><td><input type='text' size='20' id='done'/></td></tr>";
 	str+="<tr><td>Response storage</td><td><input type='text' size='20' id='response'/></td></tr>";
@@ -230,13 +226,33 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 		title="Create new event";
 	else	
 		title="Edit this "+""+o.type.toUpperCase();
-	this.par.ShowLightBox(350,20,title,str)									// Create light box
+	this.par.ShowLightBox("auto",20,title,str)									// Create light box
 	$("#saveBut").button().click(function() { _this.SaveEditedEvent(num,false); $("#shivaLightBoxDiv").remove();});
 	$("#deleteBut").button().click(function() { _this.SaveEditedEvent(num,true); $("#shivaLightBoxDiv").remove();});
 	$("#cancelBut").button().click(function() { if (newEvent) _this.SaveEditedEvent(num,true); $("#shivaLightBoxDiv").remove();});
-	$('#etabs').tabs();														// Init jqueryui
+	$('#etabs').tabs({selected:0});											// Init jqueryui
 	for (key in o)															// For each key
 		$("#"+key).val(o[key]);												// Set field
+	if (o.type == "menu") {													// Deconstruct menu
+		var lines=o.text.split(">>");										// Split into lines
+		if (lines[0]) {														// If exists
+			lines[0]=lines[0].replace(/\*!!\*/g,"\n").replace(/&quot;/g,"\"");	// *!!* -> LF and &quot; -> "
+			$("#sqpr").val(lines[0]);										// Set prompt
+			}
+		for (i=1;i<lines.length;++i) {										// For each line
+			v=lines[i].split("|");											// Get sub-parts
+			if (v[0]) {														// If exists
+				v[0]=v[0].replace(/\*!!\*/g,"\n").replace(/&quot;/g,"\"");	// *!!* -> LF and &quot; -> "
+				$("#sq"+i+"a").val(v[0]);									// Set answer
+				}
+			if (v[1].charAt(0) == "*") {									// A leading *
+				v[1]=v[1].substr(1);										// Lop it off
+				$("#sq"+i+"c").attr("checked","checked");					// Set check			
+				}
+			if (v[1])														// If exists
+				$("#sq"+i+"b").val(v[1]);									// Set action
+			}
+		}
 	$("#text").val($("#text").val().replace(/\*!!\*/g,"\n"));				// *!!* -> LF
 	$("#text").val($("#text").val().replace(/&quot;/g,"\""));				// &quot; -> "
 	$("#title").val($("#title").val().replace(/&quot;/g,"\""));				// &quot; -> "
@@ -253,6 +269,31 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 	else																	// Default
 		i=100;																// To 100%
 	$("#frame-opacity").val(i);												// Set value
+}
+
+SHIVA_Event.prototype.SetContentPanel=function(etype) 						// SET CONTENT PANEL CONTROLS
+{
+	var _this=this;															// Save 'this' locally
+	str="<table cellspacing=0 cellpadding=0 style='font-size:small' width='100%'>";
+	var chg="onchange='$(\"#content\").html(shivaLib.ev.SetContentPanel(this.value))'";
+	str+="<tr><td>Type</td><td>"+this.par.MakeSelect("type",false,["ask","canvas","find","iframe","image","menu","popup","shiva","webservice"],etype,chg)+"</td></tr>";
+	str+="<tr><td>ID</td><td><input type='text' size='20' id='id'/></td></tr>";
+	str+="<tr><td>Title</td><td><input type='text' size='20' id='title'/></td></tr>";
+	str+="<tr><td>Image Url</td><td><input type='text' size='20' id='url'/></td></tr>";
+	str+="<tr><td>Has scrollbar?</td><td><input type='checkbox' id='frame-scroller'/></td></tr>";
+	str+="<tr><td>Has close button?</td><td><input type='checkbox' id='frame-closer'/></td></tr>";
+	if (etype == "menu") {
+		str+="<input type='hidden' id='text'/>";
+		str+="<tr><td>Prompt</td><td><textarea rows='2' style='width:160px' id='sqpr'/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Action &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;?</td></tr>";
+		str+="<tr><td>Answer 1</td><td><input type='text' style='width:160px' id='sq1a'/> <input type='text' size='10' id='sq1b'/> <input type='checkbox' id='sq1c'/></td></tr>";
+		str+="<tr><td>Answer 2</td><td><input type='text' style='width:160px' id='sq2a'/> <input type='text' size='10' id='sq2b'/> <input type='checkbox' id='sq2c'/></td></tr>";
+		str+="<tr><td>Answer 3</td><td><input type='text' style='width:160px' id='sq3a'/> <input type='text' size='10' id='sq3b'/> <input type='checkbox' id='sq3c'/></td></tr>";
+		str+="<tr><td>Answer 4</td><td><input type='text' style='width:160px' id='sq4a'/> <input type='text' size='10' id='sq4b'/> <input type='checkbox' id='sq4c'/></td></tr>";
+		str+="<tr><td>Answer 5</td><td><input type='text' style='width:160px' id='sq5a'/> <input type='text' size='10' id='sq5b'/> <input type='checkbox' id='sq5c'/></td></tr>";
+		}
+	else
+		str+="<tr><td>Text</td><td><textarea rows='4' cols='20' id='text'/></td></tr>";
+	return str+"</table>";
 }
 
 SHIVA_Event.prototype.UpdatePlayerEvents=function() 					// ADD EVENTS
@@ -289,6 +330,17 @@ SHIVA_Event.prototype.SaveEditedEvent=function(num, remove) 			// SAVE EDITED EV
 			o.frame[keys[i].substr(6)]=val;									// Add to frame obj
 		else																// Normal						
 			o[keys[i]]=val;													// Add to obj
+		}
+	if (o.type == "menu") {													// Construct text from menu parts
+		o.text=$("#sqpr").val();											// Prompt
+		for (i=0;i<5;++i)													// For each question
+			if ($("#sq"+i+"a").val()) {										// If an answer title
+			o.text+=">>"+$("#sq"+i+"a").val()+"|";							// Add title
+			if ($("#sq"+i+"c").attr("checked")) 							// If correct
+				o.text+="*";												// Add star
+			if ($("#sq"+i+"b").val()) 										// If an answer action
+				o.text+=$("#sq"+i+"b").val();								// Add action
+			}				
 		}
 	o.frame.scroller=($("#frame-scroller").attr("checked") == "checked"); 	// Set checkbox
 	o.frame.closer=($("#frame-closer").attr("checked") == "checked"); 		// Set checkbox

@@ -1490,7 +1490,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 	var options=this.options;
 //	options.dataSourceUrl="kaltura_player_1_uyp6bkha"; 
 //	options.dataSourceUrl="http://player.vimeo.com/video/17853047"; 
-	
+//	options.dataSourceUrl="http://www.primaryaccess.org/music.mp3";	
 	var container=this.container;
 	var con="#"+container;
 	var id=options.dataSourceUrl;
@@ -1546,7 +1546,9 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
     		shivaLib.player.play();
     	else
      		shivaLib.player.pause();
-		$("#shivaEventDiv").height(shivaLib.player.media.clientHeight-40);
+	
+	
+		$("#shivaEventDiv").height(Math.max(shivaLib.player.media.clientHeight-40,0));
    	}
 
   	function drawOverlay()	{

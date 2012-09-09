@@ -185,11 +185,11 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 	str+="<li><a href='#actions'>Action</a></li>";
 	str+="</ul>";
 
-	str+="<div id='times'><table cellspacing=0 cellpadding=0 style='font-size:small'>";
-	str+="<tr><td width='66%'>Start (min:sec)</td><td><input type='text' size='8' id='start'/></td></tr>";
+	str+="<div id='times'><table cellspacing=0 cellpadding=0 style='font-size:small' width='100%'>";
+	str+="<tr><td>Start (min:sec)</td><td><input type='text' size='8' id='start'/></td></tr>";
 	str+="<tr><td>End (min:sec)</td><td><input type='text' size='8' id='end'/></td></tr>";
 	str+="<tr><td>Fade in (secs)</td><td><input type='text' size='8' id='fadein'/></td></tr>";
-	str+="<tr><td>Fade out (secs)</td><td><input type='text' size='8' id='fadeout'/></td></tr>";
+	str+="<tr><td>Fade out (secs) &nbsp;</td><td><input type='text' size='8' id='fadeout'/></td></tr>";
 	str+="</table></div>";
   
    	str+="<div id='content'>";
@@ -202,12 +202,12 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 	str+="<tr><td>Width</td><td><input type='text' size='10' id='frame-width' value='auto'/></td></tr>";
 	str+="<tr><td>Height</td><td><input type='text' size='10' id='frame-height' value='auto'/></td></tr>";
 	str+="<tr><td>Corner radius</td><td><input type='text' size='10' id='frame-radius' value='8'/></td></tr>";
-	str+="<tr><td>Draggable?</td><td><input type='checkbox' id='frame-draggable'/></td></tr>";
+	str+="<tr><td>Draggable? &nbsp;</td><td><input type='checkbox' id='frame-draggable'/></td></tr>";
   	str+="</table></div>";
  
   	str+="<div id='colors'><table cellspacing=0 cellpadding=0 style='font-size:small' width='100%'>";
 	str+="<tr><td>Text color</td><td><input type='text' size='15' value='black' id='frame-color'/></td></tr>";
-	str+="<tr><td>Background color</td><td><input type='text' size='15' id='frame-background-color'/></td></tr>";
+	str+="<tr><td>Background color &nbsp;</td><td><input type='text' size='15' id='frame-background-color'/></td></tr>";
 	str+="<tr><td>Border</td><td><input type='text' size='15' id='frame-border' value='1px solid'/></td> </tr>";
 	str+="<tr><td>Opacity (0-100%)</td><td><input type='range' id='frame-opacity' value='100%'/></td></tr>";
   	str+="</table></div>";
@@ -216,7 +216,7 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 	str+="<tr><td>On a click</td><td><input type='text' size='20' id='click'/></td></tr>";
 	str+="<tr><td>On a hover</td><td><input type='text' size='20' id='hover'/></td></tr>";
 	str+="<tr><td>When done</td><td><input type='text' size='20' id='done'/></td></tr>";
-	str+="<tr><td>Response storage</td><td><input type='text' size='20' id='response'/></td></tr>";
+	str+="<tr><td>Response storage &nbsp;</td><td><input type='text' size='20' id='response'/></td></tr>";
 	str+="<tr><td>Player action</td><td><input type='text' size='20' id='player'/></td></tr>";
   	str+="</table></div></div>";
 	str+="<div align='center' style='px;font-size:small'><br><button id='saveBut'>Save</button>";	
@@ -281,7 +281,7 @@ SHIVA_Event.prototype.SetContentPanel=function(etype) 						// SET CONTENT PANEL
 	str+="<tr><td>Title</td><td><input type='text' size='20' id='title'/></td></tr>";
 	str+="<tr><td>Image Url</td><td><input type='text' size='20' id='url'/></td></tr>";
 	str+="<tr><td>Has scrollbar?</td><td><input type='checkbox' id='frame-scroller'/></td></tr>";
-	str+="<tr><td>Has close button?</td><td><input type='checkbox' id='frame-closer'/></td></tr>";
+	str+="<tr><td>Has close button? &nbsp;</td><td><input type='checkbox' id='frame-closer'/></td></tr>";
 	if (etype == "menu") {
 		str+="<input type='hidden' id='text'/>";
 		str+="<tr><td>Prompt</td><td><textarea rows='2' style='width:160px' id='sqpr'/> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Action &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;?</td></tr>";

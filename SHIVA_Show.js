@@ -1546,8 +1546,6 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
     		shivaLib.player.play();
     	else
      		shivaLib.player.pause();
-	
-	
 		$("#shivaEventDiv").height(Math.max(shivaLib.player.media.clientHeight-40,0));
    	}
 

@@ -237,3 +237,43 @@
 ***Enable user draw?***Setting this to true will allow users to add annotations to the display.  Click on the pull-down menu to the right to view and choose a value.
 
 ***OVERVIEW***The SHIVA Charts tools are the perfect way to visualize data on your website. From simple line charts to complex hierarchical tree maps, SHIVA provides you with a large number of well-designed chart types. All you have to do is populate the data.<br/><br/>To get started identify an existing data source in spreadsheet form. SHIVA works with spreadsheets created or imported from Excel into Google Docs.  From within your Google Docs spreadsheet, open the File pull-down menu. Choose <b>Publish to the Web... </b>A pop-up box will open. Click the Start Publishing button. Copy the URL address that appears in the text box below.<br/><br/>From within SHIVA identify the kind of chart you want to create (annotated timeline, area chart, bar chart, etc.) from the pull-down menu.  Paste the URL address in the Data Source URL box.<br/><br/>Customize your chart with the options available.<br/><br/>Want to add text, line drawings, circles or pictures to your project?  Just click on the grey colored pencil in a circle button below the attributes box and to activate the SHIVA drawing tool.<br/><br/>The <a href='https://wiki.shanti.virginia.edu/x/N5y1AQ' target='_blank'> UVa Knowledge Base</a> contains additional information about customizing your SHIVA Charts Tool.
+
+***Font***Type the font name of your choice into the text box to the right.  Font name options include Arial, Courier, and Times Roman.
+
+***Size***Type the font size of your choice into the text box to the right.  Font size can be as small as 1 and increase from there. Note that larger font sizes may result in problems fully rendering your chart. If you encounter this issue you may need to increase the height and width of your chart. 
+
+***Color***Click on the color picker that opens when you click within the textbox. Click on the color of your choice, and the information will populate the text box.
+
+***Fill color***Click on the color picker that opens when you click within the textbox. Click on the color of your choice, and the information will populate the text box.
+
+***Border color***Click on the color picker that opens when you click within the textbox. Click on the color of your choice, and the information will populate the text box.
+
+***Border width***Type the border width of your choice into the text box to the right.  Example, 1.
+
+***Top***Use this setting to configure the placement of the chart area from the top of the page in pixels, ie.,  where the chart itself is drawn, excluding axis and legends. Click on the text box on the right and enter a numerical value.  For example, 10.
+
+***Left***Use this setting to configure the placement of the chart area from the left side of the page in pixels, ie.,  where the chart itself is drawn, excluding axis and legends. Click on the text box on the right and enter a numerical value.  For example, 50.
+
+***Width***Use this setting to configure the width of the chart area.  Click on the text box on the right and enter a numerical value followed by the % sign.  For example, 10%. 
+
+***Height***Use this setting to configure the height of the chart area.  Click on the text box on the right and enter a numerical value followed by the % sign.  For example, 50%. 
+
+***Baseline***In the text box to the right enter a numerical value for the baseline for the horizontal axis. 
+
+***Baseline color***Click on the color picker that opens when you click within the textbox. Click on the color of your choice, and the information will populate the text box.
+
+***Direction***Click on the text box to the right enter either a 1 or -1 for the direction in which the values along the horizontal axis grow. Specify -1 to reverse the order of the values.
+
+***Axis label format***Click on the text box to the right to enter a format string for numeric or date axis labels.<br><br>For number axis labels, this is a subset of the decimal formatting ICU pattern set. For instance, {format:'#,###%'} will display values "1,000%", "750%", and "50%" for values 10, 7.5, and 0.5.<br><br>For date axis labels, this is a subset of the date formatting ICU pattern set. For instance, {format:'MMM d, y'} will display the value "Jul 1, 2011" for the date of July first in 2011.
+
+***Log scale?***Click on the text box to the right to enter the hAxis property that makes the horizontal axis a logarithmic scale (requires all values to be positive). Set to true for yes.  Default is false.  This option is only supported for a continuous axis.
+
+***Text position***Click on the text box to the right to enter  the position of the horizontal axis text, relative to the chart area. Supported values: 'out', 'in', 'none'.
+
+***Axis title***Click on the text box to the right to enter the hAxis property that specifies the title of the horizontal axis.
+
+***Max value***Click on the text box to the right to enter the numerical vAxis property that specifies the highest vertical axis grid line. The actual grid line will be the greater of two values: the maxValue option value, or the highest data value, rounded up to the next higher grid mark. 
+
+***Min value***Click on the text box to the right to enter the numerical vAxis property that specifies the lowest vertical axis grid line. The actual grid line will be the lower of two values: the minValue option value, or the lowest data value, rounded down to the next lower grid mark. 
+
+***Slanted text***Click on the text box to the right, enter true or false.  If true, draw the horizontal axis text at an angle, to help fit more text along the axis; if false, draw horizontal axis text upright. Default behavior is to slant text if it cannot all fit when drawn upright. Notice that this option is available only when the hAxis.textPosition is set to 'out' (which is the default).  This option is only supported for a discrete axis.

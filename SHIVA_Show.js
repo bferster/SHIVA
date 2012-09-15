@@ -4154,6 +4154,10 @@ SHIVA_Draw.prototype.onKeyUp=function(e)								// KEY UP HANDLER
 {
 	if ($("#shivaDrawPaletteDiv").length == 0) 								// If no palette
 		return;																// Quit
+	if ((e.which == 83) && (e.ctrlKey) && (e.altKey)) {						// CTRL+ALT+S
+		shivaLib.SaveData("eStore");										// Open eStore dialog	
+		return;																// Quit
+		}
 	var i;
 	if ((e.target.tagName == "TEXTAREA") || (e.target.tagName == "INPUT"))	// If in text entry
 		return;																// Quit

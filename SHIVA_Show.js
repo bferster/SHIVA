@@ -2583,14 +2583,16 @@ SHIVA_Show.prototype.ColorPicker=function(mode, att)
 	str+="</table><div id='shivaMultiColorDiv'/>";							// Ad multicolor div
 	$("#shiva_dialogDiv").html(str);										// Add body
 	if (mode == 1) {														// Picking multiple colors
-		this.MultiColor($("#propInput"+att).val())							// Get current version from menu
-			$("#propInput"+att).val("");									// If erasing, clear it	
+		this.MultiColor($("#propInput"+att).val(),-1);						// Get current version from menu
+$("#propInput"+att).val("");												// If erasing, clear it	
 		}
 }
 
 SHIVA_Show.prototype.MultiColor=function(oldCols, newCol)				// DRAW MULTI-COLOR MENU
 {
-	var vals=oldCols+newCol+",";											// Append to current color set with comma
+	var vals=oldCols;														// Add old colors
+	if (newCol != -1)														// If not init mode
+		vals+=newCol+",";													// Append to current color set with comma
 //	$("#shivaMultiColorDiv").html(vals);									// Fill in colors
 	return vals;															// Return new color set
 }
@@ -2631,7 +2633,7 @@ function shiva_SetColor(val, att, mode)									// ON COLOR PICK
 	$(str).css('border-color',"#"+val); 									// Set input box border color to chosen color
 	$(str+"C").css('background-color',"#"+val); 							// Set color chip color
 	if (mode == 1) 															// If multi-color picking
-		val=shivaLib.MultiColor($(str).val(),val);							// Show multi-color menu
+		val=shivaLib.MultiColor($(str).val(),val);							// Show multi-color menu and set vals
 	$(str).val(val);														// Set menu value for color(s)	
 	Draw();																	// Redraw chart with new color(s)
 }

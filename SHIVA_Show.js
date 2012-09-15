@@ -2553,8 +2553,6 @@ SHIVA_Show.prototype.ColorPicker=function(mode, att)
 	var ops={ width:'auto',height:'auto',modal:true,autoOpen:true,title:"Choose color",resizable:false,position:[20,50] }
 	$("body").append("<div id='shiva_dialogDiv'/>");
 	$("#shiva_dialogDiv").dialog(ops);
-	if (mode == 1) 	
-		$("#propInput"+att).val("");
 	var str="<table width='200' height='170' cellspacing='1' style='background-color:#666666'>";
 	var cols=[
 		'330000','333300','336600','339900','33CC00','33FF00','66FF00','66CC00','669900','666600','663300','660000','FF0000','FF3300','FF6600','FF9900','FFCC00','FFFF00',
@@ -2571,7 +2569,7 @@ SHIVA_Show.prototype.ColorPicker=function(mode, att)
 		'000000','003300','006600','009900','00CC00','00FF00','99FF00','99CC00','999900','996600','993300','990000','CC0000','CC3300','CC6600','CC9900','CCCC00','CCFF00',
 		'000000','111111','222222','333333','444444','555555','666666','777777','888888','999999','AAAAAA','BBBBBB','CCCCCC','DDDDDD','EEEEEE','FFFFFF','none','x'
 		];
-	for (i=0;i<13;++i) {
+	for (i=0;i<13;++i) {													
 		str+="<tr>";
 		for (j=0;j<18;++j)
 			if (cols[(i*18)+j] == 'x')
@@ -2582,10 +2580,22 @@ SHIVA_Show.prototype.ColorPicker=function(mode, att)
 				str+="<td style='background-color:#"+cols[(i*18)+j]+"' onClick='shiva_SetColor(\""+cols[(i*18)+j]+"\",\""+att+"\",\""+mode+"\")'></td>";
 		str+="</tr>";
 		}
-	$("#shiva_dialogDiv").html(str);
+	str+="</table><div id='shivaMultiColorDiv'/>";							// Ad multicolor div
+	$("#shiva_dialogDiv").html(str);										// Add body
+	if (mode == 1) {														// Picking multiple colors
+		this.MultiColor($("#propInput"+att).val())							// Get current version from menu
+			$("#propInput"+att).val("");									// If erasing, clear it	
+		}
 }
 
-function shiva_SetColor(val, att, mode)
+SHIVA_Show.prototype.MultiColor=function(oldCols, newCol)				// DRAW MULTI-COLOR MENU
+{
+	var vals=oldCols+newCol+",";											// Append to current color set with comma
+//	$("#shivaMultiColorDiv").html(vals);									// Fill in colors
+	return vals;															// Return new color set
+}
+
+function shiva_SetColor(val, att, mode)									// ON COLOR PICK
 {
 	if (val == -1) { 
 		$("#shiva_dialogDiv").remove();
@@ -2614,15 +2624,16 @@ function shiva_SetColor(val, att, mode)
 		$('#colorDiv').html(val);
 		return;
 		}
-	if (att > 100)
-		str="#itemInput"+(Math.floor(att/100)-1)+"-"+(att%100);
-	else
-		str="#propInput"+att;
-	$(str).css('border-color',"#"+val); 
-	$(str+"C").css('background-color',"#"+val); 
-	if (mode == 1) 	val=$(str).val()+val+",";
-	$(str).val(val);
-	Draw();
+	if (att > 100)															// If within an item
+		str="#itemInput"+(Math.floor(att/100)-1)+"-"+(att%100);				// Point a sub-element input in accordian
+	else																	// Normal param
+		str="#propInput"+att;												// Point a menu input box
+	$(str).css('border-color',"#"+val); 									// Set input box border color to chosen color
+	$(str+"C").css('background-color',"#"+val); 							// Set color chip color
+	if (mode == 1) 															// If multi-color picking
+		val=shivaLib.MultiColor($(str).val(),val);							// Show multi-color menu
+	$(str).val(val);														// Set menu value for color(s)	
+	Draw();																	// Redraw chart with new color(s)
 }
 
 SHIVA_Show.prototype.MakeSelect=function(id, multi, items, sel, extra)

@@ -720,15 +720,19 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 		var e=o.player.indexOf(")");										// Param end
 		if ((s != -1) && (e != -1))											// If well-formed
 			param=o.player.substring(s+1,e).replace(/%/g,"");				// Extract param			
-		if (o.player.toLowerCase() == "load")		this.player.load(param); // Load
-		else if (o.player.toLowerCase() == "pause")	this.player.pause();	// Pause
-		else if (o.player.toLowerCase().indexOf("play") != -1) {			// Play
+		if (o.player.toLowerCase().indexOf("play") != -1) {					// Play
 			if (param)														// If a time set
 				this.player.play(param);									// Play from that
 			else															// No time set
 				this.player.play();											// Play from current spot
 			}
-		else if (o.player.toLowerCase().indexOf("volume") != -1)	this.player.volume(param/100);	// Volume
+		else if (o.player.toLowerCase() == "pause")	this.player.pause();	// Pause
+		else if (o.player.toLowerCase().indexOf("volume") != -1)			// Volume
+			this.player.volume(param/100);									// Set volume
+		else if (o.player.toLowerCase().indexOf("load") != -1) {			// Load new clip
+			this.player.media.src=param;									// Set new source
+			this.player.load(); 											// Load
+			}
 		}															
 }
 

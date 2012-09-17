@@ -2148,7 +2148,7 @@ SHIVA_Show.prototype.ReEdit=function(jsonData, propertyList)
 }
 
 SHIVA_Show.prototype.ShowHelp=function(att, helpText, chartType)
-	{
+{
 		var v;
 		var str="<br/><hr/>";
 		$("#outputDiv").text(" ");
@@ -2205,7 +2205,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 		id="propInput"+i;
    		var str="<tr style='height:26px'><td width='12'></td><td width='200' onClick='ShowHelp(this.innerHTML)'>"+props[o].des.split("::")[0];
 	if ((this.drupalMan) && (o == "dataSourceUrl")) 
-			str+="&nbsp;&nbsp;<img src='databutton.gif' title='Click to find data set' style='vertical-align:bottom' onclick='shivaLib.GetDataFromManager()'/>";
+			str+="&nbsp;&nbsp;<img src='databutton.gif' title='Click to find data set' style='vertical-align:bottom' onclick='shivaLib.GetDataFromManager(\"gdoc\",0)'/>";
    		str+="</td><td></td><td>";
    		if (props[o].opt == "query") 
    			str+="<input type='password' size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.QueryEditor(\""+id+"\")' id='"+id+"'/>";
@@ -2244,8 +2244,11 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 						id2="itemInput"+j+"-"+(k-i);
 						oo=atts[k];
 						if (props[oo].opt != "hidden")
-							str+="<span onClick='ShowHelp(this.innerText)'>"+props[oo].des+"</span><span style='position:absolute;left:142px;'>";
-				   		if (props[oo].opt == "color") {
+							str+="<span onClick='ShowHelp(this.innerText)'>"+props[oo].des;
+						if ((this.drupalMan) && (oo == "layerSource")) 
+							str+="<img src='kmlicon.gif' id='"+j+"' title='Click to find KML file' style='vertical-align:bottom' onclick='shivaLib.GetDataFromManager(\"kml\",this.id)'/>";
+					   	str+="</span><span style='position:absolute;left:142px;'>";
+					   	if (props[oo].opt == "color") {
 	   						str+="<input size='14' onChange='Draw()' style='text-align:center' id='"+id2+"'>";
 			    			str+="<div style='position:relative;border:1px solid;height:8px;width:9px;top:-14px;left:5px'"
 							str+=" onclick='shivaLib.ColorPicker(0,"+((j*100)+100+(k-i))+")' id='"+id2+"C'/>";		   			
@@ -2413,9 +2416,12 @@ SHIVA_Show.prototype.SetAdvancedAttributes=function(prop, baseVar) 		// ADVANCED
 		$("#"+baseVar+v[i].split("=")[0]).val(v[i].split("=")[1]);			// Set last value
 }
 
-SHIVA_Show.prototype.GetDataFromManager=function()
+SHIVA_Show.prototype.GetDataFromManager=function(type, index)
 {
-	window.parent.postMessage("dataSourceUrl","*");
+	if (type == "gdoc")
+		window.parent.postMessage("dataSourceUrl","*");
+	if (type == "kml")
+		window.parent.postMessage("GetFile=KML="+index,"*");
 }
 
 /////// QUERY EDITOR

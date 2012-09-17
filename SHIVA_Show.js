@@ -1885,17 +1885,6 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 			val=options[o].toString();
   			val=ops[o]=val.replace(/~/g,"#")
   			}
-		if (o.indexOf("$$") != -1) { 								// A compound variable
-			v=o.split("$$")											// Split into parts
-			delete ops[o];											// Remove original
-			if ((val != "undefined") && (v.length > 1)) {			// If defined
-				if (ops[v[0]] == "undefined")						// If new					
-					ops[v[0]]={};									// Alloc 1st part
-				ops[v[0]][v[1]]=val;								// Add second
-				if (v.length == 3)									// If a 3rd
-					ops[v[0]][v[1]][v[2]]=val;						// Add third
-				}
-			}
 		if ((val.indexOf(",") != -1) && (o != "query") && (o != "title")) {
 			if (val) {
 				array=true;

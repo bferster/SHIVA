@@ -174,7 +174,7 @@
 		else if (e.data.indexOf("PutFile=KML") == 0) {
 			var v=e.data.split("=")
 			if (v[2] < items.length)
-				items[v[2]].layerSource=v[3];
+	 	       		$("#itemInput"+v[2]+"-2").val(v[3]);
 			Draw();
 			}
 	}

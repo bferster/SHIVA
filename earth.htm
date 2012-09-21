@@ -7,7 +7,7 @@
 	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
-	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+	<script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"earth","version":"1"}]}'></script>
  	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
  	<script type="text/javascript" src="SHIVA_Show.js"></script>
 	<style type="text/css">
@@ -57,6 +57,7 @@
 		mapcenter: 					{	def:'38.03,-78.48', opt:'string',			des:'Center'}, 
 		range: 						{	def:'10000', 		opt:'string',			des:'Range'}, 
 		tilt: 						{	def:'0', 			opt:'string',			des:'Tilt angle'}, 
+		heading: 					{	def:'0', 			opt:'string',			des:'Heading angle'}, 
 		draggable: 					{	def:'true', 		opt:'true|false',		des:'Draggable?'}, 
 		height: 					{	def:'600', 			opt:'number',		 	des:'Height of map'}, 
 		width: 						{	def:'800', 			opt:'number',		 	des:'Width of map'}, 
@@ -81,6 +82,7 @@
 	helpText['Draggable?']="Whether the map can be can navigated by dragging with a mouse.  Click on the pull-down menu to the right to choose 'true' or 'false'.";
 	helpText['Range']="How far the map is zoomed in (in feet )"; 
 	helpText['Tilt angle']="Degree of tilt (0-90 degrees)"; 
+	helpText['Heading angle']="Degree of heading or spin (0-90 degrees)"; 
 	helpText['Height of map']="The height of the map in pixels.  Click on the text box to the right to enter a number between 1 and 100000.  Please note that rendering times may be hindered for very large maps."; 
 	helpText['Width of map']="The width of the map in pixels.  Click on the text box to the right to enter a number between 1 and 100000.  Please note that rendering times may be hindered for very large maps."; 
 	helpText['Zoom/Position control?']="Whether the map has a pan and zoom control.  Click on the pull-down menu to the right to choose 'true' or 'false'.";
@@ -109,10 +111,8 @@
 
 ///////// INIT  /////////////
 
-google.load("earth","1");
-google.setOnLoadCallback(DrawEarth);
- 
-    $(document).ready(function() {
+     $(document).ready(function() {
+		google.setOnLoadCallback(DrawEarth);
 		$("#toolbar").buttonset();
 		$("#tb1").button({text: false, icons: { primary: "ui-icon-arrowthick-1-n"}}).css("width","25");
 		$("#tb2").button({text: false, icons: { primary: "ui-icon-arrowthick-1-s"}}).css("width","25");
@@ -190,9 +190,9 @@ function DrawEarth()
 	lookAt.setLongitude(Number(v[1]));									// Set lon
 	lookAt.setRange(Number(shivaLib.options.range));					// Set range
 	lookAt.setTilt(Number(shivaLib.options.tilt));						// Set tilt
+	lookAt.setHeading(Number(shivaLib.options.heading));				// Set heading
 	ge.getView().setAbstractView(lookAt);								// Go there
 
-	
 	if (shivaLib.options.panControl == "true")							// If controls on
 		ge.getNavigationControl().setVisibility(ge.VISIBILITY_AUTO);	// Show them	  
 	else																// Controls off
@@ -217,7 +217,8 @@ function DrawEarth()
 			var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
 			$("#propInput0").val(Math.floor(lookAt.getLatitude()*1000)/1000+","+Math.floor(lookAt.getLongitude()*1000)/1000);
 			$("#propInput1").val(Math.floor(lookAt.getRange()));
-			$("#propInput2").val(Math.floor(lookAt.getTilt()*100)/100);
+			$("#propInput2").val(Math.floor(lookAt.getTilt()*10)/10);
+			$("#propInput3").val(Math.floor(lookAt.getHeading()*10)/10);
 			});
  		}
 }

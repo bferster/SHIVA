@@ -8,6 +8,7 @@
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+ 	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
  	<script type="text/javascript" src="SHIVA_Show.js"></script>
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
@@ -36,7 +37,7 @@
 		</span></p>
 		<p style="text-align:right"><img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate()'>
 		<span id='saveAsDiv'></span>
-		<br/><br/><label>Find on map: </label ><input size='40' id="address" style='font-size:x-small' type="text"/>&nbsp;&nbsp;
+		<br/><br/><label>Find on earth: </label ><input size='40' id="address" style='font-size:x-small' type="text"/>&nbsp;&nbsp;
 		</p>		
 		<div id="helpDiv"> </div>
 	<div id="outputDiv" style="width:460px"> </div>
@@ -50,20 +51,21 @@
 	var curAtt=null;
 	var shivaLib=null;
 	var shivaGroup="Earth"
+	var geocoder=null;
 	
 	var props={
-		mapcenter: 					{	def:'38.03,-78.48,11', opt:'string',		des:'Center and zoom'}, 
+		mapcenter: 					{	def:'38.03,-78.48', opt:'string',			des:'Center'}, 
+		range: 						{	def:'10000', 		opt:'string',			des:'Range'}, 
+		tilt: 						{	def:'0', 			opt:'string',			des:'Tilt angle'}, 
 		draggable: 					{	def:'true', 		opt:'true|false',		des:'Draggable?'}, 
-		height: 					{	def:'400', 			opt:'number',		 	des:'Height of map'}, 
-		width: 						{	def:'600', 			opt:'number',		 	des:'Width of map'}, 
+		height: 					{	def:'600', 			opt:'number',		 	des:'Height of map'}, 
+		width: 						{	def:'800', 			opt:'number',		 	des:'Width of map'}, 
 		roads: 						{	def:'false', 		opt:'true|false',		des:'Show roads?'}, 
 		borders: 					{	def:'true', 		opt:'true|false',		des:'Show borders?'}, 
 		terrainexag: 				{	def:'1', 			opt:'1|2|3',			des:'Terrain exaggeration'}, 
 		scrollwheel: 				{	def:'true', 		opt:'true|false',		des:'Enable scrollwheeel?'}, 
 		overviewMapControl: 		{	def:'false', 		opt:'true|false',		des:'Overview inset control?'}, 
 		panControl: 				{	def:'true', 		opt:'true|false',		des:'Zoom/Position control?'}, 
-		streetViewControl: 			{	def:'false', 		opt:'true|false',		des:'Show StreetView icon?'}, 
-		zoomControl: 				{	def:'true', 		opt:'true|false',		des:'Zoom control?'}, 
 		controlbox: 				{	def:'false', 		opt:'true|false',		des:'Show controlbox?'}, 
 		ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'}, 
 		item: 						{	def:'None', 		opt:'None|',			des:'<b>Choose layer to edit</b>'}, 
@@ -75,12 +77,15 @@
 		}
 		
 	var helpText=new Array();
-	helpText['Center and zoom']="This sets the center of the view and its zoom factor. The 3 items are separated by commas, (i.e. 38.03,-78.48,11). <br><br>The easist way to set this to navigate the map to the view you want to set, and click in the center of the map. The coordinates will be displayed here in the help area. Copy and paste the numbers into the text box to the right to set it.<br/><br/><b>Hint:</b> Triple-clicking the number will select all 3 coordinates.";
+	helpText['Center']="This sets the center of the view. The latitude and longitude values are separated by a comma, (i.e. 38.03,-78.48).";
 	helpText['Draggable?']="Whether the map can be can navigated by dragging with a mouse.  Click on the pull-down menu to the right to choose 'true' or 'false'.";
-	helpText['Initial map type']="The type of map that opens initially.  Click on the pull-down menu to the right to view and choose from your options including hybrid, Roadmap, Satellite, or Terrain.  More information on map types can be found at <a href='http://code.google.com/apis/maps/documentation/staticmaps/#MapTypes' target='_blank'> here</a>.";
+	helpText['Range']="How far the map is zoomed in (in feet )"; 
+	helpText['Tilt angle']="Degree of tilt (0-90 degrees)"; 
 	helpText['Height of map']="The height of the map in pixels.  Click on the text box to the right to enter a number between 1 and 100000.  Please note that rendering times may be hindered for very large maps."; 
 	helpText['Width of map']="The width of the map in pixels.  Click on the text box to the right to enter a number between 1 and 100000.  Please note that rendering times may be hindered for very large maps."; 
 	helpText['Zoom/Position control?']="Whether the map has a pan and zoom control.  Click on the pull-down menu to the right to choose 'true' or 'false'.";
+	helpText['Show roads?']="Whether to show roads on the earth view"; 
+	helpText['Show borders?']="Whether to political boundaries earth view"; 
 	helpText['Overview inset control?']="Whether the map has an inset overview in the bottom right-hand corner.  Click on the pull-down menu to the right to choose 'true' or 'false'.";
 	helpText['Terrain exaggeration']="Exaggerates the effect of height in 3D view.";
 	helpText['Enable scrollwheeel?']="Enables the mouse scrollwheel to zoom the map.  Click on the pull-down menu to the right to choose 'true' or 'false'.";
@@ -134,9 +139,33 @@ google.setOnLoadCallback(DrawEarth);
 			str+="</select>"; 
 			$("#saveAsDiv").html(str);
 			}
+	
+		$(function() {
+		    $("#address").autocomplete({
+		      source: function(request, response) {
+		        geocoder.geocode( {'address': request.term }, function(results, status) {
+		          response($.map(results, function(item) {
+		            return {
+		              label:  item.formatted_address,
+		              value: item.formatted_address,
+		              latitude: item.geometry.location.lat(),
+		              longitude: item.geometry.location.lng()
+		            }
+		          }));
+		        })
+		      },
+	     	select: function(event, ui) {
+				var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
+				$("#propInput0").val(Math.floor(ui.item.latitude*1000)/1000+","+Math.floor(ui.item.longitude*1000)/1000);
+				Draw();
+		      	}
+		    });
+  		});
 
 	});
 
+
+geocoder=new google.maps.Geocoder();
 	
 function DrawEarth() 
 {
@@ -150,13 +179,20 @@ function DrawEarth()
 	if (!shivaLib.options == "no") 										// If no options yet
 	  	return;															// Quit
 
+	
+	$("#containerDiv").height(shivaLib.options.height);					// Height
+	$("#containerDiv").width(shivaLib.options.width);					// Width
+	
 	var ge=shivaLib.map;												// Point at Google Earth
 	var lookAt=ge.createLookAt('');										// LookAt object
 	var v=shivaLib.options.mapcenter.split(",");						// Get center
 	lookAt.setLatitude(Number(v[0]));									// Set lat
 	lookAt.setLongitude(Number(v[1]));									// Set lon
-	lookAt.setRange(Number(v[2])*1000);									// Set range
+	lookAt.setRange(Number(shivaLib.options.range));					// Set range
+	lookAt.setTilt(Number(shivaLib.options.tilt));						// Set tilt
 	ge.getView().setAbstractView(lookAt);								// Go there
+
+	
 	if (shivaLib.options.panControl == "true")							// If controls on
 		ge.getNavigationControl().setVisibility(ge.VISIBILITY_AUTO);	// Show them	  
 	else																// Controls off
@@ -177,7 +213,13 @@ function DrawEarth()
 		shivaLib.map=instance;											// Set ptr to earth
 		shivaLib.map.getWindow().setVisibility(true);					// Show it
 		DrawEarth();													// Draw it
-		}
+		google.earth.addEventListener(instance.getView(),'viewchangeend', function() { 
+			var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
+			$("#propInput0").val(Math.floor(lookAt.getLatitude()*1000)/1000+","+Math.floor(lookAt.getLongitude()*1000)/1000);
+			$("#propInput1").val(Math.floor(lookAt.getRange()));
+			$("#propInput2").val(Math.floor(lookAt.getTilt()*100)/100);
+			});
+ 		}
 }
 
 	function shivaEventHandler(e)

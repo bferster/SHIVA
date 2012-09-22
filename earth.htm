@@ -74,7 +74,7 @@
 		layerSource: 				{	def:'', 			opt:'string',		 	des:'Layer source'}, 
 		layerOptions: 				{	def:'', 			opt:'string',		 	des:'Layer options'}, 
 		visible:					{	def:'true', 		opt:'true|false',		des:'Layer visibility'}, 
-		layerType: 					{	def:'KML', 			opt:'KML|Marker|Overlay',des:'Layer type'} 
+		layerType: 					{	def:'GoTo', 		opt:'GoTo|KML|Overlay',	des:'Layer type'} 
 		}
 		
 	var helpText=new Array();
@@ -92,10 +92,10 @@
 	helpText['Terrain exaggeration']="Exaggerates the effect of height in 3D view.";
 	helpText['Enable scrollwheeel?']="Enables the mouse scrollwheel to zoom the map.  Click on the pull-down menu to the right to choose 'true' or 'false'.";
 	helpText['<b>Choose layer to edit</b>']="This option lets you layer another map on top of the google map (users can layer a historical map over the google map), add a marker to your map (users can add any number of markers to the map with rollover titles), or add a KML layer.  Select the layer to edit in this pull-down, or click on the layer in the map to bring up its attributes.<br><br>To add a new layer choose None from this pull-down menu.  Set the layer source, options, visibility and type.  Then click the Add new layer button below.<br><br>To remove a layer choose said layer from the pull-down menu, then click the Remove this layer button below.";
-	helpText['Layer source']="The URL address of the KML layer data. For Markers and Overlays, you can specify the data here directly:<br/><br/>For Markers, type in the lon, lat, and rollover title (i.e., 38.03,-78.48,My Marker). You can display any .png file as an icon by specifying its URL as the 4th setting after the title.<br/><br> For KML GeoRSS feeds. put the URL in the field: (i.e., http://gmaps-samples.googlecode.com/svn/trunk/ggeoxml/cta.kml).<br/><br>For more detailed information and instructions for adding KML layers, markers and overlays please see the UVa Knowledge Base documentation about <a href='https://wiki.shanti.virginia.edu/x/cZy1AQ' target='_blank'> SHIVA Maps tools</a>.  Or to add a KML layer easily from within SHIVA (or to add text, circles or images), just click on the grey colored pencil in a circle button below the attributes box and to activate the SHIVA drawing tool.";
+	helpText['Layer source']="The URL address of the KML layer data. For Markers and Overlays, you can specify the data here directly:<br/><br/>For GoTo, type in the lon, lat, and other viewpoint settings (i.e., 38.03,-78.48,10000).<br/><br> For KML GeoRSS feeds. put the URL in the field: (i.e., http://gmaps-samples.googlecode.com/svn/trunk/ggeoxml/cta.kml).<br/><br>For more detailed information and instructions for adding KML layers, markers and overlays please see the UVa Knowledge Base documentation about <a href='https://wiki.shanti.virginia.edu/x/cZy1AQ' target='_blank'> SHIVA Maps tools</a>.  Or to add a KML layer easily from within SHIVA (or to add text, circles or images), just click on the grey colored pencil in a circle button below the attributes box and to activate the SHIVA drawing tool.";
 	helpText['Layer title']="Click on the text box to the right and type in the title of your layer.";
 	helpText['Layer options']="Options to set various layer settings. For Overlays, the top-left and bottom-right coordinates are entered, separated by comma (i.e., 38.07,-78.55,37.99,-78.41). Remember to center the map over it to be able to see it. For Markers, this is an advanced option. You can find out more information <a href='http://code.google.com/apis/maps/documentation/javascript/reference.html#KmlLayer' target='_blank'> here</a>.";	
-	helpText['Layer type']="Click on the pull-down menu to the right to view and choose from the types of layers available for use on your map.<br/><br/><b>KML</b> will allow you to place a KML file as an overlay.<br/><b>Marker</b> will place a marker icon at a particular location.<br/><b>Overlay</b> will allow you to overlay an image by specifying the corners and a URL as the source.";	
+	helpText['Layer type']="Click on the pull-down menu to the right to view and choose from the types of layers available for use on your map.<br/><br/><b>KML</b> will allow you to place a KML file as an overlay.<br/><b>GoTo</b> will fly to a particular location.<br/><b>Overlay</b> will allow you to overlay an image by specifying the corners and a URL as the source.";	
 	helpText['Layer visibility']="Click on the pull-down menu to the right, if you click true the layer will be shown, click false and the layer will not be shown.";	
 	helpText['Enable user draw?']="Setting this to true will allow users to add annotations to the display.  Click on the pull-down menu to the right to choose 'true' or 'false'.";
 	helpText['OVERVIEW']="The SHIVA Earth tool lets you embed a Google Maps image on your web page.<br/><br/>";
@@ -169,7 +169,6 @@ geocoder=new google.maps.Geocoder();
 	
 function DrawEarth() 
 {
-		trace(google)
 	if (!shivaLib.map) {												// If not initted yet 
       	shivaLib.map="no";												// Loading
      	google.earth.createInstance("containerDiv", initCB);			// Create
@@ -183,7 +182,7 @@ function DrawEarth()
 	
 	$("#containerDiv").height(shivaLib.options.height);					// Height
 	$("#containerDiv").width(shivaLib.options.width);					// Width
-	
+	this.items=items;													// Set items
 	var ge=shivaLib.map;												// Point at Google Earth
 	var lookAt=ge.createLookAt('');										// LookAt object
 	var v=shivaLib.options.mapcenter.split(",");						// Get center
@@ -209,6 +208,8 @@ function DrawEarth()
 	 ge.getLayerRoot().enableLayerById(ge.LAYER_BORDERS,(shivaLib.options.borders == "true"));
 	 ge.getLayerRoot().enableLayerById(ge.LAYER_ROADS,(shivaLib.options.roads == "true"));
 
+	DrawEarthOverlays(items);
+	shivaLib.DrawLayerControlBox(items,shivaLib.options.controlbox == "true");
 	
 	function initCB(instance) {											// GOOGLE EARTH INIT
 		shivaLib.map=instance;											// Set ptr to earth
@@ -216,13 +217,70 @@ function DrawEarth()
 		DrawEarth();													// Draw it
 		google.earth.addEventListener(instance.getView(),'viewchangeend', function() { 
 			var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
-			$("#propInput0").val(Math.floor(lookAt.getLatitude()*1000)/1000+","+Math.floor(lookAt.getLongitude()*1000)/1000);
-			$("#propInput1").val(Math.floor(lookAt.getRange()));
-			$("#propInput2").val(Math.floor(lookAt.getTilt()*10)/10);
-			$("#propInput3").val(Math.floor(lookAt.getHeading()*10)/10);
+			var view=Math.floor(lookAt.getLatitude()*10000)/10000+","+Math.floor(lookAt.getLongitude()*10000)/10000+",";
+			view+=Math.floor(lookAt.getRange())+","+Math.floor(lookAt.getTilt()*100)/100+","+Math.floor(lookAt.getHeading()*100)/100;
+			var str="<b>Current view: </b></br></br>"+view;
+			str+="<br/><br/>Click <a href='javascript:SetNewView(\""+view+"\")'>here</a> to set as the new viewpoint";
+			$('#helpDiv').html(str);
 			});
  		}
+	}
+
+
+function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
+{
+	var i,v;
+	var _this=shivaLib;
+	var lookAt=_this.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);	// Lookat object
+	lookAt.setLatitude(Number(_this.options.mapcenter.split(",")[0]));	// Set lat
+	lookAt.setLongitude(Number(_this.options.mapcenter.split(",")[1]));	// Set lon
+	lookAt.setRange(Number(_this.options.range));						// Set range
+	lookAt.setTilt(Number(_this.options.tilt));							// Set tilt
+	lookAt.setHeading(Number(_this.options.heading));					// Set heading
+
+	for (i=0;i<items.length;++i) {
+		ops=new Object();
+		if (items[i].layerType == "GoTo") {								// GoTo position
+			v=items[i].layerSource.split(",");							// Split into parts
+			if ((v.length > 1) && (items[i].visible == "true")) {		// If enough  vals and visible
+				if (v[0] != undefined)	lookAt.setLatitude(Number(v[0]));	// Set lat
+				if (v[1] != undefined)	lookAt.setLongitude(Number(v[1]));	// Set lon
+				if (v[2] != undefined)	lookAt.setRange(Number(v[2]));		// Set range
+				if (v[3] != undefined)	lookAt.setTilt(Number(v[3]));		// Set tilt
+				if (v[4] != undefined)	lookAt.setHeading(Number(v[4]));	// Set heading
+				}
+			}
+		if (items[i].layerType == "Overlay") {
+			}
+		if (items[i].layerType == "KML") {								// KML layer
+			if (items[i].obj) {										// If already there
+				_this.map.getFeatures().removeChild(items[i].obj);		// Remove it from list
+				items[i].obj=null;										// Null it out
+				}
+			var link=_this.map.createLink('');							// Create link object	
+			link.setHref(items[i].layerSource);							// Set url
+			items[i].obj=_this.map.createNetworkLink('');				// Create layer object
+			var fly=(items[i].layerOptions.indexOf("port") == -1)		// Preserve viewport?
+			items[i].obj.set(link,true,fly); 							// Sets the link, refreshVisibility, and flyToView
+			if (items[i].visible == "true") 							// If visible
+				_this.map.getFeatures().appendChild(items[i].obj);		// Add it to display list
+			else 														// Hidden
+				_this.map.getFeatures().removeChild(items[i].obj);		// Remove it from list
+			}
+	}
+	_this.map.getView().setAbstractView(lookAt);						// Go there
 }
+
+
+//http://code.google.com/apis/earth/documentation/samples/kml_example.kml
+	function SetNewView(view)
+	{
+		var v=view.split(",");
+		$("#propInput0").val(v[0]+","+v[1]);
+		$("#propInput1").val(v[2]);
+		$("#propInput2").val(v[3]);
+		$("#propInput3").val(v[4]);
+	}
 
 	function shivaEventHandler(e)
 	{

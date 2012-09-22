@@ -48,6 +48,8 @@ SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 		this.DrawChart();
 	else if (group == 'Network')
 		this.DrawNetwork();
+	else if (group == 'Earth')
+		this.DrawEarth();
 	else if (group == 'Draw') {
 		if (ops.width)	$("#"+this.container).css("width",ops.width+"px");
 		if (ops.height)	$("#"+this.container).css("height",ops.height+"px");
@@ -99,7 +101,7 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
             break;
 		case "Earth": 														// Google Earth		
   			obj="google.earth.createInstance";								// Object to test for
-        	lib="https://www.google.com/jsapi?autoload={\"modules\":[{\"name\":\"earth\",\"version\":\"1\"}]}"; 	// Lib to load
+        	lib="https://www.google.com/jsapi?autoload=\{\"modules\":\[\{\"name\":\"earth\",\"version\":\"1\"\}\]\}"; 	// Lib to load
             break;
 		}
 	if (lib) {																// If a lib to load
@@ -442,6 +444,12 @@ SHIVA_Show.prototype.SetLayer=function(num, mode) 									// SET LAYER
 				this.items[num].obj.setMap(this.map);
 			}
 		}
+	else if (group == "Earth") {
+	if (items) 
+		if (items[num]) 
+			items[num].visible=mode.toString();
+		this.DrawEarth(items);
+		}
 	else if (group == "Subway") 
 		this.DrawSubway(this.items);
 	else if (group == "Timeline") 
@@ -480,6 +488,16 @@ SHIVA_Show.prototype.Annotate=function() 												// SHOW ANNOTATION PALATTE
 		}
 	else this.dr.DrawPalette();																// Draw palette
 	this.Sound("click");																	// Click
+}
+
+
+//  GOOGLE EARTH   /////////////////////////////////////////////////////////////////////////////////////////// 
+
+
+SHIVA_Show.prototype.DrawEarth=function() 												//	DRAW EARTH
+{
+	DrawEarthOverlays(items);	
+	this.SendReadyMessage(true);															// Send ready message									
 }
 
 
@@ -2585,7 +2603,6 @@ SHIVA_Show.prototype.ColorPicker=function(mode, att)
 		this.MultiColor($("#propInput"+att).val(),-1);						// Get current version from menu
 }
 
-                                            
 SHIVA_Show.prototype.MultiColor = function(oldCols, newCol)				// DRAW MULTI-COLOR MENU
 {
 	var colors=oldCols.split(",");											// Separate oldCols to an array

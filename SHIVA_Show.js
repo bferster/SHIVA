@@ -97,6 +97,10 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
   			obj="google.maps.Map";											// Object to test for
         	lib="http://maps.googleapis.com/maps/api/js?key=AIzaSyDohush6W1WlGqOjKtncuzcbFlss6M12zM&sensor=false&callback=shivaJSLoaded"; 		// Lib to load
             break;
+		case "Earth": 														// Google Earth		
+  			obj="google.earth.createInstance";								// Object to test for
+        	lib="https://www.google.com/jsapi?autoload={\"modules\":[{\"name\":\"earth\",\"version\":\"1\"}]}"; 	// Lib to load
+            break;
 		}
 	if (lib) {																// If a lib to load
 		var v=obj.split(".");												// Split by parts
@@ -2577,19 +2581,91 @@ SHIVA_Show.prototype.ColorPicker=function(mode, att)
 		}
 	str+="</table><div id='shivaMultiColorDiv'/>";							// Ad multicolor div
 	$("#shiva_dialogDiv").html(str);										// Add body
-	if (mode == 1) {														// Picking multiple colors
+	if (mode == 1) 															// Picking multiple colors
 		this.MultiColor($("#propInput"+att).val(),-1);						// Get current version from menu
-$("#propInput"+att).val("");												// If erasing, clear it	
-		}
 }
 
-SHIVA_Show.prototype.MultiColor=function(oldCols, newCol)				// DRAW MULTI-COLOR MENU
+                                            
+SHIVA_Show.prototype.MultiColor = function(oldCols, newCol)				// DRAW MULTI-COLOR MENU
 {
-	var vals=oldCols;														// Add old colors
-	if (newCol != -1)														// If not init mode
-		vals+=newCol+",";													// Append to current color set with comma
-//	$("#shivaMultiColorDiv").html(vals);									// Fill in colors
-	return vals;															// Return new color set
+	var colors=oldCols.split(",");											// Separate oldCols to an array
+
+	function setCur(index) {												// SetCur handles both the setting of all cells and the adding on new rows as needed
+		var row=Math.floor(index/5);										// Get row from index
+		var cell=index%5;													// Get cell
+		if (typeof(shivaLib.multiColorCur) != "undefined") {				// If first time
+			$(".full:eq(" + shivaLib.multiColorCur + ")").css("border", "solid thin black")
+			}
+		if ($(".empty").length > 0 && ($("#table tr:eq(" + row + ") td:eq(" + cell + ")").index())+($("#table tr:eq(" + row + ") td:eq(" + cell + ")").parent().index()*5) >= ($(".empty:first").index() + (5*$(".empty:first").parent().index()))){
+			shivaLib.multiColorCur = $(".empty:first").index() + ($(".empty:first").parent().index() * 5);
+			$(".empty:first").css("border", "solid medium black");
+			$(".empty:first").attr("class", "full");
+			}
+		else{
+			shivaLib.multiColorCur = cell + (5 * row)
+			$("#table tr:eq(" + row + ") td:eq(" + cell + ")").css("border", "solid medium black");
+			$("#table tr:eq(" + row + ") td:eq(" + cell + ")").attr("class", "full");
+			}
+		if ($(".full:last").index() == 4 && $(".full:last").parent().index() == $("#table tr").length-1 && $("#table tr").length < 5){              //if a new row is needed and the table isn't full, add one
+			$("#table").append("<tr>");
+			for (var i=0;i<5;i++) {
+				$("#table tr:last").append($('<td>', {
+					css : {
+						width : '32px',
+						height : '32px',
+						border : 'dashed thin gray'
+						},
+					click : function() {
+						setCur($(this).index() + (5* $(this).parent().index()));
+					}
+				}));
+				$("#table tr:last td:last").attr("class", "empty");
+				}
+			}
+		}
+	if (newCol == -1) {  														// If in init mode build the basic table
+		if ($("#table").length == 0) {
+			$("#shivaMultiColorDiv").append($("<table>", {
+				id : "table",
+			}));
+			}
+		$("#table").append("<tr>");
+		for (var i = 0; i < 5; i++) {
+			$("#table tr:first").append($('<td>', {
+				css : {
+					width : '32px',
+					height : '32px',
+					border : 'dashed thin gray'
+				},
+				click : function() {
+					setCur($(this).index() + (5 * $(this).parent().index()));
+				}
+			}));
+			$("#table tr:first td:last").attr("class", "empty");
+			}
+		setCur(0);
+		if ($(".full").length == 1  && oldCols != "") {							// And if there are colors to be set, set them
+			for (var j=0;j<colors.length;j++) {
+				setCur(j);
+				$("#table tr:eq("+Math.floor(j / 5)+") td:eq("+ (j % 5)+")").css("backgroundColor", colors[j]);
+				}
+			setCur(shivaLib.multiColorCur);
+			}
+		}
+	else{																		// If not in init mode
+		if (shivaLib.multiColorCur < $(".full").length-1){						// And if the cell is an existing full cell	
+			colors[shivaLib.multiColorCur] = "#"+newCol;
+			$(".full:eq("+shivaLib.multiColorCur+")").css("backgroundColor", "#"+newCol);
+			}
+		else if(shivaLib.multiColorCur < 25){									// Else if the selected cell is the leading blank cell
+			$(".full:last").css("backgroundColor", "#"+newCol);
+			colors[shivaLib.multiColorCur] = "#"+newCol;
+			setCur(shivaLib.multiColorCur+1);
+			}
+		}
+	var ret=colors.toString();
+	ret+=",";																	// Add the trailing comma 
+	return ret;
 }
 
 function shiva_SetColor(val, att, mode)									// ON COLOR PICK

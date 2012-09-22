@@ -97,9 +97,8 @@
 	helpText['Layer options']="Options to set various layer settings. For Overlays, the top-left and bottom-right coordinates are entered, separated by comma (i.e., 38.07,-78.55,37.99,-78.41). Remember to center the map over it to be able to see it. For Markers, this is an advanced option. You can find out more information <a href='http://code.google.com/apis/maps/documentation/javascript/reference.html#KmlLayer' target='_blank'> here</a>.";	
 	helpText['Layer type']="Click on the pull-down menu to the right to view and choose from the types of layers available for use on your map.<br/><br/><b>KML</b> will allow you to place a KML file as an overlay.<br/><b>Marker</b> will place a marker icon at a particular location.<br/><b>Overlay</b> will allow you to overlay an image by specifying the corners and a URL as the source.";	
 	helpText['Layer visibility']="Click on the pull-down menu to the right, if you click true the layer will be shown, click false and the layer will not be shown.";	
-	helpText['OVERVIEW']="The SHIVA Earth tool lets you embed a Google Maps image on your web page without requiring JavaScript or any dynamic page loading. The Google Static Map service creates your map based on URL parameters sent through a standard HTTP request and returns the map as an image you can display on your web page.<br/><br/>";
-	helpText['OVERVIEW']+="To use SHIVA Map tools, find the center point of your map by using the zoom and pan features of the SHIVA map. The map will automatically load centered on Charlottesville. When you have located the center point of your map, triple click on it. Right below the SHIVA map the coordinates for your center point will be displayed.  Copy and paste them into the Center and zoom of map text box.<br/><br/>";
-	helpText['OVERVIEW']+="Customize your chart with the options available.<br/><br/>"
+	helpText['Enable user draw?']="Setting this to true will allow users to add annotations to the display.  Click on the pull-down menu to the right to choose 'true' or 'false'.";
+	helpText['OVERVIEW']="The SHIVA Earth tool lets you embed a Google Maps image on your web page.<br/><br/>";
 	helpText['OVERVIEW']+="The layers tool allows you to add KML layers, markers and/or overlays to your map.<br/><br/>";
 	helpText['OVERVIEW']+="KML is a file format used to display geographic data in an earth browser, such as Google Earth, Google Maps, and Google Maps for mobile. A KML file is processed in much the same way that HTML (and XML) files are processed by web browsers. Like HTML, KML has a tag-based structure with names and attributes used for specific display purposes, Markers or Overlays to your map.<br/><br/>";
 	helpText['OVERVIEW']+="Markers are like pins that you place on your map. A marker can have information or links attached to them that can be viewed when a user clicks on or hovers their mouse over a marker.<br/><br/>";
@@ -107,7 +106,6 @@
 	helpText['OVERVIEW']+="To add layers to your map click the '+' button below the attributes box.  A box will open allowing you to customize your layers.<br/><br/>";
 	helpText['OVERVIEW']+="Want to add text, line drawings, circles or pictures to your project?  Just click on the grey colored pencil in a circle button below the attributes box and to activate the SHIVA drawing tool.<br/><br/>";
 	helpText['OVERVIEW']+="For more information and detailed instructions for utilizing this tool please visit the UVa Knowledge Base documentation for the <a href='https://wiki.shanti.virginia.edu/x/cZy1AQ' target='_blank'> Maps Tool</a>.";
-	helpText['Enable user draw?']="Setting this to true will allow users to add annotations to the display.  Click on the pull-down menu to the right to choose 'true' or 'false'.";
 
 ///////// INIT  /////////////
 
@@ -119,6 +117,8 @@
 		$("#tb3").button({text: false, icons: { primary: "ui-icon-trash"}}).css("width","25");
 		$("#tb4").button({text: false, icons: { primary: "ui-icon-plus"}}).css("width","25");
 		shivaLib=new SHIVA_Show("containerDiv");
+		
+		shivaLib.LoadJSLib("Earth",DrawEarth)
 		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
 	  	shivaLib.SetAttributes(props,items,false);
 		ReEdit();
@@ -169,8 +169,9 @@ geocoder=new google.maps.Geocoder();
 	
 function DrawEarth() 
 {
+		trace(google)
 	if (!shivaLib.map) {												// If not initted yet 
-     	shivaLib.map="no";												// Loading
+      	shivaLib.map="no";												// Loading
      	google.earth.createInstance("containerDiv", initCB);			// Create
 	  	return;															// Quit
 	  	}

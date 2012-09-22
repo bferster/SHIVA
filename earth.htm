@@ -229,7 +229,7 @@ function DrawEarth()
 
 function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
 {
-	var i,v;
+	var i,v,opacity;
 	var _this=shivaLib;
 	var lookAt=_this.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);	// Lookat object
 	lookAt.setLatitude(Number(_this.options.mapcenter.split(",")[0]));	// Set lat
@@ -239,40 +239,55 @@ function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
 	lookAt.setHeading(Number(_this.options.heading));					// Set heading
 
 	for (i=0;i<items.length;++i) {
-		ops=new Object();
+		opacity=1;														// Assume full opacity
+		if (items[i].obj) {												// If already there
+			_this.map.getFeatures().removeChild(items[i].obj);			// Remove it from list
+			items[i].obj=null;											// Null it out
+			}
 		if (items[i].layerType == "GoTo") {								// GoTo position
 			v=items[i].layerSource.split(",");							// Split into parts
 			if ((v.length > 1) && (items[i].visible == "true")) {		// If enough  vals and visible
 				if (v[0] != undefined)	lookAt.setLatitude(Number(v[0]));	// Set lat
 				if (v[1] != undefined)	lookAt.setLongitude(Number(v[1]));	// Set lon
-				if (v[2] != undefined)	lookAt.setRange(Number(v[2]));		// Set range
-				if (v[3] != undefined)	lookAt.setTilt(Number(v[3]));		// Set tilt
-				if (v[4] != undefined)	lookAt.setHeading(Number(v[4]));	// Set heading
+				if (v[2] != undefined)	lookAt.setRange(Number(v[2]));	// Set range
+				if (v[3] != undefined)	lookAt.setTilt(Number(v[3]));	// Set tilt
+				if (v[4] != undefined)	lookAt.setHeading(Number(v[4]));// Set heading
 				}
 			}
-		if (items[i].layerType == "Overlay") {
+		if (items[i].layerType == "Overlay") {							// Image overlay
+			items[i].obj=_this.map.createGroundOverlay('');				// Alloc overlay obj
+			v=items[i].layerOptions.split(",");							// Split dest pos
+			var icon=_this.map.createIcon('');							// Create icon
+			icon.setHref(items[i].layerSource);							// Set url
+			items[i].obj.setIcon(icon);									// Set it
+			var latLonBox=_this.map.createLatLonBox('');				// Create loc
+			latLonBox.setBox(Number(v[2]),Number(v[0]),Number(v[1]),Number(v[3]),0); // Fill loc	
+			items[i].obj.setLatLonBox(latLonBox);						// Set loc
+			if (v.length == 5)											// If opacity set
+				opacity=v[4]/100;										// Set it
 			}
 		if (items[i].layerType == "KML") {								// KML layer
-			if (items[i].obj) {										// If already there
-				_this.map.getFeatures().removeChild(items[i].obj);		// Remove it from list
-				items[i].obj=null;										// Null it out
-				}
 			var link=_this.map.createLink('');							// Create link object	
 			link.setHref(items[i].layerSource);							// Set url
 			items[i].obj=_this.map.createNetworkLink('');				// Create layer object
 			var fly=(items[i].layerOptions.indexOf("port") == -1)		// Preserve viewport?
 			items[i].obj.set(link,true,fly); 							// Sets the link, refreshVisibility, and flyToView
+			}
+		if (items[i].obj) {												// If an object
+			items[i].obj.setOpacity(opacity);							// Set opacity
 			if (items[i].visible == "true") 							// If visible
 				_this.map.getFeatures().appendChild(items[i].obj);		// Add it to display list
 			else 														// Hidden
-				_this.map.getFeatures().removeChild(items[i].obj);		// Remove it from list
+				_this.map.getFeatures().removeChild(items[i].obj);			// Remove it from list
 			}
-	}
+		}
 	_this.map.getView().setAbstractView(lookAt);						// Go there
 }
 
-
+//38.07,-78.55,37.99,-78.41,75
+//http://www.viseyes.org/shiva/map.jpg
 //http://code.google.com/apis/earth/documentation/samples/kml_example.kml
+
 	function SetNewView(view)
 	{
 		var v=view.split(",");

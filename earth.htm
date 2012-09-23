@@ -74,7 +74,7 @@
 		layerSource: 				{	def:'', 			opt:'string',		 	des:'Layer source'}, 
 		layerOptions: 				{	def:'', 			opt:'string',		 	des:'Layer options'}, 
 		visible:					{	def:'true', 		opt:'true|false',		des:'Layer visibility'}, 
-		layerType: 					{	def:'GoTo', 		opt:'GoTo|KML|Overlay',	des:'Layer type'} 
+		layerType: 					{	def:'GoTo', 		opt:'GoTo|KML|Overlay|Drawn',	des:'Layer type'} 
 		}
 		
 	var helpText=new Array();
@@ -207,6 +207,7 @@ function DrawEarth()
 	
 	 ge.getLayerRoot().enableLayerById(ge.LAYER_BORDERS,(shivaLib.options.borders == "true"));
 	 ge.getLayerRoot().enableLayerById(ge.LAYER_ROADS,(shivaLib.options.roads == "true"));
+	 ge.getLayerRoot().enableLayerById(ge.LAYER_TERRAIN,true);
 
 	DrawEarthOverlays(items);
 	shivaLib.DrawLayerControlBox(items,shivaLib.options.controlbox == "true");
@@ -273,6 +274,41 @@ function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
 			var fly=(items[i].layerOptions.indexOf("port") == -1)		// Preserve viewport?
 			items[i].obj.set(link,true,fly); 							// Sets the link, refreshVisibility, and flyToView
 			}
+		if (items[i].layerType == "Drawn") {							// Drawn KML layer
+			var kmlString = ''
+              + '<?xml version="1.0" encoding="UTF-8"?>'
+              + '<kml xmlns="http://www.opengis.net/kml/2.2">'
+            + '<Document>'
+  
+  				+ '<Style id="randomColorIcon">'
+    			+ '<IconStyle>'
+  				+ '<color>ff00ff00</color>'
+       			+ '<Icon><href>http://www.viseyes.org/shiva/icons/red/cloud_download_32x32.png</href></Icon>'
+     			+ '</IconStyle>'
+    			+ '<LabelStyle><color>ff00ff00</color><scale>1</scale></LabelStyle>'
+   				+ '</Style>'
+
+              + '  <Camera>'
+              + '    <longitude>-122.444633</longitude>'
+              + '    <latitude>37.801899</latitude>'
+              + '    <altitude>139.629438</altitude>'
+              + '    <heading>-70.0</heading>'
+              + '    <tilt>75</tilt>'
+              + '  </Camera>'
+              + '  <Placemark>'
+              + '    <styleUrl>#randomColorIcon</styleUrl>'
+              + '    <name>This is the spot!</name>'
+              + '    <Point>'
+              + '      <coordinates>-122.448425,37.802907,0</coordinates>'
+              + '    </Point>'
+              + '  </Placemark>'
+             + '</Document>'
+              + '</kml>';
+			items[i].obj=_this.map.parseKml(kmlString);
+			if (items[i].obj.getAbstractView())
+   				_this.map.getView().setAbstractView(items[i].obj.getAbstractView());
+   			}
+   			
 		if (items[i].obj) {												// If an object
 			items[i].obj.setOpacity(opacity);							// Set opacity
 			if (items[i].visible == "true") 							// If visible
@@ -281,7 +317,7 @@ function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
 				_this.map.getFeatures().removeChild(items[i].obj);			// Remove it from list
 			}
 		}
-	_this.map.getView().setAbstractView(lookAt);						// Go there
+//	_this.map.getView().setAbstractView(lookAt);						// Go there
 }
 
 //38.07,-78.55,37.99,-78.41,75

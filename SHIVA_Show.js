@@ -2285,7 +2285,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
   		else if (props[o].opt == "advanced") 
    			str+="<input size='14' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.SetAdvancedAttributes(\""+id+"\",\""+o+"\")' id='"+id+"'/>";
    		else if ((props[o].opt == "color") || (props[o].opt == "colors")) {
-   			str+="<div style='max-height:26px'><input size='4' onChange='Draw()' style='position:relative;text-align:center;height:16px;top:2px; padding-left: 20px' id='"+id+"'/>";
+   			str+="<div style='max-height:26px'><input size='7' onChange='Draw()' style='position:relative;text-align:center;height:16px;top:2px; padding-left: 20px' id='"+id+"'/>";
    			str+="<div style='position:relative;border:1px solid;height:11px;width:11px;top:-16px;left:6px'"
 			if (props[o].opt == "colors")	
   				str+=" onclick='shivaLib.ColorPicker(1,"+i+")' id='"+id+"C'/>";		   			

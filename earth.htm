@@ -178,7 +178,6 @@ function DrawEarth()
 	  	return;															// Quit
 	if (!shivaLib.options == "no") 										// If no options yet
 	  	return;															// Quit
-
 	
 	$("#containerDiv").height(shivaLib.options.height);					// Height
 	$("#containerDiv").width(shivaLib.options.width);					// Width
@@ -204,11 +203,10 @@ function DrawEarth()
 	else																// No scroll
 		ge.getOptions().setScrollWheelZoomSpeed(.0000000001)	    	// Disable by making really small
 	ge.getOptions().setTerrainExaggeration(Number(shivaLib.options.terrainexag));	// Terrain exaggeration
+	ge.getLayerRoot().enableLayerById(ge.LAYER_BORDERS,(shivaLib.options.borders == "true"));
+	ge.getLayerRoot().enableLayerById(ge.LAYER_ROADS,(shivaLib.options.roads == "true"));
+	ge.getLayerRoot().enableLayerById(ge.LAYER_TERRAIN,true);
 	
-	 ge.getLayerRoot().enableLayerById(ge.LAYER_BORDERS,(shivaLib.options.borders == "true"));
-	 ge.getLayerRoot().enableLayerById(ge.LAYER_ROADS,(shivaLib.options.roads == "true"));
-	 ge.getLayerRoot().enableLayerById(ge.LAYER_TERRAIN,true);
-
 	DrawEarthOverlays(items);
 	shivaLib.DrawLayerControlBox(items,shivaLib.options.controlbox == "true");
 	
@@ -317,7 +315,7 @@ function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
 				_this.map.getFeatures().removeChild(items[i].obj);			// Remove it from list
 			}
 		}
-//	_this.map.getView().setAbstractView(lookAt);						// Go there
+	_this.map.getView().setAbstractView(lookAt);						// Go there
 }
 
 //38.07,-78.55,37.99,-78.41,75

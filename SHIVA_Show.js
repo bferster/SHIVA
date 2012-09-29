@@ -430,25 +430,44 @@ SHIVA_Show.prototype.Resize=function(wid) 								// RESIZE ELEMENT
 	return false;															// Unchanged
 }
 
-SHIVA_Show.prototype.SetLayer=function(num, mode) 									// SET LAYER
+SHIVA_Show.prototype.SetLayer=function(num, mode, type) 				// SET LAYER
 {
+	
+	var i;
 	var group=this.options.shivaGroup;
 	if (this.items) 
 		if (this.items[num]) 
 			this.items[num].visible=mode.toString();
 	if (group == "Map") {
-		if (this.items[num].obj) {
-			if (this.items[num].visible == "false") 
-				this.items[num].obj.setMap(null);
-			else	
-				this.items[num].obj.setMap(this.map);
+		if (items) {
+		 	if (type == "GoTo") {
+				for (i=0;i<items.length;++i)
+					if (items[i].layerType == "GoTo")
+						items[i].visible=false;
+			if (items[num]) 
+				items[num].visible=mode.toString();
+				this.DrawMapOverlays(items);
+				}
+			if (items[num]) {
+				if (this.items[num].obj) {
+					if (this.items[num].visible == "false") 
+						this.items[num].obj.setMap(null);
+					else	
+						this.items[num].obj.setMap(this.map);
+					}
+				}
 			}
 		}
 	else if (group == "Earth") {
-	if (items) 
-		if (items[num]) 
-			items[num].visible=mode.toString();
-		this.DrawEarth(items);
+		if (items) {
+		 	if (type == "GoTo") 
+				for (i=0;i<items.length;++i)
+					if (items[i].layerType == "GoTo")
+						items[i].visible=false;
+			if (items[num]) 
+				items[num].visible=mode.toString();
+			this.DrawEarth(items);
+			}
 		}
 	else if (group == "Subway") 
 		this.DrawSubway(this.items);
@@ -1745,8 +1764,11 @@ SHIVA_Show.prototype.AddInternalOptions=function(options, newOps) 							//	PARS
 
 SHIVA_Show.prototype.DrawMapOverlays=function(items) 										//	DRAW MAP OVERLAYS
 {
-	var i,j,latlng,v,ops;
+	var i,j,latlng,v,ops,zoom;
 	var _this=this;
+  	v=this.options.mapcenter.split(",")
+	latlng=new google.maps.LatLng(v[0],v[1]);
+	zoom=v[2];
 	for (i=0;i<items.length;++i) {
 //		items[i].layerType = "Drawn"
 		ops=new Object();
@@ -1755,7 +1777,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function(items) 										//	DRAW MAP OVERL
 		if (items[i].layerType == "Drawn") {
 			items[i].obj=new ShivaCustomMapOverlay()
 			}
-		if (items[i].layerType == "Marker") {
+		else if (items[i].layerType == "Marker") {
 			items[i].obj=new google.maps.Marker();
 			v=items[i].layerSource.split(",")
 			items[i].pos=latlng=new google.maps.LatLng(v[0],v[1]);
@@ -1766,7 +1788,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function(items) 										//	DRAW MAP OVERL
  			if (ops && items[i].obj)
 				items[i].obj.setOptions(ops);
 			}
-		if (items[i].layerType == "Overlay") {
+		else if (items[i].layerType == "Overlay") {
 			v=items[i].layerOptions.split(",");
 			var imageBounds=new google.maps.LatLngBounds(new google.maps.LatLng(v[2],v[1]),new google.maps.LatLng(v[0],v[3]));
 			if (v.length == 5)
@@ -1775,7 +1797,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function(items) 										//	DRAW MAP OVERL
 				items[i].obj=new google.maps.GroundOverlay(items[i].layerSource,imageBounds,ops);
 //	38.07,-78.55,37.99,-78.41
 			}
-		if (items[i].layerType == "KML") {
+		else if (items[i].layerType == "KML") {
 			if (items[i].layerOptions) {	
 				v=items[i].layerOptions.split(",");
 				for (j=0;j<v.length;++j) 
@@ -1783,16 +1805,25 @@ SHIVA_Show.prototype.DrawMapOverlays=function(items) 										//	DRAW MAP OVERL
 				}
 			items[i].obj=new google.maps.KmlLayer(items[i].layerSource,ops);
 			}
+		else if ((items[i].layerType == "GoTo") && (items[i].visible == "true")) {
+			v=items[i].layerSource.split(",");							// Split into parts
+			if (v.length > 1)									 		// If enough  vals and visible
+				latlng=new google.maps.LatLng(v[0],v[1]);				// Set center
+			if (v.length > 2)											// If set
+				zoom=v[2];												// Set zoom
+			}
 		if ((items[i].visible == "true") && (items[i].obj))
 			items[i].obj.setMap(this.map);	
 		if ((items[i].obj) && (!items[i].listener))
 			items[i].listener=google.maps.event.addListener(items[i].obj,'click',function(e) { _this.RunGlue(_this.container,i-1,"clicked"); });
 		}
+	this.map.setCenter(latlng);											// Center map
+	this.map.setZoom(Number(zoom));										// Zoom map
 }
 
 SHIVA_Show.prototype.DrawLayerControlBox=function(items, show)			// DRAW LAYER CONTROLBOX
 {
-	var i;
+	var i,hasGotos=false,hasLayers=false;
 	if (show != true) {														// If not on
 		$("#shivaMapControlDiv").remove();									// Remove it
 		return;																// Quit
@@ -1803,6 +1834,10 @@ SHIVA_Show.prototype.DrawLayerControlBox=function(items, show)			// DRAW LAYER C
 	var h=$("#"+this.container).css("height").replace(/px/g,"");			// Get height
 	if (t == "auto")	t=8;												// Must be a num
 	if (l == "auto")	l=8;												// Must be a num
+	if (this.options.shivaGroup == "Earth") {								// If earth, place top-right
+		l=Number(l)+($("#"+this.container).css("width").replace(/px/g,"")-0)+8;	 // Right
+		t=24;	h=0;														// Top
+		}
 	if ($("#shivaMapControlDiv").length == 0) {								// If no palette
 		str="<div id='shivaMapControlDiv' style='position:absolute;left:"+l+"px;top:"+((t-0)+(h-0)-24)+"px'>";
 		$("body").append("</div>"+str);										// Add palette to body
@@ -1810,17 +1845,45 @@ SHIVA_Show.prototype.DrawLayerControlBox=function(items, show)			// DRAW LAYER C
 		$("#shivaMapControlDiv").draggable();								// Make it draggable
 		$("#shivaMapControlDiv").css("z-index",2001);						// Force on top
 		}
-	var str="<p style='text-shadow:1px 1px white' align='center'><b>&nbsp;&nbsp;Layer Controls&nbsp;&nbsp;</b></p>";
-	for (i=0;i<items.length;++i) 											// For each item
-		if (items[i].layerTitle) {											// If a title defined
-			str+="&nbsp;<input type='checkbox' id='shcb"+i+"'";				// Add check
-			if (items[i].visible == "true")									// If initially visible
-				str+=" checked=checked ";									// Set checked
-			str+=">"+items[i].layerTitle+"&nbsp;&nbsp;<br/>";				// Add label
+	var str="<p style='text-shadow:1px 1px white' align='center'><b>&nbsp;&nbsp;Controls&nbsp;&nbsp;</b></p>";
+	for (i=0;i<items.length;++i) {											// For each item
+		if ((items[i].layerTitle) && (items[i].layerType != "GoTo")) 		// If titled and not a GoTo
+			hasLayers=true;													// Draw layers header
+		else if ((items[i].layerTitle) && (items[i].layerType == "GoTo")) 	// If titled and a GoTo
+			hasGotos=true;													// Draw gotos header
+		}
+	if (hasLayers) {														// If has layers, put up this header
+		str="<p style='text-shadow:1px 1px white'><b>&nbsp;&nbsp;Show layer&nbsp;&nbsp;</b><br/>";
+		for (i=0;i<items.length;++i) 
+			if ((items[i].layerTitle) && (items[i].layerType != "GoTo")) {	// If titled and not a GoTo
+				str+="&nbsp;<input type='checkbox' id='shcb"+i+"'";			// Add check
+				if (items[i].visible == "true")								// If initially visible
+					str+=" checked=checked ";								// Set checked
+				str+=">"+items[i].layerTitle+"&nbsp;&nbsp;<br/>";			// Add label
+				}
+			str+="</p>";													// Close p	
 			}
+	if (hasGotos) {															// Ih gotos
+		if (!hasLayers)  str="";											// If not layers, kill header
+		str+="<p style='text-shadow:1px 1px white'><b>&nbsp;&nbsp;Go to place&nbsp;&nbsp;</b><br/>";
+		str+="&nbsp;<input type='radio' name='gotos' id='shcr"+items.length+"' checked=checked>Home<br/>";		// Add home button
+		for (i=0;i<items.length;++i) 										// For each item
+			if ((items[i].layerTitle) && (items[i].layerType == "GoTo")) {	// If a GoTo
+				str+="&nbsp;<input type='radio' name='gotos' id='shcr"+i+"'";	// Add check
+				str+=">"+items[i].layerTitle+"&nbsp;&nbsp;<br/>";			// Add label
+				}
+		str+="</p>";														// Close p	
+		}
 	$("#shivaMapControlDiv").html(str+"<br/>");								// Add content	
-	for (i=0;i<items.length;++i) 											// For each item
-		$("#shcb"+i).click( function() { $.proxy(_this.SetLayer(this.id.substr(4),this.checked.toString()),_this); } );  // Add handler
+	for (i=0;i<items.length;++i) {											// For each item
+		if (items[i].layerType == "GoTo")									// If a goto
+			$("#shcr"+i).change( function() { $.proxy(_this.SetLayer(this.id.substr(4),this.checked.toString(),"GoTo"),_this); } );  // Add handler
+		else																// A regular layer
+			$("#shcb"+i).click( function() { $.proxy(_this.SetLayer(this.id.substr(4),this.checked.toString(),"?"),_this); } );  // Add handler
+		}
+	if (hasGotos)															// If has gotos
+		$("#shcr"+items.length).change( function() { $.proxy(_this.SetLayer(this.id.substr(4),this.checked.toString(),"GoTo"),_this); } );  // Add handler
+
 }
 
 ////////////// CUSTOM OVERLAY //////////////

@@ -525,46 +525,28 @@ function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
 
 	function trace(str) { console.log(str) };
 	
-	function test(ge)
+	function AddCoordDot(ge, lat, lon, num, scale)
 	{
-		var placemark=ge.createPlacemark('0');
+		var placemark=ge.createPlacemark(""+num);
 		var point=ge.createPoint('');
 		var icon=ge.createIcon('');
 		var style=ge.createStyle(''); 
 		icon.setHref('http://www.viseyes.org/shiva/coordcir.png');
 		style.getIconStyle().setIcon(icon); 
-		style.getIconStyle().setScale(.5);
-
-
+		style.getIconStyle().setScale(scale);
 		placemark.setStyleSelector(style); 
-		point.setLatitude(38.02);
-		point.setLongitude(-78.48);
+		point.setLatitude(lat);
+		point.setLongitude(lon);
 		placemark.setGeometry(point);	
 		ge.getFeatures().appendChild(placemark);
+		}	
 	
-		placemark=ge.createPlacemark('1');
-		point=ge.createPoint('');
-		placemark.setStyleSelector(style); 
-		point.setLatitude(38.02);
-		point.setLongitude(-78.50);
-		placemark.setGeometry(point);	
-		ge.getFeatures().appendChild(placemark);
-
-
-		icon=ge.createIcon('');
-		style=ge.createStyle(''); 
-		icon.setHref('http://www.viseyes.org/shiva/coordcir.png');
-		style.getIconStyle().setIcon(icon); 
-		style.getIconStyle().setScale(.35);
-
-		placemark=ge.createPlacemark('.5');
-		point=ge.createPoint('');
-		placemark.setStyleSelector(style); 
-		point.setLatitude(38.02);
-		point.setLongitude(-78.49);
-		placemark.setGeometry(point);	
-		ge.getFeatures().appendChild(placemark);
-
+	function test(ge)
+	{
+		AddCoordDot(ge,38.02,-78.48,0,.5)
+		AddCoordDot(ge,38.02,-78.50,1,.5)
+		AddCoordDot(ge,38.02,-78.49,.5,.33)
+			
   		google.earth.addEventListener(ge.getWindow(),"mousedown", 
   			function(e) {
 			    if ((e.getTarget().getType() == "KmlPlacemark") && (e.getTarget().getGeometry().getType() == "KmlPoint")) 

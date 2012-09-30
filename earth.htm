@@ -312,10 +312,11 @@ function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
 			if (items[i].visible == "true") 							// If visible
 				_this.map.getFeatures().appendChild(items[i].obj);		// Add it to display list
 			else 														// Hidden
-				_this.map.getFeatures().removeChild(items[i].obj);			// Remove it from list
+				_this.map.getFeatures().removeChild(items[i].obj);		// Remove it from list
 			}
 		}
 	_this.map.getView().setAbstractView(lookAt);						// Go there
+	test(_this.map);
 }
 
 //38.07,-78.55,37.99,-78.41,75
@@ -523,6 +524,87 @@ function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
 	}
 
 	function trace(str) { console.log(str) };
+	
+	function test(ge)
+	{
+		var placemark=ge.createPlacemark('0');
+		var point=ge.createPoint('');
+		var icon=ge.createIcon('');
+		var style=ge.createStyle(''); 
+		icon.setHref('http://www.viseyes.org/shiva/coordcir.png');
+		style.getIconStyle().setIcon(icon); 
+		style.getIconStyle().setScale(.5);
+
+
+		placemark.setStyleSelector(style); 
+		point.setLatitude(38.02);
+		point.setLongitude(-78.48);
+		placemark.setGeometry(point);	
+		ge.getFeatures().appendChild(placemark);
+	
+		placemark=ge.createPlacemark('1');
+		point=ge.createPoint('');
+		placemark.setStyleSelector(style); 
+		point.setLatitude(38.02);
+		point.setLongitude(-78.50);
+		placemark.setGeometry(point);	
+		ge.getFeatures().appendChild(placemark);
+
+
+		icon=ge.createIcon('');
+		style=ge.createStyle(''); 
+		icon.setHref('http://www.viseyes.org/shiva/coordcir.png');
+		style.getIconStyle().setIcon(icon); 
+		style.getIconStyle().setScale(.35);
+
+		placemark=ge.createPlacemark('.5');
+		point=ge.createPoint('');
+		placemark.setStyleSelector(style); 
+		point.setLatitude(38.02);
+		point.setLongitude(-78.49);
+		placemark.setGeometry(point);	
+		ge.getFeatures().appendChild(placemark);
+
+  		google.earth.addEventListener(ge.getWindow(),"mousedown", 
+  			function(e) {
+			    if ((e.getTarget().getType() == "KmlPlacemark") && (e.getTarget().getGeometry().getType() == "KmlPoint")) 
+			      dragInfo={ placemark: e.getTarget(), dragged: false   };
+				});
+		
+  		google.earth.addEventListener(ge.getGlobe(), 'mousemove', 
+  			function(e) {
+    			if (dragInfo) {
+		      		e.preventDefault();
+			    trace(e.getTarget().getId())
+		      		var point=dragInfo.placemark.getGeometry();
+		      		point.setLatitude(e.getLatitude());
+		     		point.setLongitude(e.getLongitude());
+		     		dragInfo.dragged=true;
+				   
+				   trace(shivaLib.map.getFeatures())
+				   
+				   }
+				});
+
+ 	  	google.earth.addEventListener(ge.getWindow(), 'mouseup', 
+ 	  		function(e) {
+    			if (dragInfo) {
+      				if (dragInfo.dragged) 	e.preventDefault();
+			     dragInfo=null;
+ 				 }
+  				});
+
+		
+		var lineStringPlacemark=ge.createPlacemark('');
+		var lineString=ge.createLineString('');
+		lineStringPlacemark.setGeometry(lineString);
+		lineString.getCoordinates().pushLatLngAlt(38.02, -78.48, 0);
+		lineString.getCoordinates().pushLatLngAlt(38.02, -78.50, 0);
+		ge.getFeatures().appendChild(lineStringPlacemark);
+	
+			
+	}
+	
 	
 	
 </script>

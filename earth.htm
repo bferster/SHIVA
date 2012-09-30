@@ -525,9 +525,9 @@ function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
 
 	function trace(str) { console.log(str) };
 	
-	function AddCoordDot(ge, lat, lon, num, scale)
+	function AddCoordControlDot(ge, lat, lon, num, scale)
 	{
-		var placemark=ge.createPlacemark(""+num);
+		var placemark=ge.createPlacemark("cd-"+num);
 		var point=ge.createPoint('');
 		var icon=ge.createIcon('');
 		var style=ge.createStyle(''); 
@@ -540,43 +540,55 @@ function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
 		placemark.setGeometry(point);	
 		ge.getFeatures().appendChild(placemark);
 		}	
-	
-	function test(ge)
+
+	function AddControlDots(ge, lats, lons)										// ADD COORD EDITING DOTS
 	{
-		AddCoordDot(ge,38.02,-78.48,0,.5)
-		AddCoordDot(ge,38.02,-78.50,1,.5)
-		AddCoordDot(ge,38.02,-78.49,.5,.33)
-			
-  		google.earth.addEventListener(ge.getWindow(),"mousedown", 
+		var i,a,b;
+		if (!lons.length)															// If no coords
+			return;																	// Quit
+		AddCoordControlDot(ge,lats[0],lons[0],0,.5);								// Add 1st dot								
+		for (i=1;i<lons.length;++i) {												// For all other dots
+			AddCoordControlDot(ge,lats[i],lons[i],i,.5);							// Add dot
+			a=((lats[i]-lats[0])/2)+lats[0];										// Middle lat
+			b=((lons[i]-lons[0])/2)+lons[0];										// Middle lon
+			AddCoordControlDot(ge,a,b,(i-.5),.33);									// Add bisected dot	
+			}
+ 		
+  		
+ 		google.earth.addEventListener(ge.getWindow(),"mousedown", 				// ON MOUSE DOWN
   			function(e) {
-			    if ((e.getTarget().getType() == "KmlPlacemark") && (e.getTarget().getGeometry().getType() == "KmlPoint")) 
-			      dragInfo={ placemark: e.getTarget(), dragged: false   };
+			    if ((e.getTarget().getType() == "KmlPlacemark") && (e.getTarget().getGeometry().getType() == "KmlPoint")) // If a point in a placemark
+			     	if (e.getTarget().getId().substr(0,3) == "cd-")					// If a control dot
+				    	dragInfo={ placemark: e.getTarget(), dragged: false   };	// Set global dragIno obj	
 				});
 		
-  		google.earth.addEventListener(ge.getGlobe(), 'mousemove', 
+ 		google.earth.addEventListener(ge.getGlobe(), 'mousemove', 				// ON MOUSE MOVE
   			function(e) {
-    			if (dragInfo) {
-		      		e.preventDefault();
-			    trace(e.getTarget().getId())
-		      		var point=dragInfo.placemark.getGeometry();
-		      		point.setLatitude(e.getLatitude());
-		     		point.setLongitude(e.getLongitude());
-		     		dragInfo.dragged=true;
-				   
-				   trace(shivaLib.map.getFeatures())
-				   
+    			if (dragInfo) {														// If dragging											
+		      		e.preventDefault();												// Stop popagation
+		      		var point=dragInfo.placemark.getGeometry();						// Get coord
+		      		point.setLatitude(e.getLatitude());								// Set new lat
+		     		point.setLongitude(e.getLongitude());							// Set new lon				
+		     		dragInfo.dragged=true;											// Drag flag
 				   }
 				});
 
- 	  	google.earth.addEventListener(ge.getWindow(), 'mouseup', 
+	  	google.earth.addEventListener(ge.getWindow(), 'mouseup', 				// ON MOUSE UP
  	  		function(e) {
-    			if (dragInfo) {
-      				if (dragInfo.dragged) 	e.preventDefault();
-			     dragInfo=null;
- 				 }
+    			if (dragInfo) {														// If dragging
+      				if (dragInfo.dragged) 	e.preventDefault();						// Stop propagation
+			    	dragInfo=null;													// Kill drag obj
+ 				 	}
   				});
+	}
 
-		
+	
+	function test(ge)
+	{
+		var lats=[38.02,38.02];
+		var lons=[-78.48,-78.50];
+		AddControlDots(ge,lats,lons);			
+ 
 		var lineStringPlacemark=ge.createPlacemark('');
 		var lineString=ge.createLineString('');
 		lineStringPlacemark.setGeometry(lineString);

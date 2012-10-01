@@ -530,15 +530,14 @@ function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
 // DRAWING
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	
-	function SHIVA_EarthDraw(ge)												// CONSTRUCTOR
-	{
-		this.ge=ge;
-		this.lats=[38.02,38.02,38.04];
-		this.lons=[-78.48,-78.50,-78.52];
-		shivaLib.dr=this;
-		test(ge,this)
-	}
+function SHIVA_EarthDraw(ge)												// CONSTRUCTOR
+{
+	this.ge=ge;
+	this.lats=[38.02,38.02,38.04];
+	this.lons=[-78.48,-78.50,-78.52];
+	shivaLib.dr=this;
+	test(ge,this)
+}
 	
 SHIVA_EarthDraw.prototype.AddCoordControlDot=function(lat, lon, num, scale)	// ADD COORD CONTROL DOT
 {
@@ -664,17 +663,14 @@ SHIVA_EarthDraw.prototype.AddControlDots=function(id) 						// ADD COORD EDITING
 //						AddControlDots(shivaLib.map,lats,lons)
 	 					}
    					}
- //  				if (e.getShiftKey())												// If deleting point
+ //  		if (e.getShiftKey())												// If deleting point
 			});
 
 }
 
-	function BisectLine(ge, id, after)											// ADD NEW POINT TO LINE
-	{
-	
-	
-	
-	}
+SHIVA_EarthDraw.prototypeBisectLine=function(id, after)						// ADD NEW POINT TO LINE
+{
+}
 
 
 	function FindObject(ge, id)													// FIND OBJECT BY ID

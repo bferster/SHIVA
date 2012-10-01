@@ -209,6 +209,7 @@ function DrawEarth()
 	
 	DrawEarthOverlays(items);
 	shivaLib.DrawLayerControlBox(items,shivaLib.options.controlbox == "true");
+	shivaLib.dr=new SHIVA_EarthDraw(ge);
 	
 	function initCB(instance) {											// GOOGLE EARTH INIT
 		shivaLib.map=instance;											// Set ptr to earth
@@ -316,7 +317,6 @@ function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
 			}
 		}
 	_this.map.getView().setAbstractView(lookAt);						// Go there
-	test(_this.map);
 }
 
 //38.07,-78.55,37.99,-78.41,75
@@ -525,134 +525,180 @@ function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
 
 	function trace(str) { console.log(str) };
 
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 // DRAWING
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	
+	function SHIVA_EarthDraw(ge)												// CONSTRUCTOR
+	{
+		this.ge=ge;
+		this.lats=[38.02,38.02,38.04];
+		this.lons=[-78.48,-78.50,-78.52];
+		shivaLib.dr=this;
+		test(ge,this)
+	}
+	
+SHIVA_EarthDraw.prototype.AddCoordControlDot=function(lat, lon, num, scale)	// ADD COORD CONTROL DOT
+{
+	var ge=this.ge;																// Local copy of earth
+	var placemark=ge.createPlacemark("cd-"+num);								// Create named placemark
+	var point=ge.createPoint('');												// Create point
+	var icon=ge.createIcon('');													// Create icon
+	var styleMap=ge.createStyleMap('');											// Create style map
+	
+	var normalStyle=ge.createStyle(''); 										// Create style
+	if (scale == .5)
+		icon.setHref('http://www.viseyes.org/shiva/coordcir.png');				// Set icon url
+	else
+		icon.setHref('http://www.viseyes.org/shiva/coordadd.png');				// Set icon url
+	normalStyle.getIconStyle().setIcon(icon); 									// Set icon		
+	normalStyle.getIconStyle().setScale(scale);									// Set icon scale
+	styleMap.setNormalStyle(normalStyle);										// Set normal style
+
+	var highlightStyle=ge.createStyle(''); 										// Create style
+	icon=ge.createIcon('');														// Create icon
+	icon.setHref('http://www.viseyes.org/shiva/coordsel.png');					// Set icon url
+	highlightStyle.getIconStyle().setIcon(icon); 								// Set icon		
+	highlightStyle.getIconStyle().setScale(.8);									// Set icon scale
+	styleMap.setHighlightStyle(highlightStyle);									// Set highlight style
+	
+	placemark.setStyleSelector(styleMap); 										// Add icon to placemark
+	point.setLatitude(lat);														// Set lat
+	point.setLongitude(lon);													// Set lon
+	placemark.setGeometry(point);												// Place icon
+	ge.getFeatures().appendChild(placemark);									// Add to DOM
+}	
+
+SHIVA_EarthDraw.prototype.AddControlDots=function(id) 						// ADD COORD EDITING DOTS			
+{
+	var i,j,a,b;
+	var ge=this.ge;																// Local copy of earth
+	var obs=ge.getFeatures().getChildNodes()									// Point at nodes
+	var n=obs.getLength();														// Get length
+	for (i=0;i<n;++i) 															// For each child
+		if (obs.item(i).getId().substr(0,3) == "cd-")							// If a control dot
+			ge.getFeatures().removeChild(obs.item[i])							// Remove dot	
+
+	if (!this.lons.length)														// If no coords
+		return;																	// Quit
+	this.AddCoordControlDot(this.lats[0],this.lons[0],0,.5);					// Add 1st dot								
+	for (i=1;i<this.lons.length;++i) {											// For all other dots
+		j=i-1;																	// Last dot index
+		this.AddCoordControlDot(this.lats[i],this.lons[i],i,.5);				// Add dot
+		a=((this.lats[i]-this.lats[j])/2)+this.lats[j];							// Middle lat
+		b=((this.lons[i]-this.lons[j])/2)+this.lons[j];							// Middle lon
+		this.AddCoordControlDot(a,b,(i-.5),.49);								// Add middle dot	
+		}
+	
+	google.earth.addEventListener(ge.getWindow(),"mousedown", 				// ON MOUSE DOWN
+		function(e) {
+		    if ((e.getTarget().getType() == "KmlPlacemark") && (e.getTarget().getGeometry().getType() == "KmlPoint")) // If a point in a placemark
+		     	if (e.getTarget().getId().substr(0,3) == "cd-")	{				// If a control dot
+			    	dragInfo={ placemark: e.getTarget(), dragged: false   };	// Set global dragIno obj
+					shivaLib.Sound("click");									// Click
+					}
+			});
+	
+	google.earth.addEventListener(ge.getGlobe(),'mousemove', 				// ON MOUSE MOVE
+		function(e) {
+			var o,oo,lat,lon,num;
+			if (dragInfo) {														// If dragging											
+	      		e.preventDefault();												// Stop popagation
+				if (e.getTarget().getId().indexOf(".5") != -1) 					// A mid point
+					return;														// Quit
+	     		dragInfo.dragged=true;											// Drag flag
+				o=FindObject(shivaLib.map,'line1');								// Pointer to line
+	      		var point=dragInfo.placemark.getGeometry();						// Get coord
+				num=Number(e.getTarget().getId().substr(3));					// Get index into line
+				lat=e.getLatitude();											// Get lat
+				lon=e.getLongitude();											// Get lon
+	      		point.setLatitude(lat);											// Set new lat
+	     		point.setLongitude(lon);										// Set new lon				
+
+				o.getGeometry().getCoordinates().setLatLngAlt(num,lat,lon,0);	// Set point in line
+				o=FindObject(shivaLib.map,'cd-'+(num-1));						// Pointer to pevious dot
+				if (o) {														// If one
+					o=o.getGeometry();											// Point at geometry
+					oo=FindObject(shivaLib.map,'cd-'+(num-.5));					// Pointer to middle dot
+					oo=oo.getGeometry();										// Point at geometry
+					oo.setLatitude(lat+(o.getLatitude()-lat)/2);				// Set mid-point lat
+					oo.setLongitude(lon+(o.getLongitude()-lon)/2);				// Lon
+					}
+				o=FindObject(shivaLib.map,'cd-'+(num+1));						// Pointer to next dot
+				if (o) {														// If one
+					o=o.getGeometry();											// Point at geometry
+					oo=FindObject(shivaLib.map,'cd-'+(num+.5));					// Pointer to middle dot
+					oo=oo.getGeometry();										// Point at geometry
+					oo.setLatitude(lat+(o.getLatitude()-lat)/2);				// Lat
+					oo.setLongitude(lon+(o.getLongitude()-lon)/2);				// Lon
+					}
+			   }
+			});
+
+  	google.earth.addEventListener(ge.getWindow(),'mouseup', 				// ON MOUSE UP
+  		function(e) {
+ 			if (dragInfo) {														// If dragging
+  				if (dragInfo.dragged) 	e.preventDefault();						// Stop propagation
+		    	dragInfo=null;													// Kill drag obj
+			 	}
+			if ((e.getTarget().getType() == "KmlPlacemark") && (e.getTarget().getGeometry().getType() == "KmlPoint"))  { // If a point in a placemark
+				if (e.getTarget().getId().indexOf(".5") != -1) { 				// A mid point
+					var num=Math.floor(e.getTarget().getId().substr(3));		// Get index into line
+					var o=FindObject(shivaLib.map,'cd-'+num++).getGeometry();	// Pointer to last dot
+					var lat=o.getLatitude();									// Get lat
+					var lon=o.getLongitude();									// Lon
+					o=FindObject(shivaLib.map,'cd-'+num).getGeometry();			// Pointer to next dot
+					lat=(lat+(o.getLatitude()-lat)/2);							// Lat
+					lon=(lon+(o.getLongitude()-lon)/2);							// Lon
+					o=FindObject(shivaLib.map,'line1');							// Pointer to line
+					o=o.getGeometry().getCoordinates();							// Point to coords
+					o.pushLatLngAlt(lat,lon,0);									// Add new point to line
+					var n=o.getLength();										// Get length
+					for (var i=n-1;i>=num;--i)									// For all pts beyond add
+						o.set(i,o.get(i-1)),trace(i);							// Shift down
+					o.setLatLngAlt(num,lat,lon,0);								// Set point	
+					shivaLib.Sound("ding");										// Ding
+
+//						AddControlDots(shivaLib.map,lats,lons)
+	 					}
+   					}
+ //  				if (e.getShiftKey())												// If deleting point
+			});
+
+}
+
+	function BisectLine(ge, id, after)											// ADD NEW POINT TO LINE
+	{
 	
 	
-	function AddCoordControlDot(ge, lat, lon, num, scale)						// ADD COORD CONTROL DOT
-	{
-		var placemark=ge.createPlacemark("cd-"+num);								// Create named placemark
-		var point=ge.createPoint('');												// Create point
-		var icon=ge.createIcon('');													// Create icon
-		var styleMap=ge.createStyleMap('');											// Create style map
-		
-		var normalStyle=ge.createStyle(''); 										// Create style
-		icon.setHref('http://www.viseyes.org/shiva/coordcir.png');					// Set icon url
-		normalStyle.getIconStyle().setIcon(icon); 									// Set icon		
-		normalStyle.getIconStyle().setScale(scale);									// Set icon scale
-		styleMap.setNormalStyle(normalStyle);										// Set normal style
-
-		var highlightStyle=ge.createStyle(''); 										// Create style
-		icon=ge.createIcon('');														// Create icon
-		icon.setHref('http://www.viseyes.org/shiva/coordsel.png');					// Set icon url
-		highlightStyle.getIconStyle().setIcon(icon); 								// Set icon		
-		highlightStyle.getIconStyle().setScale(.8);									// Set icon scale
-		styleMap.setHighlightStyle(highlightStyle);									// Set highlight style
-		
-		placemark.setStyleSelector(styleMap); 										// Add icon to placemark
-		point.setLatitude(lat);														// Set lat
-		point.setLongitude(lon);													// Set lon
-		placemark.setGeometry(point);												// Place icon
-		ge.getFeatures().appendChild(placemark);									// Add to DOM
-		}	
-
-	function AddControlDots(ge, lats, lons)										// ADD COORD EDITING DOTS
-	{
-		var i,j,a,b;
-		if (!lons.length)															// If no coords
-			return;																	// Quit
-		AddCoordControlDot(ge,lats[0],lons[0],0,.5);								// Add 1st dot								
-		for (i=1;i<lons.length;++i) {												// For all other dots
-			j=i-1;																	// Last dot index
-			AddCoordControlDot(ge,lats[i],lons[i],i,.5);							// Add dot
-			a=((lats[i]-lats[j])/2)+lats[j];										// Middle lat
-			b=((lons[i]-lons[j])/2)+lons[j];										// Middle lon
-			AddCoordControlDot(ge,a,b,(i-.5),.33);									// Add middle dot	
-			}
- 		
-  		
- 		google.earth.addEventListener(ge.getWindow(),"mousedown", 				// ON MOUSE DOWN
-  			function(e) {
-			    if ((e.getTarget().getType() == "KmlPlacemark") && (e.getTarget().getGeometry().getType() == "KmlPoint")) // If a point in a placemark
-			     	if (e.getTarget().getId().substr(0,3) == "cd-")					// If a control dot
- 				    	dragInfo={ placemark: e.getTarget(), dragged: false   };	// Set global dragIno obj	
-				});
-		
- 		google.earth.addEventListener(ge.getGlobe(), 'mousemove', 				// ON MOUSE MOVE
-  			function(e) {
-    			var o,oo,lat,lon,num;
-    			if (dragInfo) {														// If dragging											
-		      		e.preventDefault();												// Stop popagation
-		     		dragInfo.dragged=true;											// Drag flag
-					o=FindObject(shivaLib.map,'line1');								// Pointer to line
-		      		var point=dragInfo.placemark.getGeometry();						// Get coord
-					num=Number(e.getTarget().getId().substr(3));					// Get index into line
-					lat=e.getLatitude();											// Get lat
-					lon=e.getLongitude();											// Get lon
-		      		point.setLatitude(lat);											// Set new lat
-		     		point.setLongitude(lon);										// Set new lon				
-					if (e.getTarget().getId().indexOf(".5") != -1) {				// A mid point
-					
-					
-						return;
-						}
-					
-					o.getGeometry().getCoordinates().setLatLngAlt(num,lat,lon,0);	// Set point
-					o=FindObject(shivaLib.map,'cd-'+(num-1));						// Pointer to pevious dot
-					if (o) {														// If one
-						o=o.getGeometry();											// Point at geometry
-						oo=FindObject(shivaLib.map,'cd-'+(num-.5));					// Pointer to middle dot
-						oo=oo.getGeometry();										// Point at geometry
-						oo.setLatitude(lat+(o.getLatitude()-lat)/2);				// Set mid-point lat
-						oo.setLongitude(lon+(o.getLongitude()-lon)/2);				// Lon
-						}
-					o=FindObject(shivaLib.map,'cd-'+(num+1));						// Pointer to next dot
-					if (o) {														// If one
-						o=o.getGeometry();											// Point at geometry
-						oo=FindObject(shivaLib.map,'cd-'+(num+.5));					// Pointer to middle dot
-						oo=oo.getGeometry();										// Point at geometry
-						oo.setLatitude(lat+(o.getLatitude()-lat)/2);				// Lat
-						oo.setLongitude(lon+(o.getLongitude()-lon)/2);				// Lon
-						}
-				   }
-				});
-
-	  	google.earth.addEventListener(ge.getWindow(), 'mouseup', 				// ON MOUSE UP
- 	  		function(e) {
-     			if (dragInfo) {														// If dragging
-      				if (dragInfo.dragged) 	e.preventDefault();						// Stop propagation
-			    	dragInfo=null;													// Kill drag obj
- 				 	}
-   				if (e.getShiftKey())
-   					if ((e.getTarget().getType() == "KmlPlacemark") && (e.getTarget().getGeometry().getType() == "KmlPoint")) // If a point in a placemark
-			     		if (e.getTarget().getId().substr(0,3) == "cd-")				// If a control dot
- 							trace(e.getTarget().getId().substr(3))
-   				});
+	
 	}
 
-	function FindObject(ge, id)
+
+	function FindObject(ge, id)													// FIND OBJECT BY ID
 	{
-		var obs=ge.getFeatures().getChildNodes()
-		var n=obs.getLength();
-		for (i=0;i<n;++i) {
-			if (obs.item(i).getId() == id)
-				return obs.item(i)
+		var obs=ge.getFeatures().getChildNodes()									// Point at nodes
+		var n=obs.getLength();														// Get length
+		for (i=0;i<n;++i) {															// For each child
+			if (obs.item(i).getId() == id)											// If proper id
+				return obs.item(i);													// Return obj
 			}
-		return null;
+		return null;																// Nada
 	}		
 
-	
-	function test(ge)
+	function test()
 	{
-		var lats=[38.02,38.02,38.04];
-		var lons=[-78.48,-78.50,-78.52];
-		AddControlDots(ge,lats,lons);			
+		var _this=shivaLib.dr;
+		var ge=shivaLib.map;
+		trace(_this)
+		_this.AddControlDots("line1");			
  		var lineStringPlacemark=ge.createPlacemark('line1');
 		var lineString=ge.createLineString('');
 		lineStringPlacemark.setGeometry(lineString);
-		for (i=0;i<lats.length;++i)
-			lineString.getCoordinates().pushLatLngAlt(lats[i],lons[i],0);
+		for (i=0;i<_this.lats.length;++i)
+			lineString.getCoordinates().pushLatLngAlt(_this.lats[i],_this.lons[i],0);
 		ge.getFeatures().appendChild(lineStringPlacemark);
 	}
 	

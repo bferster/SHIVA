@@ -589,7 +589,7 @@ SHIVA_EarthDraw.prototype.AddControlDots=function(id) 						// ADD COORD EDITING
 		this.AddCoordControlDot(this.lats[i],this.lons[i],i,.5);				// Add dot
 		a=((this.lats[i]-this.lats[j])/2)+this.lats[j];							// Middle lat
 		b=((this.lons[i]-this.lons[j])/2)+this.lons[j];							// Middle lon
-		this.AddCoordControlDot(a,b,(i-.5),.49);								// Add middle dot	
+		this.AddCoordControlDot(a,b,(i-.5),.33);								// Add middle dot	
 		}
 	
 	google.earth.addEventListener(ge.getWindow(),"mousedown", 				// ON MOUSE DOWN

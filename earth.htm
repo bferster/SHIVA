@@ -536,7 +536,7 @@ function SHIVA_EarthDraw(ge)												// CONSTRUCTOR
 	this.lats=[38.02,38.02,38.04];
 	this.lons=[-78.48,-78.50,-78.52];
 	shivaLib.dr=this;
-	test(ge,this)
+	test("line1")
 }
 	
 SHIVA_EarthDraw.prototype.AddCoordControlDot=function(lat, lon, num, scale)	// ADD COORD CONTROL DOT
@@ -548,9 +548,9 @@ SHIVA_EarthDraw.prototype.AddCoordControlDot=function(lat, lon, num, scale)	// A
 	var styleMap=ge.createStyleMap('');											// Create style map
 	
 	var normalStyle=ge.createStyle(''); 										// Create style
-	if (scale == .5)
+	if (scale == .5)															// Coord icon
 		icon.setHref('http://www.viseyes.org/shiva/coordcir.png');				// Set icon url
-	else
+	else																		// Add icon
 		icon.setHref('http://www.viseyes.org/shiva/coordadd.png');				// Set icon url
 	normalStyle.getIconStyle().setIcon(icon); 									// Set icon		
 	normalStyle.getIconStyle().setScale(scale);									// Set icon scale
@@ -558,9 +558,12 @@ SHIVA_EarthDraw.prototype.AddCoordControlDot=function(lat, lon, num, scale)	// A
 
 	var highlightStyle=ge.createStyle(''); 										// Create style
 	icon=ge.createIcon('');														// Create icon
-	icon.setHref('http://www.viseyes.org/shiva/coordsel.png');					// Set icon url
+	if (scale == .5)															// Coord icon
+		icon.setHref('http://www.viseyes.org/shiva/coordsel.png');				// Set icon url
+	else																		// Add icon
+		icon.setHref('http://www.viseyes.org/shiva/coordadd.png');				// Set icon url
 	highlightStyle.getIconStyle().setIcon(icon); 								// Set icon		
-	highlightStyle.getIconStyle().setScale(.8);									// Set icon scale
+	highlightStyle.getIconStyle().setScale(1.5);								// Set icon scale
 	styleMap.setHighlightStyle(highlightStyle);									// Set highlight style
 	
 	placemark.setStyleSelector(styleMap); 										// Add icon to placemark
@@ -572,14 +575,14 @@ SHIVA_EarthDraw.prototype.AddCoordControlDot=function(lat, lon, num, scale)	// A
 
 SHIVA_EarthDraw.prototype.AddControlDots=function(id) 						// ADD COORD EDITING DOTS			
 {
-	var i,j,a,b;
+	var i,j,a,b,o;
 	var ge=this.ge;																// Local copy of earth
 	var obs=ge.getFeatures().getChildNodes()									// Point at nodes
 	var n=obs.getLength();														// Get length
-	for (i=0;i<n;++i) 															// For each child
-		if (obs.item(i).getId().substr(0,3) == "cd-")							// If a control dot
-			ge.getFeatures().removeChild(obs.item[i])							// Remove dot	
-
+	for (i=0;i<n;++i) {															// For each child
+		o=ge.getElementById(obs.item(i).getId());								// Get dot's id
+		if (o)	ge.getFeatures().removeChild(o);								// Remove dot	
+		}
 	if (!this.lons.length)														// If no coords
 		return;																	// Quit
 	this.AddCoordControlDot(this.lats[0],this.lons[0],0,.5);					// Add 1st dot								
@@ -608,7 +611,7 @@ SHIVA_EarthDraw.prototype.AddControlDots=function(id) 						// ADD COORD EDITING
 				if (e.getTarget().getId().indexOf(".5") != -1) 					// A mid point
 					return;														// Quit
 	     		dragInfo.dragged=true;											// Drag flag
-				o=FindObject(shivaLib.map,'line1');								// Pointer to line
+				o=shivaLib.map.getElementById(id);								// Pointer to line
 	      		var point=dragInfo.placemark.getGeometry();						// Get coord
 				num=Number(e.getTarget().getId().substr(3));					// Get index into line
 				lat=e.getLatitude();											// Get lat
@@ -617,18 +620,18 @@ SHIVA_EarthDraw.prototype.AddControlDots=function(id) 						// ADD COORD EDITING
 	     		point.setLongitude(lon);										// Set new lon				
 
 				o.getGeometry().getCoordinates().setLatLngAlt(num,lat,lon,0);	// Set point in line
-				o=FindObject(shivaLib.map,'cd-'+(num-1));						// Pointer to pevious dot
+				o=shivaLib.map.getElementById('cd-'+(num-1));					// Pointer to pevious dot
 				if (o) {														// If one
 					o=o.getGeometry();											// Point at geometry
-					oo=FindObject(shivaLib.map,'cd-'+(num-.5));					// Pointer to middle dot
+					oo=shivaLib.map.getElementById('cd-'+(num-.5));				// Pointer to middle dot
 					oo=oo.getGeometry();										// Point at geometry
 					oo.setLatitude(lat+(o.getLatitude()-lat)/2);				// Set mid-point lat
 					oo.setLongitude(lon+(o.getLongitude()-lon)/2);				// Lon
 					}
-				o=FindObject(shivaLib.map,'cd-'+(num+1));						// Pointer to next dot
+				o=shivaLib.map.getElementById('cd-'+(num+1));					// Pointer to next dot
 				if (o) {														// If one
 					o=o.getGeometry();											// Point at geometry
-					oo=FindObject(shivaLib.map,'cd-'+(num+.5));					// Pointer to middle dot
+					oo=shivaLib.map.getElementById('cd-'+(num+.5));				// Pointer to middle dot
 					oo=oo.getGeometry();										// Point at geometry
 					oo.setLatitude(lat+(o.getLatitude()-lat)/2);				// Lat
 					oo.setLongitude(lon+(o.getLongitude()-lon)/2);				// Lon
@@ -638,64 +641,51 @@ SHIVA_EarthDraw.prototype.AddControlDots=function(id) 						// ADD COORD EDITING
 
   	google.earth.addEventListener(ge.getWindow(),'mouseup', 				// ON MOUSE UP
   		function(e) {
+ 			var id="line1";
  			if (dragInfo) {														// If dragging
   				if (dragInfo.dragged) 	e.preventDefault();						// Stop propagation
 		    	dragInfo=null;													// Kill drag obj
 			 	}
 			if ((e.getTarget().getType() == "KmlPlacemark") && (e.getTarget().getGeometry().getType() == "KmlPoint"))  { // If a point in a placemark
 				if (e.getTarget().getId().indexOf(".5") != -1) { 				// A mid point
-					var num=Math.floor(e.getTarget().getId().substr(3));		// Get index into line
-					var o=FindObject(shivaLib.map,'cd-'+num++).getGeometry();	// Pointer to last dot
-					var lat=o.getLatitude();									// Get lat
-					var lon=o.getLongitude();									// Lon
-					o=FindObject(shivaLib.map,'cd-'+num).getGeometry();			// Pointer to next dot
-					lat=(lat+(o.getLatitude()-lat)/2);							// Lat
-					lon=(lon+(o.getLongitude()-lon)/2);							// Lon
-					o=FindObject(shivaLib.map,'line1');							// Pointer to line
-					o=o.getGeometry().getCoordinates();							// Point to coords
-					o.pushLatLngAlt(lat,lon,0);									// Add new point to line
-					var n=o.getLength();										// Get length
-					for (var i=n-1;i>=num;--i)									// For all pts beyond add
-						o.set(i,o.get(i-1)),trace(i);							// Shift down
-					o.setLatLngAlt(num,lat,lon,0);								// Set point	
-					shivaLib.Sound("ding");										// Ding
-
-//						AddControlDots(shivaLib.map,lats,lons)
-	 					}
-   					}
+					var	num=Math.floor(e.getTarget().getId().substr(3));		// Get index into line
+					shivaLib.dr.AddPointToLine(id,num);							// Bisect line
+ 					shivaLib.Sound("ding");										// Ding
+ 					}
+   				}
  //  		if (e.getShiftKey())												// If deleting point
 			});
 
 }
 
-SHIVA_EarthDraw.prototypeBisectLine=function(id, after)						// ADD NEW POINT TO LINE
+SHIVA_EarthDraw.prototype.AddPointToLine=function(id, num)				// ADD NEW POINT TO LINE
 {
+	return;
+	var lat=(this.lats[num]+(this.lats[num+1]-this.lats[num])/2);				// Bisected lat
+	var lon=(this.lons[num]+(this.lons[num+1]-this.lons[num])/2);				// Lon
+	this.lats.splice(num+1,0,lat);												// Add lat to array									
+	this.lons.splice(num+1,0,lon);												// Add lon							
+	if (this.ge.getElementById(id))												// If there
+		this.ge.getFeatures().removeChild(this.ge.getElementById(id));			// Remove 
+	test("line2");
 }
 
-
-	function FindObject(ge, id)													// FIND OBJECT BY ID
+	function test(id)
 	{
-		var obs=ge.getFeatures().getChildNodes()									// Point at nodes
-		var n=obs.getLength();														// Get length
-		for (i=0;i<n;++i) {															// For each child
-			if (obs.item(i).getId() == id)											// If proper id
-				return obs.item(i);													// Return obj
-			}
-		return null;																// Nada
-	}		
-
-	function test()
-	{
-		var _this=shivaLib.dr;
-		var ge=shivaLib.map;
-		trace(_this)
-		_this.AddControlDots("line1");			
- 		var lineStringPlacemark=ge.createPlacemark('line1');
+ 		trace(id)
+ 		var _this=shivaLib.dr;
+		var ge=_this.ge;															// Local copy of earth
+ 		
+  	if (id == "line1")
+ 		_this.AddControlDots(id);			
+ 		var lineStringPlacemark=ge.createPlacemark(id);
 		var lineString=ge.createLineString('');
 		lineStringPlacemark.setGeometry(lineString);
+		trace(_this.lats.length)
 		for (i=0;i<_this.lats.length;++i)
 			lineString.getCoordinates().pushLatLngAlt(_this.lats[i],_this.lons[i],0);
 		ge.getFeatures().appendChild(lineStringPlacemark);
+	trace(_this.lats)
 	}
 	
 	

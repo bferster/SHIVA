@@ -432,47 +432,28 @@ SHIVA_Show.prototype.Resize=function(wid) 								// RESIZE ELEMENT
 
 SHIVA_Show.prototype.SetLayer=function(num, mode, type) 				// SET LAYER
 {
-	
 	var i;
-	var group=this.options.shivaGroup;
-	if (this.items) 
-		if (this.items[num]) 
-			this.items[num].visible=mode.toString();
-	if (group == "Map") {
-		if (items) {
-		 	if (type == "GoTo") {
-				for (i=0;i<items.length;++i)
-					if (items[i].layerType == "GoTo")
-						items[i].visible=false;
-			if (items[num]) 
-				items[num].visible=mode.toString();
-				this.DrawMapOverlays(items);
-				}
-			if (items[num]) {
-				if (this.items[num].obj) {
-					if (this.items[num].visible == "false") 
-						this.items[num].obj.setMap(null);
-					else	
-						this.items[num].obj.setMap(this.map);
-					}
+	var group=this.options.shivaGroup;										// Get group
+
+	if (this.items) {														// If items
+		if (type == "GoTo")	{												// If a goto 
+			for (i=0;i<this.items.length;++i) {								// For each item
+				if (this.items[i].layerType == "GoTo")						// If a goto
+					this.items[i].visible="false";							// Turn them all off
 				}
 			}
+		if (this.items[num]) 												// If valid item	
+			this.items[num].visible=mode.toString();						// Set visibility to mode as string
 		}
-	else if (group == "Earth") {
-		if (items) {
-		 	if (type == "GoTo") 
-				for (i=0;i<items.length;++i)
-					if (items[i].layerType == "GoTo")
-						items[i].visible=false;
-			if (items[num]) 
-				items[num].visible=mode.toString();
-			this.DrawEarth(items);
-			}
-		}
+
+	if (group == "Map")
+		this.DrawMapOverlays();												
+	else if (group == "Earth") 
+		this.DrawEarthOverlays();												
 	else if (group == "Subway") 
-		this.DrawSubway(this.items);
+		this.DrawSubway();
 	else if (group == "Timeline") 
-		this.DrawTimeline(this.items);
+		this.DrawTimeline();
 }
 
 SHIVA_Show.prototype.FillElement=function(table, query) 								// FILL ELEMENT WITH DATA TABLE
@@ -512,13 +493,170 @@ SHIVA_Show.prototype.Annotate=function() 												// SHOW ANNOTATION PALATTE
 
 //  GOOGLE EARTH   /////////////////////////////////////////////////////////////////////////////////////////// 
 
-
-SHIVA_Show.prototype.DrawEarth=function() 												//	DRAW EARTH
+SHIVA_Show.prototype.DrawEarth=function() 
 {
-	DrawEarthOverlays(items);	
-	this.SendReadyMessage(true);															// Send ready message									
+	if (!this.map) {													// If not initted yet 
+      	this.map="no";													// Loading
+     	google.earth.createInstance(this.container, $.proxy(initCB,this));	// Create
+	  	return;															// Quit
+	  	}
+	if (this.map == "no") 												// If not initted yet 
+	  	return;															// Quit
+	if (!this.options) 													// If no options yet
+	  	return;															// Quit
+	
+	var ops=this.options;
+   	this.items=[];
+   	for (var key in ops) {
+		if (ops[key] == "true")  ops[key]=true;
+		if (ops[key] == "false") ops[key]=false;
+		if (key.indexOf("item-") != -1) {
+			var o=new Object;
+			v=ops[key].split(';');
+			for (i=0;i<v.length;++i) {
+				vv=v[i].split(':');
+				o[vv[0]]=vv[1].replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
+				}
+			this.items.push(o);
+			}
+		}
+	$("#"+this.container).height(ops.height);							// Height
+	$("#"+this.container).width(ops.width);								// Width
+	var ge=this.map;													// Point at Google Earth
+	var lookAt=ge.createLookAt('');										// LookAt object
+	var v=ops.mapcenter.split(",");										// Get center
+	lookAt.setLatitude(Number(v[0]));									// Set lat
+	lookAt.setLongitude(Number(v[1]));									// Set lon
+	lookAt.setRange(Number(ops.range));									// Set range
+	lookAt.setTilt(Number(ops.tilt));									// Set tilt
+	lookAt.setHeading(Number(ops.heading));								// Set heading
+	ge.getView().setAbstractView(lookAt);								// Go there
+
+	if (ops.panControl)													// If controls on
+		ge.getNavigationControl().setVisibility(ge.VISIBILITY_AUTO);	// Show them	  
+	else																// Controls off
+		ge.getNavigationControl().setVisibility(ge.VISIBILITY_HIDE);	// Hide them	 
+	ge.getOptions().setOverviewMapVisibility((ops.overviewMapControl));	// Show overview?
+	ge.getOptions().setMouseNavigationEnabled((ops.draggable));			// Show overview	 	 
+	if (ops.scrollwheel)												// If scroll enabled on
+		ge.getOptions().setScrollWheelZoomSpeed(1);	    				// Normal action
+	else																// No scroll
+		ge.getOptions().setScrollWheelZoomSpeed(.0000000001)	    	// Disable by making really small
+	ge.getOptions().setTerrainExaggeration(Number(ops.terrainexag));	// Terrain exaggeration
+	ge.getLayerRoot().enableLayerById(ge.LAYER_BORDERS,ops.borders);	// Show borders?
+	ge.getLayerRoot().enableLayerById(ge.LAYER_ROADS,ops.roads);		// Show roads?
+	ge.getLayerRoot().enableLayerById(ge.LAYER_TERRAIN,true);			// Show terrain
+	
+	this.DrawEarthOverlays();											// Draw overlays
+	this.DrawLayerControlBox(items,ops.controlbox);						// Draw control box
+	if (typeof(SHIVA_EarthDraw) == "function")							// If drawing defined
+		this.dr=new SHIVA_EarthDraw(ge);								// Add it
+	
+	function initCB(instance) {											// GOOGLE EARTH INIT
+		this.map=instance;												// Set ptr to earth
+		this.map.getWindow().setVisibility(true);						// Show it
+		this.DrawEarth();												// Draw it
+		if (typeof(ShivaPostInit) == "function") 						// If called from earth.htm
+			ShivaPostInit();											// Do any post-init actions					
+		}
+	this.SendReadyMessage(true);										// Send ready message									
 }
 
+//38.07,-78.55,37.99,-78.41,75
+//http://www.viseyes.org/shiva/map.jpg
+//http://code.google.com/apis/earth/documentation/samples/kml_example.kml
+
+SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
+{
+	var i,v,opacity;
+	var items=this.items;												// Point to items
+	var lookAt=this.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);	// Lookat object
+	lookAt.setLatitude(Number(this.options.mapcenter.split(",")[0]));	// Set lat
+	lookAt.setLongitude(Number(this.options.mapcenter.split(",")[1]));	// Set lon
+	lookAt.setRange(Number(this.options.range));						// Set range
+	lookAt.setTilt(Number(this.options.tilt));							// Set tilt
+	lookAt.setHeading(Number(this.options.heading));					// Set heading
+
+	for (i=0;i<items.length;++i) {
+		opacity=1;														// Assume full opacity
+		if (items[i].obj) {												// If already there
+			this.map.getFeatures().removeChild(items[i].obj);			// Remove it from list
+			items[i].obj=null;											// Null it out
+			}
+		if (items[i].layerType == "GoTo") {								// GoTo position
+			v=items[i].layerSource.split(",");							// Split into parts
+			if ((v.length > 1) && (items[i].visible == "true")) {		// If enough  vals and visible
+				if (v[0] != undefined)	lookAt.setLatitude(Number(v[0]));	// Set lat
+				if (v[1] != undefined)	lookAt.setLongitude(Number(v[1]));	// Set lon
+				if (v[2] != undefined)	lookAt.setRange(Number(v[2]));	// Set range
+				if (v[3] != undefined)	lookAt.setTilt(Number(v[3]));	// Set tilt
+				if (v[4] != undefined)	lookAt.setHeading(Number(v[4]));// Set heading
+				}
+			}
+		if (items[i].layerType == "Overlay") {							// Image overlay
+			items[i].obj=this.map.createGroundOverlay('');				// Alloc overlay obj
+			v=items[i].layerOptions.split(",");							// Split dest pos
+			var icon=this.map.createIcon('');							// Create icon
+			icon.setHref(items[i].layerSource);							// Set url
+			items[i].obj.setIcon(icon);									// Set it
+			var latLonBox=this.map.createLatLonBox('');					// Create loc
+			latLonBox.setBox(Number(v[2]),Number(v[0]),Number(v[1]),Number(v[3]),0); // Fill loc	
+			items[i].obj.setLatLonBox(latLonBox);						// Set loc
+			if (v.length == 5)											// If opacity set
+				opacity=v[4]/100;										// Set it
+			}
+		if (items[i].layerType == "KML") {								// KML layer
+			var link=this.map.createLink('');							// Create link object	
+			link.setHref(items[i].layerSource);							// Set url
+			items[i].obj=this.map.createNetworkLink('');				// Create layer object
+			var fly=(items[i].layerOptions.indexOf("port") == -1)		// Preserve viewport?
+			items[i].obj.set(link,true,fly); 							// Sets the link, refreshVisibility, and flyToView
+			}
+		if (items[i].layerType == "Drawn") {							// Drawn KML layer
+			var kmlString = ''
+              + '<?xml version="1.0" encoding="UTF-8"?>'
+              + '<kml xmlns="http://www.opengis.net/kml/2.2">'
+            + '<Document>'
+  
+  				+ '<Style id="randomColorIcon">'
+    			+ '<IconStyle>'
+  				+ '<color>ffff0000</color><scale>1</scale>'
+       			+ '<Icon><href>http://www.viseyes.org/shiva/icons/blue/umbrella_32x32.png</href></Icon>'
+     			+ '</IconStyle>'
+    			+ '<LabelStyle><color>ffffffff</color><scale>1</scale></LabelStyle>'
+   				+ '</Style>'
+
+              + '  <Camera>'
+              + '    <longitude>-122.444633</longitude>'
+              + '    <latitude>37.801899</latitude>'
+              + '    <altitude>139.629438</altitude>'
+              + '    <heading>-70.0</heading>'
+              + '    <tilt>75</tilt>'
+              + '  </Camera>'
+              + '  <Placemark>'
+              + '    <styleUrl>#randomColorIcon</styleUrl>'
+              + '    <name>This is the spot!</name>'
+              + '    <Point>'
+              + '      <coordinates>-122.448425,37.802907,0</coordinates>'
+              + '    </Point>'
+              + '  </Placemark>'
+             + '</Document>'
+              + '</kml>';
+			items[i].obj=this.map.parseKml(kmlString);
+			if (items[i].obj.getAbstractView())
+   				this.map.getView().setAbstractView(items[i].obj.getAbstractView());
+   			}
+   			
+		if (items[i].obj) {												// If an object
+			items[i].obj.setOpacity(opacity);							// Set opacity
+			if (items[i].visible == "true") 							// If visible
+				this.map.getFeatures().appendChild(items[i].obj);		// Add it to display list
+			else 														// Hidden
+				this.map.getFeatures().removeChild(items[i].obj);		// Remove it from list
+			}
+		}
+	this.map.getView().setAbstractView(lookAt);							// Go there
+}
 
 //  WEBPAGE   /////////////////////////////////////////////////////////////////////////////////////////// 
 
@@ -1547,7 +1685,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 	else if (options.dataSourceUrl.match(/kaltura/)) {
 		var s=options.dataSourceUrl.indexOf("kaltura_player_");
 		id=options.dataSourceUrl.substring(s+15);
-		id="https://www.kaltura.com/p/2003471/sp/0/playManifest/entryId/"+id+"/format/url/flavorParamId/301961/protocol/https/video.mp4"
+		id="https://www.kaltura.com/p/2003471/sp/0/playManifest/entryId/"+id+"/format/url/flavorParamId/301951/protocol/https/video.mp4"
 		base=""
 		}
 	else if ((options.dataSourceUrl.match(/http/g)) && (!options.dataSourceUrl.match(/youtube/g)))
@@ -1701,8 +1839,6 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 {
 	var v,vv,i;
 	var container=this.container;
-	var items=new Array();
-	this.items=items;
 	var ops=this.options;
    	var latlng=new google.maps.LatLng(-34.397,150.644);
 	var mapType=ops.mapTypeId.toUpperCase();
@@ -1715,7 +1851,8 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 	ops.center=latlng;
 	ops.zoom=Number(ll[2]);
    	
-   	for (var key in ops) {
+  	this.items=[];
+  	for (var key in ops) {
 		if (ops[key] == "true")  ops[key]=true;
 		if (ops[key] == "false") ops[key]=false;
 		if (key.indexOf("item-") != -1) {
@@ -1725,9 +1862,10 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 				vv=v[i].split(':');
 				o[vv[0]]=vv[1].replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
 				}
-			items.push(o);
+			this.items.push(o);
 			}
 		}
+	
 	if (ops.width)
 		document.getElementById(container).style.width=ops.width+"px";
 	if (ops.height)
@@ -1743,7 +1881,7 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 		};
 	this.map=new google.maps.Map(document.getElementById(container),ops);
 	this.AddClearMapStyle(this.map);
-	this.DrawMapOverlays(items);
+	this.DrawMapOverlays();
 	this.DrawLayerControlBox(items,this.options.controlbox);
 	this.SendReadyMessage(true);											
 }
@@ -1762,11 +1900,14 @@ SHIVA_Show.prototype.AddInternalOptions=function(options, newOps) 							//	PARS
 		}
 }		
 
-SHIVA_Show.prototype.DrawMapOverlays=function(items) 										//	DRAW MAP OVERLAYS
+SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 {
+ 	if (!this.items)
+  		return;
 	var i,j,latlng,v,ops,zoom;
 	var _this=this;
-  	v=this.options.mapcenter.split(",")
+ 	var items=this.items; 
+    	v=this.options.mapcenter.split(",")
 	latlng=new google.maps.LatLng(v[0],v[1]);
 	zoom=v[2];
 	for (i=0;i<items.length;++i) {
@@ -1824,11 +1965,10 @@ SHIVA_Show.prototype.DrawMapOverlays=function(items) 										//	DRAW MAP OVERL
 SHIVA_Show.prototype.DrawLayerControlBox=function(items, show)			// DRAW LAYER CONTROLBOX
 {
 	var i,hasGotos=false,hasLayers=false;
-	if (show != true) {														// If not on
+	if (!show) {															// If not on
 		$("#shivaMapControlDiv").remove();									// Remove it
 		return;																// Quit
 		}
-	_this=this;																// Local copy of this
 	var l=$("#"+this.container).css("left").replace(/px/g,"");				// Get left
 	var t=$("#"+this.container).css("top").replace(/px/g,"");				// Get top
 	var h=$("#"+this.container).css("height").replace(/px/g,"");			// Get height
@@ -1870,14 +2010,17 @@ SHIVA_Show.prototype.DrawLayerControlBox=function(items, show)			// DRAW LAYER C
 		for (i=0;i<items.length;++i) 										// For each item
 			if ((items[i].layerTitle) && (items[i].layerType == "GoTo")) {	// If a GoTo
 				str+="&nbsp;<input type='radio' name='gotos' id='shcr"+i+"'";	// Add check
+				if (items[i].visible == "true")								// If initially visible
+					str+=" checked=checked ";								// Set checked
 				str+=">"+items[i].layerTitle+"&nbsp;&nbsp;<br/>";			// Add label
 				}
 		str+="</p>";														// Close p	
 		}
 	$("#shivaMapControlDiv").html(str+"<br/>");								// Add content	
+	var _this=this;															// Local copy of this
 	for (i=0;i<items.length;++i) {											// For each item
 		if (items[i].layerType == "GoTo")									// If a goto
-			$("#shcr"+i).change( function() { $.proxy(_this.SetLayer(this.id.substr(4),this.checked.toString(),"GoTo"),_this); } );  // Add handler
+			$("#shcr"+i).click( function() { $.proxy(_this.SetLayer(this.id.substr(4),this.checked.toString(),"GoTo"),_this); } );  // Add handler
 		else																// A regular layer
 			$("#shcb"+i).click( function() { $.proxy(_this.SetLayer(this.id.substr(4),this.checked.toString(),"?"),_this); } );  // Add handler
 		}

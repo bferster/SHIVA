@@ -52,6 +52,7 @@
 	var shivaLib=null;
 	var shivaGroup="Earth"
 	var geocoder=null;
+	var initted=false;
 	
 	var props={
 		mapcenter: 					{	def:'38.03,-78.48', opt:'string',			des:'Center'}, 
@@ -110,19 +111,16 @@
 ///////// INIT  /////////////
 
      $(document).ready(function() {
-		google.setOnLoadCallback(DrawEarth);
 		$("#toolbar").buttonset();
 		$("#tb1").button({text: false, icons: { primary: "ui-icon-arrowthick-1-n"}}).css("width","25");
 		$("#tb2").button({text: false, icons: { primary: "ui-icon-arrowthick-1-s"}}).css("width","25");
 		$("#tb3").button({text: false, icons: { primary: "ui-icon-trash"}}).css("width","25");
 		$("#tb4").button({text: false, icons: { primary: "ui-icon-plus"}}).css("width","25");
 		shivaLib=new SHIVA_Show("containerDiv");
-		
-		shivaLib.LoadJSLib("Earth",DrawEarth)
 		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
 	  	shivaLib.SetAttributes(props,items,false);
 		ReEdit();
- 		Draw();
+		geocoder=new google.maps.Geocoder();
 		ShowHelp("startup");
 		if (window.addEventListener) 
 			window.addEventListener("message",shivaEventHandler,false);
@@ -163,166 +161,7 @@
   		});
 
 	});
-
-
-geocoder=new google.maps.Geocoder();
 	
-function DrawEarth() 
-{
-	if (!shivaLib.map) {												// If not initted yet 
-      	shivaLib.map="no";												// Loading
-     	google.earth.createInstance("containerDiv", initCB);			// Create
-	  	return;															// Quit
-	  	}
-	if (shivaLib.map == "no") 											// If not initted yet 
-	  	return;															// Quit
-	if (!shivaLib.options == "no") 										// If no options yet
-	  	return;															// Quit
-	
-	$("#containerDiv").height(shivaLib.options.height);					// Height
-	$("#containerDiv").width(shivaLib.options.width);					// Width
-	this.items=items;													// Set items
-	var ge=shivaLib.map;												// Point at Google Earth
-	var lookAt=ge.createLookAt('');										// LookAt object
-	var v=shivaLib.options.mapcenter.split(",");						// Get center
-	lookAt.setLatitude(Number(v[0]));									// Set lat
-	lookAt.setLongitude(Number(v[1]));									// Set lon
-	lookAt.setRange(Number(shivaLib.options.range));					// Set range
-	lookAt.setTilt(Number(shivaLib.options.tilt));						// Set tilt
-	lookAt.setHeading(Number(shivaLib.options.heading));				// Set heading
-	ge.getView().setAbstractView(lookAt);								// Go there
-
-	if (shivaLib.options.panControl == "true")							// If controls on
-		ge.getNavigationControl().setVisibility(ge.VISIBILITY_AUTO);	// Show them	  
-	else																// Controls off
-		ge.getNavigationControl().setVisibility(ge.VISIBILITY_HIDE);	// Hide them	 
-	ge.getOptions().setOverviewMapVisibility((shivaLib.options.overviewMapControl == "true"));	// Show overview?
-	ge.getOptions().setMouseNavigationEnabled((shivaLib.options.draggable == "true"));	// Show overview	 	 
-	if (shivaLib.options.scrollwheel == "true")							// If scroll enabled on
-		ge.getOptions().setScrollWheelZoomSpeed(1);	    				// Normal action
-	else																// No scroll
-		ge.getOptions().setScrollWheelZoomSpeed(.0000000001)	    	// Disable by making really small
-	ge.getOptions().setTerrainExaggeration(Number(shivaLib.options.terrainexag));	// Terrain exaggeration
-	ge.getLayerRoot().enableLayerById(ge.LAYER_BORDERS,(shivaLib.options.borders == "true"));
-	ge.getLayerRoot().enableLayerById(ge.LAYER_ROADS,(shivaLib.options.roads == "true"));
-	ge.getLayerRoot().enableLayerById(ge.LAYER_TERRAIN,true);
-	
-	DrawEarthOverlays(items);
-	shivaLib.DrawLayerControlBox(items,shivaLib.options.controlbox == "true");
-	shivaLib.dr=new SHIVA_EarthDraw(ge);
-	
-	function initCB(instance) {											// GOOGLE EARTH INIT
-		shivaLib.map=instance;											// Set ptr to earth
-		shivaLib.map.getWindow().setVisibility(true);					// Show it
-		DrawEarth();													// Draw it
-		google.earth.addEventListener(instance.getView(),'viewchangeend', function() { 
-			var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
-			var view=Math.floor(lookAt.getLatitude()*10000)/10000+","+Math.floor(lookAt.getLongitude()*10000)/10000+",";
-			view+=Math.floor(lookAt.getRange())+","+Math.floor(lookAt.getTilt()*100)/100+","+Math.floor(lookAt.getHeading()*100)/100;
-			var str="<b>Current view: </b></br></br>"+view;
-			str+="<br/><br/>Click <a href='javascript:SetNewView(\""+view+"\")'>here</a> to set as the new viewpoint";
-			$('#helpDiv').html(str);
-			});
- 		}
-	}
-
-
-function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
-{
-	var i,v,opacity;
-	var _this=shivaLib;
-	var lookAt=_this.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);	// Lookat object
-	lookAt.setLatitude(Number(_this.options.mapcenter.split(",")[0]));	// Set lat
-	lookAt.setLongitude(Number(_this.options.mapcenter.split(",")[1]));	// Set lon
-	lookAt.setRange(Number(_this.options.range));						// Set range
-	lookAt.setTilt(Number(_this.options.tilt));							// Set tilt
-	lookAt.setHeading(Number(_this.options.heading));					// Set heading
-
-	for (i=0;i<items.length;++i) {
-		opacity=1;														// Assume full opacity
-		if (items[i].obj) {												// If already there
-			_this.map.getFeatures().removeChild(items[i].obj);			// Remove it from list
-			items[i].obj=null;											// Null it out
-			}
-		if (items[i].layerType == "GoTo") {								// GoTo position
-			v=items[i].layerSource.split(",");							// Split into parts
-			if ((v.length > 1) && (items[i].visible == "true")) {		// If enough  vals and visible
-				if (v[0] != undefined)	lookAt.setLatitude(Number(v[0]));	// Set lat
-				if (v[1] != undefined)	lookAt.setLongitude(Number(v[1]));	// Set lon
-				if (v[2] != undefined)	lookAt.setRange(Number(v[2]));	// Set range
-				if (v[3] != undefined)	lookAt.setTilt(Number(v[3]));	// Set tilt
-				if (v[4] != undefined)	lookAt.setHeading(Number(v[4]));// Set heading
-				}
-			}
-		if (items[i].layerType == "Overlay") {							// Image overlay
-			items[i].obj=_this.map.createGroundOverlay('');				// Alloc overlay obj
-			v=items[i].layerOptions.split(",");							// Split dest pos
-			var icon=_this.map.createIcon('');							// Create icon
-			icon.setHref(items[i].layerSource);							// Set url
-			items[i].obj.setIcon(icon);									// Set it
-			var latLonBox=_this.map.createLatLonBox('');				// Create loc
-			latLonBox.setBox(Number(v[2]),Number(v[0]),Number(v[1]),Number(v[3]),0); // Fill loc	
-			items[i].obj.setLatLonBox(latLonBox);						// Set loc
-			if (v.length == 5)											// If opacity set
-				opacity=v[4]/100;										// Set it
-			}
-		if (items[i].layerType == "KML") {								// KML layer
-			var link=_this.map.createLink('');							// Create link object	
-			link.setHref(items[i].layerSource);							// Set url
-			items[i].obj=_this.map.createNetworkLink('');				// Create layer object
-			var fly=(items[i].layerOptions.indexOf("port") == -1)		// Preserve viewport?
-			items[i].obj.set(link,true,fly); 							// Sets the link, refreshVisibility, and flyToView
-			}
-		if (items[i].layerType == "Drawn") {							// Drawn KML layer
-			var kmlString = ''
-              + '<?xml version="1.0" encoding="UTF-8"?>'
-              + '<kml xmlns="http://www.opengis.net/kml/2.2">'
-            + '<Document>'
-  
-  				+ '<Style id="randomColorIcon">'
-    			+ '<IconStyle>'
-  				+ '<color>ffff0000</color><scale>1</scale>'
-       			+ '<Icon><href>http://www.viseyes.org/shiva/icons/blue/umbrella_32x32.png</href></Icon>'
-     			+ '</IconStyle>'
-    			+ '<LabelStyle><color>ffffffff</color><scale>1</scale></LabelStyle>'
-   				+ '</Style>'
-
-              + '  <Camera>'
-              + '    <longitude>-122.444633</longitude>'
-              + '    <latitude>37.801899</latitude>'
-              + '    <altitude>139.629438</altitude>'
-              + '    <heading>-70.0</heading>'
-              + '    <tilt>75</tilt>'
-              + '  </Camera>'
-              + '  <Placemark>'
-              + '    <styleUrl>#randomColorIcon</styleUrl>'
-              + '    <name>This is the spot!</name>'
-              + '    <Point>'
-              + '      <coordinates>-122.448425,37.802907,0</coordinates>'
-              + '    </Point>'
-              + '  </Placemark>'
-             + '</Document>'
-              + '</kml>';
-			items[i].obj=_this.map.parseKml(kmlString);
-			if (items[i].obj.getAbstractView())
-   				_this.map.getView().setAbstractView(items[i].obj.getAbstractView());
-   			}
-   			
-		if (items[i].obj) {												// If an object
-			items[i].obj.setOpacity(opacity);							// Set opacity
-			if (items[i].visible == "true") 							// If visible
-				_this.map.getFeatures().appendChild(items[i].obj);		// Add it to display list
-			else 														// Hidden
-				_this.map.getFeatures().removeChild(items[i].obj);		// Remove it from list
-			}
-		}
-	_this.map.getView().setAbstractView(lookAt);						// Go there
-}
-
-//38.07,-78.55,37.99,-78.41,75
-//http://www.viseyes.org/shiva/map.jpg
-//http://code.google.com/apis/earth/documentation/samples/kml_example.kml
-
 	function SetNewView(view)
 	{
 		var v=view.split(",");
@@ -352,103 +191,24 @@ function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
 			}
 	}
  
+ 	function ShivaPostInit()
+ 	{
+		google.earth.addEventListener(shivaLib.map.getView(),'viewchangeend', function() { 
+			var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
+			var view=Math.floor(lookAt.getLatitude()*10000)/10000+","+Math.floor(lookAt.getLongitude()*10000)/10000+",";
+			view+=Math.floor(lookAt.getRange())+","+Math.floor(lookAt.getTilt()*100)/100+","+Math.floor(lookAt.getHeading()*100)/100;
+			var str="<b>Current view: </b></br></br>"+view;
+			str+="<br/><br/>Click <a href='javascript:SetNewView(\""+view+"\")'>here</a> to set as the new viewpoint";
+			$('#helpDiv').html(str);
+			});
+	}
+ 
 	function Draw()
 	{	
 		if (shivaLib.drupalMan)  
 			window.parent.postMessage("DataChanged=true","*");
-		shivaLib.options=ops=$.parseJSON(SaveData("GetJSON"));
-		DrawEarth($.parseJSON(SaveData("GetJSON")));
-	}
-
-	function MakeKML()
-	{
-		var o,i,j,a;
-		var p=new google.maps.Point(0,0);
-		var proj=projection.getProjection();
-		var str="<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n<Document>\n"; 
-		for (i=0;i<shivaLib.overlay.length;++i) {									// For each seg
-			o=shivaLib.overlay[i];													// Point at it
-			a=Math.round(o.alpha*2.55).toString(16);								// Get alpha
-			if (a.length == 1)														// If single digit
-				a="0"+a;															// Pad 
-			if (o.type < 3) {														// Geometric shapes
-				str+="<Placemark>\n";												// Placemark
-				str+="\t<Style id=\"sty"+i+"\">\n";									// Style
-				str+="\t\t<LineStyle>\n\t\t\t<color>";								// Color start
-				if (o.edgeColor == -1)												// If no color
-					str+="00000000";												// No alpha
-				else
-					str+=a+o.edgeColor.substring(5,7)+o.edgeColor.substring(3,5)+o.edgeColor.substring(1,3);	// ABGR		
-				str+="</color>\n";													// Color end
-				str+="\t\t\t<width>"+(Math.round(o.edgeWidth/10)+1)+"</width>\n\t\t</LineStyle>\n";	// Width 
-				str+="\t\t<PolyStyle>\n\t\t\t<color>";								// Color start
-				if (o.color == -1)													// If no color
-					str+="00000000";												// No alpha
-				else
-					str+=a+o.color.substring(5,7)+o.color.substring(3,5)+o.color.substring(1,3);	// ABGR		
-				str+="</color>\n\t\t</PolyStyle>\n";								// Color/poly end
-				str+="\t</Style>\n\t<styleUrl>sty"+i+"</styleUrl>\n";				// Style URL
-				if (o.color == -1)													// If no fill
-					str+="\t<LineString><coordinates>\n";							// Line
-				else																// fill
-					str+="\t<Polygon><outerBoundaryIs><LinearRing><coordinates>\n";	// Polygon
-				if (o.type == 0) {													// Lines/polygons
-					for (j=0;j<o.x.length;++j) {									// For each point
-						p.x=o.x[j];			p.y=o.y[j];								// Get coord		
-						str+="\t\t"+proj.fromContainerPixelToLatLng(p).lng()+","+proj.fromContainerPixelToLatLng(p).lat()+"\n";
-						}
-					if (o.color != -1) {											// If a polygon
-						p.x=o.x[0];			p.y=o.y[0];								// Complete it					
-						str+="\t\t"+proj.fromContainerPixelToLatLng(p).lng()+","+proj.fromContainerPixelToLatLng(p).lat()+"\n";
-						}
-					}
-				else if (o.type == 1) {												// Circles
-					var r=Math.abs(o.x[1]-o.x[0]);									// Radius
-					for (j=0;j<=360;j+=10) {										// 18 segs
-						p.x=(Math.cos(j*.0174532925)*r)+o.x[0];						// Get x
-						p.y=(Math.sin(j*.0174532925)*r)+o.y[0];						// Y
-						str+="\t\t"+proj.fromContainerPixelToLatLng(p).lng()+","+proj.fromContainerPixelToLatLng(p).lat()+"\n";
-						}	
-					}
-				else if (o.type == 2) {												// Boxes
-					p.x=o.x[0];			p.y=o.y[0];										
-					str+="\t\t"+proj.fromContainerPixelToLatLng(p).lng()+","+proj.fromContainerPixelToLatLng(p).lat()+"\n";
-					p.x=o.x[1];			p.y=o.y[0];										
-					str+="\t\t"+proj.fromContainerPixelToLatLng(p).lng()+","+proj.fromContainerPixelToLatLng(p).lat()+"\n";
-					p.x=o.x[1];			p.y=o.y[1];										
-					str+="\t\t"+proj.fromContainerPixelToLatLng(p).lng()+","+proj.fromContainerPixelToLatLng(p).lat()+"\n";
-					p.x=o.x[0];			p.y=o.y[1];										
-					str+="\t\t"+proj.fromContainerPixelToLatLng(p).lng()+","+proj.fromContainerPixelToLatLng(p).lat()+"\n";
-					p.x=o.x[0];			p.y=o.y[0];										
-					str+="\t\t"+proj.fromContainerPixelToLatLng(p).lng()+","+proj.fromContainerPixelToLatLng(p).lat()+"\n";
-					}
-				if (o.color == -1)													// If no fill
-					str+="\t</coordinates></LineString>\n";							// Line
-				else																// fill
-					str+="\t</coordinates></LinearRing></outerBoundaryIs></Polygon>\n";
-				str+="</Placemark>\n";												// End placemark
-				}	
-			if (o.type == 4) {														// Image
-				str+="<GroundOverlay>\n";											// Overlay
-//				str+="\t<LookAt>\n";												// Look at
-//				str+="\t\t<latitude>" +shivaLib.map.getCenter().lat()+"</latitude>\n"; 	// Lat
-//				str+="\t\t<longitude>"+shivaLib.map.getCenter().lng()+"</longitude>\n"; // Lon
-//				str+="\t</LookAt>\n";												// /Look at
-				str+="\t<Icon>\n\t\t<href>"+o.imageURL+"</href>\n\t</Icon>\n";		// Image
-				p.x=o.x[0];			p.y=o.y[0];										// Corner 1
-				str+="\t\t<LatLonBox>\n";											// Coords
-				str+="\t\t<north>"+proj.fromContainerPixelToLatLng(p).lat()+"</north>\n"; // N
-				str+="\t\t<west>" +proj.fromContainerPixelToLatLng(p).lng()+"</west>\n";  // W
-				p.x=o.x[1];			p.y=o.y[1];										// Corner 2
-				str+="\t\t<south>"+proj.fromContainerPixelToLatLng(p).lat()+"</south>\n"; // S
-				str+="\t\t<east>" +proj.fromContainerPixelToLatLng(p).lng()+"</east>\n";  // E
-				str+="\t</LatLonBox>\n";											// /Coords
-				str+="</GroundOverlay>\n";											// /Overlay
-				}
-			}
-		str+="</Document>\n</kml>";
-		return str;
-	}
+		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
+ 	}
 
 	function SaveData(mode)
 	{
@@ -525,170 +285,6 @@ function DrawEarthOverlays(items) 									//	DRAW MAP OVERLAYS
 
 	function trace(str) { console.log(str) };
 
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-// DRAWING
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function SHIVA_EarthDraw(ge)												// CONSTRUCTOR
-{
-	this.ge=ge;
-	this.lats=[38.02,38.02,38.04];
-	this.lons=[-78.48,-78.50,-78.52];
-	shivaLib.dr=this;
-	test("line1")
-}
-	
-SHIVA_EarthDraw.prototype.AddCoordControlDot=function(lat, lon, num, scale)	// ADD COORD CONTROL DOT
-{
-	var ge=this.ge;																// Local copy of earth
-	var placemark=ge.createPlacemark("cd-"+num);								// Create named placemark
-	var point=ge.createPoint('');												// Create point
-	var icon=ge.createIcon('');													// Create icon
-	var styleMap=ge.createStyleMap('');											// Create style map
-	
-	var normalStyle=ge.createStyle(''); 										// Create style
-	if (scale == .5)															// Coord icon
-		icon.setHref('http://www.viseyes.org/shiva/coordcir.png');				// Set icon url
-	else																		// Add icon
-		icon.setHref('http://www.viseyes.org/shiva/coordadd.png');				// Set icon url
-	normalStyle.getIconStyle().setIcon(icon); 									// Set icon		
-	normalStyle.getIconStyle().setScale(scale);									// Set icon scale
-	styleMap.setNormalStyle(normalStyle);										// Set normal style
-
-	var highlightStyle=ge.createStyle(''); 										// Create style
-	icon=ge.createIcon('');														// Create icon
-	if (scale == .5)															// Coord icon
-		icon.setHref('http://www.viseyes.org/shiva/coordsel.png');				// Set icon url
-	else																		// Add icon
-		icon.setHref('http://www.viseyes.org/shiva/coordadd.png');				// Set icon url
-	highlightStyle.getIconStyle().setIcon(icon); 								// Set icon		
-	highlightStyle.getIconStyle().setScale(1.5);								// Set icon scale
-	styleMap.setHighlightStyle(highlightStyle);									// Set highlight style
-	
-	placemark.setStyleSelector(styleMap); 										// Add icon to placemark
-	point.setLatitude(lat);														// Set lat
-	point.setLongitude(lon);													// Set lon
-	placemark.setGeometry(point);												// Place icon
-	ge.getFeatures().appendChild(placemark);									// Add to DOM
-}	
-
-SHIVA_EarthDraw.prototype.AddControlDots=function(id) 						// ADD COORD EDITING DOTS			
-{
-	var i,j,a,b,o;
-	var ge=this.ge;																// Local copy of earth
-	var obs=ge.getFeatures().getChildNodes()									// Point at nodes
-	var n=obs.getLength();														// Get length
-	for (i=0;i<n;++i) {															// For each child
-		o=ge.getElementById(obs.item(i).getId());								// Get dot's id
-		if (o)	ge.getFeatures().removeChild(o);								// Remove dot	
-		}
-	if (!this.lons.length)														// If no coords
-		return;																	// Quit
-	this.AddCoordControlDot(this.lats[0],this.lons[0],0,.5);					// Add 1st dot								
-	for (i=1;i<this.lons.length;++i) {											// For all other dots
-		j=i-1;																	// Last dot index
-		this.AddCoordControlDot(this.lats[i],this.lons[i],i,.5);				// Add dot
-		a=((this.lats[i]-this.lats[j])/2)+this.lats[j];							// Middle lat
-		b=((this.lons[i]-this.lons[j])/2)+this.lons[j];							// Middle lon
-		this.AddCoordControlDot(a,b,(i-.5),.33);								// Add middle dot	
-		}
-	
-	google.earth.addEventListener(ge.getWindow(),"mousedown", 				// ON MOUSE DOWN
-		function(e) {
-		    if ((e.getTarget().getType() == "KmlPlacemark") && (e.getTarget().getGeometry().getType() == "KmlPoint")) // If a point in a placemark
-		     	if (e.getTarget().getId().substr(0,3) == "cd-")	{				// If a control dot
-			    	dragInfo={ placemark: e.getTarget(), dragged: false   };	// Set global dragIno obj
-					shivaLib.Sound("click");									// Click
-					}
-			});
-	
-	google.earth.addEventListener(ge.getGlobe(),'mousemove', 				// ON MOUSE MOVE
-		function(e) {
-			var o,oo,lat,lon,num;
-			if (dragInfo) {														// If dragging											
-	      		e.preventDefault();												// Stop popagation
-				if (e.getTarget().getId().indexOf(".5") != -1) 					// A mid point
-					return;														// Quit
-	     		dragInfo.dragged=true;											// Drag flag
-				o=shivaLib.map.getElementById(id);								// Pointer to line
-	      		var point=dragInfo.placemark.getGeometry();						// Get coord
-				num=Number(e.getTarget().getId().substr(3));					// Get index into line
-				lat=e.getLatitude();											// Get lat
-				lon=e.getLongitude();											// Get lon
-	      		point.setLatitude(lat);											// Set new lat
-	     		point.setLongitude(lon);										// Set new lon				
-
-				o.getGeometry().getCoordinates().setLatLngAlt(num,lat,lon,0);	// Set point in line
-				o=shivaLib.map.getElementById('cd-'+(num-1));					// Pointer to pevious dot
-				if (o) {														// If one
-					o=o.getGeometry();											// Point at geometry
-					oo=shivaLib.map.getElementById('cd-'+(num-.5));				// Pointer to middle dot
-					oo=oo.getGeometry();										// Point at geometry
-					oo.setLatitude(lat+(o.getLatitude()-lat)/2);				// Set mid-point lat
-					oo.setLongitude(lon+(o.getLongitude()-lon)/2);				// Lon
-					}
-				o=shivaLib.map.getElementById('cd-'+(num+1));					// Pointer to next dot
-				if (o) {														// If one
-					o=o.getGeometry();											// Point at geometry
-					oo=shivaLib.map.getElementById('cd-'+(num+.5));				// Pointer to middle dot
-					oo=oo.getGeometry();										// Point at geometry
-					oo.setLatitude(lat+(o.getLatitude()-lat)/2);				// Lat
-					oo.setLongitude(lon+(o.getLongitude()-lon)/2);				// Lon
-					}
-			   }
-			});
-
-  	google.earth.addEventListener(ge.getWindow(),'mouseup', 				// ON MOUSE UP
-  		function(e) {
- 			var id="line1";
- 			if (dragInfo) {														// If dragging
-  				if (dragInfo.dragged) 	e.preventDefault();						// Stop propagation
-		    	dragInfo=null;													// Kill drag obj
-			 	}
-			if ((e.getTarget().getType() == "KmlPlacemark") && (e.getTarget().getGeometry().getType() == "KmlPoint"))  { // If a point in a placemark
-				if (e.getTarget().getId().indexOf(".5") != -1) { 				// A mid point
-					var	num=Math.floor(e.getTarget().getId().substr(3));		// Get index into line
-					shivaLib.dr.AddPointToLine(id,num);							// Bisect line
- 					shivaLib.Sound("ding");										// Ding
- 					}
-   				}
- //  		if (e.getShiftKey())												// If deleting point
-			});
-
-}
-
-SHIVA_EarthDraw.prototype.AddPointToLine=function(id, num)				// ADD NEW POINT TO LINE
-{
-	return;
-	var lat=(this.lats[num]+(this.lats[num+1]-this.lats[num])/2);				// Bisected lat
-	var lon=(this.lons[num]+(this.lons[num+1]-this.lons[num])/2);				// Lon
-	this.lats.splice(num+1,0,lat);												// Add lat to array									
-	this.lons.splice(num+1,0,lon);												// Add lon							
-	if (this.ge.getElementById(id))												// If there
-		this.ge.getFeatures().removeChild(this.ge.getElementById(id));			// Remove 
-	test("line2");
-}
-
-	function test(id)
-	{
- 		trace(id)
- 		var _this=shivaLib.dr;
-		var ge=_this.ge;															// Local copy of earth
- 		
-  	if (id == "line1")
- 		_this.AddControlDots(id);			
- 		var lineStringPlacemark=ge.createPlacemark(id);
-		var lineString=ge.createLineString('');
-		lineStringPlacemark.setGeometry(lineString);
-		trace(_this.lats.length)
-		for (i=0;i<_this.lats.length;++i)
-			lineString.getCoordinates().pushLatLngAlt(_this.lats[i],_this.lons[i],0);
-		ge.getFeatures().appendChild(lineStringPlacemark);
-	trace(_this.lats)
-	}
-	
-	
 	
 </script>
 </body>

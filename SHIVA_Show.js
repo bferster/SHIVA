@@ -568,7 +568,7 @@ SHIVA_Show.prototype.DrawEarth=function()
 
 SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 {
-	var i,v,opacity;
+	var i,v,opacity,obj;
 	var items=this.items;												// Point to items
 	var lookAt=this.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);	// Lookat object
 	lookAt.setLatitude(Number(this.options.mapcenter.split(",")[0]));	// Set lat
@@ -579,10 +579,7 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 
 	for (i=0;i<items.length;++i) {
 		opacity=1;														// Assume full opacity
-		if (items[i].obj) {												// If already there
-			this.map.getFeatures().removeChild(items[i].obj);			// Remove it from list
-			items[i].obj=null;											// Null it out
-			}
+		obj=shivaLib.map.getElementById("Layer-"+(i+1));				// Pointer to pevious layer obj, if any
 		if (items[i].layerType == "GoTo") {								// GoTo position
 			v=items[i].layerSource.split(",");							// Split into parts
 			if ((v.length > 1) && (items[i].visible == "true")) {		// If enough  vals and visible
@@ -594,23 +591,29 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 				}
 			}
 		if (items[i].layerType == "Overlay") {							// Image overlay
-			items[i].obj=this.map.createGroundOverlay('');				// Alloc overlay obj
+			if (!obj) {													// Not already alloc'd
+				obj=this.map.createGroundOverlay("Layer-"+(i+1));		// Alloc overlay obj
+				this.map.getFeatures().appendChild(obj);				// Add it to display list
+				}
 			v=items[i].layerOptions.split(",");							// Split dest pos
 			var icon=this.map.createIcon('');							// Create icon
 			icon.setHref(items[i].layerSource);							// Set url
-			items[i].obj.setIcon(icon);									// Set it
+			obj.setIcon(icon);											// Set it
 			var latLonBox=this.map.createLatLonBox('');					// Create loc
 			latLonBox.setBox(Number(v[2]),Number(v[0]),Number(v[1]),Number(v[3]),0); // Fill loc	
-			items[i].obj.setLatLonBox(latLonBox);						// Set loc
+			obj.setLatLonBox(latLonBox);								// Set loc
 			if (v.length == 5)											// If opacity set
 				opacity=v[4]/100;										// Set it
 			}
 		if (items[i].layerType == "KML") {								// KML layer
 			var link=this.map.createLink('');							// Create link object	
 			link.setHref(items[i].layerSource);							// Set url
-			items[i].obj=this.map.createNetworkLink('');				// Create layer object
+			if (!obj) {													// Not already alloc'd
+				obj=this.map.createNetworkLink("Layer-"+(i+1));			// Create layer object
+				this.map.getFeatures().appendChild(obj);				// Add it to display list
+				}
 			var fly=(items[i].layerOptions.indexOf("port") == -1)		// Preserve viewport?
-			items[i].obj.set(link,true,fly); 							// Sets the link, refreshVisibility, and flyToView
+			obj.set(link,true,fly); 									// Sets the link, refreshVisibility, and flyToView
 			}
 		if (items[i].layerType == "Drawn") {							// Drawn KML layer
 			var kmlString = ''
@@ -642,17 +645,14 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
               + '  </Placemark>'
              + '</Document>'
               + '</kml>';
-			items[i].obj=this.map.parseKml(kmlString);
-			if (items[i].obj.getAbstractView())
-   				this.map.getView().setAbstractView(items[i].obj.getAbstractView());
+			obj=this.map.parseKml(kmlString);
+			if (obj.getAbstractView())
+   				this.map.getView().setAbstractView(obj.getAbstractView());
    			}
-   			
-		if (items[i].obj) {												// If an object
-			items[i].obj.setOpacity(opacity);							// Set opacity
-			if (items[i].visible == "true") 							// If visible
-				this.map.getFeatures().appendChild(items[i].obj);		// Add it to display list
-			else 														// Hidden
-				this.map.getFeatures().removeChild(items[i].obj);		// Remove it from list
+  			
+		if (obj) {														// If an object
+			obj.setOpacity(opacity);									// Set opacity
+			obj.setVisibility(items[i].visible == "true");				// Show/hide it
 			}
 		}
 	this.map.getView().setAbstractView(lookAt);							// Go there
@@ -1882,7 +1882,7 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 	this.map=new google.maps.Map(document.getElementById(container),ops);
 	this.AddClearMapStyle(this.map);
 	this.DrawMapOverlays();
-	this.DrawLayerControlBox(items,this.options.controlbox);
+	this.DrawLayerControlBox(this.items,this.options.controlbox);
 	this.SendReadyMessage(true);											
 }
 
@@ -1904,14 +1904,13 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 {
  	if (!this.items)
   		return;
-	var i,j,latlng,v,ops,zoom;
+	var i,j,latlng,v,ops,curZoom,curLatLon;
 	var _this=this;
  	var items=this.items; 
-    	v=this.options.mapcenter.split(",")
-	latlng=new google.maps.LatLng(v[0],v[1]);
-	zoom=v[2];
+    v=this.options.mapcenter.split(",")
+	curLatlng=new google.maps.LatLng(v[0],v[1]);
+	curZoom=v[2];
 	for (i=0;i<items.length;++i) {
-//		items[i].layerType = "Drawn"
 		ops=new Object();
 		if (items[i].obj) 
 			items[i].obj.setMap(null);
@@ -1949,17 +1948,17 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 		else if ((items[i].layerType == "GoTo") && (items[i].visible == "true")) {
 			v=items[i].layerSource.split(",");							// Split into parts
 			if (v.length > 1)									 		// If enough  vals and visible
-				latlng=new google.maps.LatLng(v[0],v[1]);				// Set center
+				curLatlng=new google.maps.LatLng(v[0],v[1]);			// Set center
 			if (v.length > 2)											// If set
-				zoom=v[2];												// Set zoom
+				curZoom=v[2];											// Set zoom
 			}
 		if ((items[i].visible == "true") && (items[i].obj))
 			items[i].obj.setMap(this.map);	
 		if ((items[i].obj) && (!items[i].listener))
 			items[i].listener=google.maps.event.addListener(items[i].obj,'click',function(e) { _this.RunGlue(_this.container,i-1,"clicked"); });
 		}
-	this.map.setCenter(latlng);											// Center map
-	this.map.setZoom(Number(zoom));										// Zoom map
+	this.map.setCenter(curLatlng);										// Center map
+	this.map.setZoom(Number(curZoom));									// Zoom map
 }
 
 SHIVA_Show.prototype.DrawLayerControlBox=function(items, show)			// DRAW LAYER CONTROLBOX

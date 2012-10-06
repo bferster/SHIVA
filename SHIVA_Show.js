@@ -536,6 +536,10 @@ SHIVA_Show.prototype.DrawEarth=function()
 		ge.getNavigationControl().setVisibility(ge.VISIBILITY_AUTO);	// Show them	  
 	else																// Controls off
 		ge.getNavigationControl().setVisibility(ge.VISIBILITY_HIDE);	// Hide them	 
+	ge.getNavigationControl().getScreenXY().setYUnits(ge.UNITS_PIXELS);	// Bottom
+	ge.getNavigationControl().getScreenXY().setXUnits(ge.UNITS_PIXELS);	// Left
+
+
 	ge.getOptions().setOverviewMapVisibility((ops.overviewMapControl));	// Show overview?
 	ge.getOptions().setMouseNavigationEnabled((ops.draggable));			// Show overview	 	 
 	if (ops.scrollwheel)												// If scroll enabled on

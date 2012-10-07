@@ -552,8 +552,6 @@ SHIVA_Show.prototype.DrawEarth=function()
 	
 	this.DrawEarthOverlays();											// Draw overlays
 	this.DrawLayerControlBox(items,ops.controlbox);						// Draw control box
-	if (typeof(SHIVA_EarthDraw) == "function")							// If drawing defined
-		this.dr=new SHIVA_EarthDraw(ge);								// Add it
 	
 	function initCB(instance) {											// GOOGLE EARTH INIT
 		this.map=instance;												// Set ptr to earth

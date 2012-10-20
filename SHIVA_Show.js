@@ -2720,7 +2720,7 @@ SHIVA_Show.prototype.ShowLightBox=function(width, top, title, content)
 	str+="<span style='font-size:large;text-shadow:1px 1px #ccc'><b>"+title+"</b></span>";
 	str+="<div id='shivaLightContentDiv'>"+content+"</div>";					
 	$("#shivaLightBoxDiv").append(str);	
-						
+	$("#shivaLightBoxDiv").css("z-index",2500);						
 }
 
 SHIVA_Show.prototype.Prompt=function(title, message, def, id)

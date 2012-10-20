@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="mapscholaricon.ico">
+	<title>MapScholar</title>
+	<link rel="stylesheet" type="text/css" href="http://www.viseyes.org/shiva/css/smoothness/jquery-ui-1.8.16.custom.css">
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"earth","version":"1"}]}'></script>
+ 	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+ 	<script type="text/javascript" src="../shiva/SHIVA_Show.js"></script>
+	<style type="text/css">
+		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small}
+		p.pb { text-align:right; color:#fff; }
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		tr.odd { background-color:#e0e0e0; }
+		.propTable { background-color:#eee;border-radius:8px;
+				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				  	 border-collapse: collapse;
+				  	 width:278px;
+				  	 }
+	</style>
+</head>
+<body>
+		<div id="containerDiv" style="position:absolute;width:800px;height:600px;left:20px;top:20px;"></div>
+		<div id="shelfDiv" style="position:absolute;width:200px;height:636px;left:820px;top:20px;background-color:#ccc;"> </div>
+		<div id="mapInfoDiv" style="position:absolute;width:800px;height:36px;top:620px;left:20px;background-color:#eee"> </div>
+<script>
+
+///////// GLOBALS   //////////
+
+	var items=new Array();
+	var shivaLib=null;
+	var shivaGroup="Earth"
+	var geocoder=null;
+	
+///////// INIT  /////////////
+
+     $(document).ready(function() {
+		shivaLib=new SHIVA_Show("containerDiv");
+		shivaLib.dr=new SHIVA_EarthDraw();
+		google.setOnLoadCallback(shivaLib.DrawEarth);
+		shivaLib.LoadJSLib("Earth",shivaLib.DrawEarth)
+ 		shivaLib.options={ 	shivaGroup:"Earth", height:"600", width:"800", 
+ 							mapcenter:"29.36,-80.49", range:"1000000", tilt:"42", heading:"0",
+ 							panControl:"true", draggable:"true", scrollwheel:"true", overviewMapControl:"false",
+ 							terrainexag:"1", borders:"false", roads:"false"
+ 							};
+ 		
+ 		
+ 		Draw();
+		DrawShelf();
+		shivaLib.dr.DrawControlBar(false);
+		if (window.addEventListener) 
+			window.addEventListener("message",shivaEventHandler,false);
+		else
+			window.attachEvent("message",shivaEventHandler);	
+		
+		$(function() {
+		    $("#address").autocomplete({
+		      source: function(request, response) {
+		        geocoder.geocode( {'address': request.term }, function(results, status) {
+		          response($.map(results, function(item) {
+		            return {
+		              label:  item.formatted_address,
+		              value: item.formatted_address,
+		              latitude: item.geometry.location.lat(),
+		              longitude: item.geometry.location.lng()
+		            }
+		          }));
+		        })
+		      },
+	     	select: function(event, ui) {
+				var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
+				shivaLib.options.mapcenter=(Math.floor(ui.item.latitude*1000)/1000+","+Math.floor(ui.item.longitude*1000)/1000);
+				Draw();
+		      	}
+		    });
+  		});
+
+	});
+
+
+geocoder=new google.maps.Geocoder();
+	
+	function shivaEventHandler(e)
+	{
+	}
+ 
+	function Draw()
+	{	
+		shivaLib.DrawEarth();
+	}
+
+	function ShivaPostInit()
+ 	{
+		shivaLib.dr.InitEvents();
+		test()
+	}
+
+	function DrawShelf(mode)		
+	{
+		var str="<img src='img/MapScholarLogo.png'/>";
+		var _this=shivaLib.dr;
+		if (mode == "draw") {
+			var type=$("#annType").val();
+			if (_this.curSeg != -1)
+				type=_this.segs[_this.curSeg].type;
+			str+="<div style='position:absolute;top:203px;width:162px;height:395px;background-color:#fff;border:1px solid #999;margin:10px;padding:8px' class='rounded-corners'>";
+			str+="<br/><div style='text-align:center'><b>"+type+"</b></div><br/><table>";
+			if (type == "Draw") {
+				str+="<tr><td>To add a new segment, choose a type of segment to draw from the Draw selector pulldown menu. A segment will be added that can be edited."
+				str+="<br/><br/><div style='text-align:center'><b>To edit</b></div>";
+				str+="<br/>To edit an existing segment, click on that segment on the map to select it.";
+				str+="<br/><br/>Drag a point's icon to move that point. Drag icon with SHIFT key pressed to move the whole segment.";
+				str+="<br/><br/>Click on a (+) icon in the segment to icon to insert a new point there. Dragging the (+) will also add one. Right-click point icon to remove point.";
+				str+="<br/><br/>Click on the trashcan icon to remove the complete segment.";
+				str+="</td></tr>"
+				}
+			else if ((type == "Line") || (type == "Shape")) {
+				str+="<tr><td>Popup text&nbsp;</td><td><textarea rows='1' style='width:80px;font-size:x-small' id='annText2'></textarea></td></tr>";
+				str+="<tr><td colspan='2'><p><hr/></p>";
+				str+="<Drag a point's icon to move that point. Drag icon with SHIFT key pressed to move the whole segment.";
+				str+="<br/><br/>Click on a (+) icon in the segment to icon to insert a new point there. Dragging the (+) will also add one. Right-click point icon to remove point.";
+				str+="<br/><br/>Click on the trash can icon to remove the complete segment.";
+				str+="</td></tr>"
+				}
+			else if (type == "Image") {
+				str+="<tr><td>Image URL&nbsp;</td><td><input type='text' size='20' style='font-size:x-small' id='annUrl'/></td></tr>";
+				str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:95px;font-size:x-small' id='annText2'></textarea></td></tr>";
+				str+="<tr><td>Rotation&nbsp;</td><td><input type='range' max='360' style='width:100px;font-size:x-small' id='annRot'/></td></tr>";
+				str+="<tr><td colspan='2'><p><hr/></p>";
+				str+="Drag corner dots to resize box. Drag corner dot with SHIFT key pressed to move the image.";
+				str+="<br/><br/>Click on the trash can icon to remove the image";
+				str+="</td></tr>"
+				}
+			else if (type == "Box") {
+				str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:80px;font-size:x-small' id='annText2'></textarea></td></tr>";
+				str+="<tr><td colspan='2'><p><hr/></p>";
+				str+="Drag corner dots to resize box. Drag corner dot with SHIFT key pressed to move the whole box.";
+				str+="<br/><br/>Click on the trash can icon to remove box";
+				str+="</td></tr>"
+				}
+			else if (type == "Marker") {
+				str+="<tr><td>Label&nbsp;</td><td><input type='text' size='15' style='font-size:x-small' id='annText'/></td></tr>";
+				str+="<tr><td>Icon &nbsp;</td><td><input type='text' size='15' style='font-size:x-small' id='annUrl'/></td></tr>";
+				str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:80px;font-size:x-small' id='annText2'></textarea></td></tr>";
+				str+="<tr><td colspan='2'><p><hr/></p>";
+				str+="Type \"pin\" in the the <i>Icon box</i> to show a pushpin icon, type \"none\" to show no icon, or type in a url to an image file. There are a number of icons <a href='http://www.viseyes.org/shiva/icons' target='_blank'> here</a>.";
+				str+="<br/><br/>Text from the <i>Label box </i>appears to the right of the icon. When marker clicked, a popup will display any text entered in the <i>Popup text box</i>. You can use HTML formatting.";
+				str+="<br/><br/>Click on the trash can icon to remove the marker";
+				str+="</td></tr>"
+				}
+			if (_this.curSeg != -1)
+				str+="<img src='img/trashdot.gif' style='position:absolute;left:80px;top:390px' title='Remove segment' id='annDelete'>";		
+			}
+		else{
+			str+="<div style='text-align:center'>"
+			str+="&nbsp;&nbsp;&nbsp;<select id='shelfMode' style='font-size:x-small'>";
+			str+="<option>Maps</option>";		str+="<option>Tours</option>";
+			str+="</select>&nbsp;</div>";
+			str+="<div style='position:absolute;text-align:center;top:595px;width:200px;color:#fff;text-shadow:1px 1px #bbb'><br/>The University of Virginia<br/>10/15/12</div>";
+			}
+		$("#shelfDiv").html(str+"</table></div>");
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DRAWING ON GOOGLE EARTH
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function SHIVA_EarthDraw()												// CONSTRUCTOR
+{
+	this.segs=new Array();													// Holds drawn segs
+	this.curSeg=-1;															// Current seg for editing
+	this.curRandom=123;														// Current random #
+	this.dragInfo={ clicked:false, dragged:false };							// Drag information
+	var o={ type:"Image", url:"http://www.viseyes.org/shiva/map.jpg", vis:100, rot:0, lats:[36,37], lons:[-80,-80.5] };
+//	this.segs.push(o);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// SCREENS 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+SHIVA_EarthDraw.prototype.DrawControlBar=function(mode)					// DRAW MAP CONTROL BAR
+{
+	var str="<p>"
+	var _this=shivaLib.dr;													// Point to draw obj
+	this.inAnnotate=!this.inAnnotate;										// Toggle mode
+	if (mode != undefined) 													// If setting absolutely
+		this.inAnnotate=mode;												// Set mode
+	else																	// Default	
+		shivaLib.Sound("click");											// Click
+	if (this.inAnnotate) {													// If annotation
+		var s,col="#0000ff",ecol="#ffff00",ewid=2,vis=100,url="",text="",text2="",type="Draw",rot=0;
+		if ($("#annType").val())											// If set
+			type=$("#annType").val();										// Use that settinh
+		if (this.curSeg != -1) {											// If editing
+			s=this.segs[this.curSeg];										// Point at seg
+			col=s.col;		ecol=s.ecol;	vis=s.vis;						// Get atts 
+			ewid=s.ewid;	type=s.type;	url=s.url;						// from
+			text=s.text;	text2=s.text2;	rot=s.rot;						// seg
+			}
+		str+="&nbsp;&nbsp;<img src='img/globe.gif' style='vertical-align:bottom' title='Back to map' onclick='shivaLib.dr.DrawControlBar()'>";		
+		str+="&nbsp;&nbsp;&nbsp;<select id='annType' style='font-size:x-small'>";
+		str+="<option>Draw</option>";		str+="<option>Line</option>";
+		str+="<option>Shape</option>";		str+="<option>Box</option>";
+		str+="<option>Marker</option>";		str+="<option>Image</option>";	
+		str+="</select>&nbsp;&nbsp;"; 
+		if (type != "Draw") {												// If drawing/editng
+			str+="Color&nbsp; <input type='text' size='1' style='font-size:x-small' id='annCol'/>&nbsp;&nbsp;&nbsp;";
+			str+="Edge&nbsp; <input type='text' size='1' style='font-size:x-small;text-align:center;border:1px solid #999' id='annEwid'/>";
+			str+="<input type='text' size='1' style='font-size:x-small' id='annEcol'/>&nbsp;&nbsp;&nbsp;";
+			str+="Visibility&nbsp; <input type='range' size='12' style='width:80px;height:14px;vertical-align:bottom'; id='annVis'/>&nbsp;&nbsp;&nbsp;";
+			}
+		$("#mapInfoDiv").html(str+"</p>")									// Add to DOM
+		$("#annType").val(type);											// Set type
+		$("#annCol").css("background-color",col);							// Set back to col
+		$("#annCol").css("border","1px solid "+col);						// Set border
+		if (!col)		$("#annCol").val("  no").css("color","#666");		// Add no
+		else			$("#annCol").val(col).css("color",col);				// Hide text
+		$("#annEwid").val(ewid);											// Set wid
+		$("#annEcol").css("background-color",ecol);							// Set back to col
+		$("#annEcol").css("border","1px solid "+ecol);						// Set border	
+		if (!ecol)		$("#annEcol").val("  no").css("color","#666");		// Add no
+		else			$("#annEcol").val(ecol).css("color",ecol);			// Hide text
+		$("#annVis").val(vis);												// Show cur vis
+		DrawShelf("draw");													// Draw shelf
+		$("#annText").val(text);											// Set text
+		$("#annText2").val(text2);											// Set text2
+		$("#annUrl").val(url);												// Set url
+		$("#annRot").val(rot);												// Show cur rot
+		}
+	else{
+		this.curSeg=-1;														// Not editing
+		this.DrawMap();
+		str+="&nbsp;&nbsp;<img src='img/annotate.gif' style='vertical-align:bottom' title='Annotate' onclick='shivaLib.dr.DrawControlBar()'>";		
+		str+="<label>&nbsp; Location: </label ><input size='20' id='address' style='font-size:x-small' type='text'/>";
+		str+="&nbsp;&nbsp; <input type='checkbox' checked='checked'  style='vertical-align:middle' id='wireframes'>Show boxes?";		
+		$("#mapInfoDiv").html(str+"</p>")									// Add to DOM
+		DrawShelf();														// Draw shelf
+		}
+	
+	$("#annType").change(function(e){ 									// SET TYPE
+		_this.curSeg=-1;													// Deselect
+		_this.DrawControlBar(true);											// Draw control bar
+		if (_this.AddNewSeg($("#annType").val())) {							// Add new seg
+			shivaLib.Sound("ding");											// Ding
+			_this.curSeg=_this.segs.length-1;								// Highlight current one																				
+			}
+		_this.DrawMap();													// Redraw map
+		DrawShelf("draw");													// Draw shelf
+		});
+
+	$("#annCol").click(function(e) { 									// SET COLOR
+		_this.Do();															// Set undo	
+		_this.ColorPicker("Col",e.pageX,654);								// Pick col
+		});
+		
+	$("#annEwid").change(function(e) {									// SET EDGE WIDTH 
+		if (_this.curSeg != -1)	{											// If editing
+			_this.Do();														// Set undo	
+			_this.segs[_this.curSeg].ewid=$("#annEwid").val();				// Set ewid
+			_this.StyleSeg(_this.curSeg);									// Set style
+			}
+		});
+		
+	$("#annEcol").click(function(e) { 									// SET EDGE COLOR
+		_this.Do();															// Set undo	
+		_this.ColorPicker("Ecol",e.pageX,654);								// Pick ecol
+		});
+
+	$("#annVis").change(function(e){ 									// SET VISIBILITY
+		if (_this.curSeg != -1) {											// If editing
+			_this.segs[_this.curSeg].vis=$("#annVis").val();				// Set vis
+			_this.StyleSeg(_this.curSeg);									// Set style
+			}
+		});
+
+	$("#annRot").change(function(e){ 									// SET ROTATION
+		if (_this.curSeg != -1) {											// If editing
+			_this.segs[_this.curSeg].rot=$("#annRot").val();				// Set rot
+			_this.StyleSeg(_this.curSeg);									// Set style
+			}
+		});
+
+	$("#annDelete").click(function(e){ 									// DELETE SEG
+		_this.Do();															// Set undo	
+		_this.RemoveSeg(_this.curSeg);										// Remove from system
+		shivaLib.Sound("delete");											// Delete
+		$("#annType").val("Draw");											// Back to draw
+		_this.curSeg=-1;													// Not editing																					
+ 		_this.DrawMap();													// Redraw map
+		DrawShelf("draw");													// Redraw shelf
+		_this.DrawControlBar(true);											// Draw control bar
+		});
+
+	$("#annText").change(function(e){ 									// SET TEXT
+		if (_this.curSeg != -1)	{											// If editing
+			_this.Do();														// Set undo	
+			_this.segs[_this.curSeg].text=$("#annText").val();				// Set text
+			_this.StyleSeg(_this.curSeg);									// Set style
+			}
+		_this.DrawMap();													// Redraw map
+		});
+
+	$("#annText2").change(function(e){ 									// SET TEXT2
+		if (_this.curSeg != -1)	{											// If editing
+			_this.Do();														// Set undo	
+			_this.segs[_this.curSeg].text2=$("#annText2").val();			// Set text2
+			_this.StyleSeg(_this.curSeg);									// Set style
+			}
+		_this.DrawMap();													// Redraw map
+		});
+
+	$("#annUrl").change(function(e){ 									// SET URL
+		if (_this.curSeg != -1)	{											// If editing
+			_this.Do();														// Set undo	
+			_this.segs[_this.curSeg].url=$("#annUrl").val();				// Set url
+			_this.StyleSeg(_this.curSeg);									// Set style
+			}
+		_this.DrawMap();													// Redraw map
+		});
+
+}
+
+SHIVA_EarthDraw.prototype.AddNewSeg=function(type)							// ADD NEW SEGMENT
+{
+	var o=new Object();
+	o.type=type;																// Set type
+	o.lats=new Array();		o.lons=new Array();									// Add coord arrays
+	o.vis=$("#annVis").val()-0;													// Set vis
+	o.col=$("#annCol").val();													// Set col
+	o.ecol=$("#annEcol").val();													// Set ecol
+	o.ewid=$("#annEwid").val()-0;												// Set ewid
+	var ge=shivaLib.map;														// Local copy of earth
+	var lookAt=ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);		// Get pos
+	var bounds=ge.getView().getViewportGlobeBounds();							// Get bounds
+	var w=(bounds.getEast()-bounds.getWest())/40;								// Width	
+	
+	if (type == "Marker") {														// A marker
+		o.text="New Marker";													// Set text
+		o.lats.push(lookAt.getLatitude());										// Add center lat
+		o.lons.push(lookAt.getLongitude());										// Add lon
+		}
+	else if ((type == "Box") || (type == "Image")) {							// Box/Image
+		o.lats.push(lookAt.getLatitude()-w);									// Add lat
+		o.lons.push(lookAt.getLongitude()+w);									// Add lon
+		o.lats.push(lookAt.getLatitude()+w);									// Add lat
+		o.lons.push(lookAt.getLongitude()-w);									// Add lon
+		o.rot=0;																// Set url
+		if (type == "Image") 													// If image
+			o.url=$("#annUrl").val();											// Set url
+		}
+	else if ((type == "Shape") || (type == "Line")) {							// Shape/Line
+		o.lats.push(lookAt.getLatitude());										// Add lat
+		o.lons.push(lookAt.getLongitude()+w);									// Add lon
+		if (type == "Shape") {													// A shape
+			o.lats.push(lookAt.getLatitude()+(w/2));							// Add lat
+			o.lons.push(lookAt.getLongitude());									// Add lon
+			}
+		o.lats.push(lookAt.getLatitude());										// Add lat
+		o.lons.push(lookAt.getLongitude()-w);									// Add lon
+		}
+	else																		// Unknown type
+		return false;															// Quit
+	this.Do();																	// Set undo	
+	this.segs.push(o);															// Add seg
+	this.AddSegsToEarth(this.segs.length-1);									// Add to EDOM
+	return true;
+}
+
+SHIVA_EarthDraw.prototype.ColorPicker=function(which, x, y)					// COLOR PICKER
+{	
+	if (($("#edcpCol").length || $("#edcpEcol").length))						// If any bars up
+		return																	// Quit
+	var str="<img src='img/colorbar.png' id='edcp"+which+"' style='position:absolute;top:"+y+"px;left:"+(x-100)+"px'/>"
+	$("body").append(str);														// Add to DOM
+     $("#edcp"+which+"").click(function(e) {									// Click handler
+	    var cols=["ffffff","999999","666666","333333","000000","ff0000",		// Color list
+	    		  "00ff00","0000ff","00ffff","ff00ff","ffff00","f59d00",
+	    		  ""];
+	  	var which=e.target.id.substr(4); 										// Get which var
+	    var col=cols[Math.floor((e.pageX-this.offsetLeft)/15)];					// Set color
+		if (col) col="#"+col;													// Add #	
+		$("#ann"+which).css("background-color",col);							// Set interior
+		$("#ann"+which).css("border","1px solid "+col);							// Border
+		if (!col)		$("#ann"+which).val("  no").css("color","#666");		// Add no
+		else			$("#ann"+which).val(col).css("color",col);				// Hide text
+		if (shivaLib.dr.curSeg != -1) {											// If editing
+			shivaLib.dr.segs[shivaLib.dr.curSeg][which.toLowerCase()]=col;		// Set var	
+			shivaLib.dr.StyleSeg(shivaLib.dr.curSeg);							// Set style
+	 		}
+	 	$("#"+e.target.id).remove();											// Remove bar
+ 		});
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// MAP 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+SHIVA_EarthDraw.prototype.DrawMap=function()								// DRAW MAP
+{		
+  	this.DrawControlDots((this.curSeg != -1));									// Add control dots	if editing
+}
+
+SHIVA_EarthDraw.prototype.AddSegsToEarth=function(num)						// ADD SEGMENTS TO EDOM
+{	
+	var i,j,s,point,coords,polygon,seg;
+	var start=0,end=this.segs.length;											// Assume whole list
+	if (num != undefined)														// If adding
+		start=num,end=(num+1);													// Narrow range to add
+	var ge=shivaLib.map;														// Point to earth												
+	for (i=start;i<end;++i) {													// For each seg
+		s=this.segs[i];															// Point at seg
+		s.id=""+Math.floor(Math.random()*99999999);								// Make random #
+		if (s.type != "Image") {												// Not for images
+			seg=ge.createPlacemark(s.id);										// Create holder
+			seg.setStyleSelector(ge.createStyle(''));							// Create style
+			}
+		if ((s.type == "Shape") || (s.type == "Box")) {							// If a polygon or box
+			polygon=ge.createPolygon('');										// Add it
+			coords=ge.createLinearRing('');										// Holds coords
+			seg.setGeometry(polygon);											// Set coords in seg
+			polygon.setOuterBoundary(coords)									// Add coords
+			}
+		else if (s.type == "Line") {											// If a line
+			coords=ge.createLineString('');										// Holds coords
+			seg.setGeometry(coords);											// Set coords in seg
+			}
+		else if (s.type == "Marker") {											// If a marker
+			point=ge.createPoint('');											// Create point
+			point.setLatitude(s.lats[0]);										// Set lat
+			point.setLongitude(s.lons[0]);										// Set lon
+			seg.setGeometry(point);												// Set point in seg
+			}
+		if ((s.type == "Line") || (s.type == "Shape")) { 						// Has geometry
+			seg.getStyleSelector().getLineStyle();								// Add a line style obj
+			for (j=0;j<s.lats.length;++j)										// For each point
+				coords.getCoordinates().pushLatLngAlt(s.lats[j],s.lons[j],0);	// Add point
+			}
+		else if (s.type == "Box") {												// If a box
+			coords.getCoordinates().pushLatLngAlt(s.lats[0],s.lons[0],0);		// Top-left corner
+			coords.getCoordinates().pushLatLngAlt(s.lats[0],s.lons[1],0);		// TR
+			coords.getCoordinates().pushLatLngAlt(s.lats[1],s.lons[1],0);		// BR
+			coords.getCoordinates().pushLatLngAlt(s.lats[1],s.lons[0],0);		// BR
+			}
+		else if (s.type == "Image") {											// If an image
+			seg=ge.createGroundOverlay(s.id);									// Create holder
+			var latLonBox=ge.createLatLonBox('');								// Create box
+			latLonBox.setBox(s.lats[0],s.lats[1],s.lons[0],s.lons[1],0);		// Set coords
+			seg.setLatLonBox(latLonBox);										// Set geometry
+			}
+		ge.getFeatures().appendChild(seg);										// Add seg to EDOM
+		this.StyleSeg(i);														// Style it
+		}
+}
+
+SHIVA_EarthDraw.prototype.StyleSeg=function(num)							// SET SEGMENT STYLING
+{	
+	var r,g,b,a;
+	var ge=shivaLib.map;														// Local copy of earth
+	var s=this.segs[num];														// Point at seg
+	var seg=ge.getElementById(s.id);											// Get object
+	if (s.type != "Image") {													// If not an image
+		var lineStyle=seg.getStyleSelector().getLineStyle();					// Get line style
+		var polyStyle=seg.getStyleSelector().getPolyStyle();					// Get poly style
+		}
+	a=Math.floor(s.vis*2.555).toString(16);										// Get alpha
+	if (a.length < 2)	a="0"+a;												// Pad it			
+	if (lineStyle) {															// If it has one
+		if (s.ecol) {															// If exists	
+			r=s.ecol.substr(1,2);												// Get red
+			g=s.ecol.substr(3,2);												// Get green
+			b=s.ecol.substr(5,2);												// Get blue
+			lineStyle.getColor().set(a+b+g+r);  								// Set color in aabbggrr format
+			}
+		if (s.ewid)																// If exists
+			lineStyle.setWidth(Number(s.ewid));									// Set width	
+		}
+	if (polyStyle) {															// If it has one
+		if (s.col) {															// If exists	
+			r=s.col.substr(1,2);												// Get red
+			g=s.col.substr(3,2);												// Get green
+			b=s.col.substr(5,2);												// Get blue
+			polyStyle.getColor().set(a+b+g+r);  								// Set color in aabbggrr format
+			}
+		polyStyle.setOutline(s.ecol != "")										// Set outline
+		}
+	if (s.type == "Marker") {													// If a marker
+		var url=s.url;															// Point at URL
+		if (!url) 																// No url set
+			url="http://www.viseyes.org/mapscholar/img/dotmarker.png";			// Use dot marker
+		else if (url == "none") 												// If none
+			url="http://www.viseyes.org/mapscholar/img/nomarker.png";			// Use invisible marker
+		var style=ge.createStyle('');											// Create style
+		var icon=ge.createIcon('');												// Create icon
+		icon.setHref(url);														// Set url										
+		if (url == "pin") 														// If pin
+			style.getIconStyle().setIcon(null);									// Null icon style
+		else																	// A cutom style
+			style.getIconStyle().setIcon(icon);									// Set icon style
+		seg.setStyleSelector(style);											// Set icon
+		}
+	else if (s.type == "Image") {												// If an Image
+		var icon=ge.createIcon('');												// Create icon
+		if (s.url) {															// If set
+			icon.setHref(s.url);												// Set url
+			seg.setIcon(icon);													// Attach to seg
+			}
+		seg.setOpacity(s.vis/100);												// Set opacity
+		var latLonBox=seg.getLatLonBox();										// Get coords	
+		var a=s.rot;															// Get 0 -> 360 rot
+		if (a > 180) a=-(360-a);												// Convert -180 -> +180
+		latLonBox.setRotation(Number(a));										// Set rotation
+		}
+	if (s.text)																	// If exists
+		seg.setName(s.text);													// Set label
+	if (s.text2)																// If exists
+		seg.setDescription(s.text2);											// Set ballon contents
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// EDITING 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+SHIVA_EarthDraw.prototype.DrawControlDots=function(mode) 					// ADD COORD EDITING DOTS			
+{
+	var i,j,a,b,o,n,seg;
+	var ge=shivaLib.map;														// Local copy of earth
+	if (typeof(ge) != "object")													// If not initted yet
+		return;																	// Quit
+	while (1) {																	// Loop
+		seg=ge.getFeatures().getChildNodes();									// Get seg									
+		n=seg.getLength();														// Get length
+		for (i=0;i<n;++i) {														// For each child
+			if (seg.item(i).getId().indexOf("cd-") != -1) {						// If a control dot
+				ge.getFeatures().removeChild(seg.item(i));						// Remove dot	
+				seg.item(i).release();											// Release it
+				break;															// Start from the top
+				}
+			}	
+		if (i == n)																// If not found
+			break; 																// Quit looking altogether
+		}
+	if (mode == false)															// If deleting
+		return;																	// Turn them off
+	if (this.curSeg == -1)														// Nothing selected
+		return;																	// Quit
+	var s=this.segs[this.curSeg];												// Point at seg
+	if (s.type == "Marker")														// Not needed for markers
+		return;																	// Quit
+	this.curRandom=""+Math.floor((Math.random()*999)+1);						// Make random # 1-999
+	n=3-this.curRandom.length;													// Get length
+	for (i=0;i<n;++i)															// For each missing digit
+		this.curRandom="0"+this.curRandom;										// Pad
+	if (!s.lons.length)															// If no coords
+		return;																	// Quit
+	this.AddCoordControlDot(s.lats[0],s.lons[0],0,.5);							// Add 1st dot								
+	for (i=1;i<s.lons.length;++i) {												// For all other dots
+		j=i-1;																	// Last dot index
+		this.AddCoordControlDot(s.lats[i],s.lons[i],i,.5);						// Add dot
+		a=((s.lats[i]-s.lats[j])/2)+s.lats[j];									// Middle lat
+		b=((s.lons[i]-s.lons[j])/2)+s.lons[j];									// Middle lon
+		if ((s.type == "Line") || (s.type == "Shape"))							// If line or shape
+			this.AddCoordControlDot(a,b,(i-.5),.25);							// Add middle dot	
+		}
+}
+
+SHIVA_EarthDraw.prototype.AddCoordControlDot=function(lat, lon, num, scale)	// ADD COORD CONTROL DOT
+{
+	var ge=shivaLib.map;														// Local copy of earth
+	var placemark=ge.createPlacemark(this.curRandom+"cd-"+num);					// Create named placemark
+	var point=ge.createPoint('');												// Create point
+	var icon=ge.createIcon('');													// Create icon
+	var styleMap=ge.createStyleMap('');											// Create style map
+	var normalStyle=ge.createStyle(''); 										// Create style
+	if (scale == .5)															// Coord icon
+		icon.setHref('http://www.viseyes.org/mapscholar/img/coordcir.png');		// Set icon url
+	else																		// Add icon
+		icon.setHref('http://www.viseyes.org/mapscholar/img/coordadd.png');		// Set icon url
+	normalStyle.getIconStyle().setIcon(icon); 									// Set icon		
+	normalStyle.getIconStyle().setScale(scale);									// Set icon scale
+	styleMap.setNormalStyle(normalStyle);										// Set normal style
+
+	var highlightStyle=ge.createStyle(''); 										// Create style
+	icon=ge.createIcon('');														// Create icon
+	if (scale == .5) {															// Coord icon
+		icon.setHref('http://www.viseyes.org/mapscholar/img/coordsel.png');		// Set icon url
+		highlightStyle.getIconStyle().setScale(1.5);							// Set icon scale
+		}
+	else{																		// Add icon
+		icon.setHref('http://www.viseyes.org/mapscholar/img/coordadd.png');		// Set icon url
+		highlightStyle.getIconStyle().setScale(.5);								// Set icon scale
+		}
+	highlightStyle.getIconStyle().setIcon(icon); 								// Set icon		
+	styleMap.setHighlightStyle(highlightStyle);									// Set highlight style
+	placemark.setStyleSelector(styleMap); 										// Add icon to placemark
+	point.setLatitude(lat);														// Set lat
+	point.setLongitude(lon);													// Set lon
+	placemark.setGeometry(point);												// Place icon
+	ge.getFeatures().appendChild(placemark);									// Add to DOM
+}	
+
+
+SHIVA_EarthDraw.prototype.AddPointToLine=function(num, lat, lon)			// ADD NEW POINT TO LINE
+{
+	var i;
+	var o=this.dragInfo.coords;													// Point at coords
+	var s=this.segs[this.curSeg];												// Point at seg
+	if (!lat) {																	// If not lat/lon defined
+		lat=(s.lats[num]+(s.lats[num+1]-s.lats[num])/2);						// Bisected lat
+		lon=(s.lons[num]+(s.lons[num+1]-s.lons[num])/2);						// Lon
+		s.lats.splice(num+1,0,lat);												// Add lat to array									
+		s.lons.splice(num+1,0,lon);												// Add lon							
+		}
+	o.pushLatLngAlt(lat,lon,0);													// Add a new coord
+	for (i=0;i<s.lats.length;++i)												// For each coord
+		o.setLatLngAlt(i,s.lats[i],s.lons[i],0);								// Set it
+	this.DrawControlDots(true);													// Redraw control dots
+}
+
+SHIVA_EarthDraw.prototype.RemovePointFromSeg=function(num)					// REMOVE POINT FROM SEGMENT
+{
+	var i;
+	var s=this.segs[this.curSeg];												// Point at seg
+	var o=this.dragInfo.coords;													// Point at coords
+	s.lats.splice(num,1);														// Remove lat to array									
+	s.lons.splice(num,1);														// Remove lon							
+	o.pop();																	// Remove kml dot
+	for (i=0;i<s.lats.length;++i)												// For each coord
+		o.setLatLngAlt(i,s.lats[i],s.lons[i],0);								// Set it
+	this.DrawControlDots(true);													// Redraw control dots
+}
+
+SHIVA_EarthDraw.prototype.RemoveSeg=function(num)							// REMOVE SEGMENT
+{
+	var ge=shivaLib.map;														// Point at earth
+	var o=ge.getElementById(this.segs[num].id);									// Find seg
+	ge.getFeatures().removeChild(o);											// Remove line	
+	this.segs.splice(num,1);													// Remove from segs
+}
+
+SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
+{	
+	var _this=shivaLib.dr;														// Point to draw obj
+	var ge=shivaLib.map;														// Point at earth
+
+	google.earth.addEventListener(ge.getGlobe(),"mousedown", 				// ON MOUSE DOWN
+		function(e) {
+			var type="";
+			if (!_this.inAnnotate)												// If not annotating
+		    	return;															// Quit
+			var id=e.getTarget().getId();										// Find id
+			if (typeof(e.getTarget().getGeometry) == "function")				// If has geometry
+				type=e.getTarget().getGeometry().getType();						// Get type from geometry
+		  	else																
+		  		type=e.getTarget().getType();									// Get from seg
+		  	trace(type)
+		  	if (type == "KmlPoint") { 											// If point
+				var	num=Math.floor(e.getTarget().getId().substr(6));			// Get index into line
+				if (id.substr(3,3) != "cd-") {									// If not a control dot, must be a marker
+					for (i=0;i<_this.segs.length;++i) {							// Look through list
+						if (_this.segs[i].id == id) {							// If id matches
+							_this.curSeg=i;										// This is curseg
+							num=0;												// Move 1st point
+							break;												// Quit looking
+							}
+						}
+					}
+				var s=shivaLib.dr.segs[shivaLib.dr.curSeg];						// Point at seg
+		    	_this.dragInfo.clicked=true;									// Been clicked on
+		    	_this.dragInfo.point=e.getTarget().getGeometry();				// Point coords
+		    	var o=shivaLib.map.getFeatures().getChildNodes();				// Get seg									
+				var n=o.getLength();											// Get length
+				for (var i=0;i<n;++i) 											// For each child
+					if (o.item(i).getId().indexOf(s.id) != -1) {				// If a control dot
+						_this.dragInfo.seg=o.item(i);							// Point at seg
+						DrawShelf("draw");										// Draw shelf
+						_this.DrawControlBar(true);								// Update control bar
+						break;													// Quit looking
+						}
+		    	if ((s.type == "Shape") || (s.type == "Box"))					// A polygon or box
+		    		_this.dragInfo.coords=_this.dragInfo.seg.getGeometry().getOuterBoundary().getCoordinates();	
+				else
+					_this.dragInfo.coords=_this.dragInfo.seg.getGeometry().getCoordinates()
+				if (id.indexOf(".5") != -1) { 									// A mid point
+						shivaLib.Sound("ding");									// Ding
+						_this.Do();												// Set undo	
+	 					shivaLib.dr.AddPointToLine(num,0,0);					// Bisect line
+ 		 				}
+	     		else if (id.substr(3,3) == "cd-")	{							// If a control dot
+			    	if (e.getButton() && ((s.type == "Shape") || (s.type == "Line"))) {	 // Delete point from line/shape									// Right-clicked
+						if ((s.type == "Shape") && (s.lats.length < 4)) 		// Got to have min of 3
+							return;												// Quit
+						else if (s.lats.length < 3) 							// Got to have min of 2
+							return;												// Quit
+						_this.Do();												// Set undo	
+						shivaLib.Sound("delete");								// Delete
+						_this.RemovePointFromSeg(num);							// Remove it
+			    		}
+			    	else														// Line or polygon
+						shivaLib.Sound("click");								// Click
+					}
+				}
+		    else if (id || ((_this.segs[0]) && (_this.segs[0].type == "Image"))) { // If an id'd seg
+				_this.curSeg=-1;												// Not editing
+				for (i=0;i<_this.segs.length;++i) {								// Look through list
+					if (_this.segs[i].id == id) {								// If id matches
+						_this.curSeg=i;											// This is curseg
+						break;													// Quit looking
+						}
+					}
+				if ((_this.curSeg == -1) && (_this.segs[0]) && (_this.segs[0].type == "Image"))
+					_this.curSeg=0;
+				_this.DrawMap();												// Refresh map
+				DrawShelf("draw");												// Show options
+				_this.DrawControlBar(true);										// Update control bar
+				}
+			});
+
+	google.earth.addEventListener(ge.getGlobe(),'mousemove', 				// ON MOUSE MOVE
+		function(e) {
+			var i,o,lat,lon,num;
+			if (_this.dragInfo.clicked) {										// If clicked											
+	      		e.preventDefault();												// Stop popagation
+	     		_this.dragInfo.dragged=true;									// Drag flag
+				num=Number(e.getTarget().getId().substr(6));					// Get index into line
+	    		_this.dragInfo.point=e.getTarget().getGeometry();				// Point coords
+				lat=e.getLatitude();											// Get lat
+				lon=e.getLongitude();											// Get lon
+	      		_this.dragInfo.point.setLatLng(lat,lon);						// Set new lat/lon
+				_this.Do();														// Set undo	
+				var s=_this.segs[_this.curSeg];									// Point at seg
+				if (e.getShiftKey()) {											// If moving whole seg
+					var dlat=s.lats[num]-lat;									// Delta lat
+					var dlon=s.lons[num]-lon;									// Delta lon
+					var n=s.lats.length;										// Get num pts
+					if (s.type == "Box") {										// Box
+						s.lats[0]-=dlat;		s.lons[0]-=dlon;				// Set pos
+						s.lats[1]-=dlat;		s.lons[1]-=dlon;				// Set pos
+						_this.dragInfo.coords.setLatLngAlt(0,s.lats[0],s.lons[0],0);// Set coord
+						_this.dragInfo.coords.setLatLngAlt(1,s.lats[0],s.lons[1],0);// Set coord
+						_this.dragInfo.coords.setLatLngAlt(2,s.lats[1],s.lons[1],0);// Set coord
+						_this.dragInfo.coords.setLatLngAlt(3,s.lats[1],s.lons[0],0);// Set coord
+						}
+					else if (s.type == "Image") {								// Image
+						s.lats[0]-=dlat;		s.lons[0]-=dlon;				// Set pos
+						s.lats[1]-=dlat;		s.lons[1]-=dlon;				// Set pos
+						var latLonBox=_this.dragInfo.seg.getLatLonBox();		// Get coords	
+						var a=s.rot;											// Get 0 -> 360 rot
+						if (a > 180) a=-(360-a);								// Convert -180 -> +180
+						latLonBox.setBox(s.lats[0],s.lats[1],s.lons[0],s.lons[1],Number(a));	// Set coords						
+						}
+					else{														// Line/shape
+						for (i=0;i<n;++i) {										// For each point
+							s.lats[i]-=dlat;									// Set lat
+							s.lons[i]-=dlon;									// SGet lon
+							_this.dragInfo.coords.setLatLngAlt(i,s.lats[i],s.lons[i],0); // Set point in line
+							}
+						}
+					}
+				else{
+					if (s.type == "Box") {										// Box
+						if (num == 0) {											// SE corner
+							_this.dragInfo.coords.setLatLngAlt(0,lat,lon,0);		// Set coord
+							_this.dragInfo.coords.setLatLngAlt(1,lat,s.lons[1],0);	// Set coord
+							_this.dragInfo.coords.setLatLngAlt(3,s.lats[1],lon,0);	// Set coord
+							}
+						else{													// NW corner
+							_this.dragInfo.coords.setLatLngAlt(2,lat,lon,0);		// Set coord
+							_this.dragInfo.coords.setLatLngAlt(1,s.lats[0],lon,0);	// Set coord
+							_this.dragInfo.coords.setLatLngAlt(3,lat,s.lons[0],0);	// Set coord
+							}
+						}
+					else if (s.type == "Image") {								// Image
+						s.lats[num]=lat;										// Set lat
+						s.lons[num]=lon;										// Get lon
+						var latLonBox=_this.dragInfo.seg.getLatLonBox();		// Get coords	
+						var a=s.rot;											// Get 0 -> 360 rot
+						if (a > 180) a=-(360-a);								// Convert -180 -> +180
+						latLonBox.setBox(s.lats[0],s.lats[1],s.lons[0],s.lons[1],Number(a));	// Set coords						
+						}
+					else
+						_this.dragInfo.coords.setLatLngAlt(num,lat,lon,0);		// Set coord
+					s.lats[num]=lat;											// Set lat
+					s.lons[num]=lon;											// Get lon
+					}
+			   }
+			});
+
+  	google.earth.addEventListener(ge.getGlobe(),'mouseup', 					// ON MOUSE UP
+  		function(e) {
+			if (_this.dragInfo.clicked) {										// If dragging
+  				if (_this.dragInfo.dragged) 	e.preventDefault();				// Stop propagation
+		    	_this.dragInfo.clicked=_this.dragInfo.dragged=false;			// Disable drag obj
+				_this.DrawControlDots(true);									// Redraw control dots
+				 }
+	 		});
+}
+
+SHIVA_EarthDraw.prototype.Do=function()										// SAVE UNDO
+{
+}
+
+function test()
+{
+	var _this=shivaLib.dr;
+	var ge=shivaLib.map;
+	_this.AddSegsToEarth();
+	shivaLib.dr.DrawMap();
+/*	
+	var groundOverlay = ge.createGroundOverlay('');
+        var icon = ge.createIcon('');
+        icon.setHref("http://www.google.com/logos/earthday08.gif");
+        groundOverlay.setIcon(icon);
+        var latLonBox = ge.createLatLonBox('');
+        latLonBox.setBox(39.80, 38.75, -76.77, -77.85, 0);
+        groundOverlay.setLatLonBox(latLonBox);
+        ge.getFeatures().appendChild(groundOverlay);    
+
+         google.earth.addEventListener(ge.getGlobe(), 'mousedown', function(e) { 
+                    e.preventDefault();
+                    var obj = e.getTarget();
+                     console.log("hello"); 
+                    });
+ */                  
+}
+	
+	
+	
+</script>
+</body>
+</html>

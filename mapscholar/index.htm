@@ -9,7 +9,7 @@
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 	<script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"earth","version":"1"}]}'></script>
  	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
- 	<script type="text/javascript" src="../shiva/SHIVA_Show.js"></script>
+ 	<script type="text/javascript" src="http://www.viseyes.org/shiva/SHIVA_Show.js"></script>
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small}
 		p.pb { text-align:right; color:#fff; }
@@ -122,7 +122,7 @@ geocoder=new google.maps.Geocoder();
 			else if ((type == "Line") || (type == "Shape")) {
 				str+="<tr><td>Popup text&nbsp;</td><td><textarea rows='1' style='width:80px;font-size:x-small' id='annText2'></textarea></td></tr>";
 				str+="<tr><td colspan='2'><p><hr/></p>";
-				str+="<Drag a point's icon to move that point. Drag icon with SHIFT key pressed to move the whole segment.";
+				str+="<Drag a point's icon to move that point. Drag the segment itself to move the whole segment.";
 				str+="<br/><br/>Click on a (+) icon in the segment to icon to insert a new point there. Dragging the (+) will also add one. Right-click point icon to remove point.";
 				str+="<br/><br/>Click on the trash can icon to remove the complete segment.";
 				str+="</td></tr>"
@@ -132,14 +132,14 @@ geocoder=new google.maps.Geocoder();
 				str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:95px;font-size:x-small' id='annText2'></textarea></td></tr>";
 				str+="<tr><td>Rotation&nbsp;</td><td><input type='range' max='360' style='width:100px;font-size:x-small' id='annRot'/></td></tr>";
 				str+="<tr><td colspan='2'><p><hr/></p>";
-				str+="Drag corner dots to resize box. Drag corner dot with SHIFT key pressed to move the image.";
+				str+="Drag corner dots to resize image. Drag center of box to move the whole box.";
 				str+="<br/><br/>Click on the trash can icon to remove the image";
 				str+="</td></tr>"
 				}
 			else if (type == "Box") {
 				str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:80px;font-size:x-small' id='annText2'></textarea></td></tr>";
 				str+="<tr><td colspan='2'><p><hr/></p>";
-				str+="Drag corner dots to resize box. Drag corner dot with SHIFT key pressed to move the whole box.";
+				str+="Drag corner dots to resize box. Drag center of box to move the whole box.";
 				str+="<br/><br/>Click on the trash can icon to remove box";
 				str+="</td></tr>"
 				}
@@ -200,8 +200,8 @@ SHIVA_EarthDraw.prototype.DrawControlBar=function(mode)					// DRAW MAP CONTROL 
 		if (this.curSeg != -1) {											// If editing
 			s=this.segs[this.curSeg];										// Point at seg
 			col=s.col;		ecol=s.ecol;	vis=s.vis;						// Get atts 
-			ewid=s.ewid;	type=s.type;	url=s.url;						// from
-			text=s.text;	text2=s.text2;	rot=s.rot;						// seg
+			ewid=s.ewid;	url=s.url;		rot=s.rot;						// from
+			text=s.text;	text2=s.text2;	type=s.type;					// seg
 			}
 		str+="&nbsp;&nbsp;<img src='img/globe.gif' style='vertical-align:bottom' title='Back to map' onclick='shivaLib.dr.DrawControlBar()'>";		
 		str+="&nbsp;&nbsp;&nbsp;<select id='annType' style='font-size:x-small'>";
@@ -216,7 +216,6 @@ SHIVA_EarthDraw.prototype.DrawControlBar=function(mode)					// DRAW MAP CONTROL 
 			str+="Visibility&nbsp; <input type='range' size='12' style='width:80px;height:14px;vertical-align:bottom'; id='annVis'/>&nbsp;&nbsp;&nbsp;";
 			}
 		$("#mapInfoDiv").html(str+"</p>")									// Add to DOM
-		$("#annType").val(type);											// Set type
 		$("#annCol").css("background-color",col);							// Set back to col
 		$("#annCol").css("border","1px solid "+col);						// Set border
 		if (!col)		$("#annCol").val("  no").css("color","#666");		// Add no
@@ -246,10 +245,11 @@ SHIVA_EarthDraw.prototype.DrawControlBar=function(mode)					// DRAW MAP CONTROL 
 	$("#annType").change(function(e){ 									// SET TYPE
 		_this.curSeg=-1;													// Deselect
 		_this.DrawControlBar(true);											// Draw control bar
-		if (_this.AddNewSeg($("#annType").val())) {							// Add new seg
+		if (_this.AddNewSeg(this.value)) {									// Add new seg
 			shivaLib.Sound("ding");											// Ding
 			_this.curSeg=_this.segs.length-1;								// Highlight current one																				
 			}
+		$("#annType").val("Draw");											// Reset control
 		_this.DrawMap();													// Redraw map
 		DrawShelf("draw");													// Draw shelf
 		});
@@ -593,7 +593,7 @@ SHIVA_EarthDraw.prototype.AddCoordControlDot=function(lat, lon, num, scale)	// A
 		}
 	else{																		// Add icon
 		icon.setHref('http://www.viseyes.org/mapscholar/img/coordadd.png');		// Set icon url
-		highlightStyle.getIconStyle().setScale(.5);								// Set icon scale
+		highlightStyle.getIconStyle().setScale(.75);								// Set icon scale
 		}
 	highlightStyle.getIconStyle().setIcon(icon); 								// Set icon		
 	styleMap.setHighlightStyle(highlightStyle);									// Set highlight style
@@ -650,7 +650,7 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 
 	google.earth.addEventListener(ge.getGlobe(),"mousedown", 				// ON MOUSE DOWN
 		function(e) {
-			var type="";
+			var s,i,n,o,num,type="";
 			if (!_this.inAnnotate)												// If not annotating
 		    	return;															// Quit
 			var id=e.getTarget().getId();										// Find id
@@ -658,9 +658,9 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 				type=e.getTarget().getGeometry().getType();						// Get type from geometry
 		  	else																
 		  		type=e.getTarget().getType();									// Get from seg
-		  	trace(type)
+			_this.dragInfo.lon=_this.dragInfo.lat=0;							// Rest lat/lon
 		  	if (type == "KmlPoint") { 											// If point
-				var	num=Math.floor(e.getTarget().getId().substr(6));			// Get index into line
+				num=Math.floor(e.getTarget().getId().substr(6));				// Get index into line
 				if (id.substr(3,3) != "cd-") {									// If not a control dot, must be a marker
 					for (i=0;i<_this.segs.length;++i) {							// Look through list
 						if (_this.segs[i].id == id) {							// If id matches
@@ -670,11 +670,11 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 							}
 						}
 					}
-				var s=shivaLib.dr.segs[shivaLib.dr.curSeg];						// Point at seg
+				s=shivaLib.dr.segs[shivaLib.dr.curSeg];							// Point at seg
 		    	_this.dragInfo.clicked=true;									// Been clicked on
 		    	_this.dragInfo.point=e.getTarget().getGeometry();				// Point coords
-		    	var o=shivaLib.map.getFeatures().getChildNodes();				// Get seg									
-				var n=o.getLength();											// Get length
+		    	o=shivaLib.map.getFeatures().getChildNodes();					// Get seg									
+				n=o.getLength();												// Get length
 				for (var i=0;i<n;++i) 											// For each child
 					if (o.item(i).getId().indexOf(s.id) != -1) {				// If a control dot
 						_this.dragInfo.seg=o.item(i);							// Point at seg
@@ -687,7 +687,6 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 				else
 					_this.dragInfo.coords=_this.dragInfo.seg.getGeometry().getCoordinates()
 				if (id.indexOf(".5") != -1) { 									// A mid point
-						shivaLib.Sound("ding");									// Ding
 						_this.Do();												// Set undo	
 	 					shivaLib.dr.AddPointToLine(num,0,0);					// Bisect line
  		 				}
@@ -701,23 +700,37 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 						shivaLib.Sound("delete");								// Delete
 						_this.RemovePointFromSeg(num);							// Remove it
 			    		}
-			    	else														// Line or polygon
-						shivaLib.Sound("click");								// Click
 					}
 				}
 		    else if (id || ((_this.segs[0]) && (_this.segs[0].type == "Image"))) { // If an id'd seg
+				var oseg=_this.curSeg;											// Save original seg
 				_this.curSeg=-1;												// Not editing
 				for (i=0;i<_this.segs.length;++i) {								// Look through list
 					if (_this.segs[i].id == id) {								// If id matches
 						_this.curSeg=i;											// This is curseg
+				    	s=_this.segs[i];										// Seg data
+						_this.dragInfo.seg=shivaLib.map.getElementById(_this.segs[_this.curSeg].id)
+				    	if ((s.type == "Shape") || (s.type == "Box"))			// A polygon or box
+		    				_this.dragInfo.coords=_this.dragInfo.seg.getGeometry().getOuterBoundary().getCoordinates();	
+						else
+							_this.dragInfo.coords=_this.dragInfo.seg.getGeometry().getCoordinates()
 						break;													// Quit looking
 						}
 					}
-				if ((_this.curSeg == -1) && (_this.segs[0]) && (_this.segs[0].type == "Image"))
+				if ((_this.curSeg == -1) && (_this.segs[0]) && (_this.segs[0].type == "Image")) {
 					_this.curSeg=0;
-				_this.DrawMap();												// Refresh map
-				DrawShelf("draw");												// Show options
-				_this.DrawControlBar(true);										// Update control bar
+					_this.dragInfo.seg=shivaLib.map.getElementById(_this.segs[_this.curSeg].id)
+					}
+				if (_this.curSeg != -1) {										// Got one
+			    	_this.dragInfo.clicked=true;								// Been clicked on
+					_this.dragInfo.lat=e.getLatitude();							// Save click lat
+					_this.dragInfo.lon=e.getLongitude();						// Save lon
+					}
+				if (oseg != _this.curSeg) {										// If changed
+					_this.DrawMap();											// Refresh map
+					DrawShelf("draw");											// Show options
+					_this.DrawControlBar(true);									// Update control bar
+					}
 				}
 			});
 
@@ -727,17 +740,12 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 			if (_this.dragInfo.clicked) {										// If clicked											
 	      		e.preventDefault();												// Stop popagation
 	     		_this.dragInfo.dragged=true;									// Drag flag
-				num=Number(e.getTarget().getId().substr(6));					// Get index into line
-	    		_this.dragInfo.point=e.getTarget().getGeometry();				// Point coords
+				var s=_this.segs[_this.curSeg];									// Point at seg
 				lat=e.getLatitude();											// Get lat
 				lon=e.getLongitude();											// Get lon
-	      		_this.dragInfo.point.setLatLng(lat,lon);						// Set new lat/lon
-				_this.Do();														// Set undo	
-				var s=_this.segs[_this.curSeg];									// Point at seg
-				if (e.getShiftKey()) {											// If moving whole seg
-					var dlat=s.lats[num]-lat;									// Delta lat
-					var dlon=s.lons[num]-lon;									// Delta lon
-					var n=s.lats.length;										// Get num pts
+				if (_this.dragInfo.lat) {										// If clicked on a seg	
+					var dlat=_this.dragInfo.lat-lat;							// Delta lat
+					var dlon=_this.dragInfo.lon-lon;							// Delta lon
 					if (s.type == "Box") {										// Box
 						s.lats[0]-=dlat;		s.lons[0]-=dlon;				// Set pos
 						s.lats[1]-=dlat;		s.lons[1]-=dlon;				// Set pos
@@ -755,40 +763,44 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 						latLonBox.setBox(s.lats[0],s.lats[1],s.lons[0],s.lons[1],Number(a));	// Set coords						
 						}
 					else{														// Line/shape
-						for (i=0;i<n;++i) {										// For each point
+						for (i=0;i<s.lats.length;++i) {							// For each point
 							s.lats[i]-=dlat;									// Set lat
-							s.lons[i]-=dlon;									// SGet lon
+							s.lons[i]-=dlon;									// Set lon
 							_this.dragInfo.coords.setLatLngAlt(i,s.lats[i],s.lons[i],0); // Set point in line
 							}
 						}
+					_this.dragInfo.lat=lat;										// Reset lat
+					_this.dragInfo.lon=lon;										// Lon
+					return;														// Quit
 					}
-				else{
-					if (s.type == "Box") {										// Box
-						if (num == 0) {											// SE corner
-							_this.dragInfo.coords.setLatLngAlt(0,lat,lon,0);		// Set coord
-							_this.dragInfo.coords.setLatLngAlt(1,lat,s.lons[1],0);	// Set coord
-							_this.dragInfo.coords.setLatLngAlt(3,s.lats[1],lon,0);	// Set coord
-							}
-						else{													// NW corner
-							_this.dragInfo.coords.setLatLngAlt(2,lat,lon,0);		// Set coord
-							_this.dragInfo.coords.setLatLngAlt(1,s.lats[0],lon,0);	// Set coord
-							_this.dragInfo.coords.setLatLngAlt(3,lat,s.lons[0],0);	// Set coord
-							}
+				num=Number(e.getTarget().getId().substr(6));					// Get index into line
+	    		_this.dragInfo.point=e.getTarget().getGeometry();				// Point coords
+	      		_this.dragInfo.point.setLatLng(lat,lon);						// Set new lat/lon
+				if (s.type == "Box") {											// Box
+					if (num == 0) {												// SE corner
+						_this.dragInfo.coords.setLatLngAlt(0,lat,lon,0);		// Set coord
+						_this.dragInfo.coords.setLatLngAlt(1,lat,s.lons[1],0);	// Set coord
+						_this.dragInfo.coords.setLatLngAlt(3,s.lats[1],lon,0);	// Set coord
 						}
-					else if (s.type == "Image") {								// Image
-						s.lats[num]=lat;										// Set lat
-						s.lons[num]=lon;										// Get lon
-						var latLonBox=_this.dragInfo.seg.getLatLonBox();		// Get coords	
-						var a=s.rot;											// Get 0 -> 360 rot
-						if (a > 180) a=-(360-a);								// Convert -180 -> +180
-						latLonBox.setBox(s.lats[0],s.lats[1],s.lons[0],s.lons[1],Number(a));	// Set coords						
+					else{														// NW corner
+						_this.dragInfo.coords.setLatLngAlt(2,lat,lon,0);		// Set coord
+						_this.dragInfo.coords.setLatLngAlt(1,s.lats[0],lon,0);	// Set coord
+						_this.dragInfo.coords.setLatLngAlt(3,lat,s.lons[0],0);	// Set coord
 						}
-					else
-						_this.dragInfo.coords.setLatLngAlt(num,lat,lon,0);		// Set coord
+					}
+				else if (s.type == "Image") {									// Image
 					s.lats[num]=lat;											// Set lat
 					s.lons[num]=lon;											// Get lon
+					var latLonBox=_this.dragInfo.seg.getLatLonBox();			// Get coords	
+					var a=s.rot;												// Get 0 -> 360 rot
+					if (a > 180) a=-(360-a);									// Convert -180 -> +180
+					latLonBox.setBox(s.lats[0],s.lats[1],s.lons[0],s.lons[1],Number(a));	// Set coords						
 					}
-			   }
+				else
+					_this.dragInfo.coords.setLatLngAlt(num,lat,lon,0);			// Set coord
+				s.lats[num]=lat;												// Set lat
+				s.lons[num]=lon;												// Get lon
+				}
 			});
 
   	google.earth.addEventListener(ge.getGlobe(),'mouseup', 					// ON MOUSE UP

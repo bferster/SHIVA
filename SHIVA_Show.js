@@ -99,10 +99,6 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
   			obj="google.maps.Map";											// Object to test for
         	lib="http://maps.googleapis.com/maps/api/js?key=AIzaSyDohush6W1WlGqOjKtncuzcbFlss6M12zM&sensor=false&callback=shivaJSLoaded"; 		// Lib to load
             break;
-		case "Earth": 														// Google Earth		
-  			obj="google.earth.createInstance";								// Object to test for
-        	lib="https://www.google.com/jsapi?autoload=\{\"modules\":\[\{\"name\":\"earth\",\"version\":\"1\"\}\]\}"; 	// Lib to load
-            break;
 		}
 	if (lib) {																// If a lib to load
 		var v=obj.split(".");												// Split by parts
@@ -551,7 +547,7 @@ SHIVA_Show.prototype.DrawEarth=function()
 	ge.getLayerRoot().enableLayerById(ge.LAYER_TERRAIN,true);			// Show terrain
 	
 	this.DrawEarthOverlays();											// Draw overlays
-	this.DrawLayerControlBox(items,ops.controlbox);						// Draw control box
+	this.DrawLayerControlBox(this.items,ops.controlbox);				// Draw control box
 	
 	function initCB(instance) {											// GOOGLE EARTH INIT
 		this.map=instance;												// Set ptr to earth

@@ -41,16 +41,12 @@
      $(document).ready(function() {
 		shivaLib=new SHIVA_Show("containerDiv");
 		shivaLib.dr=new SHIVA_EarthDraw();
-		google.setOnLoadCallback(shivaLib.DrawEarth);
-		shivaLib.LoadJSLib("Earth",shivaLib.DrawEarth)
- 		shivaLib.options={ 	shivaGroup:"Earth", height:"600", width:"800", 
+		shivaLib.options={ 	shivaGroup:"Earth", height:"600", width:"800", 
  							mapcenter:"29.36,-80.49", range:"1000000", tilt:"42", heading:"0",
  							panControl:"true", draggable:"true", scrollwheel:"true", overviewMapControl:"false",
  							terrainexag:"1", borders:"false", roads:"false"
  							};
- 		
- 		
- 		Draw();
+  		Draw();
 		DrawShelf();
 		shivaLib.dr.DrawControlBar(false);
 		if (window.addEventListener) 
@@ -91,7 +87,7 @@ geocoder=new google.maps.Geocoder();
  
 	function Draw()
 	{	
-		shivaLib.DrawEarth();
+		shivaLib.Draw(shivaLib.options);
 	}
 
 	function ShivaPostInit()

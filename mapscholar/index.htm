@@ -122,25 +122,28 @@ geocoder=new google.maps.Geocoder();
 				str+="</td></tr>"
 				}
 			else if (type == "Image") {
-				str+="<tr><td>Image URL&nbsp;</td><td><input type='text' size='20' style='font-size:x-small' id='annUrl'/></td></tr>";
-				str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:100px;font-size:x-small' id='annText2'></textarea></td></tr>";
-				str+="<tr><td>Rotation&nbsp;</td><td><input type='range' max='360' style='width:105px;font-size:x-small' id='annRot'/><input type='text' size='20' style='font-size:x-small' id='annRot2'/></td></tr>";
+				str+="<tr><td>Image URL&nbsp;</td><td><input type='text' style='width:100px;font-size:x-small' id='annUrl'/></td></tr>";
+				str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:98px;font-size:x-small' id='annText2'></textarea></td></tr>";
+				str+="<tr><td>Rotation&nbsp;</td><td><input type='range' max='360' style='width:100px;font-size:x-small' id='annRot'/>";
+				if ($.browser.webkit) 	
+					str+="<input type='text' style='width:100px;font-size:x-small' id='annRot2'/>";
+				str+="</td></tr>";
 				str+="<tr><td colspan='2'><p><hr/></p>";
 				str+="Drag corner dots to resize image. Drag center of box to move the whole box.";
 				str+="<br/><br/>Click on the trash can icon to remove the image";
 				str+="</td></tr>"
 				}
 			else if (type == "Box") {
-				str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:80px;font-size:x-small' id='annText2'></textarea></td></tr>";
+				str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:98px;font-size:x-small' id='annText2'></textarea></td></tr>";
 				str+="<tr><td colspan='2'><p><hr/></p>";
 				str+="Drag corner dots to resize box. Drag center of box to move the whole box.";
 				str+="<br/><br/>Click on the trash can icon to remove box";
 				str+="</td></tr>"
 				}
 			else if (type == "Marker") {
-				str+="<tr><td>Label&nbsp;</td><td><input type='text' size='15' style='font-size:x-small' id='annText'/></td></tr>";
-				str+="<tr><td>Icon &nbsp;</td><td><input type='text' size='15' style='font-size:x-small' id='annUrl'/></td></tr>";
-				str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:80px;font-size:x-small' id='annText2'></textarea></td></tr>";
+				str+="<tr><td>Label&nbsp;</td><td><input type='text' style='width:100px;font-size:x-small' id='annText'/></td></tr>";
+				str+="<tr><td>Icon &nbsp;</td><td><input type='text' style='width:100px;font-size:x-small' id='annUrl'/></td></tr>";
+				str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:98px;font-size:x-small' id='annText2'></textarea></td></tr>";
 				str+="<tr><td colspan='2'><p><hr/></p>";
 				str+="Type \"pin\" in the the <i>Icon box</i> to show a pushpin icon, type \"none\" to show no icon, or type in a url to an image file. There are a number of icons <a href='http://www.viseyes.org/shiva/icons' target='_blank'> here</a>.";
 				str+="<br/><br/>Text from the <i>Label box </i>appears to the right of the icon. When marker clicked, a popup will display any text entered in the <i>Popup text box</i>. You can use HTML formatting.";
@@ -170,7 +173,7 @@ function SHIVA_EarthDraw()												// CONSTRUCTOR
 	this.curSeg=-1;															// Current seg for editing
 	this.curRandom=123;														// Current random #
 	this.dragInfo={ clicked:false, dragged:false,lat:0, lon:0, seg:null, point:null, coords:null };		// Drag information
-	var o={ type:"Image", url:"http://www.viseyes.org/shiva/map.jpg", vis:100, rot:0, lats:[36,37], lons:[-80,-80.5] };
+	var o={ type:"Image", url:"http://www.viseyes.org/shiva/map.jpg", vis:100, rot:0, lats:[37,36], lons:[-80,-80.5] };
 //	this.segs.push(o);
 }
 

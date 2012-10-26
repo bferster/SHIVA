@@ -2704,12 +2704,14 @@ SHIVA_Show.prototype.ShowLightBox=function(width, top, title, content)
 	str="<div id='shivaLightBoxDiv' style='position:fixed;width:100%;height:100%;";	
 	str+="background:url(overlay.png) repeat;top:0px;left:0px';</div>";
 	$("body").append(str);														
-	str="<div id='shivaLightBoxIntDiv' style='position:absolute;padding:10px;width:"+width;
+	str="<div id='shivaLightBoxIntDiv' style='position:absolute;padding:10px;width:";
 	if (width != "auto") 
-		str+="px";	
+		str+=Math.abs(width)+"px";	
 	else
 		width=400;
 	var x=($("#shivaLightBoxDiv").width()-width)/2;
+	if (width < 0)
+		x=830;
 	str+=";border-radius:12px;moz-border-radius:12px;z-index:2003;"
 	str+="border:1px solid; left:"+x+"px;top:"+top+"%;background-color:#f8f8f8'>";
 	str+="<img src='shivalogo32.png' style='vertical-align:-30%'/>&nbsp;&nbsp;";								
@@ -3023,7 +3025,7 @@ SHIVA_Show.prototype.Clone=function(obj) 								// CLONE OBJECT/ARRAY
 
 SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MENU
 {
-	var i,email="";											
+	var i,email="",w=350;											
 	var v=document.cookie.split(';');										// Get cookie array
 	for (var i=0;i<v.length;i++) 											// for each cookie
 		if (v[i].indexOf("ez-email=") != -1)								// If an email set
@@ -3038,9 +3040,9 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 	if (type != "all")
 		str+=" <button id='linkBut'>Link</button>";	
 	str+=" <button id='cancelBut'>Cancel</button></div>";	
-	this.ShowLightBox(350,20,"SHIVA eStore",str)							// Create light box
+	if (type == "KML") w=-350;												// Force to right of Earth (KLUDGE)																
+	this.ShowLightBox(w,20,"SHIVA eStore",str)								// Create light box
 	$("#cancelBut").button().click(function() { $("#shivaLightBoxDiv").remove();});
-	
 	$("#saveBut").button().click(function() {								// SAVE
 		var _email=$("#email").val();										// Get email
 		var _title=$("#ez-title").val();									// Get title
@@ -3067,7 +3069,7 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 		document.cookie="ez-email="+_email;									// Save email in cookie
 		$("#shivaLightBoxDiv").remove();									// Close box						
 		str="\",\n\t\"shivaTitle\": \""+_title+"\"\n}";						// Add title
-		if (type != "Canvas") 
+		if ((type != "Canvas") && (type != "KML"))							// Not for canvas or KML
 			_data=_data.substr(0,_data.lastIndexOf("\""))+str;				// Remove last "\n}
 		$.post("http://www.primaryaccess.org/REST/addeasyfile.php",{ email:_email, type: _type, title:_title,data:_data.replace(/'/g,"\\'") });
 		});
@@ -3079,7 +3081,7 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 			return;															// Don't save
 			}						
 		document.cookie="ez-email="+email;									// Save email in cookie
-		var dat={ email:email };											// Set emila to look for
+		var dat={ email:email };											// Set email to look for
 		if (type != "all")													// If not loading all
 			dat["type"]=type;												// Filter by type
 		str="http://www.primaryaccess.org/REST/listeasyfile.php";			// eStore list url
@@ -3124,7 +3126,7 @@ SHIVA_Show.prototype.ShowEasyFile=function(files, callback, mode) // GET DATA FR
 
 SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	// SHOW LIST OF FILES
 {
-	var i,str;
+	var i,str,type;
 	files.sort(function(a, b) { 												// Sort by date
 		var A=new Date(a.created.substr(0,5)+"/2012 "+a.created.substr(6) );
 		var B=new Date(b.created.substr(0,5)+"/2012 "+b.created.substr(6) );
@@ -3139,10 +3141,13 @@ SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	/
 		$(str).appendTo("#ezFilesTable tbody");								// Add file to table
 		$("#ezFilesTable tr:odd").addClass("odd");							// Color
 		}
-	for (i=0;i<files.length;++i) 											// For each file
+	for (i=0;i<files.length;++i) {											// For each file
+		type=files[i].type;													// Set type
 		$("#ezfile-"+files[i].id).click(function() {						// Add click handler
 			str="http://www.primaryaccess.org/REST/geteasyfile.php?id="+this.id.substr(7);
-			if (mode == "link")												// If a link
+			if ((mode == "link") && (type == "KML"))						// If a KML link
+				alert("http://www.primaryaccess.org/REST/getkml.php?e="+this.id.substr(7));	// Show url
+			if ((mode == "link") && (type != "KML"))						// If a SHIVA link
 				alert("www.viseyes.org/shiva/go.htm?e="+this.id.substr(7));	// Show url
 			else{															// If a load
 				var dat={ id:this.id.substr(7) };							// Set id to look for
@@ -3153,6 +3158,7 @@ SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	/
 				}
 			$("#shivaLightBoxDiv").remove();								// Close lightbox
 			});	
+		}
 }
 
 function easyFileListWrapper(data)										// LOAD EASY FILE LIST

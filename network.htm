@@ -222,7 +222,11 @@
 	function SetAttributes() 
 	{
 		chartType=$('#chartType').val();
-		shivaLib.SetAttributes(props[chartType]);
+		var dsurl=$('#propInput0').val();
+		var newprops=props[chartType];
+		if ($.trim(dsurl).length > 5)
+			newprops.dataSourceUrl.def=dsurl;
+		shivaLib.SetAttributes(newprops);
 		Draw();
 	}	
 

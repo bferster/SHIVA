@@ -138,8 +138,9 @@ geocoder=new google.maps.Geocoder();
 				str+="</td></tr>"
 				}
 			else if (type == "Marker") {
-				str+="<tr><td>Icon &nbsp;</td><td><input type='text' style='width:100px;font-size:x-small' id='annUrl'/></td></tr>";
+				str+="<tr><td>Label&nbsp;</td><td><input type='text' style='width:100px;font-size:x-small' id='annText'/></td></tr>";
 				str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:98px;font-size:x-small' id='annText2'></textarea></td></tr>";
+				str+="<tr><td>Icon &nbsp;</td><td><input type='text' style='width:100px;font-size:x-small' id='annUrl'/></td></tr>";
 				str+="<tr><td colspan='2'><p><hr/></p>";
 				str+="Type \"pin\" in the the <i>Icon box</i> to show a pushpin icon, type \"none\" to show no icon, or type in a url to an image file. There are a number of icons <a href='http://www.viseyes.org/shiva/icons' target='_blank'> here</a>.";
 				str+="<br/><br/>Text from the <i>Label box </i>appears to the right of the icon. When marker clicked, a popup will display any text entered in the <i>Popup text box</i>. You can use HTML formatting.";
@@ -207,7 +208,7 @@ SHIVA_EarthDraw.prototype.DrawControlBar=function(mode)					// DRAW MAP CONTROL 
 			str+="<input type='text' size='1' style='font-size:x-small' id='annEcol'/>&nbsp;&nbsp;&nbsp;";
 			str+="Visibility&nbsp; <input type='range' size='12' style='width:80px;height:14px;vertical-align:bottom'; id='annVis'/>&nbsp;&nbsp;&nbsp;";
 			}
-		str+="<input type='button' value='Save/Load' size='1' style='position:absolute;left:710px;font-size:x-small' id='annSave'/>";
+		str+="<input type='button' value='Save/Load' size='1' style='position:absolute;left:722px;font-size:x-small' id='annSave'/>";
 		$("#mapInfoDiv").html(str+"</p>")									// Add to DOM
 		$("#annCol").css("background-color",col);							// Set back to col
 		$("#annCol").css("border","1px solid "+col);						// Set border
@@ -891,18 +892,18 @@ SHIVA_EarthDraw.prototype.CreateKML=function()								// CREATE KML FILE
 			else																// fill
 				str+="\t<Polygon><outerBoundaryIs><LinearRing><coordinates>\n";	// Polygon
 			if (s.type == "Box") {												// Box
-				str+="\t\t"+s.lons[0]+","+s.lats[0]+"\n";						// Coords
-				str+="\t\t"+s.lons[1]+","+s.lats[0]+"\n";
-				str+="\t\t"+s.lons[1]+","+s.lats[1]+"\n";
-				str+="\t\t"+s.lons[0]+","+s.lats[1]+"\n";
+				str+="\t\t"+s.lons[0]+","+s.lats[0]+",0\n";						// Coords
+				str+="\t\t"+s.lons[1]+","+s.lats[0]+",0\n";
+				str+="\t\t"+s.lons[1]+","+s.lats[1]+",0\n";
+				str+="\t\t"+s.lons[0]+","+s.lats[1]+",0\n";
 				}
 			else{																// Lines/polygons
 				for (j=0;j<s.lats.length;++j) {									// For each point
-					str+="\t\t"+s.lons[j]+","+s.lats[j]+"\n";					// Add coord
+					str+="\t\t"+s.lons[j]+","+s.lats[j]+",0\n";					// Add coord
 					}
 				}
 		if (s.type == "Shape")													// If Shape
-			str+="\t\t"+s.lons[0]+","+s.lats[0]+"\n";							// Add last coord
+			str+="\t\t"+s.lons[0]+","+s.lats[0]+",0\n";							// Add last coord
 		if (s.type == "Line")													// If line
 				str+="\t</coordinates></LineString>\n";							// Line
 			else																// fill
@@ -911,13 +912,17 @@ SHIVA_EarthDraw.prototype.CreateKML=function()								// CREATE KML FILE
 			}	
 		if (s.type == "Image") {												// Image
 			str+="<GroundOverlay>\n";											// Overlay
+					str+="00000000";												// No alpha
+
 			str+="\t<Icon>\n\t\t<href>"+s.url+"</href>\n\t</Icon>\n";			// Image
 			str+="\t\t<LatLonBox>\n";											// Coords
 			str+="\t\t<north>"+s.lats[0]+"</north>\n"; 							// N
 			str+="\t\t<west>" +s.lons[0]+"</west>\n";  							// W
 			str+="\t\t<south>"+s.lats[1]+"</south>\n"; 							// S
 			str+="\t\t<east>" +s.lons[1]+"</east>\n";  							// E
-			str+="\t</LatLonBox>\n";											// /Coords
+			str+="\t\t<rotation>" +s.rot+"</rotation>\n";  						// Rotation
+			str+="\t</LatLonBox>\n";											// Coords
+			str+="\t<color>" +a+"000000</color>\n";  							// Alpha
 			str+="</GroundOverlay>\n";											// /Overlay
 			}
 		}
@@ -925,11 +930,70 @@ SHIVA_EarthDraw.prototype.CreateKML=function()								// CREATE KML FILE
 	return str;
 }
 
-SHIVA_EarthDraw.prototype.ParseKML=function(kml)							// PARSE KML FILE
+SHIVA_EarthDraw.prototype.ParseKML=function(data)							// PARSE KML FILE
 {
+/*	
+kml: "|*kml xmlns='http://www.opengis.net/kml/2.2'*||*Document*|
+|*GroundOverlay*||*Icon*||*href*|http://www.viseyes.org/shiva/map.jpg|*href*||*Icon*||*LatLonBox*||*north*|31.607587814331055|*north*||*west*|-78.79130554199219|*west*||*south*|28.182737010894833|*south*||*east*|-81.66403683656546|*east*||*LatLonBox*||*GroundOverlay*|
+|*Placemark*||*Style id='sty1'*||*LineStyle*||*color*|ff00ffff|*color*||*width*|2|*width*||*LineStyle*||*PolyStyle*||*color*|ffff0000|*color*||*PolyStyle*||*Style*||*styleUrl*|sty1|*styleUrl*||*LineString*||*coordinates*|-79.31596307264607,29.356773892854523-76.44873809814453,34.857765197753906|*coordinates*||*LineString*||*Placemark*|
+|*Placemark*||*Style id='sty2'*||*LineStyle*||*color*|7d00ffff|*color*||*width*|2|*width*||*LineStyle*||*PolyStyle*||*color*|7dff0000|*color*||*PolyStyle*||*Style*||*styleUrl*|sty2|*styleUrl*||*Polygon*||*outerBoundaryIs*||*LinearRing*||*coordinates*|-82.60691003309529,31.008034268831086-83.78094691505498,31.595052709810933-84.95498379701468,31.008034268831086-82.60691003309529,31.008034268831086|*coordinates*||*LinearRing*||*outerBoundaryIs*||*Polygon*||*Placemark*|
+|*Placemark*||*name*|New Marker|*name*||*Style*||*IconStyle*||*Icon*||*href*|http://www.viseyes.org/mapscholar/img/dotmarker.png|*href*||*Icon*||*IconStyle*||*Style*||*Point*||*coordinates*|-80.48999995460576,29.356773892854523,0*||*coordinates*||*Point*||*Placemark*|
+|*Placemark*||*Style id='sty4'*||*LineStyle*||*color*|ff00ffff|*color*||*width*|2|*width*||*LineStyle*||*PolyStyle*||*color*|ffff0000|*color*||*PolyStyle*||*Style*||*styleUrl*|sty4|*styleUrl*||*Polygon*||*outerBoundaryIs*||*LinearRing*||*coordinates*|-83.0277626942281,30.029029311191167-85.37583645814749,30.029029311191167-85.37583645814749,27.680955547271786-83.0277626942281,27.680955547271786|*coordinates*||*LinearRing*||*outerBoundaryIs*||*Polygon*|
+|*Placemark*||*Document*||*kml*|"
+*/
+	var type,s=0,e=0,i,j,k,v;
+	var lats,lons;
+	var kml=data.kml;															// Point at kml data
+	while (1) {																	// Loop
+		type="";																// No type
+		if ((i=kml.indexOf("|*GroundOverlay*|",s)) != -1) {						// An image
+			type="Image";														// Set type
+			e=kml.indexOf("|*GroundOverlay*|",i+20);							// Get end
+			s=e+10;																// Set new start
+			}
+		else if ((i=kml.indexOf("|*Placemark*|",s)) != -1)	{					// Other seg type
+			e=kml.indexOf("|*Placemark*|",i+20);								// Get end
+			s=e+10;																// Set new start
+			if (((j=kml.indexOf("|*IconStyle*|",i)) != -1) && (j < e)) {		// If an icon within end
+				type="Marker";													// Set type
+				}
+			else if (((j=kml.indexOf("|*LinearRing*|",i)) != -1) && (j < e)) {	// If a polygon
+				j=kml.indexOf("|*coordinates*|",i)+15;							// Start of coords
+				k=kml.indexOf("|*coordinates*|",j);								// End of coords
+				v=kml.substring(j,k).split(",0");								// Split by Z
+				lats=[];	lons=[]
+				type="Shape";													// Set type
+				for (j=0;j<v.length-1;++j) {									// For each pair
+					lons[j]=v[j].split(",")[0];									// Get lon
+					lats[j]=v[j].split(",")[1];									// Get lat
+					}
+				if ((lats[0] == lats[1]) && (lats[2] == lats[3]) && (lons[0] == lons[3]) && (lons[1] == lons[2])) {
+					type="Box";													// It's a box
+					}
+				}
+			else{																// Must be a line
+				j=kml.indexOf("|*coordinates*|",i)+15;							// Start of coords
+				k=kml.indexOf("|*coordinates*|",j);								// End of coords
+				v=kml.substring(j,k).split(",0");								// Split by Z
+				lats=[];	lons=[]
+				for (j=0;j<v.length-1;++j) {									// For each pair
+					lons[j]=v[j].split(",")[0];									// Get lon
+					lats[j]=v[j].split(",")[1];									// Get lat
+					}
+				type="Line";													// Set type
+				}
+			}
+		else																	// No more
+			break;																// Quit
+		}
+			
+
 	
-	trace(kml)	
 	
+	
+	
+
+		
 	
 }
 

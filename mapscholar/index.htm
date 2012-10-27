@@ -126,7 +126,8 @@ geocoder=new google.maps.Geocoder();
 				str+="<tr><td>Rotation&nbsp;</td><td><input type='range' max='360' style='width:100px;font-size:x-small' id='annRot'/>";
 				str+="</td></tr>";
 				str+="<tr><td colspan='2'><p><hr/></p>";
-				str+="Drag corner dots to resize image. Drag center of box to move the whole box.";
+				str+="Drag corner dots to resize image. Drag center of box to move the whole box.<br/><br/>";
+				str+="You can fine-tune the rotation by dragging a corner point and pressing the Alt or Option key. Dragging point left of center rotates CCW, right rotates CW.";
 				str+="<br/><br/>Click on the trash can icon to remove the image";
 				str+="</td></tr>"
 				}
@@ -820,19 +821,23 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 						}
 					}
 				else if (s.type == "Image") {									// Image
-					s.lats[num]=lat;											// Set lat
-					s.lons[num]=lon;											// Get lon
 					var latLonBox=_this.dragInfo.seg.getLatLonBox();			// Get coords	
-					var a=s.rot;												// Get 0 -> 360 rot
+					var a=s.rot-0;												// Get 0 -> 360 rot
+					if (e.getAltKey()) {										// Rotating
+						a+=(400-e.getClientX())/1600;							// Add to rot 
+						$("#annrot").val(s.rot);								// Set slider
+						s.rot=a;
+						}
 					if (a > 180) a=-(360-a);									// Convert -180 -> +180
 					latLonBox.setBox(s.lats[0],s.lats[1],s.lons[0],s.lons[1],Number(a));	// Set coords						
 					}
 				else
 					_this.dragInfo.coords.setLatLngAlt(num,lat,lon,0);			// Set coord
-				s.lats[num]=lat;												// Set lat
-				s.lons[num]=lon;												// Get lon
+				if (!e.getAltKey()) {											// If not rotating
+					s.lats[num]=lat;											// Set lat
+					s.lons[num]=lon;											// Get lon
+					}
 				}
-				
 			});
 
   	google.earth.addEventListener(ge.getGlobe(),'mouseup', 					// ON MOUSE UP

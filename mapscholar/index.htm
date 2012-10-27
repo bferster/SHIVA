@@ -880,13 +880,17 @@ SHIVA_EarthDraw.prototype.CreateKML=function()								// CREATE KML FILE
 				str+=a+s.ecol.substring(5,7)+s.ecol.substring(3,5)+s.ecol.substring(1,3);	// ABGR		
 			str+="</color>\n";													// Color end
 			str+="\t\t\t<width>"+s.ewid+"</width>\n\t\t</LineStyle>\n";			// Width 
-			str+="\t\t<PolyStyle>\n\t\t\t<color>";								// Color start
-			if (s.col == -1)													// If no color
-				str+="00000000";												// No alpha
-			else
-				str+=a+s.col.substring(5,7)+s.col.substring(3,5)+s.col.substring(1,3);	// ABGR		
-			str+="</color>\n\t\t</PolyStyle>\n";								// Color/poly end
-			str+="\t</Style>\n\t<styleUrl>sty"+i+"</styleUrl>\n";				// Style URL
+			if ((s.type == "Shape") || (s.type == "Box")) {						// A polygon
+				str+="\t\t<PolyStyle>\n\t\t\t<color>";							// Color start
+				if (s.col == -1)												// If no color
+					str+="00000000";											// No alpha
+				else
+					str+=a+s.col.substring(5,7)+s.col.substring(3,5)+s.col.substring(1,3);	// ABGR		
+				str+="</color>\n\t\t</PolyStyle>\n";							// Color/poly end
+				}
+			
+			if ((s.type == "Marker") || (s.type == "Image")) 					// Has url
+				str+="\t</Style>\n\t<styleUrl>sty"+i+"</styleUrl>\n";			// Style URL
 			if (s.type == "Line")												// If line
 				str+="\t<LineString><coordinates>\n";							// Line
 			else																// fill
@@ -941,59 +945,109 @@ kml: "|*kml xmlns='http://www.opengis.net/kml/2.2'*||*Document*|
 |*Placemark*||*Style id='sty4'*||*LineStyle*||*color*|ff00ffff|*color*||*width*|2|*width*||*LineStyle*||*PolyStyle*||*color*|ffff0000|*color*||*PolyStyle*||*Style*||*styleUrl*|sty4|*styleUrl*||*Polygon*||*outerBoundaryIs*||*LinearRing*||*coordinates*|-83.0277626942281,30.029029311191167-85.37583645814749,30.029029311191167-85.37583645814749,27.680955547271786-83.0277626942281,27.680955547271786|*coordinates*||*LinearRing*||*outerBoundaryIs*||*Polygon*|
 |*Placemark*||*Document*||*kml*|"
 */
-	var type,s=0,e=0,i,j,k,v;
-	var lats,lons;
+	var type,s=0,e,i,j,k,o;
 	var kml=data.kml;															// Point at kml data
+	var _this=shivaLib.dr;														// Point at draw module
 	while (1) {																	// Loop
 		type="";																// No type
+		o=new Object();															// Add seg
+		o.lats=new Array();		o.lons=new Array();								// Coord array
 		if ((i=kml.indexOf("|*GroundOverlay*|",s)) != -1) {						// An image
-			type="Image";														// Set type
-			e=kml.indexOf("|*GroundOverlay*|",i+20);							// Get end
+			e=kml.indexOf("|*GroundOverlay*|",i+10);							// Get end
 			s=e+10;																// Set new start
+			o.type="Image";														// Set type
+			o.url=GetTag(i,e,"href");											// Get url
+			o.lats[0]=Number(GetTag(i,e,"north"));								// Get N
+			o.lats[1]=Number(GetTag(i,e,"south"));								// S
+			o.lons[1]=Number(GetTag(i,e,"east"));								// E
+			o.lons[0]=Number(GetTag(i,e,"west"));								// W
+			o.rot=Number(GetTag(i,e,"rotation"));								// Rot
+			GetColor(j,o.vis);													// Get color (to set vis)
+			o.vis=vis;															// Get vis
+			_this.segs.push(o);													// Add seg
+			_this.AddSegsToEarth(_this.segs.length-1);							// Add seg to EDOM
 			}
 		else if ((i=kml.indexOf("|*Placemark*|",s)) != -1)	{					// Other seg type
-			e=kml.indexOf("|*Placemark*|",i+20);								// Get end
+			e=kml.indexOf("|*Placemark*|",i+10);								// Get end
 			s=e+10;																// Set new start
 			if (((j=kml.indexOf("|*IconStyle*|",i)) != -1) && (j < e)) {		// If an icon within end
-				type="Marker";													// Set type
+				o.vis=100;														// Alpha
+				o.type="Marker";												// Set type
+				GetCoords(i,e,o.lats,o.lons);									// Get coords
+				o.url=GetTag(i,e,"href");										// Get url
+				o.text=GetTag(i,e,"name");										// Get label
+				o.text2=GetTag(i,e,"description");								// Get description
+				_this.segs.push(o);												// Add seg
+				_this.AddSegsToEarth(_this.segs.length-1);						// Add seg to EDOM
 				}
 			else if (((j=kml.indexOf("|*LinearRing*|",i)) != -1) && (j < e)) {	// If a polygon
-				j=kml.indexOf("|*coordinates*|",i)+15;							// Start of coords
-				k=kml.indexOf("|*coordinates*|",j);								// End of coords
-				v=kml.substring(j,k).split(",0");								// Split by Z
 				lats=[];	lons=[]
-				type="Shape";													// Set type
-				for (j=0;j<v.length-1;++j) {									// For each pair
-					lons[j]=v[j].split(",")[0];									// Get lon
-					lats[j]=v[j].split(",")[1];									// Get lat
-					}
+				GetCoords(i,e,lats,lons);										// Get all the coords
+				o.type="Shape";													// Set type
 				if ((lats[0] == lats[1]) && (lats[2] == lats[3]) && (lons[0] == lons[3]) && (lons[1] == lons[2])) {
-					type="Box";													// It's a box
+					o.lats[0]=lats[0];		o.lons[0]=lons[0];					// Add coord			
+					o.lats[1]=lats[2];		o.lons[1]=lons[2];					// Add coord			
+					o.type="Box";
 					}
+				else{
+					GetCoords(i,e,o.lats,o.lons);								// Get all the coords
+					o.lats.pop();												// Remove last lat
+					o.lons.pop();												// Lon
+					}
+				j=kml.indexOf("PolyStyle",i)+8;									// Move to polystyle
+				o.col=GetColor(j);												// Get color
+				o.vis=vis;														// Get vis
+				j=kml.indexOf("LineStyle",i)+8;									// Move to linestyle
+				o.ewid=Number(GetTag(j,e,"width"));								// Get width
+				o.ecol=GetColor(j);												// Get color
+				o.text=GetTag(i,e,"name");										// Get label
+				o.text2=GetTag(i,e,"description");								// Get description
+				_this.segs.push(o);												// Add seg
+				_this.AddSegsToEarth(_this.segs.length-1);						// Add seg to EDOM
 				}
 			else{																// Must be a line
-				j=kml.indexOf("|*coordinates*|",i)+15;							// Start of coords
-				k=kml.indexOf("|*coordinates*|",j);								// End of coords
-				v=kml.substring(j,k).split(",0");								// Split by Z
-				lats=[];	lons=[]
-				for (j=0;j<v.length-1;++j) {									// For each pair
-					lons[j]=v[j].split(",")[0];									// Get lon
-					lats[j]=v[j].split(",")[1];									// Get lat
-					}
-				type="Line";													// Set type
+				GetCoords(i,e,o.lats,o.lons);									// Get coords
+				o.type="Line";													// Set type
+				j=kml.indexOf("LineStyle",i)+8;									// Move to linestyle
+				o.ewid=Number(GetTag(j,e,"width"));								// Get width
+				o.ecol=GetColor(j,o.vis);										// Get color
+				o.vis=vis;														// Get vis
+				o.text2=GetTag(i,e,"description");								// Get description
+				_this.segs.push(o);												// Add seg
+				_this.AddSegsToEarth(_this.segs.length-1);						// Add seg to EDOM
 				}
 			}
 		else																	// No more
 			break;																// Quit
 		}
-			
 
-	
-	
-	
-	
+	function GetTag(start, end, tag) {											// EXTRACT CONTENTS OF TAG
+		var s=kml.indexOf("|*"+tag+"*|",start)+tag.length+4;					// Start of contents
+		if ((s == tag.length+3) || (s > end))									// No start	or past end														
+			return "";															// Return null
+		var e=kml.indexOf("|*"+tag+"*|",s);										// End 
+		if ((e == -1) || (e > end))												// No start	or past end														
+			return "";															// Return null
+		return kml.substring(s,e);												// Extract string
+		}
 
-		
+	function GetColor(start) {												// EXTRACT COLOR
+		var s=kml.indexOf("|*color*|",start)+9;									// Start of color
+		var e=kml.indexOf("|*color*|",s);										// End 
+		var col=kml.substring(s,e);												// Extract color
+		vis=parseInt(col.substr(0,2),16)/2.55;									// Get it
+		return "#"+col.substring(6,8)+col.substring(4,6)+col.substring(2,4);	// ABGR -> RGB
+		}
+
+	function GetCoords(start, end, lats, lons) {							// EXTRACT COORDS
+		var i;
+		var v=GetTag(start,end,"coordinates").split(",0");						// Get pairs
+		for (i=0;i<v.length-1;++i) {											// For each pair
+			lons[i]=Number(v[i].split(",")[0]);									// Get lon
+			lats[i]=Number(v[i].split(",")[1]);									// Get lat
+			}
+		return v.length-1;														// Return number coords
+		}
 	
 }
 
@@ -1006,7 +1060,7 @@ function test()
 	var _this=shivaLib.dr;
 	var ge=shivaLib.map;
 	_this.AddSegsToEarth();
-	shivaLib.dr.DrawMap();
+	_this.DrawMap();
 }
 	
 	

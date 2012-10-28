@@ -171,6 +171,7 @@ function SHIVA_EarthDraw()												// CONSTRUCTOR
 	this.curSeg=-1;															// Current seg for editing
 	this.curRandom=123;														// Current random #
 	this.dragInfo={ clicked:false, dragged:false,lat:0, lon:0, seg:null, point:null, coords:null };		// Drag information
+	document.onkeydown=this.onBrowserKeyDown;									// Keydown listener
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -491,12 +492,14 @@ SHIVA_EarthDraw.prototype.StyleSeg=function(num)							// SET SEGMENT STYLING
 			lineStyle.setWidth(Number(s.ewid));									// Set width	
 		}
 	if (polyStyle) {															// If it has one
-		if (s.col) {															// If exists	
+		if (s.col != "") {														// If has color	
 			r=s.col.substr(1,2);												// Get red
 			g=s.col.substr(3,2);												// Get green
 			b=s.col.substr(5,2);												// Get blue
 			polyStyle.getColor().set(a+b+g+r);  								// Set color in aabbggrr format
 			}
+		else																	// No color
+			polyStyle.getColor().set("00000000");  								// No interior color
 		polyStyle.setOutline(s.ecol != "")										// Set outline
 		}
 	if (s.type == "Marker") {													// If a marker
@@ -659,6 +662,10 @@ SHIVA_EarthDraw.prototype.RemoveSeg=function(num)							// REMOVE SEGMENT
 	this.segs.splice(num,1);													// Remove from segs
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// EVENTS 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
 SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 {	
 	var _this=shivaLib.dr;														// Point to draw obj
@@ -694,6 +701,7 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 				s=shivaLib.dr.segs[shivaLib.dr.curSeg];							// Point at seg
 		    	_this.dragInfo.clicked=true;									// Been clicked on
 		    	_this.dragInfo.point=e.getTarget().getGeometry();				// Point coords
+				_this.dragInfo.rot=s.rot;										// Save rotation
 		    	o=shivaLib.map.getFeatures().getChildNodes();					// Get seg									
 				n=o.getLength();												// Get length
 				for (var i=0;i<n;++i) 											// For each child
@@ -824,7 +832,8 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 					var latLonBox=_this.dragInfo.seg.getLatLonBox();			// Get coords	
 					var a=s.rot-0;												// Get 0 -> 360 rot
 					if (e.getAltKey()) {										// Rotating
-						a+=(400-e.getClientX())/1600;							// Add to rot 
+						a=Number(_this.dragInfo.rot);							// Get rot when 1st clicked
+						a+=(400-e.getClientX())/40;								// Add to rot 
 						$("#annrot").val(s.rot);								// Set slider
 						s.rot=a;
 						}
@@ -850,6 +859,20 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 	 		});
 }
 
+SHIVA_EarthDraw.prototype.onBrowserKeyDown=function(e)					// BROWSER KEY DOWN HANDLER
+{
+	if ((e.keyCode == 8) &&													// Look for Del key
+        (e.target.tagName != "TEXTAREA") && 								// In text area
+        (e.target.tagName != "INPUT")) { 									// or input
+		e.stopPropagation();												// Trap it
+     	return false;
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// KML 
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
 SHIVA_EarthDraw.prototype.CreateKML=function()								// CREATE KML FILE
 {
 	var s,i,j,a;
@@ -873,13 +896,14 @@ SHIVA_EarthDraw.prototype.CreateKML=function()								// CREATE KML FILE
 					url="http://www.viseyes.org/mapscholar/img/nomarker.png";	// Use invisible marker
 				if (url != "pin") 
 					str+="\t<Style>\n\t\t<IconStyle>\n\t\t\t<Icon><href>"+url+"</href></Icon>\n\t\t</IconStyle>\n\t</Style>\n";	// Icon url
-				str+="\t<Point>\n\t\t<coordinates>"+s.lons[0]+","+s.lats[0]+",0>";	// Coords		
+				str+="\t<Point>\n\t\t<coordinates>"+s.lons[0]+","+s.lats[0]+",0";	// Coords		
 				str+="</coordinates>\n\t</Point>\n</Placemark>\n";				// Close tags
 				continue;														// Continue
 				}
 			str+="\t<Style id=\"sty"+i+"\">\n";									// Style
 			str+="\t\t<LineStyle>\n\t\t\t<color>";								// Color start
-			if (s.ecol == -1)													// If no color
+			trace(s)
+			if (s.ecol == "") 													// If no color
 				str+="00000000";												// No alpha
 			else
 				str+=a+s.ecol.substring(5,7)+s.ecol.substring(3,5)+s.ecol.substring(1,3);	// ABGR		
@@ -887,7 +911,7 @@ SHIVA_EarthDraw.prototype.CreateKML=function()								// CREATE KML FILE
 			str+="\t\t\t<width>"+s.ewid+"</width>\n\t\t</LineStyle>\n";			// Width 
 			if ((s.type == "Shape") || (s.type == "Box")) {						// A polygon
 				str+="\t\t<PolyStyle>\n\t\t\t<color>";							// Color start
-				if (s.col == -1)												// If no color
+				if (s.col == "")												// If no color
 					str+="00000000";											// No alpha
 				else
 					str+=a+s.col.substring(5,7)+s.col.substring(3,5)+s.col.substring(1,3);	// ABGR		
@@ -899,10 +923,11 @@ SHIVA_EarthDraw.prototype.CreateKML=function()								// CREATE KML FILE
 			else																// fill
 				str+="\t<Polygon><outerBoundaryIs><LinearRing><coordinates>\n";	// Polygon
 			if (s.type == "Box") {												// Box
-				str+="\t\t"+s.lons[0]+","+s.lats[0]+",0\n";						// Coords
-				str+="\t\t"+s.lons[1]+","+s.lats[0]+",0\n";
-				str+="\t\t"+s.lons[1]+","+s.lats[1]+",0\n";
-				str+="\t\t"+s.lons[0]+","+s.lats[1]+",0\n";
+				str+="\t\t"+s.lons[0]+","+s.lats[0]+",0\n";						// NW
+				str+="\t\t"+s.lons[1]+","+s.lats[0]+",0\n";						// NE
+				str+="\t\t"+s.lons[1]+","+s.lats[1]+",0\n";						// SE
+				str+="\t\t"+s.lons[0]+","+s.lats[1]+",0\n";						// SW
+				str+="\t\t"+s.lons[0]+","+s.lats[0]+",0\n";						// Last coord
 				}
 			else{																// Lines/polygons
 				for (j=0;j<s.lats.length;++j) {									// For each point
@@ -920,19 +945,19 @@ SHIVA_EarthDraw.prototype.CreateKML=function()								// CREATE KML FILE
 		if (s.type == "Image") {												// Image
 			str+="<GroundOverlay>\n";											// Overlay
 			str+="\t<Icon>\n\t\t<href>"+s.url+"</href>\n\t</Icon>\n";			// Image
+			str+="\t<color>" +a+"ffffff</color>\n";  							// Alpha
 			str+="\t<LatLonBox>\n";												// Coords
 			str+="\t\t<north>"+s.lats[0]+"</north>\n"; 							// N
-			str+="\t\t<west>" +s.lons[0]+"</west>\n";  							// W
 			str+="\t\t<south>"+s.lats[1]+"</south>\n"; 							// S
-			str+="\t\t<east>" +s.lons[1]+"</east>\n";  							// E
+			str+="\t\t<east>" +s.lons[0]+"</east>\n";  							// W
+			str+="\t\t<west>" +s.lons[1]+"</west>\n";  							// E
 			str+="\t\t<rotation>" +s.rot+"</rotation>\n";  						// Rotation
 			str+="\t</LatLonBox>\n";											// Coords
-			str+="\t<color>" +a+"ffffff</color>\n";  							// Alpha
 			str+="</GroundOverlay>\n";											// /Overlay
 			}
 		}
-	str+="</Document>\n</kml>";
-	return str;
+	str+="</Document>\n</kml>";													// End doc
+	return str;																	// Return kml
 }
 
 SHIVA_EarthDraw.prototype.ParseKML=function(data)							// PARSE KML FILE

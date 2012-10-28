@@ -482,7 +482,7 @@ SHIVA_EarthDraw.prototype.StyleSeg=function(num)							// SET SEGMENT STYLING
 	a=Math.floor(s.vis*2.555).toString(16);										// Get alpha
 	if (a.length < 2)	a="0"+a;												// Pad it			
 	if (lineStyle) {															// If it has one
-		if (s.ecol) {															// If exists	
+		if ((s.ecol != undefined) && (s.ecol != "")) {							// If has color	
 			r=s.ecol.substr(1,2);												// Get red
 			g=s.ecol.substr(3,2);												// Get green
 			b=s.ecol.substr(5,2);												// Get blue
@@ -492,7 +492,7 @@ SHIVA_EarthDraw.prototype.StyleSeg=function(num)							// SET SEGMENT STYLING
 			lineStyle.setWidth(Number(s.ewid));									// Set width	
 		}
 	if (polyStyle) {															// If it has one
-		if (s.col != "") {														// If has color	
+		if ((s.col != undefined) && (s.col != "")) {								// If has color	
 			r=s.col.substr(1,2);												// Get red
 			g=s.col.substr(3,2);												// Get green
 			b=s.col.substr(5,2);												// Get blue
@@ -902,7 +902,6 @@ SHIVA_EarthDraw.prototype.CreateKML=function()								// CREATE KML FILE
 				}
 			str+="\t<Style id=\"sty"+i+"\">\n";									// Style
 			str+="\t\t<LineStyle>\n\t\t\t<color>";								// Color start
-			trace(s)
 			if (s.ecol == "") 													// If no color
 				str+="00000000";												// No alpha
 			else

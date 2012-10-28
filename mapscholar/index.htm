@@ -170,8 +170,9 @@ function SHIVA_EarthDraw()												// CONSTRUCTOR
 	this.segs=new Array();													// Holds drawn segs
 	this.curSeg=-1;															// Current seg for editing
 	this.curRandom=123;														// Current random #
+	this.hasDots=false;														// No dots yet
 	this.dragInfo={ clicked:false, dragged:false,lat:0, lon:0, seg:null, point:null, coords:null };		// Drag information
-	document.onkeydown=this.onBrowserKeyDown;									// Keydown listener
+	document.onkeydown=this.onBrowserKeyDown;								// Keydown listener
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -199,7 +200,7 @@ SHIVA_EarthDraw.prototype.DrawControlBar=function(mode)					// DRAW MAP CONTROL 
 			text=s.text;	text2=s.text2;	type=s.type;					// seg
 			}
 		str+="&nbsp;&nbsp;<img src='img/globe.gif' style='vertical-align:bottom' title='Back to map' onclick='shivaLib.dr.DrawControlBar()'>";		
-		str+="&nbsp;&nbsp;&nbsp;<select id='annType' style='font-size:x-small'>";
+		str+="&nbsp;&nbsp;&nbsp;<select id='annType' style='font-size:x-small' onchange='shivaLib.dr.AddNewSeg()'>";
 		str+="<option>Draw</option>";		str+="<option>Line</option>";
 		str+="<option>Shape</option>";		str+="<option>Box</option>";
 		str+="<option>Marker</option>";		str+="<option>Image</option>";	
@@ -227,7 +228,6 @@ SHIVA_EarthDraw.prototype.DrawControlBar=function(mode)					// DRAW MAP CONTROL 
 		$("#annText2").val(text2);											// Set text2
 		$("#annUrl").val(url);												// Set url
 		$("#annRot").val(rot);												// Show cur rot
-		$("#annRot2").val(rot);												// Show cur rot
 		}
 	else{
 		this.curSeg=-1;														// Not editing
@@ -239,18 +239,6 @@ SHIVA_EarthDraw.prototype.DrawControlBar=function(mode)					// DRAW MAP CONTROL 
 		DrawShelf();														// Draw shelf
 		}
 	
-	$("#annType").change(function(e){ 									// SET TYPE
-		_this.curSeg=-1;													// Deselect
-		_this.DrawControlBar(true);											// Draw control bar
-		if (_this.AddNewSeg(this.value)) {									// Add new seg
-			shivaLib.Sound("ding");											// Ding
-			_this.curSeg=_this.segs.length-1;								// Highlight current one																				
-			}
-		$("#annType").val("Draw");											// Reset control
-		_this.DrawMap();													// Redraw map
-		DrawShelf("draw");													// Draw shelf
-		});
-
 	$("#annCol").click(function(e) { 									// SET COLOR
 		_this.Do();															// Set undo	
 		_this.ColorPicker("Col",e.pageX,654);								// Pick col
@@ -279,15 +267,6 @@ SHIVA_EarthDraw.prototype.DrawControlBar=function(mode)					// DRAW MAP CONTROL 
 	$("#annRot").change(function(e){ 									// SET ROTATION
 		if (_this.curSeg != -1) {											// If editing
 			_this.segs[_this.curSeg].rot=this.value;						// Set rot
-			$("#annRot2").val(this.value);									// Set text box
-			_this.StyleSeg(_this.curSeg);									// Set style
-			}
-		});
-
-	$("#annRot2").change(function(e){ 									// SET ROTATION
-		if (_this.curSeg != -1) {											// If editing
-			_this.segs[_this.curSeg].rot=this.value;						// Set rot
-			$("#annRot").val(this.value);									// Set slider
 			_this.StyleSeg(_this.curSeg);									// Set style
 			}
 		});
@@ -337,8 +316,12 @@ SHIVA_EarthDraw.prototype.DrawControlBar=function(mode)					// DRAW MAP CONTROL 
 
 }
 
-SHIVA_EarthDraw.prototype.AddNewSeg=function(type)							// ADD NEW SEGMENT
+SHIVA_EarthDraw.prototype.AddNewSeg=function()								// ADD NEW SEGMENT
 {
+	var type=$("#annType").val();												// Get type
+	this.curSeg=-1;																// Deselect
+	this.DrawControlBar(true);													// Draw control bar
+	$("#annType").val("Draw");													// Reset control
 	var o=new Object();
 	o.type=type;																// Set type
 	o.lats=new Array();		o.lons=new Array();									// Add coord arrays
@@ -380,6 +363,10 @@ SHIVA_EarthDraw.prototype.AddNewSeg=function(type)							// ADD NEW SEGMENT
 	this.Do();																	// Set undo	
 	this.segs.push(o);															// Add seg
 	this.AddSegsToEarth(this.segs.length-1);									// Add to EDOM
+	shivaLib.Sound("ding");														// Ding
+	this.curSeg=this.segs.length-1;												// Highlight current one																				
+	this.DrawMap();																// Redraw map
+	DrawShelf("draw");															// Draw shelf
 	return true;
 }
 
@@ -464,6 +451,7 @@ SHIVA_EarthDraw.prototype.AddSegsToEarth=function(num)						// ADD SEGMENTS TO E
 			latLonBox.setBox(s.lats[0],s.lats[1],s.lons[0],s.lons[1],0);		// Set coords
 			seg.setLatLonBox(latLonBox);										// Set geometry
 			var icon=ge.createIcon('');											// Create icon
+			seg.setDrawOrder(-1);												// Allow overlays on it
 			seg.setIcon(icon);													// Attach to seg
 			s.asp=0;															// No aspect yet
 			}
@@ -558,7 +546,7 @@ SHIVA_EarthDraw.prototype.DrawControlDots=function(mode) 					// ADD COORD EDITI
 	var ge=shivaLib.map;														// Local copy of earth
 	if (typeof(ge) == "string") 												// If not initted yet
 		return;																	// Quit
-	while (1) {																	// Loop
+	while (this.hasDots) {														// Loop
 		seg=ge.getFeatures().getChildNodes();									// Get seg									
 		n=seg.getLength();														// Get length
 		for (i=0;i<n;++i) {														// For each child
@@ -571,6 +559,7 @@ SHIVA_EarthDraw.prototype.DrawControlDots=function(mode) 					// ADD COORD EDITI
 		if (i == n)																// If not found
 			break; 																// Quit looking altogether
 		}
+	this.hasDots=false;															// No dots
 	if (mode == false)															// If deleting
 		return;																	// Turn them off
 	if (this.curSeg == -1)														// Nothing selected
@@ -584,6 +573,7 @@ SHIVA_EarthDraw.prototype.DrawControlDots=function(mode) 					// ADD COORD EDITI
 		this.curRandom="0"+this.curRandom;										// Pad
 	if (!s.lons.length)															// If no coords
 		return;																	// Quit
+	this.hasDots=true;															// Have dots
 	this.AddCoordControlDot(s.lats[0],s.lons[0],0,.5);							// Add 1st dot								
 	for (i=1;i<s.lons.length;++i) {												// For all other dots
 		j=i-1;																	// Last dot index
@@ -685,15 +675,13 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 
 	google.earth.addEventListener(ge.getGlobe(),"mousedown", 				// ON MOUSE DOWN
 		function(e) {
-			var s,i,n,o,num,type="";
+			var s,i,n,o,num;
 			if (!_this.inAnnotate)												// If not annotating
 		    	return;															// Quit
 			var id=e.getTarget().getId();										// Find id
-			if (typeof(e.getTarget().getGeometry) == "function")				// If has geometry
+		  	var type=e.getTarget().getType();									// Get type
+			if (type != "GEGlobe")												// If something hit
 				type=e.getTarget().getGeometry().getType();						// Get type from geometry
-		  	else																
-		  		type=e.getTarget().getType();									// Get from seg
-			_this.dragInfo.lon=_this.dragInfo.lat=0;							// Rest lat/lon
 
 			if (e.getButton() && _this.curSeg != -1) {							// If appending dot
 	 			shivaLib.dr.AddPointToLine(0,e.getLatitude(),e.getLongitude());	// Add to line/shape
@@ -711,6 +699,7 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 						}
 					}
 				s=shivaLib.dr.segs[shivaLib.dr.curSeg];							// Point at seg
+				_this.dragInfo.lat=0;											// Disable seg moving
 		    	_this.dragInfo.clicked=true;									// Been clicked on
 		    	_this.dragInfo.point=e.getTarget().getGeometry();				// Point coords
 				_this.dragInfo.rot=s.rot;										// Save rotation
@@ -798,6 +787,7 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 				lat=e.getLatitude();											// Get lat
 				lon=e.getLongitude();											// Get lon
 				if (_this.dragInfo.lat) {										// If clicked on a seg	
+					_this.DrawControlDots(false);								// Hide control dots
 					var dlat=_this.dragInfo.lat-lat;							// Delta lat
 					var dlon=_this.dragInfo.lon-lon;							// Delta lon
 					if (s.type == "Box") {										// Box
@@ -1075,6 +1065,8 @@ SHIVA_EarthDraw.prototype.ParseKML=function(data)							// PARSE KML FILE
 		var s=kml.indexOf("|*color*|",start)+9;									// Start of color
 		var e=kml.indexOf("|*color*|",s);										// End 
 		var col=kml.substring(s,e);												// Extract color
+		if (col.length < 8)														// Too short
+			return "";															// Return none
 		vis=parseInt(col.substr(0,2),16)/2.55;									// Get it
 		return "#"+col.substring(6,8)+col.substring(4,6)+col.substring(2,4);	// ABGR -> RGB
 		}

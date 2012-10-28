@@ -126,7 +126,7 @@ geocoder=new google.maps.Geocoder();
 				str+="<tr><td>Rotation&nbsp;</td><td><input type='range' max='360' style='width:100px;font-size:x-small' id='annRot'/>";
 				str+="</td></tr>";
 				str+="<tr><td colspan='2'><p><hr/></p>";
-				str+="Drag corner dots to resize image. Drag center of box to move the whole box.<br/><br/>";
+				str+="Drag corner dots to resize image. If Shift key is pressed, the image will be stretched. Drag the center of image to move the image.<br/><br/>";
 				str+="You can fine-tune the rotation by dragging a corner point and pressing the Alt or Option key. Dragging point left of center rotates CCW, right rotates CW.";
 				str+="<br/><br/>Click on the trash can icon to remove the image";
 				str+="</td></tr>"
@@ -409,7 +409,7 @@ SHIVA_EarthDraw.prototype.ColorPicker=function(which, x, y)					// COLOR PICKER
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
-// MAP 
+// EARTH 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 SHIVA_EarthDraw.prototype.DrawMap=function()								// DRAW MAP
@@ -463,6 +463,9 @@ SHIVA_EarthDraw.prototype.AddSegsToEarth=function(num)						// ADD SEGMENTS TO E
 			var latLonBox=ge.createLatLonBox('');								// Create box
 			latLonBox.setBox(s.lats[0],s.lats[1],s.lons[0],s.lons[1],0);		// Set coords
 			seg.setLatLonBox(latLonBox);										// Set geometry
+			var icon=ge.createIcon('');											// Create icon
+			seg.setIcon(icon);													// Attach to seg
+			s.asp=0;															// No aspect yet
 			}
 		ge.getFeatures().appendChild(seg);										// Add seg to EDOM
 		this.StyleSeg(i);														// Style it
@@ -518,10 +521,20 @@ SHIVA_EarthDraw.prototype.StyleSeg=function(num)							// SET SEGMENT STYLING
 		seg.setStyleSelector(style);											// Set icon
 		}
 	else if (s.type == "Image") {												// If an Image
-		var icon=ge.createIcon('');												// Create icon
-		if (s.url) {															// If set
-			icon.setHref(s.url);												// Set url
-			seg.setIcon(icon);													// Attach to seg
+		if ((s.url) && (seg.getIcon().getHref() != s.url)) {					// A new url
+			seg.getIcon().setHref(s.url);										// Set url
+			var _this=this;														// Point to module
+			var testImg=new Image();											// Test image to get sizes
+			testImg.src=s.url;													// Set url
+			testImg.onload=function() {											// When loaded
+				var s=_this.segs[num];											// Point at seg
+				s.asp=this.height/this.width;  									// Get aspect ratio
+				s.lats[1]=s.lats[0]-Math.abs(s.lons[0]-s.lons[1])*s.asp;		// Set height
+				var a=s.rot;													// Get 0 -> 360 rot
+				if (a > 180) a=-(360-a);										// Convert -180 -> +180
+				latLonBox.setBox(s.lats[0],s.lats[1],s.lons[0],s.lons[1],Number(a));	// Set coords						
+				_this.DrawMap(true);											// Redraw
+				};
 			}
 		seg.setOpacity(s.vis/100);												// Set opacity
 		var latLonBox=seg.getLatLonBox();										// Get coords	
@@ -617,7 +630,6 @@ SHIVA_EarthDraw.prototype.AddCoordControlDot=function(lat, lon, num, scale)	// A
 	ge.getFeatures().appendChild(placemark);									// Add to DOM
 }	
 
-
 SHIVA_EarthDraw.prototype.AddPointToLine=function(num, lat, lon)			// ADD NEW POINT TO LINE
 {
 	var i;
@@ -702,6 +714,8 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 		    	_this.dragInfo.clicked=true;									// Been clicked on
 		    	_this.dragInfo.point=e.getTarget().getGeometry();				// Point coords
 				_this.dragInfo.rot=s.rot;										// Save rotation
+				if (s.type == "Image") 											// If an image
+					s.asp=Math.abs(s.lats[0]-s.lats[1])/Math.abs(s.lons[0]-s.lons[1]);	// Set aspect ratio
 		    	o=shivaLib.map.getFeatures().getChildNodes();					// Get seg									
 				n=o.getLength();												// Get length
 				for (var i=0;i<n;++i) 											// For each child
@@ -835,14 +849,19 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 						a=Number(_this.dragInfo.rot);							// Get rot when 1st clicked
 						a+=(400-e.getClientX())/40;								// Add to rot 
 						$("#annrot").val(s.rot);								// Set slider
-						s.rot=a;
+						s.rot=a;												// Set rot
+		      			_this.dragInfo.point.setLatLng(s.lats[num],lon);		// Vertical motion only
 						}
 					if (a > 180) a=-(360-a);									// Convert -180 -> +180
 					latLonBox.setBox(s.lats[0],s.lats[1],s.lons[0],s.lons[1],Number(a));	// Set coords						
 					}
-				else
+				else															// Point
 					_this.dragInfo.coords.setLatLngAlt(num,lat,lon,0);			// Set coord
 				if (!e.getAltKey()) {											// If not rotating
+					if ((!e.getShiftKey()) && (s.type == "Image") && (s.asp)) {	// If maintaining aspect
+						lat=((s.lats[1-num]-(s.lons[1-num]-s.lons[num])*s.asp))	// Remake lat
+		      			_this.dragInfo.point.setLatLng(lat,lon);				// Set new lat/lon
+						}
 					s.lats[num]=lat;											// Set lat
 					s.lons[num]=lon;											// Get lon
 					}

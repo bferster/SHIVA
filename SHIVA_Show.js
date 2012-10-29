@@ -2765,170 +2765,6 @@ SHIVA_Show.prototype.SecondsToTimecode=function(secs) 					// CONVERT SECONDS TO
 	return str;																// Return timecode			
 }	
 
-//////////// COLORPICKER 
-
-SHIVA_Show.prototype.ColorPicker=function(mode, att)
-{
-	$("#shiva_dialogDiv").remove();
-	var ops={ width:'auto',height:'auto',modal:true,autoOpen:true,title:"Choose color",resizable:false,position:[20,50] }
-	$("body").append("<div id='shiva_dialogDiv'/>");
-	$("#shiva_dialogDiv").dialog(ops);
-	var str="<table width='200' height='170' cellspacing='1' style='background-color:#666666'>";
-	var cols=[
-		'330000','333300','336600','339900','33CC00','33FF00','66FF00','66CC00','669900','666600','663300','660000','FF0000','FF3300','FF6600','FF9900','FFCC00','FFFF00',
-		'330033','333333','336633','339933','33CC33','33FF33','66FF33','66CC33','669933','666633','663333','660033','FF0033','FF3333','FF6633','FF9933','FFCC33','FFFF33',
-		'330066','333366','336666','339966','33CC66','33FF66','66FF66','66CC66','669966','666666','663366','660066','FF0066','FF3366','FF6666','FF9966','FFCC66','FFFF66',
-		'330099','333399','336699','339999','33CC99','33FF99','66FF99','66CC99','669999','666699','663399','660099','FF0099','FF3399','FF6699','FF9999','FFCC99','FFFF99',
-		'3300CC','3333CC','3366CC','3399CC','33CCCC','33FFCC','66FFCC','66CCCC','6699CC','6666CC','6633CC','6600CC','FF00CC','FF33CC','FF66CC','FF99CC','FFCCCC','FFFFCC',
-		'3300FF','3333FF','3366FF','3399FF','33CCFF','33FFFF','66FFFF','66CCFF','6699FF','6666FF','6633FF','6600FF','FF00FF','FF33FF','FF66FF','FF99FF','FFCCFF','FFFFFF',
-		'0000FF','0033FF','0066FF','0099FF','00CCFF','00FFFF','99FFFF','99CCFF','9999FF','9966FF','9933FF','9900FF','CC00FF','CC33FF','CC66FF','CC99FF','CCCCFF','CCFFFF',
-		'0000CC','0033CC','0066CC','0099CC','00CCCC','00FFCC','99FFCC','99CCCC','9999CC','9966CC','9933CC','9900CC','CC00CC','CC33CC','CC66CC','CC99CC','CCCCCC','CCFFCC',
-		'000099','003399','006699','009999','00CC99','00FF99','99FF99','99CC99','999999','996699','993399','990099','CC0099','CC3399','CC6699','CC9999','CCCC99','CCFF99',
-		'000066','003366','006666','009966','00CC66','00FF66','99FF66','99CC66','999966','996666','993366','990066','CC0066','CC3366','CC6666','CC9966','CCCC66','CCFF66',
-		'000033','003333','006633','009933','00CC33','00FF33','99FF33','99CC33','999933','996633','993333','990033','CC0033','CC3333','CC6633','CC9933','CCCC33','CCFF33',
-		'000000','003300','006600','009900','00CC00','00FF00','99FF00','99CC00','999900','996600','993300','990000','CC0000','CC3300','CC6600','CC9900','CCCC00','CCFF00',
-		'000000','111111','222222','333333','444444','555555','666666','777777','888888','999999','AAAAAA','BBBBBB','CCCCCC','DDDDDD','EEEEEE','FFFFFF','none','x'
-		];
-	for (i=0;i<13;++i) {													
-		str+="<tr>";
-		for (j=0;j<18;++j)
-			if (cols[(i*18)+j] == 'x')
-				str+="<td background='closer.gif' onClick='shiva_SetColor(-1,\""+att+"\",\""+mode+"\")'></td>";
-			else if (cols[(i*18)+j] == 'none')
-				str+="<td background='nocolor.gif' onClick='shiva_SetColor(\"none\",\""+att+"\",\""+mode+"\")'></td>";
-			else
-				str+="<td style='background-color:#"+cols[(i*18)+j]+"' onClick='shiva_SetColor(\""+cols[(i*18)+j]+"\",\""+att+"\",\""+mode+"\")'></td>";
-		str+="</tr>";
-		}
-	str+="</table><div id='shivaMultiColorDiv'/>";							// Ad multicolor div
-	$("#shiva_dialogDiv").html(str);										// Add body
-	if (mode == 1) 															// Picking multiple colors
-		this.MultiColor($("#propInput"+att).val(),-1);						// Get current version from menu
-}
-
-SHIVA_Show.prototype.MultiColor = function(oldCols, newCol)				// DRAW MULTI-COLOR MENU
-{
-	var colors=oldCols.split(",");											// Separate oldCols to an array
-
-	function setCur(index) {												// SetCur handles both the setting of all cells and the adding on new rows as needed
-		var row=Math.floor(index/5);										// Get row from index
-		var cell=index%5;													// Get cell
-		if (typeof(shivaLib.multiColorCur) != "undefined") {				// If first time
-			$(".full:eq(" + shivaLib.multiColorCur + ")").css("border", "solid thin black")
-			}
-		if ($(".empty").length > 0 && ($("#table tr:eq(" + row + ") td:eq(" + cell + ")").index())+($("#table tr:eq(" + row + ") td:eq(" + cell + ")").parent().index()*5) >= ($(".empty:first").index() + (5*$(".empty:first").parent().index()))){
-			shivaLib.multiColorCur = $(".empty:first").index() + ($(".empty:first").parent().index() * 5);
-			$(".empty:first").css("border", "solid medium black");
-			$(".empty:first").attr("class", "full");
-			}
-		else{
-			shivaLib.multiColorCur = cell + (5 * row)
-			$("#table tr:eq(" + row + ") td:eq(" + cell + ")").css("border", "solid medium black");
-			$("#table tr:eq(" + row + ") td:eq(" + cell + ")").attr("class", "full");
-			}
-		if ($(".full:last").index() == 4 && $(".full:last").parent().index() == $("#table tr").length-1 && $("#table tr").length < 5){              //if a new row is needed and the table isn't full, add one
-			$("#table").append("<tr>");
-			for (var i=0;i<5;i++) {
-				$("#table tr:last").append($('<td>', {
-					css : {
-						width : '32px',
-						height : '32px',
-						border : 'dashed thin gray'
-						},
-					click : function() {
-						setCur($(this).index() + (5* $(this).parent().index()));
-					}
-				}));
-				$("#table tr:last td:last").attr("class", "empty");
-				}
-			}
-		}
-	if (newCol == -1) {  														// If in init mode build the basic table
-		if ($("#table").length == 0) {
-			$("#shivaMultiColorDiv").append($("<table>", {
-				id : "table",
-			}));
-			}
-		$("#table").append("<tr>");
-		for (var i = 0; i < 5; i++) {
-			$("#table tr:first").append($('<td>', {
-				css : {
-					width : '32px',
-					height : '32px',
-					border : 'dashed thin gray'
-				},
-				click : function() {
-					setCur($(this).index() + (5 * $(this).parent().index()));
-				}
-			}));
-			$("#table tr:first td:last").attr("class", "empty");
-			}
-		setCur(0);
-		if ($(".full").length == 1  && oldCols != "") {							// And if there are colors to be set, set them
-			for (var j=0;j<colors.length;j++) {
-				setCur(j);
-				$("#table tr:eq("+Math.floor(j / 5)+") td:eq("+ (j % 5)+")").css("backgroundColor", colors[j]);
-				}
-			setCur(shivaLib.multiColorCur);
-			}
-		}
-	else{																		// If not in init mode
-		if (shivaLib.multiColorCur < $(".full").length-1){						// And if the cell is an existing full cell	
-			colors[shivaLib.multiColorCur] = "#"+newCol;
-			$(".full:eq("+shivaLib.multiColorCur+")").css("backgroundColor", "#"+newCol);
-			}
-		else if(shivaLib.multiColorCur < 25){									// Else if the selected cell is the leading blank cell
-			$(".full:last").css("backgroundColor", "#"+newCol);
-			colors[shivaLib.multiColorCur] = "#"+newCol;
-			setCur(shivaLib.multiColorCur+1);
-			}
-		}
-	var ret=colors.toString();
-	ret+=",";																	// Add the trailing comma 
-	return ret;
-}
-
-function shiva_SetColor(val, att, mode)									// ON COLOR PICK
-{
-	if (val == -1) { 
-		$("#shiva_dialogDiv").remove();
-		return;
-		}
-	if (val == -2) 
-		val=$("#shiva_cpInput").val();
-	if (mode == 0) 
-		$("#shiva_dialogDiv").remove();
-	if (isNaN(att)) {
-		var str="#"+att.replace(/___/g,"");
-		$(str).val(val);
-		$(str).change();
-		var oVal=val;
-		if (val == "none")
-			val="ffffff";
-		if (att.indexOf("___") != -1) {
-			$(str+"C").css('background-color',"#"+val); 
-			$(str).css('border-color',"#"+val); 
-			}
-		else
-			$(str).css('border-color',"#"+val); 
-		return;
-		}
-	if (att < 0) {
-		$('#colorDiv').html(val);
-		return;
-		}
-	if (att > 100)															// If within an item
-		str="#itemInput"+(Math.floor(att/100)-1)+"-"+(att%100);				// Point a sub-element input in accordian
-	else																	// Normal param
-		str="#propInput"+att;												// Point a menu input box
-	$(str).css('border-color',"#"+val); 									// Set input box border color to chosen color
-	$(str+"C").css('background-color',"#"+val); 							// Set color chip color
-	if (mode == 1) 															// If multi-color picking
-		val=shivaLib.MultiColor($(str).val(),val);							// Show multi-color menu and set vals
-	$(str).val(val);														// Set menu value for color(s)	
-	Draw();																	// Redraw chart with new color(s)
-}
-
 SHIVA_Show.prototype.MakeSelect=function(id, multi, items, sel, extra)
 {
 	var	str="<select id='"+id+"'";
@@ -4781,4 +4617,801 @@ SHIVA_Draw.prototype.IdeaDrop=function(from, to) 						//	HANDLE IDEA NODE DRAG 
 {
 	this.segs[from].ideaParent=to;											// Connect
 	shivaLib.Sound("ding");													// Ding sound
+}
+
+//////////// COLORPICKER
+
+SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
+    $("#shiva_dialogDiv").remove();                                     //remove existing dialogs
+    var self = this;
+    var inputBox = $("#propInput" + attr);
+
+    //HELPER FUNCTIONS
+    this.HEX_to_HSV = function(hexString) {                             
+        var value = hexString.substring(1);
+        
+        var r = parseInt(value.substring(0, 2), 16) / 255;
+        var g = parseInt(value.substring(2, 4), 16) / 255;
+        var b = parseInt(value.substring(4, 6), 16) / 255;
+
+        var max = Math.max.apply(Math, [r, g, b]);
+        var min = Math.min.apply(Math, [r, g, b]);
+
+        var hue;
+        var sat;
+        var val = max;
+
+        var delta = max - min;
+        if (max != 0)
+            sat = delta / max;
+        else {
+            sat = 0;
+            hue = 0;
+            return;
+        }
+
+        if (delta == 0) {
+            return [0, 0, val];
+        }
+
+        if (r == max)
+            hue = (g - b) / delta;
+        else if (g == max)
+            hue = 2 + (b - r) / delta;
+        else
+            hue = 4 + (r - g) / delta;
+        hue *= 60;
+        if (hue < 0)
+            hue += 360;
+        return [hue, sat, val];
+    }
+
+    this.RGB_to_HSV = function(r, g, b) {
+
+        var max = Math.max.apply(Math, [r, g, b]);
+        var min = Math.min.apply(Math, [r, g, b]);
+
+        var hue;
+        var sat;
+        var val = max;
+
+        var delta = max - min;
+
+        if (max != 0)
+            sat = delta / max;
+        else {
+            sat = 0;
+            hue = 0;
+            return [hue, sat, val];
+        }
+
+        if (delta == 0) {
+            return [0, 0, val];
+        }
+
+        if (r == max) {
+            hue = (g - b) / delta;
+        } else if (g == max) {
+            hue = 2 + (b - r) / delta;
+        } else {
+            hue = 4 + (r - g) / delta;
+        }
+
+        hue *= 60;
+        if (hue < 0)
+            hue += 360;
+        return [hue, sat, val];
+    }
+
+    this.HSV_to_HEX = function(h, s, v) {
+
+        if (h === 0)
+            h = .001;
+        else if (h == 360)
+            h = 359.999;
+
+        chroma = v * s;
+        hprime = h / 60;
+        x = chroma * (1 - Math.abs(hprime % 2 - 1));
+
+        var r;
+        var g;
+        var b;
+
+        if (h == 0)
+            r, g, b = 0;
+        else if (hprime >= 0 && hprime < 1) {
+            r = chroma;
+            g = x;
+            b = 0;
+        } else if (hprime >= 1 && hprime < 2) {
+            r = x;
+            g = chroma;
+            b = 0;
+        } else if (hprime >= 2 && hprime < 3) {
+            r = 0;
+            g = chroma;
+            b = x;
+        } else if (hprime >= 3 && hprime < 4) {
+            r = 0;
+            g = x;
+            b = chroma;
+        } else if (hprime >= 4 && hprime < 5) {
+            r = x;
+            g = 0;
+            b = chroma;
+        } else if (hprime >= 5 && hprime < 6) {
+
+            r = chroma;
+            g = 0;
+            b = x;
+        }
+
+        m = v - chroma;
+        r = Math.round(255 * (r + m));
+        g = Math.round(255 * (g + m));
+        b = Math.round(255 * (b + m));
+
+        return self.RGB_to_HEX(r, g, b);
+    }
+
+    this.RGB_to_HEX = function(r, g, b) {
+        h1 = Math.floor(r / 16).toString(16);
+        h2 = Math.floor((r % 16)).toString(16);
+        h3 = Math.floor(g / 16).toString(16);
+        h4 = Math.floor((g % 16)).toString(16);
+        h5 = Math.floor(b / 16).toString(16);
+        h6 = Math.floor((b % 16)).toString(16);
+
+        return "#" + h1 + h2 + h3 + h4 + h5 + h6;
+    }
+    
+    //  BUILDING THE COLORPICKER
+    var hue = 0;
+    var sat = 1;
+    var val = 1;
+    var cp_current = 0;
+    var cp_first = 0;
+
+    $('body').append($("<div>", {
+        id : 'shiva_dialogDiv',
+        class : 'propTable',
+        css : {
+            position : 'absolute',
+            right : '100px',
+            top : '30px',
+            width : '240px',
+            marginLeft : '2px',
+            marginRight : '2px',
+            padding : '5px',
+            paddingBottom : '30px',
+            paddingTop : '10px',
+        },
+    }).draggable({
+        delay : 300
+    }));
+    //TABS
+    $("#shiva_dialogDiv").append($("<div>", {
+        id : 'cp_colorbar',
+        css : {
+            position : 'absolute',
+            right : '1px',
+            top : '-1px',
+            width : '244px',
+            height : '22px',
+            borderTopLeftRadius : '8px',
+            borderTopRightRadius : '8px',
+        }
+    }));
+    $("#cp_colorbar").append($("<a>", {
+        class : 'cbar_control',
+        css : {
+            width : '30px',
+            height : '20px',
+            position : 'relative',
+            left : '-5px',
+            float : 'left',
+            border : '0',
+            borderRadius : '0',
+            borderTopLeftRadius : '8px',
+            borderRight : '1px solid gray',
+            borderBottom : '1px solid gray',
+        },
+        click : function() {
+            if (cp_first > 0)
+                cp_first--;
+            self.position_bar();
+        },
+    }).button({
+        icons : {
+            primary : 'ui-icon-arrowthick-1-w'
+        },
+        text : false
+    }));
+    $("#cp_colorbar").append($("<a>", {
+        class : 'cbar_control',
+        css : {
+            width : '28px',
+            height : '20px',
+            position : 'absolute',
+            left : '216px',
+            top : '0px',
+            border : '0',
+            borderRadius : '0',
+            borderTopRightRadius : '8px',
+            borderLeft : '1px solid gray',
+            borderBottom : '1px solid gray',
+        },
+        click : function() {
+            if (cp_first < $(".tab").length - 5)
+                cp_first++
+            self.position_bar();
+        }
+    }).button({
+        icons : {
+            primary : 'ui-icon-arrowthick-1-e'
+        },
+        text : false
+    }));
+    $("#cp_colorbar").append($("<a>", {
+        class : 'cbar_control',
+        css : {
+            width : '18.5px',
+            height : '20px',
+            position : 'absolute',
+            top : '0',
+            left : '196px',
+            border : '0',
+            borderRadius : '0',
+            borderLeft : '1px solid gray',
+            borderBottom : '1px solid gray',
+        },
+        click : function() {
+            cp_first++;
+            self.add("none");
+        }
+    }).button({
+        icons : {
+            primary : 'ui-icon-plusthick'
+        },
+        text : false
+    }));
+    $("#cp_colorbar a").hover(function() {
+        $(this).css("cursor", "pointer");
+    });
+    $("#shiva_dialogDiv").append($("<span>", {
+        html : "S&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B",
+        css : {
+            color : 'gray',
+            position : 'absolute',
+            top : '25px',
+            left : '186px',
+        }
+    }));
+    $("#shiva_dialogDiv").append($("<div>", {
+        id : 'cp_colormap',
+        css : {
+            position : 'relative',
+            top : '20px',
+            width : '150px',
+            padding : '2px',
+            height : '150px',
+        }
+    }));
+    $("#cp_colormap").append($("<img>", {
+        src : 'hsv_wheel.png',
+        click : function(e) {
+            self.position((e.pageX - $(this).parent().offset().left), (e.pageY - $(this).parent().offset().top));
+        },
+    }))
+    $("#shiva_dialogDiv").append($("<input>", {
+        id : 'cp_current',
+        maxLength : '7',
+        css : {
+            position : 'absolute',
+            top : '97px',
+            left : '52.5px',
+            width : '58px',
+            height : '20px',
+            border : '0',
+            textAlign : 'center',
+            backgroundColor : 'transparent',
+        },
+        change : function() {
+            var val = $(this).attr("value");
+            if (val[0] != "#")
+                val = "#" + val;
+            if (val == "none")
+                self.update(null);
+            else if (val.length === 7) {
+                var hsv = self.HEX_to_HSV(val);
+                if (hsv == -1) {
+                    self.setColor(0, 0, 0);
+                    $(this).attr("value", "000000");
+                } else {
+                    hue = hsv[0];
+                    sat = hsv[1];
+                    val = hsv[2];
+                    self.setColor(hue, sat, val);
+                }
+            }
+        }
+    }));
+    //SLIDERS
+    $("#shiva_dialogDiv").append($("<div>", {
+        id : 'cp_brightness',
+        class : 'slider',
+        title : 'brightness',
+        css : {
+            width : '5px',
+            height : '120px',
+            position : 'relative',
+            right : '24.5px',
+            top : '-120px',
+            float : 'right',
+            borderRadius : '8px',
+            border : '1px solid gray',
+        }
+    }).slider({
+        value : 100,
+        orientation : 'vertical'
+    }));
+    $("#shiva_dialogDiv").append($("<div>", {
+        id : 'cp_saturation',
+        title : 'saturation',
+        class : 'slider',
+        css : {
+            width : '5px',
+            height : '120px',
+            position : 'relative',
+            right : '45.5px',
+            top : '-120px',
+            float : 'right',
+            borderRadius : '8px',
+            border : '1px solid gray',
+        }
+    }).slider({
+        value : 100,
+        orientation : 'vertical'
+    }));
+    $(".slider a").css("width", '20px');
+    $(".slider a").css("height", '10px');
+    $(".slider a").css("left", "-8px");
+    $(".slider").first().slider("option", "slide", function() {
+        self.setColor(hue, sat, $(this).slider("option", "value") / 100);
+    });
+    $(".slider").last().slider("option", "slide", function() {
+        self.setColor(hue,$(this).slider("option", "value") / 100, val);
+    });
+    $("#shiva_dialogDiv").append($("<div>", {
+        id : 'cp_chip',
+        css : {
+            border : '1px solid gray',
+            borderRadius : '4px',
+            width : '50px',
+            height : '30px',
+            position : 'relative',
+            left : '172px',
+            top : '15px'
+        },
+    }));
+    $("#shiva_dialogDiv").append($("<div>", {
+        id : 'cp_basic',
+        css : {
+            width : '216px',
+            position : 'relative',
+            left : '10px',
+            top : '25px',
+        }
+    }));
+    $("#cp_basic").append($("<div>", {
+        id : 'basic_colors',
+        css : {
+            position : 'absolute',
+            width : '216px',
+            height : '20px',
+            border : '1px solid gray',
+        }
+    }))
+    $("#cp_basic").append($("<div>", {
+        id : 'neutral',
+        css : {
+            position : 'absolute',
+            top : '20px',
+            width : '216px',
+            height : '20px',
+            border : '1px solid gray',
+        }
+    }))
+    var form = [12, 16];
+    for (var i = 0; i < 2; i++) {
+        var html = "";
+        for (var j = 0; j < form[i]; j++) {
+            html += "<div class= \'chips\' style=\'height:100%;width:" + ((1 / form[i]) * 100) + "%;float:left\'></div>";
+        }
+        $("#cp_basic").children().eq(i).html(html);
+    }
+    for (var i = 0; i < 12; i++) {
+        $("#basic_colors").children().eq(i).css("backgroundColor", self.HSV_to_HEX((i * 30), 1, 1))
+    }
+    for (var i = 0; i < 16; i++) {
+        $("#neutral").children().eq(i).css("backgroundColor", self.HSV_to_HEX(0, 0, (i * 0.06666666666666667)));
+    }
+    $("#cp_basic").children().children().click(function() {
+        var color = $(this).css("backgroundColor");
+        color = color.slice(4, color.length - 1);
+        color = color.split(",");
+        var hsv = self.RGB_to_HSV(color[0] / 255, color[1] / 255, color[2] / 255);
+        self.setColor(hsv[0], hsv[1], hsv[2]);
+    });
+
+    $("#shiva_dialogDiv").append($("<div>", {
+        id : 'cp_control',
+        css : {
+            width : '216px',
+            height : '30px',
+            position : 'relative',
+            top : '78px',
+        }
+    }));
+
+    //SCHEMES
+    $("#cp_control").append($("<button>", {
+        id : 'cp_schemes',
+        class : 'button',
+        html : 'Schemes',
+        css : {
+            left : '12px',
+        },
+        click : function() {
+            $("#cp_schemediv").toggle();
+        }
+    }))
+    $("#shiva_dialogDiv").append($("<div>", {
+        id : 'cp_schemediv',
+        css : {
+            height : '160px',
+            position : 'relative',
+            top : '85px',
+            paddingBottom : '50px',
+
+        }
+    }));
+    $("#cp_schemediv").hide();
+
+    $("#cp_schemediv").append($("<div>", {
+        id : 'cp_schemebox',
+    }));
+    for (var i = 0; i < 4; i++) {
+        $("#cp_schemebox").append($("<div>", {
+            css : {
+                width : '100%',
+                height : '35px',
+                position : 'relative',
+                top : '-5px',
+                paddingBottom : '2px',
+                paddingTop : '2px',
+            }
+        }));
+    };
+    var names = [["monochromatic"], ["complementary", "split-complementary"], ["triadic", "analagous"], ["tetrad"]];
+    var form = [[16], [2, 3], [3, 3], [4]];
+    for (var i = 0; i < form.length; i++) {
+        for (var j = 0; j < form[i].length; j++) {
+            $("#cp_schemebox").children().eq(i).append($("<div>", {
+                html : "<center>" + names[i][j] + "</center>",
+                css : {
+                    float : 'left',
+                    position : 'absolute',
+                    top : '0',
+                    left : (((92 / form[i].length) + 2) * j) + 2 + "%",
+                    fontSize : '10px',
+                    width : 92 / form[i].length + "%",
+                    height : '100%',
+                }
+            }));
+            for (var k = 0; k < form[i][j]; k++) {
+                $("#cp_schemebox").children().eq(i).children("div").eq(j).append($("<div>", {
+                    css : {
+                        float : 'left',
+                        position : 'relative',
+                        top : '1px',
+                        width : 100 / form[i][j] + "%",
+                        height : '50%',
+                    }
+                }));
+            }
+        }
+    }
+    $("#cp_schemebox").children().children().css("fontSize", "8.5px");
+    $("#cp_schemebox div:not(:has(*))").filter("div").click(function() {
+        var color = $(this).css("backgroundColor");
+        color = color.slice(4, color.length - 1);
+        color = color.split(",");
+        color = self.RGB_to_HEX(color[0], color[1], color[2]);
+        $(".tab").eq(cp_current).children().first().css("backgroundColor", color);
+        $(".tab").eq(cp_current).children().first().html("");
+        self.drawColors(color);
+    });
+    ///end of schemes
+
+    $("#cp_control").append($("<button>", {
+        id : 'cp_nocolor',
+        class : 'button',
+        html : "No color",
+        css : {
+            left : '22px',
+        },
+        click : function() {
+            self.update("none");
+        }
+    }));
+
+    $("#cp_control").append($("<button>", {
+        id : 'cp_OK',
+        class : 'button',
+        html : "OK",
+        css : {
+            width : '60px',
+            left : '35px',
+        },
+        click : function() {
+            $("#shiva_dialogDiv").remove();
+            return;
+        }
+    }))
+    $(".button").button();
+    $(".button").css({
+        position : 'relative',
+        borderRadius : '8px',
+        float : 'left',
+        fontSize : '9px',
+        top : '3px',
+    });
+
+    this.scheme = function() {    //Dynamically builds the schemes                                      
+        for (var i = 0; i < 16; i++) {
+            $("#cp_schemebox").children("div").eq(0).children("div").eq(0).children("div").eq(i).css("backgroundColor", self.HSV_to_HEX(hue, (1 - (i / 16)), 1));
+        }
+        $("#cp_schemebox").children("div").eq(1).children("div").eq(0).children("div").eq(0).css("backgroundColor", self.HSV_to_HEX(hue, sat, val));
+        $("#cp_schemebox").children("div").eq(1).children("div").eq(0).children("div").eq(1).css("backgroundColor", self.HSV_to_HEX((hue + 180) % 360, sat, val));
+        $("#cp_schemebox").children("div").eq(1).children("div").eq(1).children("div").eq(0).css("backgroundColor", self.HSV_to_HEX(hue, sat, val));
+        $("#cp_schemebox").children("div").eq(1).children("div").eq(1).children("div").eq(1).css("backgroundColor", self.HSV_to_HEX((hue + 150) % 360, sat, val));
+        $("#cp_schemebox").children("div").eq(1).children("div").eq(1).children("div").eq(2).css("backgroundColor", self.HSV_to_HEX((hue + 210) % 360, sat, val));
+        $("#cp_schemebox").children("div").eq(2).children("div").eq(0).children("div").eq(0).css("backgroundColor", self.HSV_to_HEX(hue, sat, val));
+        $("#cp_schemebox").children("div").eq(2).children("div").eq(0).children("div").eq(1).css("backgroundColor", self.HSV_to_HEX((hue + 120) % 360, sat, val));
+        $("#cp_schemebox").children("div").eq(2).children("div").eq(0).children("div").eq(2).css("backgroundColor", self.HSV_to_HEX((hue + 240) % 360, sat, val));
+        $("#cp_schemebox").children("div").eq(2).children("div").eq(1).children("div").eq(0).css("backgroundColor", self.HSV_to_HEX((hue + 330) % 360, sat, val));
+        $("#cp_schemebox").children("div").eq(2).children("div").eq(1).children("div").eq(1).css("backgroundColor", self.HSV_to_HEX(hue, sat, val));
+        $("#cp_schemebox").children("div").eq(2).children("div").eq(1).children("div").eq(2).css("backgroundColor", self.HSV_to_HEX((hue + 390) % 360, sat, val));
+        $("#cp_schemebox").children("div").eq(3).children("div").eq(0).children("div").eq(0).css("backgroundColor", self.HSV_to_HEX(hue, sat, val));
+        $("#cp_schemebox").children("div").eq(3).children("div").eq(0).children("div").eq(1).css("backgroundColor", self.HSV_to_HEX((hue + 30) % 360, sat, val));
+        $("#cp_schemebox").children("div").eq(3).children("div").eq(0).children("div").eq(2).css("backgroundColor", self.HSV_to_HEX((hue + 180) % 360, sat, val));
+        $("#cp_schemebox").children("div").eq(3).children("div").eq(0).children("div").eq(3).css("backgroundColor", self.HSV_to_HEX((hue + 210) % 360, sat, val));
+    }
+
+    this.update = function(attr, value) {     //Sets "hue", "sat", or "val" and handles the consequences
+        if (attr == "none") {
+            $(".tab").eq(cp_current).children().html("<center>none</center>");
+            $(".tab").eq(cp_current).children().css("backgroundColor", "white");
+            $("#cp_chip").css("backgroundColor", "white");
+            $("#cp_chip").css("border", "1px dashed gray");
+            $(".slider").first().slider("option", "value", 100);
+            $(".slider").last().slider("option", "value", 100);
+            //handle inputBox?
+        } else if (attr == null) {
+            $(".tab").eq(cp_current).children().html("");
+            $(".tab").eq(cp_current).children().css("backgroundColor", "transparent");
+            $("#cp_current").attr("value", "");
+            $("#cp_chip").css("backgroundColor", "transparent");
+            $("#cp_chip").css("border", "1px dashed gray");
+            $(".slider").first().slider("option", "value", 100)
+            $(".slider").last().slider("option", "value", 100)
+            //handle inputBox?
+        } else {
+            if (attr == "saturation") {
+                sat = value;
+            } else if (attr == "brightness") {
+                val = value;
+            } else if (attr == "hue") {
+                hue = value;
+            }
+            var color = self.HSV_to_HEX(hue, sat, val);
+            $("#cp_chip").css("backgroundColor", color);
+            $("#cp_chip").css("border", "1px solid gray");
+            $("#cp_current").attr("value", color.slice(1))
+            $(".tab").eq(cp_current).children().css("backgroundColor", color)
+            $(".tab").eq(cp_current).children().html('');
+            $(".slider").first().slider("option", "value", val * 100)
+            $(".slider").last().slider("option", "value", sat * 100)
+        }
+        self.scheme()
+    }
+
+    this.add = function(color_HEX) {                //Adds a new chip to the tabs
+        cp_current = $(".tab").length;
+        $("#cp_colorbar a:eq(1)").before($("<div>", {
+            class : 'tab',
+            css : {
+                height : '16px',
+                width : '28px',
+                border : '1px solid gray',
+                borderTop : '0',
+                padding : '2px',
+                position : 'relative',
+                left : '-6px',
+                float : 'left',
+            },
+            click : function() {
+                $(".tab:not(:eq(" + $(this).index(".tab") + "))").css("borderBottom", '1px solid gray');
+                $(this).css("borderBottom", '0');
+                cp_current = $(this).index(".tab");
+            }
+        }).append($("<div>", {
+            css : {
+                fontSize : '10px',
+                width : "100%",
+                height : '100%',
+            }
+        })).append($("<img>", {
+            src : 'cpclose.png',
+            css : {
+                width : '4px',
+                position : 'absolute',
+                top : '2.5px',
+                right : '2.5px',
+            },
+            mouseenter : function() {
+                $(this).css({
+                    width : '10px',
+                })
+            },
+            mouseleave : function() {
+                $(this).css({
+                    width : '4px',
+                })
+            },
+            click : function() {
+                cp_current = $(this).parent().index(".tab");
+                self.removeTab();
+            }
+        })));
+        if (color_HEX == "none") {
+            $('.tab').last().children().css("backgroundColor", "transparent");
+            self.update("none");
+        } else if (color_HEX == null) {
+            $('.tab').last().children().css("backgroundColor", "transparent");
+            self.update(null);
+        } else {
+            $('.tab').last().children().css("backgroundColor", color_HEX);
+            var color = self.HEX_to_HSV(color_HEX);
+            if ( typeof color != "undefined")
+                self.setColor(color[0], color[1], color[2]);
+            else
+                self.setColor(0, 0, 0);
+        }
+        self.position_bar();
+    }
+    
+    this.drawColors = function(color_HEX){
+        var colors = inputBox.val().split(",");
+        colors[cp_current] = color_HEX.slice(1);
+        
+        var boxChip = colors[cp_current];
+        boxChip = "#"+boxChip;
+        var str = "#propInput" + attr;
+        $(str).css('border-color', boxChip);
+        $(str + "C").css('background-color', boxChip);
+          
+        var str = colors.toString();
+
+        if (str[str.length - 1] != ",")
+            str += ",";
+        inputBox.val(str);
+
+        Draw();
+    }
+
+    this.setColor = function(h, s, v) {                       
+        self.update("hue", h);
+        self.update("saturation", s);
+        self.update("brightness", v);
+
+       self.drawColors(self.HSV_to_HEX(h, s, v));
+    }
+
+    this.position_bar = function() {
+        if (cp_current > cp_first + 4)
+            cp_current = cp_first + 4;
+        $(".tab").eq(cp_current).click();
+        $(".tab").show();
+        $(".tab:lt(" + cp_first + ")").hide();
+        $(".tab:gt(" + (cp_first + 4) + ")").hide();
+    }
+    //HANDLES the setting of HUE by angle relative to the center of the wheel
+    this.position = function(x, y) {
+        var xrel = x - 75;
+        var yrel = 75 - y;
+        var angleR = Math.atan2(yrel, xrel);
+
+        var angle = angleR * (180 / Math.PI);
+        var h;
+
+        if (angle > 0) {
+            h = (360 - (angle - 90)) % 360;
+        } else {
+            h = 90 + (angle - (angle * 2));
+        }
+        self.setColor(h, 1, 1);
+    }
+
+    this.removeTab = function() {
+        $(".tab").eq(cp_current).remove();
+        var colors = inputBox.val();
+        colors = colors.split(",");
+        colors.splice(cp_current, 1)
+        var str = colors.toString();
+        if (str[str.length - 1] != ",")
+            str = str + ",";
+        inputBox.val(str);
+        while ($(".tab").length < 5)
+        self.add();
+        cp_current = cp_first;
+        $(".tab").eq(cp_current).click();
+        Draw();
+    }
+    //COLORPICKER INITIALIZATION
+
+    var oldcols = inputBox.val();
+
+    //SINGLE color mode
+    if (mode == 0) {
+        $("#cp_colorbar").hide();
+        if (oldcols != "") {
+            if (oldcols[0] != "#")
+                oldcols = "#" + oldcols;
+            var color = self.HEX_to_HSV(oldcols);
+            self.setColor(color[0], color[1], color[2]);
+        }
+    }
+    //MULTI color mode
+    else {
+        $("#cp_nocolor").hide();
+        $("#cp_OK").css("left", '90px');
+        if (oldcols != "") {
+            oldcols = oldcols.split(",");
+            var rem = 6 - oldcols.length;
+            for (var i = 0; i < oldcols.length; i++) {
+                if (oldcols[i] != "") {
+                    self.add("#" + oldcols[i]);
+                }
+            }
+            if (rem > 0) {
+                for (var j = 0; j < rem; j++) {
+                    self.add();
+                }
+            }
+        } else {
+            for (var j = 0; j < 5; j++) {
+                self.add();
+            }
+        }
+
+        $(".tab").first().click();
+        Draw();
+
+        $(".tab").hover(function() {
+            $(this).css("cursor", "pointer");
+        });
+    }
+    $("#cp_schemebox div:not(:has(*))").hover(function() {
+        $(this).css("cursor", "pointer");
+    });
+    $("#cp_basic div:not(:has(*))").hover(function() {
+        $(this).css("cursor", "pointer");
+    });
+    $(".slider a").hover(function() {
+        $(this).css("cursor", "pointer");
+    });
+
 }

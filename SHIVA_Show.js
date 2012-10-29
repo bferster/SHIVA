@@ -4787,9 +4787,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             paddingBottom : '30px',
             paddingTop : '10px',
         },
-    }).draggable({
-        delay : 300
-    }));
+    }).draggable());
     //TABS
     $("#shiva_dialogDiv").append($("<div>", {
         id : 'cp_colorbar',
@@ -4868,7 +4866,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
         },
         click : function() {
             cp_first++;
-            self.add("none");
+            self.add();
         }
     }).button({
         icons : {
@@ -4944,7 +4942,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
         title : 'brightness',
         css : {
             width : '5px',
-            height : '120px',
+            height : '85px',
             position : 'relative',
             right : '24.5px',
             top : '-120px',
@@ -4962,7 +4960,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
         class : 'slider',
         css : {
             width : '5px',
-            height : '120px',
+            height : '85px',
             position : 'relative',
             right : '45.5px',
             top : '-120px',
@@ -4992,7 +4990,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             height : '30px',
             position : 'relative',
             left : '172px',
-            top : '15px'
+            top: '-25px',
         },
     }));
     $("#shiva_dialogDiv").append($("<div>", {
@@ -5001,7 +4999,6 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             width : '216px',
             position : 'relative',
             left : '10px',
-            top : '25px',
         }
     }));
     $("#cp_basic").append($("<div>", {
@@ -5023,7 +5020,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             border : '1px solid gray',
         }
     }))
-    var form = [12, 16];
+    var form = [16, 16];
     for (var i = 0; i < 2; i++) {
         var html = "";
         for (var j = 0; j < form[i]; j++) {
@@ -5031,8 +5028,8 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
         }
         $("#cp_basic").children().eq(i).html(html);
     }
-    for (var i = 0; i < 12; i++) {
-        $("#basic_colors").children().eq(i).css("backgroundColor", self.HSV_to_HEX((i * 30), 1, 1))
+    for (var i = 0; i < 16; i++) {
+        $("#basic_colors").children().eq(i).css("backgroundColor", self.HSV_to_HEX((i * 22.5), 1, 1))
     }
     for (var i = 0; i < 16; i++) {
         $("#neutral").children().eq(i).css("backgroundColor", self.HSV_to_HEX(0, 0, (i * 0.06666666666666667)));
@@ -5051,7 +5048,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             width : '216px',
             height : '30px',
             position : 'relative',
-            top : '78px',
+            top : '50px',
         }
     }));
 
@@ -5061,7 +5058,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
         class : 'button',
         html : 'Schemes',
         css : {
-            left : '12px',
+            left : '18px',
         },
         click : function() {
             $("#cp_schemediv").toggle();
@@ -5072,8 +5069,8 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
         css : {
             height : '160px',
             position : 'relative',
-            top : '85px',
-            paddingBottom : '50px',
+            top : '60px',
+            paddingBottom : '30px',
 
         }
     }));

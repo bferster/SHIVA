@@ -7,8 +7,8 @@
 	<link rel="stylesheet" type="text/css" href="http://www.viseyes.org/shiva/css/smoothness/jquery-ui-1.8.16.custom.css">
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
-	<script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"earth","version":"1"}]}'></script>
- 	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+ 	<script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"earth","version":"1"}]}'></script>
  	<script type="text/javascript" src="http://www.viseyes.org/shiva/SHIVA_Show.js"></script>
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small}
@@ -101,7 +101,7 @@ geocoder=new google.maps.Geocoder();
 		var str="<img src='img/MapScholarLogo.png'/>";
 		var _this=shivaLib.dr;
 		if (mode == "draw") {
-			var type=$("#annType").val();
+			var type="Draw";
 			if (_this.curSeg != -1)
 				type=_this.segs[_this.curSeg].type;
 			str+="<div style='position:absolute;top:203px;width:162px;height:395px;background-color:#fff;border:1px solid #999;margin:10px;padding:8px' class='rounded-corners'>";
@@ -149,7 +149,7 @@ geocoder=new google.maps.Geocoder();
 				str+="</td></tr>"
 				}
 			if (_this.curSeg != -1) {
-				str+="<img src='img/trashdot.gif' style='position:absolute;left:8x;top:390px' title='Remove segment' id='annDelete'>";		
+				str+="<img src='img/trashdot.gif' style='position:absolute;left:8px;top:390px' title='Remove segment' id='annDelete'>";		
 				if (_this.segs[_this.curSeg].lock)
 					str+="<img src='img/lockdot.png' style='position:absolute;left:155px;top:390px' title='Unlock segment' id='annLock'>";		
 				else
@@ -161,7 +161,7 @@ geocoder=new google.maps.Geocoder();
 			str+="&nbsp;&nbsp;&nbsp;<select id='shelfMode' style='font-size:x-small'>";
 			str+="<option>Maps</option>";		str+="<option>Tours</option>";
 			str+="</select>&nbsp;</div>";
-			str+="<div style='position:absolute;text-align:center;top:595px;width:200px;color:#fff;text-shadow:1px 1px #bbb'><br/>The University of Virginia<br/>10/15/12</div>";
+			str+="<div style='position:absolute;text-align:center;top:595px;width:200px;color:#fff;text-shadow:1px 1px #bbb'><br/>The University of Virginia<br/>10/31/12</div>";
 			}
 		$("#shelfDiv").html(str+"</table></div>");
 	}
@@ -173,6 +173,8 @@ geocoder=new google.maps.Geocoder();
 function SHIVA_EarthDraw()												// CONSTRUCTOR
 {
 	this.segs=new Array();													// Holds drawn segs
+	this.undos=new Array();													// Holds undos
+	this.maxUndo=100;														// Max number of undos
 	this.curSeg=-1;															// Current seg for editing
 	this.curRandom=123;														// Current random #
 	this.hasDots=false;														// No dots yet
@@ -218,6 +220,8 @@ SHIVA_EarthDraw.prototype.DrawControlBar=function(mode)					// DRAW MAP CONTROL 
 			if ($.browser.webkit)
 				str+="<input type='text' style='font-size:x-small;width:30px;height:14px;vertical-align:bottom;border:none;background:none'; id='annVis2'/>";
 			}
+		if (_this.undos.length)
+			str+="<img src='img/undodot.png' style='position:absolute;left:700px' title='Undo' id='annUndo'>";		
 		str+="<input type='button' value='Save/Load' size='1' style='position:absolute;left:722px;font-size:x-small' id='annSave'/>";
 		$("#mapInfoDiv").html(str+"</p>")									// Add to DOM
 		$("#annCol").css("background-color",col);							// Set back to col
@@ -337,6 +341,16 @@ SHIVA_EarthDraw.prototype.DrawControlBar=function(mode)					// DRAW MAP CONTROL 
 		var kml=_this.CreateKML();											// Make KML
 		$.proxy(shivaLib.EasyFile(kml,_this.ParseKML,"KML"),shivaLib); 		// Run eStore
 		});
+
+	$("#annUndo").click(function(e){ 									// UNDO
+		if (_this.Undo()) {													// If a success
+			shivaLib.Sound("ding");											// Ding
+			_this.DrawMap();												// Refresh map
+			DrawShelf("draw");												// Show options
+			_this.DrawControlBar(true);										// Update control bar
+			}
+		});
+
 
 }
 
@@ -719,8 +733,10 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 			if (type != "GEGlobe")												// If something hit
 				type=e.getTarget().getGeometry().getType();						// Get type from geometry
 			if (e.getButton() && _this.curSeg != -1) {							// If appending dot
-				if (!_this.segs[_this.curSeg].lock)								// If not locked
+				if (!_this.segs[_this.curSeg].lock)	{							// If not locked
+					_this.Do();													// Undo
 	 				shivaLib.dr.AddPointToLine(0,e.getLatitude(),e.getLongitude());	// Add to line/shape
+	 				}
  				return;
 				}
 		  	if (type == "KmlPoint") { 											// If point
@@ -737,6 +753,7 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 				s=shivaLib.dr.segs[shivaLib.dr.curSeg];							// Point at seg
 				if (s.lock)														// If locked
 					return;														// Quit
+				_this.Do();														// Set undo	
 				_this.dragInfo.lat=0;											// Disable seg moving
 		    	_this.dragInfo.clicked=true;									// Been clicked on
 		    	_this.dragInfo.point=e.getTarget().getGeometry();				// Point coords
@@ -805,6 +822,7 @@ SHIVA_EarthDraw.prototype.InitEvents=function()								// INIT EVENTS
 						}
 					}
 				if (_this.curSeg != -1) {										// Got one
+					_this.Do();													// Set undo	
 			    	_this.dragInfo.clicked=true;								// Been clicked on
 					_this.dragInfo.lat=e.getLatitude();							// Save click lat
 					_this.dragInfo.lon=e.getLongitude();						// Save lon
@@ -1126,6 +1144,28 @@ SHIVA_EarthDraw.prototype.ParseKML=function(data)							// PARSE KML FILE
 
 SHIVA_EarthDraw.prototype.Do=function()										// SAVE UNDO
 {
+	var i,o,a=new Array();
+	_this=shivaLib.dr;															// Point at draw module
+	for (i=0;i<_this.segs.length;++i) 											// For eqach seg
+		a.push($.extend(true,{},_this.segs[i]));								// Deep copy 
+	_this.undos.push(a);														// Add to end of list
+	if (_this.undos.length > _this.maxUndo)										// If beyond limit
+		_this.undos.shift();													// Pop off 1st		
+}
+
+SHIVA_EarthDraw.prototype.Undo=function()									// PERFORM UNDO
+{
+	_this=shivaLib.dr;															// Point at draw module
+	if (!_this.undos.length)													// If  no undos
+		return false;															// Return didn't undo
+	while (_this.segs.length)													// For each seg
+		_this.RemoveSeg(0);														// Remove it
+	_this.curSeg=-1;															// No seg selected
+	var s=_this.undos.pop().slice(0);											// Get array of segs
+	for (i=0;i<s.length;++i) 													// For each seg
+		_this.segs.push($.extend(true,{},s[i]));								// Deep copy 
+	_this.AddSegsToEarth();														// Add them back
+	return true;																// Return did undo
 }
 
 function test()

@@ -110,6 +110,7 @@ geocoder=new google.maps.Geocoder();
 				str+="<tr><td>To add a new segment, choose a type of segment to draw from the Draw selector pulldown menu. A segment will be added that can be edited."
 				str+="<br/><br/><div style='text-align:center'><b>To edit</b></div>";
 				str+="<br/>To edit an existing segment, click on that segment on the map to select it.";
+				str+="<br/><br/>You can undo actions by clicking on the undo button to the left of the Save/Load button.";
 				str+="<br/><br/>Click on the trashcan icon to remove the complete segment.";
 				str+="</td></tr>"
 				}
@@ -118,6 +119,7 @@ geocoder=new google.maps.Geocoder();
 				str+="<tr><td colspan='2'><p><hr/></p>";
 				str+="<Drag a point's icon to move that point. Drag the segment itself to move the whole segment.";
 				str+="<br/><br/>Click on a (+) icon in the segment to icon to insert a new point there.<br/><br/>Right-clicking will add a new point to the end of the line where you clicked.<br/><br/>Click on point icon with SHIFT key down to remove point.";
+				str+="<br/><br/>Undo actions by clicking on the undo button to the left of the Save/Load button.";
 				str+="<br/><br/>Click on the trash can icon to remove the complete segment.";
 				str+="</td></tr>"
 				}
@@ -135,6 +137,7 @@ geocoder=new google.maps.Geocoder();
 				str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:98px;font-size:x-small' id='annText2'></textarea></td></tr>";
 				str+="<tr><td colspan='2'><p><hr/></p>";
 				str+="Drag corner dots to resize box. Drag center of box to move the whole box.";
+				str+="<br/><br/>Undo actions by clicking on the undo button to the left of the Save/Load button.";
 				str+="<br/><br/>Click on the trash can icon to remove box";
 				str+="</td></tr>"
 				}

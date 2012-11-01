@@ -609,44 +609,9 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 				obj=this.map.createNetworkLink("Layer-"+(i+1));			// Create layer object
 				this.map.getFeatures().appendChild(obj);				// Add it to display list
 				}
-			var fly=(items[i].layerOptions.indexOf("port") == -1)		// Preserve viewport?
-			obj.set(link,true,fly); 									// Sets the link, refreshVisibility, and flyToView
+			var fly=(items[i].layerOptions.toLowerCase().indexOf("port") == -1)		// Preserve viewport?
+				obj.set(link,true,fly); 								// Sets the flyToView
 			}
-		if (items[i].layerType == "Drawn") {							// Drawn KML layer
-			var kmlString = ''
-              + '<?xml version="1.0" encoding="UTF-8"?>'
-              + '<kml xmlns="http://www.opengis.net/kml/2.2">'
-            + '<Document>'
-  
-  				+ '<Style id="randomColorIcon">'
-    			+ '<IconStyle>'
-  				+ '<color>ffff0000</color><scale>1</scale>'
-       			+ '<Icon><href>http://www.viseyes.org/shiva/icons/blue/umbrella_32x32.png</href></Icon>'
-     			+ '</IconStyle>'
-    			+ '<LabelStyle><color>ffffffff</color><scale>1</scale></LabelStyle>'
-   				+ '</Style>'
-
-              + '  <Camera>'
-              + '    <longitude>-122.444633</longitude>'
-              + '    <latitude>37.801899</latitude>'
-              + '    <altitude>139.629438</altitude>'
-              + '    <heading>-70.0</heading>'
-              + '    <tilt>75</tilt>'
-              + '  </Camera>'
-              + '  <Placemark>'
-              + '    <styleUrl>#randomColorIcon</styleUrl>'
-              + '    <name>This is the spot!</name>'
-              + '    <Point>'
-              + '      <coordinates>-122.448425,37.802907,0</coordinates>'
-              + '    </Point>'
-              + '  </Placemark>'
-             + '</Document>'
-              + '</kml>';
-			obj=this.map.parseKml(kmlString);
-			if (obj.getAbstractView())
-   				this.map.getView().setAbstractView(obj.getAbstractView());
-   			}
-  			
 		if (obj) {														// If an object
 			obj.setOpacity(opacity);									// Set opacity
 			obj.setVisibility(items[i].visible == "true");				// Show/hide it

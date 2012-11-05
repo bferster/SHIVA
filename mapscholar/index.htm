@@ -86,11 +86,110 @@ function MapScholar()													// CONSTRUCTOR
  						panControl:"true", draggable:"true", scrollwheel:"true", overviewMapControl:"false",
  						terrainexag:"1", borders:"false", roads:"false"
  						};
+	
+	this.InitProjectData();													// Init project data
 	shivaLib.Draw(shivaLib.options);										// Draw map
 	this.dr=new MapScholar_Draw();											// Alloc draw module
 	this.sh=new MapScholar_Shelf();											// Alloc shelf module
-	mps.dr.DrawControlBar(false);											// Draw control bar and shelf
+	this.dr.DrawControlBar(false);											// Draw control bar and shelf
 }	
+
+MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
+{
+//		atlas[
+//			name, desc, id,
+//			type (tour|collection)
+//			mids[]
+//			]
+//		mobs[
+//			name, src, title, citation, id,
+//			flyto (true|false)
+//			type (map|layer|goto)
+//			metadata{
+//				title,desc,start,end,tags,citation
+//				}
+//			] 
+
+	this.atlas=new Array();													// Holds atlas data
+	this.mobs=new Array();													// Holds map objects data
+
+
+	var atlas={ type:"collection",		
+				name:"Florida Maps",
+				desc:"This is a collection of florida maps",
+				mids:[],
+				id:0
+				};
+	
+	var meta={	title:"Map of England",
+				desc:"This is a nicely drawn map of England",
+				start:1754,
+				end:0,
+				tags:"England, empire",
+				citation:"John Smythe, 1754 LOC"
+				};
+	var mob={ 	type:"map", 
+				large:"http://www.viseyes.org/shiva/map.jpg",
+				med:"http://www.viseyes.org/shiva/map.jpg",
+				thumb:"http://www.viseyes.org/shiva/map.jpg",
+				flyto:false,
+				title:"1754 map of England",
+				id:0,
+				metadata:meta 
+				}			
+	
+	this.AddNewAtlas(atlas);
+	this.AddNewMob(mob)
+	this.AddMobToAtlas(this.atlas[0].id,this.mobs[0].id);
+	trace(this)
+}
+
+MapScholar.prototype.AddNewAtlas=function(atlas)						// ADD NEW ATLAS TO PROJECT
+{
+	atlas.id=""+Math.floor(Math.random()*999999999999);						// Make random id #
+	this.atlas.push($.extend(true,{},atlas));								// Copy new atlas to project
+}
+
+MapScholar.prototype.AddNewMob=function(mob)							// ADD NEW MAP OBJECT TO PROJECT
+{
+	mob.id=""+Math.floor(Math.random()*999999999999);						// Make random id #
+	this.mobs.push($.extend(true,{},mob));									// Copy new mob  to project
+}
+
+MapScholar.prototype.AddMobToAtlas=function(atlasID, mobID, num)		// ADD MOB ID TO ATLAS
+{
+	var aNum;
+	if ((aNum=this.FindAtlasByID(atlasID)) == -1)							// Get index
+		return false;														// Return if none
+	if (num == undefined)													// If num not spec'd
+		num=this.atlas[aNum].mids.length;									// Add to end
+	this.atlas[aNum].mids.splice(num,0,mobID);								// Add mob id to atlas
+}
+
+MapScholar.prototype.ShiftMob=function(aNum, from, to)					// SHIFT MAP OBJECT IN ATLAS
+{
+	var mob=this.atlas[aNum].mobs.splice(from,1);							// Remove it from old loc
+	if (to != -1)															// If not deleting
+		this.atlas[aNum].mobs.splice(to,0,mob);								// Move it to new loc
+}
+
+MapScholar.prototype.FindAtlasByID=function(id)							// FIND ATLAS INDEX BY ID
+{
+	var i;
+	for (i=0;i<this.atlas.length;++i)										// For each atlas
+		if (id == this.atlas[i].id)											// If matched
+			return i;														// Return index
+	return -1;																// Not found
+}
+
+MapScholar.prototype.FindMobByID=function(id)							// FIND MAP OBJECT INDEX BY ID
+{
+	var i;
+	for (i=0;i<this.mobs.length;++i)										// For each mob
+		if (id == this.mobs[i].id)											// If matched
+			return i;														// Return index
+	return -1;																// Not found
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // SHELF 

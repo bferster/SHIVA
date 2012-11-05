@@ -12,7 +12,6 @@ function MapScholar_Draw()												// CONSTRUCTOR
 	this.hasDots=false;														// No dots yet
 	this.inAnnotate=false;													// Not in drawing
 	this.dragInfo={ clicked:false, dragged:false,lat:0, lon:0, seg:null, point:null, coords:null };		// Drag information
-	
 	document.onkeydown=this.onBrowserKeyDown;								// Keydown listener
 }
 

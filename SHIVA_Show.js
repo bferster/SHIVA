@@ -3785,10 +3785,10 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 			str+="<tr><td>&nbsp;&nbsp;Draw curves?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
 			str+="<tr><td>&nbsp;&nbsp;Draw arrow?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"arrow\",this.checked)' type='checkbox' id='arrow'></td></tr>";
 			}		
-		str+="<tr><td>&nbsp;&nbsp;Color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"color\")' onChange='shivaLib.dr.SetVal(\"color\",this.value)' type='text' id='color'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Fill color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"color\")' onChange='shivaLib.dr.SetVal(\"color\",this.value)' type='text' id='color'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Visibility</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"alpha\",this.value)' type='range' id='alpha'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"edgeColor\")' onChange='shivaLib.dr.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Edge width</td><td>&nbsp;<input style='width:85px;height:12px;background-color:transparent;' onChange='shivaLib.dr.SetVal(\"edgeWidth\",this.value)' type='range' id='edgeWidth'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Line color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"edgeColor\")' onChange='shivaLib.dr.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Line width</td><td>&nbsp;<input style='width:85px;height:12px;background-color:transparent;' onChange='shivaLib.dr.SetVal(\"edgeWidth\",this.value)' type='range' id='edgeWidth'></td></tr>";
 		}
 	else if (tool == 3) {
 		str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"boxColor\")' onChange='shivaLib.dr.SetVal(\"boxColor\",this.value)' type='text' id='boxColor'></td></tr>";
@@ -3809,7 +3809,7 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 		str+="<tr><td>&nbsp;&nbsp;Shape</td><td>&nbsp;<select style='width:85px;height:18px;font-size:x-small' onChange='shivaLib.dr.SetVal(\"ideaShape\",this.value)' id='ideaShape'><option>Round box</option><option>Rectangle</option><option>Oval</option><option>Circle</option></select></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaBackCol\")' type='text' id='ideaBackCol'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Gradient?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"ideaGradient\",this.checked)' type='checkbox' id='ideaGradient'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaEdgeCol\")' onChange='shivaLib.dr.SetVal(\"ideaEdgeCol\",this.value)' type='text' id='ideaEdgeCol'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Line color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaEdgeCol\")' onChange='shivaLib.dr.SetVal(\"ideaEdgeCol\",this.value)' type='text' id='ideaEdgeCol'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Text color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"ideaTextCol\")' onChange='shivaLib.dr.SetVal(\"ideaTextCol\",this.value)' type='text' id='ideaTextCol'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Bold text?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"ideaBold\",this.checked)' type='checkbox' id='ideaBold'></td></tr>";
 		str+="<tr><td colspan='2' style='text-align:center'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button style='font-size:x-small' onclick='shivaLib.dr.AddIdea(-1)'>Add base idea</button></td></tr>";
@@ -4373,7 +4373,7 @@ SHIVA_Draw.prototype.AddSelect=function(x, y, shiftKey)					// SELECT SEGMENT/DO
 			}
 		for (i=0;i<this.segs.length;++i) {									// For each seg
 			o=this.segs[i];													// Point at seg
-			if ((!o.x) || (o.type == 5))										// If an idea map node or no x
+			if ((!o.x) || (o.type == 5))									// If an idea map node or no x
 				continue;													// Skip it
 			for (j=0;j<o.x.length;++j) 										// For each dot in seg
 				if ((x > o.x[j]-6) && (x < o.x[j]+6) && (y > o.y[j]-6) && (y < o.y[j]+6)) { // If near
@@ -4487,6 +4487,7 @@ SHIVA_Draw.prototype.MoveSegs=function(dx, dy, dz)						// MOVE SELECTED SEGS
 
 SHIVA_Draw.prototype.AddIdea=function(num) 								//	ADD IDEA NODE 
 {
+	var i,off=0;
 	var o=new Object;
 	if ((num != -1) && (this.selectedItems.length))							// If highlighted
 		num=this.selectedItems[0]											// This is the parent
@@ -4505,9 +4506,12 @@ SHIVA_Draw.prototype.AddIdea=function(num) 								//	ADD IDEA NODE
 		o.ideaLeft=$("#shivaDrawDiv").width()/2;							// Center x
 		o.ideaTop=$("#shivaDrawDiv").height()/2;							// Center y
 		}
-	else{
-		o.ideaLeft=this.segs[num].ideaLeft;									// Same x
-		o.ideaTop=(Number(this.segs[num].ideaTop)+Number(this.segs[num].ideaHgt)+32);	// Put under parent
+	else{                                                                   // A child
+		for (i=0;i<this.segs.length;++i)                                    // For each seg
+		  if (this.segs[i].ideaParent == num)                               // If siblings
+		      off+=10;                                                      // Add to offset
+		o.ideaLeft=this.segs[num].ideaLeft+off;								// Same x
+		o.ideaTop=(Number(this.segs[num].ideaTop)+Number(this.segs[num].ideaHgt)+32+off);	// Put under parent
 		}
 	if (shivaLib.player)													// If over a player
 		o.s=this.startTime,o.e=this.endTime;								// Set time

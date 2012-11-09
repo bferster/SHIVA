@@ -123,7 +123,7 @@ SHIVA_Event.prototype.DrawEventDots=function() 							// DRAW EVENT DOTS
 			x=(s/dur)*wid/this.scale;										// Start x		
 		w=Math.max(14,((e-s)/dur)*wid/this.scale)-1;							// Width
 		str="<div id='shivaEventDot-"+i+"' style='position:absolute;text-align:center;";
-		str+="width:"+w+"px;left:"+x+"px;height:14px;";
+		str+="width:"+w+"px;left:"+x+"px;height:14px;padding:0px;";
 		str+="border-radius:8px;-moz-border-radius:8px;background-color:#ccc;border:1px #eee solid'";
 		str+="title='"+o.type.toUpperCase()+" "+o.start;					// Tool tip
 		if (o.end)															// If an end

@@ -2128,6 +2128,18 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
  		for (i=0;i<v.length;++i) 
   			ops.query+=v[i]+" ";
  		}
+    if (options.series) {
+        var v=options.series.split(",")
+        ops.series=new Array();
+        var o={};
+        for (i=1;i<v.length;++i) {
+            if (!isNaN(v[i]))
+            ops.series.push(o),o={};
+        else
+            o[v[i].split("=")[0]]=v[i].split("=")[1];
+        }
+        ops.series.push(o);
+        }
  	var wrap=new google.visualization.ChartWrapper(ops);
 	this.map=wrap;
  	wrap.setOptions(ops);
@@ -2984,7 +2996,7 @@ function SHIVA_Graphics() 																			// CONSTRUCTOR
 	this.composite="source-over";
 }
 
-SHIVA_Graphics.prototype.CreateCanvas=function(id, con, wid, hgt, left, top) 							//	ADD NEW CANVAS
+SHIVA_Graphics.prototype.CreateCanvas=function(id, con, wid, hgt, left, top) 						//	ADD NEW CANVAS
 {
 	var str="<canvas id='"+id+"' "; 
 	if (wid) 	str+="width='"+wid+"px' "; 

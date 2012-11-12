@@ -622,7 +622,7 @@ MapScholar_Draw.prototype.InitEvents=function()								// INIT EVENTS
 		  	var type=e.getTarget().getType();									// Get type
 			if (type != "GEGlobe")												// If something hit
 				type=e.getTarget().getGeometry().getType();						// Get type from geometry
-			if (e.getButton() && _this.curSeg != -1) {							// If appending dot
+			if ((e.getButton()) && (_this.curSeg != -1) && (!e.getShiftKey())){	// If appending dot
 				if (!_this.segs[_this.curSeg].lock)	{							// If not locked
 					_this.Do();													// Undo
 	 				mps.dr.AddPointToLine(0,e.getLatitude(),e.getLongitude());	// Add to line/shape

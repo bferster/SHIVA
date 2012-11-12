@@ -249,7 +249,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 			var dd="#shivaIdea"+i;											// Div id										
 			str="<div id='"+dd.substr(1)+"'";
 			str+="style='position:absolute;padding:8px;font-family:sans-serif;text-align:center;";
-			str+="border:1px solid "+o.ideaEdgeCol+";background-color:"+o.ideaBackCol+";";
+			str+="margin:0px;border:1px solid "+o.ideaEdgeCol+";background-color:"+o.ideaBackCol+";";
 			str+="left:"+o.ideaLeft+"px;top:"+o.ideaTop+"px;'>";
 			str+="</div>";		
 			$("#shivaDrawDiv").append(str);									// Add div

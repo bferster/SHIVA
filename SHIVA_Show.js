@@ -97,7 +97,7 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
            	break;
 		case "Map": 														// Google maps		
   			obj="google.maps.Map";											// Object to test for
-        	lib="http://maps.googleapis.com/maps/api/js?key=AIzaSyDohush6W1WlGqOjKtncuzcbFlss6M12zM&sensor=false&callback=shivaJSLoaded"; 		// Lib to load
+        	lib="http://maps.googleapis.com/maps/api/js?sensor=false&callback=shivaJSLoaded"; 		// Lib to load
             break;
 		}
 	if (lib) {																// If a lib to load

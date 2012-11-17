@@ -24,8 +24,8 @@ MapScholar_Draw.prototype.DrawShelf=function()							// DRAW DRAWING SHELF
 	var type="Draw";
 	if (this.curSeg != -1)
 		type=this.segs[this.curSeg].type;
-	var str="<img src='img/MapScholarLogo.png'/>";
-	str+="<div style='position:absolute;top:203px;width:162px;height:395px;background-color:#fff;border:1px solid #999;margin:10px;padding:8px' class='rounded-corners'>";
+    str="<div align='center'><img width='160' src='img/MapScholarLogo.png'/></div>";
+    str+="<div id='contentShelf' style='width:200px;height:401px;background-color:#fff;border:1px solid #999;margin:6px;padding:8px' class='rounded-corners'>";
 	str+="<br/><div style='text-align:center'><b>"+type+"</b></div><br/><table>";
 	if (type == "Draw") {
 		str+="<tr><td>To add a new segment, choose a type of segment to draw from the Draw selector pulldown menu. A segment will be added that can be edited."
@@ -36,7 +36,7 @@ MapScholar_Draw.prototype.DrawShelf=function()							// DRAW DRAWING SHELF
 		str+="</td></tr>"
 		}
 	else if ((type == "Line") || (type == "Shape")) {
-		str+="<tr><td>Popup text&nbsp;</td><td><textarea rows='1' style='width:80px;font-size:x-small' id='annText2'></textarea></td></tr>";
+		str+="<tr><td>Popup text&nbsp;</td><td><textarea rows='1' style='width:110px;font-size:x-small' id='annText2'></textarea></td></tr>";
 		str+="<tr><td colspan='2'><p><hr/></p>";
 		str+="<Drag a point's icon to move that point. Drag the segment itself to move the whole segment.";
 		str+="<br/><br/>Click on a (+) icon in the segment to icon to insert a new point there.<br/><br/>Right-clicking will add a new point to the end of the line where you clicked.<br/><br/>Click on point icon with SHIFT key down to remove point.";
@@ -45,8 +45,8 @@ MapScholar_Draw.prototype.DrawShelf=function()							// DRAW DRAWING SHELF
 		str+="</td></tr>"
 		}
 	else if (type == "Image") {
-		str+="<tr><td>Image URL&nbsp;</td><td><input type='text' style='width:100px;font-size:x-small' id='annUrl'/></td></tr>";
-		str+="<tr><td>Rotation&nbsp;</td><td><input type='range' max='360' style='width:100px;font-size:x-small' id='annRot'/>";
+		str+="<tr><td>Image URL&nbsp;</td><td><input type='text' style='width:130px;font-size:x-small' id='annUrl'/></td></tr>";
+		str+="<tr><td>Rotation&nbsp;</td><td><input type='range' max='360' style='width:130px;font-size:x-small' id='annRot'/>";
 		str+="</td></tr>";
 		str+="<tr><td colspan='2'><p><hr/></p>";
 		str+="Drag corner dots to resize image. If Shift key is pressed, the image will be stretched. Drag the center of image to move the image.<br/><br/>";
@@ -55,7 +55,7 @@ MapScholar_Draw.prototype.DrawShelf=function()							// DRAW DRAWING SHELF
 		str+="</td></tr>"
 		}
 	else if (type == "Box") {
-		str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:98px;font-size:x-small' id='annText2'></textarea></td></tr>";
+		str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:130px;font-size:x-small' id='annText2'></textarea></td></tr>";
 		str+="<tr><td colspan='2'><p><hr/></p>";
 		str+="Drag corner dots to resize box. Drag center of box to move the whole box.";
 		str+="<br/><br/>Undo actions by clicking on the undo button to the left of the Save/Load button.";
@@ -63,9 +63,9 @@ MapScholar_Draw.prototype.DrawShelf=function()							// DRAW DRAWING SHELF
 		str+="</td></tr>"
 		}
 	else if (type == "Marker") {
-		str+="<tr><td>Label&nbsp;</td><td><input type='text' style='width:100px;font-size:x-small' id='annText'/></td></tr>";
-		str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:98px;font-size:x-small' id='annText2'></textarea></td></tr>";
-		str+="<tr><td>Icon &nbsp;</td><td><input type='text' style='width:100px;font-size:x-small' id='annUrl'/></td></tr>";
+		str+="<tr><td>Label&nbsp;</td><td><input type='text' style='width:130px;font-size:x-small' id='annText'/></td></tr>";
+		str+="<tr><td>Popup<br/>text&nbsp;</td><td><textarea rows='3' style='width:128px;font-size:x-small' id='annText2'></textarea></td></tr>";
+		str+="<tr><td>Icon &nbsp;</td><td><input type='text' style='width:130px;font-size:x-small' id='annUrl'/></td></tr>";
 		str+="<tr><td colspan='2'><p><hr/></p>";
 		str+="Type \"pin\" in the the <i>Icon box</i> to show a pushpin icon, type \"none\" to show no icon, or type in a url to an image file. There are a number of icons <a href='http://www.viseyes.org/shiva/icons' target='_blank'> here</a>.";
 		str+="<br/><br/>Text from the <i>Label box </i>appears to the right of the icon. When marker clicked, a popup will display any text entered in the <i>Popup text box</i>. You can use HTML formatting.";
@@ -73,11 +73,11 @@ MapScholar_Draw.prototype.DrawShelf=function()							// DRAW DRAWING SHELF
 		str+="</td></tr>"
 		}
 	if (this.curSeg != -1) {
-		str+="<img src='img/trashdot.gif' style='position:absolute;left:8px;top:390px' title='Remove segment' id='annDelete'>";		
+		str+="<img src='img/trashdot.gif' style='position:absolute;left:10px;top:580px' title='Remove segment' id='annDelete'>";		
 		if (this.segs[this.curSeg].lock)
-			str+="<img src='img/lockdot.png' style='position:absolute;left:155px;top:390px' title='Unlock segment' id='annLock'>";		
+			str+="<img src='img/lockdot.png' style='position:absolute;left:200px;top:580px' title='Unlock segment' id='annLock'>";		
 		else
-			str+="<img src='img/unlockdot.png' style='position:absolute;left:155px;top:390px' title='Lock segment' id='annLock'>";		
+			str+="<img src='img/unlockdot.png' style='position:absolute;left:200px;top:580px' title='Lock segment' id='annLock'>";		
 		}
 	$("#shelfDiv").html(str+"</table></div>");
 }

@@ -145,6 +145,7 @@ MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 				flyto:false,
 				title:"The dividing line",
 				desc:"This is is a KML of the dividing line",
+                metadata:meta 
 				}			
 	this.AddNewMob(mob)
 	this.AddMobToAtlas(this.atlas[0].id,this.mobs[1].id);
@@ -154,6 +155,7 @@ MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 				flyto:false,
 				title:"Central London",
 				desc:"This is is the center of London's business district in the eighteenth century",
+                metadata:meta 
 				}			
 	this.AddNewMob(mob)
 	this.AddMobToAtlas(this.atlas[0].id,this.mobs[2].id);
@@ -285,7 +287,8 @@ MapScholar_Shelf.prototype.FillShelf=function()								// FILL SHELF
         if ((this.curMob == i) && (this.mobVis[i] > 0)) {                       // If selected and visible
             str+="<tr><td valign='top' style='color:#009900' align='center'><b>Visibility</b></td><td>";
             str+="<div id='mobVis' style='width:70%;display:inline-block'></div>";                   // Add div for vis
-	        str+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width='11' src='img/infobutton.gif'/><br/><br/></td></tr>";
+	        str+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width='11' id='mobInfo' src='img/infobutton.gif'/><br/><br/></td></tr>";
+	        str+="<tr><td colspan='2' id='mobCite'></td</tr>";
 	       }
 	   }
 	$("#contentShelf").html("</table>"+str);                                    // Add mobs
@@ -295,14 +298,14 @@ MapScholar_Shelf.prototype.FillShelf=function()								// FILL SHELF
         }
 	for (i=0;i<n;++i) {															// For each mob
 		$("#mob"+i).click( function(e) {										// Add click handler
+			shivaLib.Sound("click");                                            // Click
+			var id=this.id.substr(3);                                           // Get id
+			mps.sh.curMob=id;								                    // Set curmob
 	        if (!e.shiftKey) {                                                  // If not setting multiples
 	           for (j=0;j<n;++j)                                                // For each mob
 	               if (j != mps.sh.curMob)                                      // If not this one
 	                   mps.sh.mobVis[j]=0;                                      // Hide mob
 			     }
-			shivaLib.Sound("click");                                            // Click
-			var id=this.id.substr(3);                                           // Get id
-			mps.sh.curMob=id;								                    // Set curmob
 			if (mps.sh.mobVis[id] < 50)                                         // If off
                 mps.sh.mobVis[id]=100;                                          // Turn it on
             else                                                                // If on
@@ -311,6 +314,20 @@ MapScholar_Shelf.prototype.FillShelf=function()								// FILL SHELF
 			});
           }
  
+    $("#mobInfo").click( function(e) {                                      // CLICK ON INFO BUTTOM
+        shivaLib.Sound("click");                                                // Click
+        var o=mps.mobs[mps.FindMobByID(mps.atlas[mps.sh.curAtlas].mids[mps.sh.curMob])].metadata;  // Point at mob
+        if ($("#mobCite").html()) {                                             // If something there already
+             $("#mobCite").html("");                                            // Clear it
+           $("#mobCite").css("padding","0px");                                  // No padding
+            }
+        else{                                                                    // Nothing there yet
+            $("#mobCite").html("Citation information about the map or layer will be found here, such as citation, dates, etc.");
+            $("#mobCite").css("background-color","#f0f0f0");                    // Color
+            $("#mobCite").css("padding","6px");                                 // Add padding
+            }
+       });
+
     if ((this.curMob != -1) && (this.mobVis[this.curMob] > 0)) {                // If selected and visible
         var val=this.mobVis[this.curMob];                                       // Get def
         var ops={ min:0, max:100, value:val,                                    // Slider options

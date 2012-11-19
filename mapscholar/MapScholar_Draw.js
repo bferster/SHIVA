@@ -116,8 +116,8 @@ MapScholar_Draw.prototype.DrawControlBar=function(mode)						// DRAW MAP CONTROL
 				str+="<input type='text' style='font-size:x-small;width:30px;height:14px;vertical-align:bottom;border:none;background:none'; id='annVis2'/>";
 			}
 		if (this.undos.length)
-			str+="<img src='img/undodot.png' style='position:absolute;left:700px' title='Undo' id='annUndo'>";		
-		str+="<input type='button' value='Save/Load' size='1' style='position:absolute;left:722px;font-size:x-small' id='annSave'/>";
+			str+="<img src='img/undodot.png' style='position:absolute;left:780px' title='Undo' id='annUndo'>";		
+		str+="<input type='button' value='Save/Load' size='1' style='position:absolute;left:880px;font-size:x-small' id='annSave'/>";
 		$("#controlBarDiv").html(str+"</p>")									// Add to DOM
 		$("#annCol").css("background-color",col);								// Set back to col
 		$("#annCol").css("border","1px solid "+col);							// Set border

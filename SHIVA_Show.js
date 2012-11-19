@@ -511,7 +511,9 @@ SHIVA_Show.prototype.DrawEarth=function()
 			v=ops[key].split(';');
 			for (i=0;i<v.length;++i) {
 				vv=v[i].split(':');
-				o[vv[0]]=vv[1].replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
+                if (vv[1].indexOf("http") == -1)
+                    vv[1]=vv[1].replace(/~/g,"=");
+  				o[vv[0]]=vv[1].replace(/\^/g,"&").replace(/\`/g,":");
 				}
 			this.items.push(o);
 			}
@@ -1822,7 +1824,9 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 			v=ops[key].split(';');
 			for (i=0;i<v.length;++i) {
 				vv=v[i].split(':');
-				o[vv[0]]=vv[1].replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
+				if (vv[1].indexOf("http") == -1)
+				    vv[1]=vv[1].replace(/~/g,"=");
+				o[vv[0]]=vv[1].replace(/\^/g,"&").replace(/\`/g,":");
 				}
 			this.items.push(o);
 			}

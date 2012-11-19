@@ -227,32 +227,36 @@ function MapScholar_Shelf()												// CONSTRUCTOR
 {
 	this.curAtlas=0;														// Default to all
 	this.curMob=-1;															// Default to none
+    this.mobVis=new Array();                                                // Holds hide/show status
 }
 
 MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 {
+	var i;
 	var str="<p>";
 	str+="&nbsp;&nbsp;<img src='img/annotate.gif' style='vertical-align:bottom' title='Annotate' onclick='mps.dr.DrawControlBar(true)'>";		
 	str+="<label>&nbsp; Location: </label ><input size='20' id='address' style='font-size:x-small' type='text'/>";
 	str+="&nbsp;&nbsp; <input type='checkbox' checked='checked'  style='vertical-align:middle' id='wireframes'>Show boxes?";		
 	$("#controlBarDiv").html(str+"</p>")										// Add to DOM
-	str="<div align='center'><img width='160' src='img/MapScholarLogo.png'/>";
-	str+="<select id='tourSelect' style='font-size:x-small'>";
-	str+="<option>All maps</option>";		str+="<option>Ceded Islands</option>";
-	str+="<option>Florida</option>";
-	str+="</select></div>";
-	str+="<div id='contentShelf' style='width:200px;height:382px;background-color:#fff;border:1px solid #999;margin:6px;padding:8px;overflow-x:hidden;overflow-y:scroll' class='rounded-corners'/>";
-	str+="&nbsp;&nbsp; Visibility&nbsp; <input type='range' style='width:80px;height:14px;vertical-align:bottom'; id='mobVis'/>&nbsp;&nbsp;";
-	$("#shelfDiv").html(str+"</table></div>");
+	str="<div id='contentShelf' style='width:228px;height:598px;background-color:#fff;border:1px solid #999;margin:0px;padding:0px;overflow-x:hidden;overflow-y:scroll' class='rsounded-corners'/>";
+    str+="<p align='center'><select id='tourSelect' style='font-size:x-small'>";
+    str+="<option>All maps</option>";       str+="<option>Ceded Islands</option>";
+    str+="<option>Florida</option>";
 
-	this.FillShelf();
-}
+	
+	$("#shelfDiv").html(str+"</table></div>");
+    var n=mps.atlas[this.curAtlas].mids.length;                                 // Number of mobs to add
+    this.mobVis=[];                                                             // Remove old array
+    for (i=0;i<n;++i)                                                           // For each mob
+	   this.mobVis.push(0);                                                     // Make it hidden                                       
+	this.FillShelf();                                                           // Drawshelf
+ }
 
 MapScholar_Shelf.prototype.FillShelf=function()								// FILL SHELF
 {
 	var i,o,pic;
 	var n=mps.atlas[this.curAtlas].mids.length;									// Number of mobs to add
-	str="<table cellspacing='0'>";
+	str="<table cellspacing='0' cellpadding='6'>";
 	for (i=0;i<n;++i) {															// For each mob
 		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];			// Point at mob
 		if (o.type == "map") {													// A map													
@@ -270,24 +274,41 @@ MapScholar_Shelf.prototype.FillShelf=function()								// FILL SHELF
 			 pic="img/layericon.png";											// Set
 		else if (o.type == "goto") 												// A goto													
 			pic="img/gotoicon.png";												// Use icon
-	   str+="<tr";
-       if (this.curMob == i)                                                    // If current
-            str+=" style='background-color:#e2ffe2'";                           // Color it
-		str+="><td width='68'><img id='mob"+i+"' width='64' src='"+pic+"'>";	// Add pic
-    	str+="<br/></td><td align='top'><b>"+o.title+"</b><br/>";							// Add title
-		str+=o.desc+"<br/><br/>";												// Add desc
-		str+="</td></tr>";														// Close entry
+	    str+="<tr id='mob"+i+"'";                                               // Row start
+        str+="><td width='68'><img width='64' src='"+pic+"'>";	                // Add pic
+        str+="<br/></td><td align='top'><span";
+       if (this.mobVis[i] > 0)                                                  // If showing
+            str+=" style='color:#990000'";                                      // Color it
+        str+="><b>"+o.title+"</b></span><br/>";			                        // Add title
+ 		str+=o.desc;												            // Add desc
+ 		str+="<br/><br/</td></tr>";												// Close entry
+        if ((this.curMob == i) && (this.mobVis[i] > 0))                         // If current and visible
+            str+="<tr style='border-collapse:collapse;border-spacing:0px;'><td align='center'>Visibility</td><td><input type='range' style='width:80px;height:14px;vertical-align:middle'; id='mobVis'/></td></tr>";   
 		}
-	$("#contentShelf").html("</table>"+str)
-		
-
-
-	for (i=0;i<n;++i) 															// For each mob
+	$("#contentShelf").html("</table>"+str);                                    // Add mobs
+    if (this.curMob != -1) {                                                    // If a current
+        $("#visControl").show();                                                // Show it
+        $("#mobVis").val(this.mobVis[this.curMob]);                             // Set value
+        }
+	for (i=0;i<n;++i) {															// For each mob
 		$("#mob"+i).click( function(e) {										// Add click handler
-			var id=(e.target.id).substr(3);										// Get index
-			mps.sh.curMob=id;
-			mps.sh.FillShelf();
+	        if (!e.shiftKey)                                                    // If not setting multiples
+	           for (j=0;j<n;++j)                                                // For each mob
+	               mps.sh.mobVis[j]=0;                                          // Hide them all
+			shivaLib.Sound("click");                                            // Click
+			var id=this.id.substr(3);                                           // Get id
+			mps.sh.curMob=id;								                    // Set curmob
+			if (mps.sh.mobVis[id] < 50)                                         // If off
+                mps.sh.mobVis[id]=100;                                          // Turn it on
+            else                                                                // If on
+                mps.sh.mobVis[id]=0;                                            // Turn it off
+			mps.sh.FillShelf();                                                 // Redraw shelf
 			});
+          }
+  
+    $("#mobVis").change(function(e){                                         // SET VISIBILITY
+         mps.sh.mobVis[mps.sh.curMob]=$("#mobVis").val();                        // Set vis factor
+         });
 
 	}
 	

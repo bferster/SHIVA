@@ -15,12 +15,13 @@
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small}
 		p.pb { text-align:right; color:#fff; }
 		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		.chapterbar { -moz-border-radius:3px;-webkit-border-radius:3px;-khtml-border-radius:3px;border-radius:4px;background-color:#aaa;height:14px;padding:3px;color:#fff}
+		.headerbar { border-bottom:1px solid #999;height:14px;padding:3px;color:#666}
 		tr.odd { background-color:#e0e0e0; }
 		.propTable { background-color:#eee;border-radius:8px;
 				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
 				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
 				  	 border-collapse: collapse;
-				  	 width:278px;
 				  	 }
 	</style>
 </head>
@@ -112,6 +113,7 @@ MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 
 	this.atlas=new Array();													// Holds atlas data
 	this.mobs=new Array();													// Holds map objects data
+	var i=0;
 
 	var atlas={ type:"collection",		
 				name:"Florida Maps",
@@ -127,6 +129,13 @@ MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 				tags:"England, empire",
 				citation:"John Smythe, 1754 LOC"
 				};
+	var mob={ 	type:"chapter", 
+				status:"open",
+				title:"All Maps",
+				}			
+	this.AddNewMob(mob)
+	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
+
 	var mob={ 	type:"map", 
 				large:"http://www.viseyes.org/shiva/map.jpg",
 				med:"http://www.viseyes.org/shiva/map.jpg",
@@ -138,27 +147,26 @@ MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 				}			
 	
 	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[0].id);
+	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
 	
 	var mob={ 	type:"layer", 
 				large:"http://www.viseyes.org/shiva/map.jpg",
 				flyto:false,
 				title:"The dividing line",
-				desc:"This is is a KML of the dividing line",
+				desc:"",
                 metadata:meta 
 				}			
 	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[1].id);
+	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
 
 	var mob={ 	type:"goto", 
 				large:"http://www.viseyes.org/shiva/map.jpg",
 				flyto:false,
 				title:"Central London",
-				desc:"This is is the center of London's business district in the eighteenth century",
                 metadata:meta 
 				}			
 	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[2].id);
+	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
 
 	var mob={ 	type:"map", 
 				large:"http://www.viseyes.org/shiva/map.jpg",
@@ -171,7 +179,41 @@ MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 				}			
 	
 	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[3].id);
+	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
+
+
+	var mob={ 	type:"header", 
+				status:"open",
+				title:"Ceded Islands",
+				}			
+	this.AddNewMob(mob)
+	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
+
+	var mob={ 	type:"map", 
+				large:"http://www.viseyes.org/shiva/map.jpg",
+				med:"http://www.viseyes.org/shiva/map.jpg",
+				thumb:"http://www.viseyes.org/shiva/map.jpg",
+				flyto:false,
+				title:"1754 map of England",
+				desc:"This is a nicely drawn map of England",
+				metadata:meta 
+				}			
+	
+	this.AddNewMob(mob)
+	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
+
+	var mob={ 	type:"map", 
+				large:"http://www.viseyes.org/shiva/map.jpg",
+				med:"http://www.viseyes.org/shiva/map.jpg",
+				thumb:"http://www.viseyes.org/shiva/map.jpg",
+				flyto:false,
+				title:"1754 map of England",
+				desc:"This is a nicely drawn map of England",
+				metadata:meta 
+				}			
+	
+	this.AddNewMob(mob)
+	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
 }
 
 MapScholar.prototype.AddNewAtlas=function(atlas)						// ADD NEW ATLAS TO PROJECT
@@ -239,108 +281,120 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 	str+="&nbsp;&nbsp;<img src='img/annotate.gif' style='vertical-align:bottom' title='Annotate' onclick='mps.dr.DrawControlBar(true)'>";		
 	str+="<label>&nbsp; Location: </label ><input size='20' id='address' style='font-size:x-small' type='text'/>";
 	str+="&nbsp;&nbsp; <input type='checkbox' checked='checked'  style='vertical-align:middle' id='wireframes'>Show boxes?";		
-	$("#controlBarDiv").html(str+"</p>")										// Add to DOM
-	str="<div id='contentShelf' style='width:228px;height:598px;background-color:#fff;border:1px solid #999;margin:0px;padding:6px;overflow-x:hidden;overflow-y:scroll' class='rsounded-corners'/>";
-    str+="<p align='center'><select id='tourSelect' style='font-size:x-small'>";
-    str+="<option>All maps</option>";       str+="<option>Ceded Islands</option>";
-    str+="<option>Florida</option>";
+	$("#controlBarDiv").html(str+"</p>");                                    // Add to DOM
+	str="<div id='contentShelf' style='width:215px;height:622px;background-color:#fff;border:1px solid #999;margin:0px;padding:6px;overflow-x:hidden;overflow-y:scroll' class='rsounded-corners'/>";
+	$("#shelfDiv").html(str+"</table></div>");								// Add div
+	var n=mps.atlas[this.curAtlas].mids.length;								// Number of mobs to add
+	this.mobVis=[];															// Remove old array
+	for (i=0;i<n;++i)														// For each mob
+		this.mobVis.push(0);												// Make it hidden                                       
+		this.FillShelf();													// Drawshelf
+}
 
-	
-	$("#shelfDiv").html(str+"</table></div>");
-    var n=mps.atlas[this.curAtlas].mids.length;                                 // Number of mobs to add
-    this.mobVis=[];                                                             // Remove old array
-    for (i=0;i<n;++i)                                                           // For each mob
-	   this.mobVis.push(0);                                                     // Make it hidden                                       
-	this.FillShelf();                                                           // Drawshelf
- }
-
-MapScholar_Shelf.prototype.FillShelf=function()								// FILL SHELF
+MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 {
 	var i,o,pic;
-	var n=mps.atlas[this.curAtlas].mids.length;									// Number of mobs to add
-	str="<table cellspacing='0'>";
-	for (i=0;i<n;++i) {															// For each mob
-		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];			// Point at mob
-		if (o.type == "map") {													// A map													
-			if (o.thumb)														// If a thumb defined															
-				pic=o.thumb; 													// Use it
-			else if (o.med)														// Else if a med defined															
-				pic=o.med; 														// Use it
-			else if (o.large)													// Else if a large defined															
-				pic=o.med; 														// Use it
+	var n=mps.atlas[this.curAtlas].mids.length;                             // Number of mobs to add
+	str="<table cellspacing='0'>";                                          // Table start
+	for (i=0;i<n;++i) {                                                     // For each mob
+		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];      // Point at mob
+		if ((o.type == "chapter") || (o.type == "header")) {				// A header													
+			str+="<tr height='30'><td colspan='2'><div class='"+o.type+"bar'>"; // Start
+			str+="<img id='mob"+i+"' src='img/";							// Img base
+			if (!this.mobVis[i])											// If open
+				str+="collapse";											// Expand
+			else															// If closed
+				str+="expand";												// Collapse
+			if (o.type == "header")											// If a header
+				str+="2";													// Use dark icons
+			str+=".gif'><b>"+o.title+"</div>";								// Title
+			str+="</td><tr>";												// End 
+			continue;
 			}
-		else if (o.type == "layer") 											// A layer													
-	        if (o.thumb)                                                        // If a thumb defined                                                           
-                pic=o.thumb;                                                    // Use it
-			else                                                                // Use icon
-			 pic="img/layericon.png";											// Set
-		else if (o.type == "goto") 												// A goto													
-			pic="img/gotoicon.png";												// Use icon
-	    str+="<tr id='mob"+i+"'";                                               // Row start
-        str+="><td width='68'><img width='64' src='"+pic+"'>";	                // Add pic
-        str+="<br/></td><td align='top'><span";
-       if (this.mobVis[i] > 0)                                                  // If showing
-            str+=" style='color:#990000'";                                      // Color it
-        str+="><b>"+o.title+"</b></span><br/>";			                        // Add title
- 		str+=o.desc;												            // Add desc
- 		str+="<br/><br/</td></tr>";												// Close entry
-        if ((this.curMob == i) && (this.mobVis[i] > 0)) {                       // If selected and visible
-            str+="<tr><td valign='top' style='color:#009900' align='center'><b>Visibility</b></td><td>";
-            str+="<div id='mobVis' style='width:70%;display:inline-block'></div>";                   // Add div for vis
-	        str+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width='11' id='mobInfo' src='img/infobutton.gif'/><br/><br/></td></tr>";
-	        str+="<tr><td colspan='2' id='mobCite'></td</tr>";
-	       }
-	   }
-	$("#contentShelf").html("</table>"+str);                                    // Add mobs
-    if (this.curMob != -1) {                                                    // If a current
-        $("#visControl").show();                                                // Show it
-        $("#mobVis").val(this.mobVis[this.curMob]);                             // Set value
-        }
-	for (i=0;i<n;++i) {															// For each mob
-		$("#mob"+i).click( function(e) {										// Add click handler
-			shivaLib.Sound("click");                                            // Click
-			var id=this.id.substr(3);                                           // Get id
-			mps.sh.curMob=id;								                    // Set curmob
-	        if (!e.shiftKey) {                                                  // If not setting multiples
-	           for (j=0;j<n;++j)                                                // For each mob
-	               if (j != mps.sh.curMob)                                      // If not this one
-	                   mps.sh.mobVis[j]=0;                                      // Hide mob
-			     }
-			if (mps.sh.mobVis[id] < 50)                                         // If off
-                mps.sh.mobVis[id]=100;                                          // Turn it on
-            else                                                                // If on
-                mps.sh.mobVis[id]=0;                                            // Turn it off
-			mps.sh.FillShelf();                                                 // Redraw shelf
+		if (o.type == "map") { 												// A map													
+			if (o.thumb)                                                    // If a thumb defined															
+				pic=o.thumb;												// Use it
+			else if (o.med)													// Else if a med defined															
+				pic=o.med;													// Use it
+			else if (o.large)												// Else if a large defined															
+			pic=o.med;														// Use it
+			}
+		else if (o.type == "layer") 										// A layer													
+			if (o.thumb)													// If a thumb defined                                                           
+				pic=o.thumb;												// Use it
+			else															// Use icon
+				pic="img/layericon.png";									// Set
+		else if (o.type == "goto")											// A goto													
+			pic="img/gotoicon.png";											// Use icon
+		str+="<tr id='mob"+i+"'";											// Row start
+		if ((this.curMob == i) && (this.mobVis[i] > 0)) 					// If selected and visible
+			str+="' style='background-color:#eeeeff'";						// Color background
+		str+="><td valign='top' width='68'><img "; 							// Img start								
+			if (o.type == "map")											// If a map                                                    
+            str+=" style='border: 1px solid #999' ";						// Add border
+		str+=" width='64' src='"+pic+"'>";									// Add pic
+		str+="<br/></td><td align='top'><span";
+		if (this.mobVis[i] > 0)												// If showing
+			str+=" style='color:#990000'";									// Color it
+		str+="><b>"+o.title+"</b></span><br/>";								// Add title
+		if (o.desc)															// If desc spec'd
+			str+=o.desc+"<br/>";											// Add desc
+		str+="<br/></td></tr>";												// Close entry
+		if ((this.curMob == i) && (this.mobVis[i] > 0)) {					// If selected and visible
+			str+="<tr style='background-color:#eeeeff'><td valign='top' style='color:#009900' align='center'><b>Visibility</b></td><td>";
+			str+="<div id='mobVis' style='width:70%;display:inline-block'></div>";		// Add div for vis
+			str+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width='11' id='mobInfo' src='img/infobutton.gif'/><br/><br/></td></tr>";
+			str+="<tr><td colspan='2' id='mobCite'></td></tr>";
+			}
+		}
+	$("#contentShelf").html("</table>"+str);								// Add mobs
+	if (this.curMob != -1) {												// If a current
+		$("#visControl").show();											// Show it
+		$("#mobVis").val(this.mobVis[this.curMob]);							// Set value
+		}
+	for (i=0;i<n;++i) {														// For each mob
+		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];      // Point at mob
+		$("#mob"+i).click( function(e) {									// Add click handler
+			shivaLib.Sound("click");										// Click
+			var id=this.id.substr(3);										// Get id
+			mps.sh.curMob=id;												// Set curmob
+			if (!e.shiftKey) {												// If not setting multiples
+				for (j=0;j<n;++j)											// For each mob
+					if (j != mps.sh.curMob)									// If not this one
+						mps.sh.mobVis[j]=0;									// Hide mob
+				}
+			if (mps.sh.mobVis[id] < 50)										// If off
+				mps.sh.mobVis[id]=100;										// Turn it on
+			else															// If on
+				mps.sh.mobVis[id]=0;										// Turn it off
+			mps.sh.FillShelf();												// Redraw shelf
 			});
-          }
+		}
  
-    $("#mobInfo").click( function(e) {                                      // CLICK ON INFO BUTTOM
-        shivaLib.Sound("click");                                                // Click
-        var o=mps.mobs[mps.FindMobByID(mps.atlas[mps.sh.curAtlas].mids[mps.sh.curMob])].metadata;  // Point at mob
-        if ($("#mobCite").html()) {                                             // If something there already
-             $("#mobCite").html("");                                            // Clear it
-           $("#mobCite").css("padding","0px");                                  // No padding
-            }
-        else{                                                                    // Nothing there yet
-            $("#mobCite").html("Citation information about the map or layer will be found here, such as citation, dates, etc.");
-            $("#mobCite").css("background-color","#f0f0f0");                    // Color
-            $("#mobCite").css("padding","6px");                                 // Add padding
-            }
-       });
+	$("#mobInfo").click( function(e) {									// CLICK ON INFO BUTTON
+		shivaLib.Sound("click");											// Click
+		var o=mps.mobs[mps.FindMobByID(mps.atlas[mps.sh.curAtlas].mids[mps.sh.curMob])].metadata;	// Point at mob
+		if ($("#mobCite").html()) {											// If something there already
+			$("#mobCite").html("");											// Clear it
+			$("#mobCite").css("padding","0px");								// No padding
+			}
+		else{																// Nothing there yet
+			$("#mobCite").html("<b>Map 3</b><br>Citation information about the map or layer will be found here, such as author, dates, etc.");
+			$("#mobCite").css("background-color","#eeeeff");				// Color
+			$("#mobCite").css("padding","6px");								// Add padding
+			}
+		});
 
-    if ((this.curMob != -1) && (this.mobVis[this.curMob] > 0)) {                // If selected and visible
-        var val=this.mobVis[this.curMob];                                       // Get def
-        var ops={ min:0, max:100, value:val,                                    // Slider options
-            slide:function(event,ui) {                                          // Slide cb
-                mps.sh.mobVis[mps.sh.curMob]=ui.value;                          // Set vis factor
-                }
-            }    
-         $("#mobVis" ).slider(ops);                                             // Init slider
-        }
-	}
-	
-
-
+	if ((this.curMob != -1) && (this.mobVis[this.curMob] > 0)) {			// If selected and visible
+		var val=this.mobVis[this.curMob];									// Get def
+		var ops={ min:0, max:100, value:val,								// Slider options
+			slide:function(event,ui) {										// Slide cb
+				mps.sh.mobVis[mps.sh.curMob]=ui.value;						// Set vis factor
+				}
+			}    
+		$("#mobVis" ).slider(ops);											// Init slider
+		}
+}
 	
 
 

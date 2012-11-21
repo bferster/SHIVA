@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -131,7 +132,7 @@ MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 				};
 	var mob={ 	type:"chapter", 
 				status:"open",
-				title:"All Maps",
+				title:"Chapter 1",
 				}			
 	this.AddNewMob(mob)
 	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
@@ -184,6 +185,7 @@ MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 
 	var mob={ 	type:"header", 
 				status:"open",
+				desc: "The Ceded Islands were a frequently charted territory for English cartographers in the 17th century.",
 				title:"Ceded Islands",
 				}			
 	this.AddNewMob(mob)
@@ -247,8 +249,8 @@ MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 	this.AddNewMob(mob)
 	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
 	var mob={ 	type:"chapter", 
-				status:"open",
-				title:"Chapter 1",
+				status:"closed",
+				title:"Chapter 2",
 				}			
 	this.AddNewMob(mob)
 	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
@@ -270,8 +272,7 @@ MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 				large:"http://www.viseyes.org/shiva/map.jpg",
 				flyto:false,
 				title:"The dividing line",
-				desc:"",
-                metadata:meta 
+               metadata:meta 
 				}			
 	this.AddNewMob(mob)
 	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
@@ -458,11 +459,15 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 				str+="2";													// Use dark icons
 			str+=".gif'><b>"+o.title+"</div>";								// Title
 			str+="</td><tr>";												// End 
+			if ((o.desc)&& (o.status == "open"))							// If a description
+				str+="<tr><td colspan='2'><i>"+o.desc+"</i><br/><br/></td></tr>";	// Add it
 			if (o.status != "open")	{										// If closed open
 				var type=o.type;											// Search type
 				for (j=i+1;j<n;++j) {											// For each mob
 					o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[j])];   // Point at mob
-					if (o.type == type)										// Got next one
+					if (o.type == type)										// If a match
+						break;												// Quit
+					if ((type == "header") && (o.type == "chapter"))		// Quit on chapter if a header
 						break;												// Quit
 					}
 				i=j-1;														// Set next index

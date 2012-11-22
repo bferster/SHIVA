@@ -98,23 +98,21 @@ function MapScholar()													// CONSTRUCTOR
 
 MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 {
-//		atlas[
-//			name, desc, id,
-//			type (tour|collection)
-//			mids[]
-//			]
-//		mobs[
-//			name, src, title, citation, id,
-//			flyto (true|false)
-//			type (map|layer|goto)
-//			metadata{
-//				title,desc,start,end,tags,citation
-//				}
-//			] 
-
+/*		atlas[
+			name, desc, id,
+			type (tour|collection)
+			mids[]
+			]
+		mobs[
+			name, kml, title, desc, id,
+			status (open|closed|flyto)
+			type (map|layer|goto|chapter|header)
+			start,end,tags,citation
+			] 
+*/
+	var o,i,j,v;
 	this.atlas=new Array();													// Holds atlas data
 	this.mobs=new Array();													// Holds map objects data
-	var i=0;
 
 	var atlas={ type:"collection",		
 				name:"Florida Maps",
@@ -122,248 +120,23 @@ MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 				mids:[],
 				id:0
 				};
-
 	this.AddNewAtlas(atlas);
 
-	var meta={	start:1754,
-				end:0,
-				tags:"England, empire",
-				citation:"John Smythe, 1754 LOC"
-				};
-	var mob={ 	type:"chapter", 
-				status:"open",
-				title:"Chapter 1",
-				}			
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-
-	var mob={ 	type:"map", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				med:"http://www.viseyes.org/shiva/map.jpg",
-				thumb:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"1754 map of England",
-				desc:"This is a nicely drawn map of England",
-				metadata:meta 
-				}			
-	
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-	
-	var mob={ 	type:"layer", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"The dividing line",
-				desc:"",
-                metadata:meta 
-				}			
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-
-	var mob={ 	type:"goto", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"Central London",
-                metadata:meta 
-				}			
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-
-	var mob={ 	type:"map", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				med:"http://www.viseyes.org/shiva/map.jpg",
-				thumb:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"1754 map of England",
-				desc:"This is a nicely drawn map of England",
-				metadata:meta 
-				}			
-	
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-
-
-	var mob={ 	type:"header", 
-				status:"open",
-				desc: "The Ceded Islands were a frequently charted territory for English cartographers in the 17th century.",
-				title:"Ceded Islands",
-				}			
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-
-	var mob={ 	type:"map", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				med:"http://www.viseyes.org/shiva/map.jpg",
-				thumb:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"1754 map of England",
-				desc:"This is a nicely drawn map of England",
-				metadata:meta 
-				}			
-	
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-
-	var mob={ 	type:"map", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				med:"http://www.viseyes.org/shiva/map.jpg",
-				thumb:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"1754 map of England",
-				desc:"This is a nicely drawn map of England",
-				metadata:meta 
-				}			
-	
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-	var mob={ 	type:"header", 
-				status:"open",
-				title:"Florida",
-				}			
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-
-	var mob={ 	type:"map", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				med:"http://www.viseyes.org/shiva/map.jpg",
-				thumb:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"1754 map of England",
-				desc:"This is a nicely drawn map of England",
-				metadata:meta 
-				}			
-	
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-
-	var mob={ 	type:"map", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				med:"http://www.viseyes.org/shiva/map.jpg",
-				thumb:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"1754 map of England",
-				desc:"This is a nicely drawn map of England",
-				metadata:meta 
-				}			
-	
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-	var mob={ 	type:"chapter", 
-				status:"closed",
-				title:"Chapter 2",
-				}			
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-
-	var mob={ 	type:"map", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				med:"http://www.viseyes.org/shiva/map.jpg",
-				thumb:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"1754 map of England",
-				desc:"This is a nicely drawn map of England",
-				metadata:meta 
-				}			
-	
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-	
-	var mob={ 	type:"layer", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"The dividing line",
-               metadata:meta 
-				}			
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-
-	var mob={ 	type:"goto", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"Central London",
-                metadata:meta 
-				}			
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-
-	var mob={ 	type:"map", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				med:"http://www.viseyes.org/shiva/map.jpg",
-				thumb:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"1754 map of England",
-				desc:"This is a nicely drawn map of England",
-				metadata:meta 
-				}			
-	
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-
-
-	var mob={ 	type:"header", 
-				status:"open",
-				title:"Ceded Islands",
-				}			
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-
-	var mob={ 	type:"map", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				med:"http://www.viseyes.org/shiva/map.jpg",
-				thumb:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"1754 map of England",
-				desc:"This is a nicely drawn map of England",
-				metadata:meta 
-				}			
-	
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-
-	var mob={ 	type:"map", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				med:"http://www.viseyes.org/shiva/map.jpg",
-				thumb:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"1754 map of England",
-				desc:"This is a nicely drawn map of England",
-				metadata:meta 
-				}			
-	
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-	var mob={ 	type:"header", 
-				status:"open",
-				title:"Florida",
-				}			
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-
-	var mob={ 	type:"map", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				med:"http://www.viseyes.org/shiva/map.jpg",
-				thumb:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"1754 map of England",
-				desc:"This is a nicely drawn map of England",
-				metadata:meta 
-				}			
-	
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
-
-	var mob={ 	type:"map", 
-				large:"http://www.viseyes.org/shiva/map.jpg",
-				med:"http://www.viseyes.org/shiva/map.jpg",
-				thumb:"http://www.viseyes.org/shiva/map.jpg",
-				flyto:false,
-				title:"1754 map of England",
-				desc:"This is a nicely drawn map of England",
-				metadata:meta 
-				}			
-	
-	this.AddNewMob(mob)
-	this.AddMobToAtlas(this.atlas[0].id,this.mobs[i++].id);
+	var mobs=shivaLib.GetTextFile("default.txt");							// Load data
+	mobs.replace(/\n\r/g,"\n");												// \n\r -> \n
+	mobs.replace(/\r\n/g,"\n");												// \r\n -> \n
+	mobs.replace(/\r/g,"");													// Remove \r's
+	mobs=mobs.split("\n");													// Split into rows
+	var fields=mobs[0].split("\t");											// Get field names
+	for (i=1;i<mobs.length;++i) {											// For each row
+		o={};																// Fresh object
+		v=mobs[i].split("\t");												// Split into fields
+		for (j=0;j<=fields.length;++j)										// For each field 
+			if (fields[j])													// If a real field
+				o[fields[j]]=v[j];											// Set it
+		this.mobs.push(o);													// Add new mob to project
+		this.AddMobToAtlas(this.atlas[0].id,this.mobs[i-1].id);				// Add to atlas
+		}
 }
 
 MapScholar.prototype.AddNewAtlas=function(atlas)						// ADD NEW ATLAS TO PROJECT
@@ -374,7 +147,6 @@ MapScholar.prototype.AddNewAtlas=function(atlas)						// ADD NEW ATLAS TO PROJEC
 
 MapScholar.prototype.AddNewMob=function(mob)							// ADD NEW MAP OBJECT TO PROJECT
 {
-	mob.id=""+Math.floor(Math.random()*999999999999);						// Make random id #
 	this.mobs.push($.extend(true,{},mob));									// Copy new mob  to project
 }
 
@@ -451,19 +223,19 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 		if ((o.type == "chapter") || (o.type == "header")) {				// A header													
 			str+="<tr height='30'><td colspan='2'><div class='"+o.type+"bar'>"; // Start
 			str+="<img id='mob"+i+"' src='img/";							// Img base
-			if (o.status == "open")											// If open
-				str+="collapse";											// Expand
+			if (o.status == "closed")										// If open
+				str+="expand";												// Expand
 			else															// If closed
-				str+="expand";												// Collapse
+				str+="collapse";											// Collapse
 			if (o.type == "header")											// If a header
 				str+="2";													// Use dark icons
 			str+=".gif'><b>"+o.title+"</div>";								// Title
 			str+="</td><tr>";												// End 
-			if ((o.desc)&& (o.status == "open"))							// If a description
+			if ((o.desc)&& (o.status != "closed"))							// If a description
 				str+="<tr><td colspan='2'><i>"+o.desc+"</i><br/><br/></td></tr>";	// Add it
-			if (o.status != "open")	{										// If closed open
+			if (o.status == "closed")	{									// If closed
 				var type=o.type;											// Search type
-				for (j=i+1;j<n;++j) {											// For each mob
+				for (j=i+1;j<n;++j) {										// For each mob
 					o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[j])];   // Point at mob
 					if (o.type == type)										// If a match
 						break;												// Quit
@@ -475,18 +247,19 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			continue;
 			}
 		if (o.type == "map") { 												// A map													
-			if (o.thumb)                                                    // If a thumb defined															
-				pic=o.thumb;												// Use it
+			if (o.small)                                                    // If a small defined															
+				pic=o.small;												// Use it
 			else if (o.med)													// Else if a med defined															
 				pic=o.med;													// Use it
 			else if (o.large)												// Else if a large defined															
 			pic=o.med;														// Use it
 			}
-		else if (o.type == "layer") 										// A layer													
-			if (o.thumb)													// If a thumb defined                                                           
-				pic=o.thumb;												// Use it
+		else if (o.type == "layer") {										// A layer													
+			if (o.small)													// If a thumb defined                                                           
+				pic=o.small;												// Use it
 			else															// Use icon
 				pic="img/layericon.png";									// Set
+			}
 		else if (o.type == "goto")											// A goto													
 			pic="img/gotoicon.png";											// Use icon
 		str+="<tr id='mob"+i+"'";											// Row start
@@ -496,7 +269,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			if (o.type == "map")											// If a map                                                    
             str+=" style='border: 1px solid #999' ";						// Add border
 		str+=" width='64' src='"+pic+"'>&nbsp;&nbsp;</td>";					// Add pic
-		str+="<td align='top'><b>"+o.title+"</b><br/>";						// Add title
+		str+="<td valign='top'><b>"+o.title+"</b><br/>";						// Add title
 		if (o.desc)															// If desc spec'd
 			str+=o.desc+"<br/>";											// Add desc
 		str+="<br/></td></tr>";												// Close entry
@@ -535,13 +308,24 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
  
 	$("#mobInfo").click( function(e) {									// CLICK ON INFO BUTTON
 		shivaLib.Sound("click");											// Click
-		var o=mps.mobs[mps.FindMobByID(mps.atlas[mps.sh.curAtlas].mids[mps.sh.curMob])].metadata;	// Point at mob
+		var o=mps.mobs[mps.FindMobByID(mps.atlas[mps.sh.curAtlas].mids[mps.sh.curMob])];	// Point at mob
 		if ($("#mobCite").html()) {											// If something there already
 			$("#mobCite").html("");											// Clear it
 			$("#mobCite").css("padding","0px");								// No padding
 			}
 		else{																// Nothing there yet
-			$("#mobCite").html("<b>Map 3</b><br>Citation information about the map or layer will be found here, such as author, dates, etc.");
+			var str="<hr/><b>";
+			str+=o.type.substr(0,1).toUpperCase()+o.type.substr(1)+" ";		// Set type
+			str+=o.id+"</b>";												// Add map id
+			if (o.start) {													// If a start set
+				str+="&nbsp;&nbsp;&nbsp;("+o.start;							// Add it
+				if (o.end)													// If an end set
+					str+=" - "+o.end;										// Add it
+				str+=")";													// Close date paren
+				}
+			if (o.citation)													// If a citation set
+				str+="<br/>"+o.citation;									// Add it
+			$("#mobCite").html(str);										// Set text
 			$("#mobCite").css("background-color","#ddddff");				// Color
 			$("#mobCite").css("padding","6px");								// Add padding
 			}

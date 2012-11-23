@@ -24,7 +24,7 @@ MapScholar_Draw.prototype.DrawShelf=function()							// DRAW DRAWING SHELF
 	var type="Draw";
 	if (this.curSeg != -1)
 		type=this.segs[this.curSeg].type;
-    str="<div align='center'><img width='160' height='180' src='img/MapScholarLogo.png'/></div>";
+    str="<div align='center'><img width='160' height='174' src='img/MapScholarLogo.png'/></div>";
     str+="<div id='contentShelf' style='width:200px;height:401px;background-color:#fff;border:1px solid #999;margin:6px;padding:8px' class='rounded-corners'>";
 	str+="<br/><div style='text-align:center'><b>"+type+"</b></div><br/><table>";
 	if (type == "Draw") {
@@ -100,8 +100,8 @@ MapScholar_Draw.prototype.DrawControlBar=function(mode)						// DRAW MAP CONTROL
 			ewid=s.ewid;	url=s.url;		rot=s.rot;							// from
 			text=s.text;	text2=s.text2;	type=s.type;						// seg
 			}
-	var str="<p>"
-		str+="&nbsp;&nbsp;<img src='img/globe.gif' style='vertical-align:bottom' title='Back to map' onclick='mps.dr.DrawControlBar(false)'>";		
+		var str="<p>"
+		str+="&nbsp;&nbsp;<img width='18' height='18' src='img/globe.gif' style='vertical-align:bottom' title='Back to map' onclick='mps.dr.DrawControlBar(false)'>";		
 		str+="&nbsp;&nbsp;&nbsp;<select id='annType' style='font-size:x-small' onchange='mps.dr.AddNewSeg()'>";
 		str+="<option>Draw</option>";		str+="<option>Line</option>";
 		str+="<option>Shape</option>";		str+="<option>Box</option>";

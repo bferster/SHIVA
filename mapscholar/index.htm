@@ -7,7 +7,7 @@
 	<title>MapScholar</title>
 	<link rel="stylesheet" type="text/css" href="http://www.viseyes.org/shiva/css/smoothness/jquery-ui-1.8.16.custom.css">
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
  	<script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"earth","version":"1"}]}'></script>
  	<script type="text/javascript" src="http://www.viseyes.org/shiva/SHIVA_Show.js"></script>
@@ -16,8 +16,8 @@
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small}
 		p.pb { text-align:right; color:#fff; }
 		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
-		.chapterbar { -moz-border-radius:3px;-webkit-border-radius:3px;-khtml-border-radius:3px;border-radius:4px;width:190px;background-color:#999;height:14px;padding:3px;color:#fff}
-		.headerbar { border-bottom:1px solid #999;height:14px;width:190px;padding:3px;color:#333}
+		.chapterbar { -moz-border-radius:3px;-webkit-border-radius:3px;-khtml-border-radius:3px;border-radius:4px;width:192px;background-color:#999;height:14px;padding:3px;color:#fff}
+		.headerbar { border-bottom:1px solid #999;height:14px;width:192px;padding:3px;color:#333}
 		tr.odd { background-color:#e0e0e0; }
 		.propTable { background-color:#eee;border-radius:8px;
 				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
@@ -269,7 +269,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			if (o.type == "map")											// If a map                                                    
             str+=" style='border: 1px solid #999' ";						// Add border
 		str+=" width='64' src='"+pic+"'>&nbsp;&nbsp;</td>";					// Add pic
-		str+="<td valign='top'><b>"+o.title+"</b><br/>";						// Add title
+		str+="<td valign='top'><b>"+o.title+"</b><br/>";					// Add title
 		if (o.desc)															// If desc spec'd
 			str+=o.desc+"<br/>";											// Add desc
 		str+="<br/></td></tr>";												// Close entry

@@ -24,7 +24,7 @@ MapScholar_Draw.prototype.DrawShelf=function()							// DRAW DRAWING SHELF
 	var type="Draw";
 	if (this.curSeg != -1)
 		type=this.segs[this.curSeg].type;
-    str="<div align='center'><img width='160' src='img/MapScholarLogo.png'/></div>";
+    str="<div align='center'><img width='160' height='180' src='img/MapScholarLogo.png'/></div>";
     str+="<div id='contentShelf' style='width:200px;height:401px;background-color:#fff;border:1px solid #999;margin:6px;padding:8px' class='rounded-corners'>";
 	str+="<br/><div style='text-align:center'><b>"+type+"</b></div><br/><table>";
 	if (type == "Draw") {
@@ -46,8 +46,8 @@ MapScholar_Draw.prototype.DrawShelf=function()							// DRAW DRAWING SHELF
 		}
 	else if (type == "Image") {
 		str+="<tr><td>Image URL&nbsp;</td><td><input type='text' style='width:130px;font-size:x-small' id='annUrl'/></td></tr>";
-		str+="<tr><td>Rotation&nbsp;</td><td><input type='range' max='360' style='width:130px;font-size:x-small' id='annRot'/>";
-		str+="</td></tr>";
+		str+="<tr><td valign='bottom'>Rotation&nbsp;</td><td><div id='annRot' style='width:100px;display:inline-block'</div>";
+		str+="<input type='text' style='font-size:xx-small;vertical-align:top;border:none;background:none' id='annRot2'/></td></tr>";
 		str+="<tr><td colspan='2'><p><hr/></p>";
 		str+="Drag corner dots to resize image. If Shift key is pressed, the image will be stretched. Drag the center of image to move the image.<br/><br/>";
 		str+="You can fine-tune the rotation by dragging a corner point and pressing the Alt or Option key. Dragging point left of center rotates CCW, right rotates CW.";
@@ -111,9 +111,8 @@ MapScholar_Draw.prototype.DrawControlBar=function(mode)						// DRAW MAP CONTROL
 			str+="Color&nbsp; <input type='text' size='1' style='font-size:x-small' id='annCol'/>&nbsp;&nbsp;&nbsp;";
 			str+="Edge&nbsp; <input type='text' size='1' style='font-size:x-small;text-align:center;border:1px solid #999' id='annEwid'/>";
 			str+="<input type='text' size='1' style='font-size:x-small' id='annEcol'/>&nbsp;&nbsp;&nbsp;";
-			str+="Visibility&nbsp; <input type='range' style='width:80px;height:14px;vertical-align:bottom'; id='annVis'/>&nbsp;&nbsp;";
-			if ($.browser.webkit)
-				str+="<input type='text' style='font-size:x-small;width:30px;height:14px;vertical-align:bottom;border:none;background:none'; id='annVis2'/>";
+			str+="Visibility&nbsp;&nbsp;<span id='annVis' style='width:100px;display:inline-block'></span>&nbsp;&nbsp;";
+			str+="<input type='text' style='font-size:x-small;width:30px;height:14px;vertical-align:bottom;border:none;background:none'; id='annVis2'/>";
 			}
 		if (this.undos.length)
 			str+="<img src='img/undodot.png' style='position:absolute;left:780px' title='Undo' id='annUndo'>";		
@@ -135,10 +134,11 @@ MapScholar_Draw.prototype.DrawControlBar=function(mode)						// DRAW MAP CONTROL
 		$("#annText2").val(text2);												// Set text2
 		$("#annUrl").val(url);													// Set url
 		$("#annRot").val(rot);													// Show cur rot
+		$("#annRot2").val(rot);													// Set rot text
 		}
 	else{
 		this.curSeg=-1;															// Not editing
-		this.DrawMap();
+		this.DrawMap();															// Draw map
 		mps.sh.Draw();															// Draw main shelf
 		}
 	
@@ -160,28 +160,41 @@ MapScholar_Draw.prototype.DrawControlBar=function(mode)						// DRAW MAP CONTROL
 		_this.ColorPicker("Ecol",e.pageX,654);									// Pick ecol
 		});
 
-	$("#annVis").change(function(e){ 										// SET VISIBILITY
-		if (_this.curSeg != -1) {												// If editing
-			_this.segs[_this.curSeg].vis=$("#annVis").val();					// Set vis
-			_this.StyleSeg(_this.curSeg);										// Set style
-			$("#annVis2").val($("#annVis").val());								// Sync with text box
-			}
-		});
-
 	$("#annVis2").blur(function(e){ 										// SET VISIBILITY
 		if (_this.curSeg != -1) {												// If editing
 			_this.segs[_this.curSeg].vis=$("#annVis2").val();					// Set vis
 			_this.StyleSeg(_this.curSeg);										// Set style
-		$("#annVis").val($("#annVis2").val());									// Sync with text box
+			$("#annVis").slider("option","value",$("#annVis2").val());			// Sync with text box
 			}
 		});
 
-	$("#annRot").change(function(e){ 										// SET ROTATION
+	$("#annRot2").blur(function(e){ 										// SET ROTATION
 		if (_this.curSeg != -1) {												// If editing
-			_this.segs[_this.curSeg].rot=this.value;							// Set rot
+			_this.segs[_this.curSeg].rot=$("#annRot2").val();					// Set rot
 			_this.StyleSeg(_this.curSeg);										// Set style
+			$("#annRot").slider("option","value",$("#annRot2").val());			// Sync with text box
 			}
 		});
+
+	var ops={ min:0, max:360, value:rot,										// Slider options
+		slide:function(event,ui) {												// Slide cb
+		if (_this.curSeg != -1) {												// If editing
+			_this.segs[_this.curSeg].rot=ui.value;								// Set rot
+			_this.StyleSeg(_this.curSeg);										// Set style
+			$("#annRot2").val(ui.value);										// Sync with text box
+			}
+		}};    
+	$("#annRot" ).slider(ops);													// Init slider
+
+	var ops={ min:0, max:100, value:vis,										// Slider options
+		slide:function(event,ui) {												// Slide cb
+		if (_this.curSeg != -1) {												// If editing
+			_this.segs[_this.curSeg].vis=ui.value;								// Set vis
+			_this.StyleSeg(_this.curSeg);										// Set style
+			$("#annVis2").val(ui.value);										// Sync with text box
+			}    
+		}};   
+	$("#annVis" ).slider(ops);													// Init slider
 
 	$("#annDelete").click(function(e){ 										// DELETE SEG
 		_this.Do();																// Set undo	
@@ -190,7 +203,6 @@ MapScholar_Draw.prototype.DrawControlBar=function(mode)						// DRAW MAP CONTROL
 		$("#annType").val("Draw");												// Back to draw
 		_this.curSeg=-1;														// Not editing																					
  		_this.DrawMap();														// Redraw map
-		_this.DrawShelf();														// Redraw shelf
 		_this.DrawControlBar(true);												// Draw control bar
 		});
 
@@ -237,7 +249,6 @@ MapScholar_Draw.prototype.DrawControlBar=function(mode)						// DRAW MAP CONTROL
 		if (_this.Undo()) {														// If a success
 			shivaLib.Sound("ding");												// Ding
 			_this.DrawMap();													// Refresh map
-			_this.DrawShelf();													// Show options
 			_this.DrawControlBar(true);											// Update control bar
 			}
 		});
@@ -296,7 +307,6 @@ MapScholar_Draw.prototype.AddNewSeg=function()								// ADD NEW SEGMENT
 	shivaLib.Sound("ding");														// Ding
 	this.curSeg=this.segs.length-1;												// Highlight current one																				
 	this.DrawMap();																// Redraw map
-	this.DrawShelf();															// Draw shelf
 	this.DrawControlBar(true);													// Draw control bar
 	return true;																// OK
 }
@@ -640,7 +650,7 @@ MapScholar_Draw.prototype.InitEvents=function()								// INIT EVENTS
 							}
 						}
 					}
-				s=mps.dr.segs[mps.dr.curSeg];							// Point at seg
+				s=mps.dr.segs[mps.dr.curSeg];									// Point at seg
 				if (s.lock)														// If locked
 					return;														// Quit
 				_this.Do();														// Set undo	
@@ -655,7 +665,6 @@ MapScholar_Draw.prototype.InitEvents=function()								// INIT EVENTS
 				for (var i=0;i<n;++i) 											// For each child
 					if (o.item(i).getId().indexOf(s.id) != -1) {				// If a control dot
 						_this.dragInfo.seg=o.item(i);							// Point at seg
-						_this.DrawShelf();										// Draw shelf
 						_this.DrawControlBar(true);								// Update control bar
 						break;													// Quit looking
 						}
@@ -717,7 +726,6 @@ MapScholar_Draw.prototype.InitEvents=function()								// INIT EVENTS
 					_this.dragInfo.lat=e.getLatitude();							// Save click lat
 					_this.dragInfo.lon=e.getLongitude();						// Save lon
 					_this.DrawMap();											// Refresh map
-					_this.DrawShelf();											// Show options
 					_this.DrawControlBar(true);									// Update control bar
 					}
 				}
@@ -786,7 +794,8 @@ MapScholar_Draw.prototype.InitEvents=function()								// INIT EVENTS
 					if (e.getAltKey()) {										// Rotating
 						a=Number(_this.dragInfo.rot);							// Get rot when 1st clicked
 						a+=(400-e.getClientX())/40;								// Add to rot 
-						$("#annrot").val(s.rot);								// Set slider
+						$("#annRot").slider("option","value",s.rot);			// Set slider
+						$("#annRot2").val(s.rot);								// Set text box
 						s.rot=a;												// Set rot
 		      			_this.dragInfo.point.setLatLng(s.lats[num],lon);		// Vertical motion only
 						}

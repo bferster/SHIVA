@@ -2561,7 +2561,7 @@ SHIVA_Show.prototype.SetAdvancedAttributes=function(prop, baseVar) 		// ADVANCED
 						format:			{ opt:'string',	 des:'Axis lable format'},
 						direction:		{ opt:'string',	 des:'Direction'},
 						logScale:		{ opt:'string',	 des:'Log scale?'},
-						testPosition:	{ opt:'string',	 des:'Text position'},
+						textPosition:	{ opt:'string',	 des:'Text position'},
 						title:			{ opt:'string',	 des:'Axis title'},
 						maxValue:		{ opt:'string',	 des:'Max value'},
 						minValue:		{ opt:'string',	 des:'Min value'},

@@ -199,7 +199,9 @@ MapScholar.prototype.AddMapBoxes=function()								// ADD MAP WIREFRAMES
 {
 	var i,coords,seg,m,sty;
 	var ge=shivaLib.map;													// Point to earth												
-	for (i=0;i<this.mobs.length;++i) {										// For each seg
+    var folder=ge.createFolder("wireframes");								// Create folder
+    ge.getFeatures().appendChild(folder);									// Add folder to EDOM
+ 	for (i=0;i<this.mobs.length;++i) {										// For each seg
 		m=this.mobs[i];														// Point at mob
 		if (m.type != "map")												// If not a map
 			continue;														// Continue
@@ -208,7 +210,7 @@ MapScholar.prototype.AddMapBoxes=function()								// ADD MAP WIREFRAMES
 		seg=ge.createPlacemark(m.gid);										// Create holder
 		seg.setStyleSelector(ge.createStyle(''));							// Create style
 		seg.setGeometry(coords);											// Set coords in seg
-		ge.getFeatures().appendChild(seg);									// Add seg to EDOM
+		folder.getFeatures().appendChild(seg);								// Add seg to folder
 		coords.getCoordinates().pushLatLngAlt(m.north-0,m.west-0,0);		// Add point
 		coords.getCoordinates().pushLatLngAlt(m.north-0,m.east-0,0);		// Add point
 		coords.getCoordinates().pushLatLngAlt(m.south-0,m.east-0,0);		// Add point
@@ -287,8 +289,8 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 	str+="<label>&nbsp; Location: </label ><input size='20' id='address' style='font-size:x-small' type='text'/>";
 	str+="&nbsp;&nbsp; <input type='checkbox' checked='checked'  style='vertical-align:middle' id='wireframes'>Show boxes?";		
 	$("#controlBarDiv").html(str+"</p>");                                    // Add to DOM
-	str="<div id='contentShelf' style='width:217px;top:24px;height:582px;background-color:#eee;margin:0px;padding:6px;overflow-x:hidden;overflow-y:scroll' class='rsounded-corners'/>";
-	str+="<hr><p>&nbsp; <img id='expandAll' src='img/";						// image base
+	str="<div id='contentShelf' style='width:216px;top:24px;height:586px;background-color:#eee;margin:0px;padding:6px;overflow-x:hidden;overflow-y:scroll;border:1px solid #ccc;'/>";
+	str+="<p>&nbsp; <img id='expandAll' src='img/";						// image base
 	if (this.expandAll)														// If expand
 		str+="expand2.gif'> Expand all</p>";								// Expand all button
 	else																	// Collaspe

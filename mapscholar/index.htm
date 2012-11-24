@@ -340,7 +340,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 	for (i=0;i<n;++i) {                                                     // For each mob
 		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];      // Point at mob
 		if ((o.type == "chapter") || (o.type == "header")) {				// A header													
-			str+="<tr valign='top' height='36'><td colspan='2'><div class='"+o.type+"bar'>"; // Start
+			str+="<tr valign='top' height='30'><td colspan='2'><div class='"+o.type+"bar'>"; // Start
 			str+="<img id='mob"+i+"' src='img/";							// Img base
 			if (o.status == "closed")										// If open
 				str+="expand";												// Expand

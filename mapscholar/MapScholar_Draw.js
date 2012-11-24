@@ -626,8 +626,10 @@ MapScholar_Draw.prototype.InitEvents=function()								// INIT EVENTS
 	google.earth.addEventListener(ge.getGlobe(),"mousedown", 				// ON MOUSE DOWN
 		function(e) {
 			var s,i,n,o,num;
-			if (!_this.inDraw)													// If not annotating
+			if (!_this.inDraw) {												// If not annotating
+		    	mps.ClickHandler(e);											// Call main click handler
 		    	return;															// Quit
+				}
 			var id=e.getTarget().getId();										// Find id
 		  	var type=e.getTarget().getType();									// Get type
 			if (type != "GEGlobe")												// If something hit
@@ -673,9 +675,9 @@ MapScholar_Draw.prototype.InitEvents=function()								// INIT EVENTS
 				else
 					_this.dragInfo.coords=_this.dragInfo.seg.getGeometry().getCoordinates()
 				if (id.indexOf(".5") != -1) { 									// A mid point
-						_this.Do();												// Set undo	
-	 					mps.dr.AddPointToLine(num,0,0);					// Bisect line
- 		 				}
+					_this.Do();													// Set undo	
+	 				mps.dr.AddPointToLine(num,0,0);								// Bisect line
+ 		 			}
 	     		else if (id.substr(3,3) == "cd-")	{							// If a control dot
 			    	if (e.getShiftKey() && ((s.type == "Shape") || (s.type == "Line"))) {	 // Delete point from line/shape									// Right-clicked
 						if ((s.type == "Shape") && (s.lats.length < 4)) 		// Got to have min of 3

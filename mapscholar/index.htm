@@ -275,6 +275,7 @@ function MapScholar_Shelf()												// CONSTRUCTOR
 {
 	this.curAtlas=0;														// Default to all
 	this.curMob=-1;															// Default to none
+    this.expandAll=true;													// Expand/collapse button status
     this.mobVis=new Array();                                                // Holds hide/show status
 }
 
@@ -286,21 +287,46 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 	str+="<label>&nbsp; Location: </label ><input size='20' id='address' style='font-size:x-small' type='text'/>";
 	str+="&nbsp;&nbsp; <input type='checkbox' checked='checked'  style='vertical-align:middle' id='wireframes'>Show boxes?";		
 	$("#controlBarDiv").html(str+"</p>");                                    // Add to DOM
-	str="<div id='contentShelf' style='width:217px;top:24px;height:600px;background-color:#eee;margin:0px;padding:6px;overflow-x:hidden;overflow-y:scroll' class='rsounded-corners'/>";
+	str="<div id='contentShelf' style='width:217px;top:24px;height:582px;background-color:#eee;margin:0px;padding:6px;overflow-x:hidden;overflow-y:scroll' class='rsounded-corners'/>";
+	str+="<hr><p>&nbsp; <img id='expandAll' src='img/";						// image base
+	if (this.expandAll)														// If expand
+		str+="expand2.gif'> Expand all</p>";								// Expand all button
+	else																	// Collaspe
+		str+="collapse2.gif'> Collapse all</p>";							// Collapse all button
 	$("#shelfDiv").html(str+"</table></div>");								// Add div
 	var n=mps.atlas[this.curAtlas].mids.length;								// Number of mobs to add
 	this.mobVis=[];															// Remove old array
 	for (i=0;i<n;++i)														// For each mob
 		this.mobVis.push(0);												// Make it hidden                                       
-		this.FillShelf();													// Drawshelf
+		this.FillShelf();													// Draw shelf
 	
 	$("#wireframes").click(function(e) {								// SHOW BOXES?
+		shivaLib.Sound("click");											// Click
 		mps.showBoxes=e.target.checked;										// Set var
 		if (e.target.checked)												// If checked
 			mps.ShowMapBoxes(-1,"on");										// Show them
 		else																// If unchecked
 			mps.ShowMapBoxes(-1,"off");										// Hide
 		});
+	
+	$("#expandAll").click(function(e) {									// EXPAND/COLLAPSE ALL
+		shivaLib.Sound("click");											// Click
+		mps.sh.ToggleExpandCollapse();										// Expand or collapse
+		});
+
+}
+
+MapScholar_Shelf.prototype.ToggleExpandCollapse=function()				// EXPAND/COLLAPSE ALL
+{
+	var i,o,n;
+	this.expandAll=!this.expandAll;											// Toggle state
+	var n=mps.atlas[this.curAtlas].mids.length;                             // Number of mobs to add
+	for (i=0;i<n;++i) {                                                     // For each mob
+		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];      // Point at mob
+		if ((o.type == "chapter") || (o.type == "header")) 					// A header													
+			o.status=this.expandAll?"closed":"open";						// Set status
+		this.Draw();														// Draw shelf
+	}
 }
 
 MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF

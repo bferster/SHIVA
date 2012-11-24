@@ -249,7 +249,7 @@ MapScholar.prototype.ShowMapBoxes=function(num, mode)					// HIDE/SHOW WIREFRAME
 
 MapScholar.prototype.ClickHandler=function(e)							// HANDLE CLICKS TO EARTH
 {
-	var i;
+	var i,j;
 	var id=e.getTarget().getId();											// Find id
 	if (id.indexOf("WIRE-") == 0) {											// If a wireframe
 	if (!e.getShiftKey()) {													// If multiselecting
@@ -259,6 +259,17 @@ MapScholar.prototype.ClickHandler=function(e)							// HANDLE CLICKS TO EARTH
 		}
 	for (i=0;i<mps.mobs.length;++i) {										// For each seg
 		if (id == mps.mobs[i].gid) {										// A match
+			if (!$("#mobPos"+i).position()) {								// If not visible
+				for (j=i;j>=0;--j) {										// Walk backwards													
+					if (mps.mobs[j].status == "closed") {					// If a closed header/chapter
+						mps.mobs[j].status="open";							// Open it
+						mps.sh.FillShelf();									// Fill it
+						break;
+						}
+					}
+				}
+			var y=$("#mobPos"+i).position().top+$("#contentShelf").scrollTop();	// Get pos
+			$("#contentShelf").scrollTop(y);								// Scroll
 			shivaLib.Sound("click");										// Click
 			if (mps.sh.mobVis[i] < 50)										// If invisible
 				mps.sh.mobVis[i]=100;										// Show it
@@ -388,7 +399,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			if (o.type == "map")											// If a map                                                    
             str+=" style='border: 1px solid #999' ";						// Add border
 		str+=" width='64' src='"+pic+"'>&nbsp;&nbsp;</td>";					// Add pic
-		str+="<td valign='top'><b>"+o.title+"</b><br/>";					// Add title
+		str+="<td valign='top'><span id='mobPos"+ i+"'><b>"+o.title+"</b><br/></span>";					// Add title
 		if (o.desc)															// If desc spec'd
 			str+=o.desc+"<br/>";											// Add desc
 		str+="<br/></td></tr>";												// Close entry

@@ -197,7 +197,7 @@ MapScholar.prototype.FindMobByID=function(id)							// FIND MAP OBJECT INDEX BY 
 
 MapScholar.prototype.AddMapBoxes=function()								// ADD MAP WIREFRAMES
 {
-	var i,coords,seg,m,sty;
+	var i,coords,seg,m,sty,a=30000;
 	var ge=shivaLib.map;													// Point to earth												
     var folder=ge.createFolder("wireframes");								// Create folder
     ge.getFeatures().appendChild(folder);									// Add folder to EDOM
@@ -211,14 +211,15 @@ MapScholar.prototype.AddMapBoxes=function()								// ADD MAP WIREFRAMES
 		seg.setStyleSelector(ge.createStyle(''));							// Create style
 		seg.setGeometry(coords);											// Set coords in seg
 		folder.getFeatures().appendChild(seg);								// Add seg to folder
-		coords.getCoordinates().pushLatLngAlt(m.north-0,m.west-0,0);		// Add point
-		coords.getCoordinates().pushLatLngAlt(m.north-0,m.east-0,0);		// Add point
-		coords.getCoordinates().pushLatLngAlt(m.south-0,m.east-0,0);		// Add point
-		coords.getCoordinates().pushLatLngAlt(m.south-0,m.west-0,0);		// Add point
-		coords.getCoordinates().pushLatLngAlt(m.north-0,m.west-0,0);		// Add point
+		coords.getCoordinates().pushLatLngAlt(m.north-0,m.west-0,a);		// Add point
+		coords.getCoordinates().pushLatLngAlt(m.north-0,m.east-0,a);		// Add point
+		coords.getCoordinates().pushLatLngAlt(m.south-0,m.east-0,a);		// Add point
+		coords.getCoordinates().pushLatLngAlt(m.south-0,m.west-0,a);		// Add point
+		coords.getCoordinates().pushLatLngAlt(m.north-0,m.west-0,a);		// Add point
 		sty=seg.getStyleSelector().getLineStyle();							// Get line style
 		sty.setWidth(1);													// Set width	
 		sty.getColor().set("ff00ffff");  									// Set color in aabbggrr format
+		coords.setAltitudeMode(ge.ALTITUDE_RELATIVE_TO_GROUND);				// Relative to ground level
 		}
 }
 

@@ -76,6 +76,7 @@
 	});
 
 
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // MAIN 
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -249,38 +250,17 @@ MapScholar.prototype.ShowMapBoxes=function(num, mode)					// HIDE/SHOW WIREFRAME
 
 MapScholar.prototype.ClickHandler=function(e)							// HANDLE CLICKS TO EARTH
 {
-	var i,j;
+	var i;
 	var id=e.getTarget().getId();											// Find id
 	if (id.indexOf("WIRE-") == 0) {											// If a wireframe
-	if (!e.getShiftKey()) {													// If multiselecting
-		mps.ShowMapBoxes(-1,"on");											// Reset all
-		for (i=0;i<mps.sh.mobVis.length;++i)								// For each mob
-			mps.sh.mobVis[i]=0;												// Make it hidden                                       
-		}
-	for (i=0;i<mps.mobs.length;++i) {										// For each seg
-		if (id == mps.mobs[i].gid) {										// A match
-			if (!$("#mobPos"+i).position()) {								// If not visible
-				for (j=i;j>=0;--j) {										// Walk backwards													
-					if (mps.mobs[j].status == "closed") {					// If a closed header/chapter
-						mps.mobs[j].status="open";							// Open it
-						mps.sh.FillShelf();									// Fill it
-						break;
-						}
-					}
+		for (i=0;i<mps.mobs.length;++i) 									// For each seg
+			if (id == mps.mobs[i].gid) {									// A match
+				shivaLib.Sound("click");									// Click
+				mps.sh.HighlightMob(i,e.getShiftKey(),true);				// Highlight mob
 				}
-			var y=$("#mobPos"+i).position().top+$("#contentShelf").scrollTop();	// Get pos
-			$("#contentShelf").scrollTop(y);								// Scroll
-			shivaLib.Sound("click");										// Click
-			if (mps.sh.mobVis[i] < 50)										// If invisible
-				mps.sh.mobVis[i]=100;										// Show it
-			else															// If visible
-				mps.sh.mobVis[i]=0;											// Show it
-			mps.sh.FillShelf();												// Redraw shelf
-			mps.ShowMapBoxes(i,"select");									// Highlight box
-			}	
-		}
-	}
+			}
 }
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // SHELF 
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -291,7 +271,70 @@ function MapScholar_Shelf()												// CONSTRUCTOR
 	this.curMob=-1;															// Default to none
     this.expandAll=true;													// Expand/collapse button status
     this.mobVis=new Array();                                                // Holds hide/show status
+	
+	$("body").keydown(function(e) {										// KEY DOWN HANDLER
+		if (e.keyCode == 40) {												// Down arrow
+			mps.sh.HighlightMob("next",false,true);							// Next mob
+			shivaLib.Sound("click");										// Click
+			}
+		else if (e.keyCode == 38) {											// Up arrow
+			mps.sh.HighlightMob("last",false,true);							// Previous mob
+			shivaLib.Sound("click");										// Click
+			}
+		});
 }
+
+MapScholar_Shelf.prototype.HighlightMob=function(which, multi, scroll)	// HIGHLIGHT MOB OBJECT
+{
+	var j;
+	var i=Math.max(this.curMob,0);											// Start point
+	var n=mps.mobs.length-1;												// Last mob
+	if (which == "next") {													// Going forward										
+		i=Math.min(i+1,n);													// Cap at end
+		while (((mps.mobs[i].type == "header") || (mps.mobs[i].type == "chapter")) && (i < n)) // Skip over nav mobs
+			i++;															// Inc
+		}
+	else if (which == "last") {												// Going backward										
+		i=Math.max(i-1,0);													// Cap at end
+		while (((mps.mobs[i].type == "header") || (mps.mobs[i].type == "chapter")) && (i > 0)) // Skip over nav mobs
+			i--;															// Inc
+		}
+	else																	// Absolute
+		i=Number(which);													// Get number
+	i=this.curMob=Math.min(Math.max(i,0),n);								// Set indexer and cap
+	if (!$("#mobPos"+i).position()) {										// If not visible
+		for (j=i;j>=0;--j) {												// Walk backwards													
+			if (mps.mobs[j].status == "closed") {							// If a closed header/chapter
+				mps.mobs[j].status="open";									// Open it
+				this.FillShelf();											// Fill it
+				break;
+				}
+			}
+		}
+	if ($("#mobPos"+i).position()) {										// If a pos element
+		var y=$("#mobPos"+i).position().top+$("#contentShelf").scrollTop();	// Get pos
+		if (scroll)															// If scrolling
+			$("#contentShelf").scrollTop(y);								// Scroll
+		}
+	var o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];   	// Point at mob
+	if (o.status == "open")			o.status="closed";						// If open, close
+	else if (o.status == "closed")	o.status="open";						// If closed, open
+	if (!multi) {															// If not setting multiples
+		for (j=0;j<n+1;++j)													// For each mob
+			if (j != this.curMob)											// If not this one
+				this.mobVis[j]=0;											// Hide mob
+		if (mps.showBoxes)													// If showing boxes
+			mps.ShowMapBoxes(-1,"on");										// Reset boxes
+		}
+	if (this.mobVis[i] < 50)												// If off
+		this.mobVis[i]=100;													// Turn it on
+	else																	// If on
+		this.mobVis[i]=0;													// Turn it off
+	this.FillShelf();														// Redraw shelf
+	if (mps.showBoxes)														// If showing boxes
+		mps.ShowMapBoxes(i,"select");										// Highlight box
+}
+
 
 MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 {
@@ -394,7 +437,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			pic="img/gotoicon.png";											// Use icon
 		str+="<tr id='mob"+i+"'";											// Row start
 		if (this.mobVis[i] > 0) 											// If visible
-			str+="' style='background-color:#ddddff'";						// Color background
+			str+="' style='background-color:#ccccff'";						// Color background
 		str+="><td valign='top' width='70'><img "; 							// Img start								
 			if (o.type == "map")											// If a map                                                    
             str+=" style='border: 1px solid #999' ";						// Add border
@@ -404,7 +447,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			str+=o.desc+"<br/>";											// Add desc
 		str+="<br/></td></tr>";												// Close entry
 		if ((this.curMob == i) && (this.mobVis[i] > 0) && (o.type != "goto")){	// If selected and visible
-			str+="<tr style='background-color:#ddddff'><td valign='top' style='color:#009900' align='center'><b>Visibility</b></td><td>";
+			str+="<tr style='background-color:#ccccff'><td valign='top' style='color:#009900' align='center'><b>Visibility</b></td><td>";
 			str+="<div id='mobVis' style='width:70%;display:inline-block'></div>";		// Add div for vis
 			str+="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width='11' id='mobInfo' src='img/infobutton.gif'/><br/><br/></td></tr>";
 			str+="<tr><td colspan='2' id='mobCite'></td></tr>";
@@ -419,24 +462,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 		$("#mob"+i).click( function(e) {									// Add click handler
 			shivaLib.Sound("click");										// Click
 			var id=this.id.substr(3);										// Get id
-			mps.sh.curMob=id;												// Set curmob
-			var o=mps.mobs[mps.FindMobByID(mps.atlas[mps.sh.curAtlas].mids[id])];      // Point at mob
-			if (o.status == "open")			o.status="closed";				// If open, close
-			else if (o.status == "closed")	o.status="open";				// If closed, open
-			if (!e.shiftKey) {												// If not setting multiples
-				for (j=0;j<n;++j)											// For each mob
-					if (j != mps.sh.curMob)									// If not this one
-						mps.sh.mobVis[j]=0;									// Hide mob
-				if (mps.showBoxes)											// If showing boxes
-					mps.ShowMapBoxes(-1,"on");								// Reset boxes
-				}
-			if (mps.sh.mobVis[id] < 50)										// If off
-				mps.sh.mobVis[id]=100;										// Turn it on
-			else															// If on
-				mps.sh.mobVis[id]=0;										// Turn it off
-			mps.sh.FillShelf();												// Redraw shelf
-			if (mps.showBoxes)												// If showing boxes
-				mps.ShowMapBoxes(id,"select");								// Highlight box
+			mps.sh.HighlightMob(id,e.shiftKey,false);						// Highlight mob
 			});
 		}
  
@@ -460,7 +486,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			if (o.citation)													// If a citation set
 				str+="<br/>"+o.citation;									// Add it
 			$("#mobCite").html(str);										// Set text
-			$("#mobCite").css("background-color","#ddddff");				// Color
+			$("#mobCite").css("background-color","#ccccff");				// Color
 			$("#mobCite").css("padding","6px");								// Add padding
 			}
 		});

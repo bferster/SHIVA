@@ -198,12 +198,16 @@ MapScholar.prototype.FindMobByID=function(id)							// FIND MAP OBJECT INDEX BY 
 
 MapScholar.prototype.AddMapBoxes=function()								// ADD MAP WIREFRAMES
 {
+	var x,y,cx,cy,ar,sin,cos;
 	var i,coords,seg,m,sty,a=30000;
 	var ge=shivaLib.map;													// Point to earth												
     var folder=ge.createFolder("wireframes");								// Create folder
     ge.getFeatures().appendChild(folder);									// Add folder to EDOM
  	for (i=0;i<this.mobs.length;++i) {										// For each seg
 		m=this.mobs[i];														// Point at mob
+		ar=m.rotation*(Math.PI/180);										// Angle to radians
+		sin=Math.sin(ar);													// Get sine
+		cos=Math.cos(ar);													// Get cosine
 		if (m.type != "map")												// If not a map
 			continue;														// Continue
 		m.gid="WIRE-"+Math.floor(Math.random()*99999999);					// Make random #
@@ -212,11 +216,25 @@ MapScholar.prototype.AddMapBoxes=function()								// ADD MAP WIREFRAMES
 		seg.setStyleSelector(ge.createStyle(''));							// Create style
 		seg.setGeometry(coords);											// Set coords in seg
 		folder.getFeatures().appendChild(seg);								// Add seg to folder
-		coords.getCoordinates().pushLatLngAlt(m.north-0,m.west-0,a);		// Add point
-		coords.getCoordinates().pushLatLngAlt(m.north-0,m.east-0,a);		// Add point
-		coords.getCoordinates().pushLatLngAlt(m.south-0,m.east-0,a);		// Add point
-		coords.getCoordinates().pushLatLngAlt(m.south-0,m.west-0,a);		// Add point
-		coords.getCoordinates().pushLatLngAlt(m.north-0,m.west-0,a);		// Add point
+
+		cx=((m.east-m.west)/2)+(m.west-0);									// Center x
+		cy=((m.south-m.north)/2)+(m.north-0);								// Center y
+		x=cx+(m.west-cx)*cos-(m.north-cy)*sin;								// Rotate x
+		y=cy+(m.west-cx)*sin+(m.north-cy)*cos;								// Rotate y
+		coords.getCoordinates().pushLatLngAlt(y,x,a);						// Add point
+		x=cx+(m.east-cx)*cos-(m.north-cy)*sin;								// Rotate x
+		y=cy+(m.east-cx)*sin+(m.north-cy)*cos;								// Rotate y
+		coords.getCoordinates().pushLatLngAlt(y,x,a);						// Add point
+		x=cx+(m.east-cx)*cos-(m.south-cy)*sin;								// Rotate x
+		y=cy+(m.east-cx)*sin+(m.south-cy)*cos;								// Rotate y
+		coords.getCoordinates().pushLatLngAlt(y,x,a);						// Add point
+		x=cx+(m.west-cx)*cos-(m.south-cy)*sin;								// Rotate x
+		y=cy+(m.west-cx)*sin+(m.south-cy)*cos;								// Rotate y
+		coords.getCoordinates().pushLatLngAlt(y,x,a);						// Add point
+		x=cx+(m.west-cx)*cos-(m.north-cy)*sin;								// Rotate x
+		y=cy+(m.west-cx)*sin+(m.north-cy)*cos;								// Rotate y
+		coords.getCoordinates().pushLatLngAlt(y,x,a);						// Add point
+
 		sty=seg.getStyleSelector().getLineStyle();							// Get line style
 		sty.setWidth(1);													// Set width	
 		sty.getColor().set("ff00ffff");  									// Set color in aabbggrr format
@@ -302,7 +320,8 @@ MapScholar_Shelf.prototype.HighlightMob=function(which, multi, scroll)	// HIGHLI
 	else																	// Absolute
 		i=Number(which);													// Get number
 	i=this.curMob=Math.min(Math.max(i,0),n);								// Set indexer and cap
-	if (!$("#mobPos"+i).position()) {										// If not visible
+	var o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];   	// Point at mob
+	if ((!$("#mobPos"+i).position()) && (o.type != "chapter") && (o.type != "header")) {										// If not visible
 		for (j=i;j>=0;--j) {												// Walk backwards													
 			if (mps.mobs[j].status == "closed") {							// If a closed header/chapter
 				mps.mobs[j].status="open";									// Open it
@@ -316,15 +335,15 @@ MapScholar_Shelf.prototype.HighlightMob=function(which, multi, scroll)	// HIGHLI
 		if (scroll)															// If scrolling
 			$("#contentShelf").scrollTop(y);								// Scroll
 		}
-	var o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];   	// Point at mob
 	if (o.status == "open")			o.status="closed";						// If open, close
 	else if (o.status == "closed")	o.status="open";						// If closed, open
 	if (!multi) {															// If not setting multiples
-		for (j=0;j<n+1;++j)													// For each mob
+		for (j=0;j<n+1;++j)	{												// For each mob
+			if ((this.mobVis[j]) && (mps.showBoxes))						// If selected
+				mps.ShowMapBoxes(j,"on");									// Reset box
 			if (j != this.curMob)											// If not this one
 				this.mobVis[j]=0;											// Hide mob
-		if (mps.showBoxes)													// If showing boxes
-			mps.ShowMapBoxes(-1,"on");										// Reset boxes
+			}
 		}
 	if (this.mobVis[i] < 50)												// If off
 		this.mobVis[i]=100;													// Turn it on

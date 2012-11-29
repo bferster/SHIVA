@@ -4604,12 +4604,28 @@ SHIVA_Draw.prototype.IdeaDrop=function(from, to) 						//	HANDLE IDEA NODE DRAG 
 	shivaLib.Sound("ding");													// Ding sound
 }
 
+                                                                     
+                                                                     
+                                                                     
+                                             
 //////////// COLORPICKER
 
 SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
     $("#shiva_dialogDiv").remove();                                     //remove existing dialogs
     var self = this;
-    var inputBox = $("#propInput" + attr);
+	var sel = "";
+	console.log(isNaN(attr));
+	if (isNaN(attr)) 
+		sel="#"+attr.replace(/___/g,"");
+	else if (attr < 0) 
+		sel = "#colordiv";
+	else if (attr > 100)														
+		sel="#itemInput"+(Math.floor(attr/100)-1)+"-"+(attr%100);	
+	else sel = "#propInput" + attr;
+		
+	console.log(sel);
+    var inputBox = $(sel);
+    var inputBoxChip = $(sel+"C");
 
     //HELPER FUNCTIONS
     this.HEX_to_HSV = function(hexString) {                             
@@ -4758,10 +4774,12 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
     var cp_current = 0;
     var cp_first = 0;
 
+	var z = ($('.ui-widget-overlay').length > 0)?($('.ui-widget-overlay').css('z-index')+1):'auto';
     $('body').append($("<div>", {
         id : 'shiva_dialogDiv',
         class : 'propTable',
         css : {
+        	zIndex: z,
             position : 'absolute',
             right : '100px',
             top : '30px',
@@ -4868,7 +4886,8 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             color : 'gray',
             position : 'absolute',
             top : '25px',
-            left : '186px',
+            left : 
+            '186px',
         }
     }));
     $("#shiva_dialogDiv").append($("<div>", {
@@ -5157,7 +5176,8 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
         }
         $("#cp_schemebox").children("div").eq(1).children("div").eq(0).children("div").eq(0).css("backgroundColor", self.HSV_to_HEX(hue, sat, val));
         $("#cp_schemebox").children("div").eq(1).children("div").eq(0).children("div").eq(1).css("backgroundColor", self.HSV_to_HEX((hue + 180) % 360, sat, val));
-        $("#cp_schemebox").children("div").eq(1).children("div").eq(1).children("div").eq(0).css("backgroundColor", self.HSV_to_HEX(hue, sat, val));
+        $("#cp_schemebox").children("div").eq
+        (1).children("div").eq(1).children("div").eq(0).css("backgroundColor", self.HSV_to_HEX(hue, sat, val));
         $("#cp_schemebox").children("div").eq(1).children("div").eq(1).children("div").eq(1).css("backgroundColor", self.HSV_to_HEX((hue + 150) % 360, sat, val));
         $("#cp_schemebox").children("div").eq(1).children("div").eq(1).children("div").eq(2).css("backgroundColor", self.HSV_to_HEX((hue + 210) % 360, sat, val));
         $("#cp_schemebox").children("div").eq(2).children("div").eq(0).children("div").eq(0).css("backgroundColor", self.HSV_to_HEX(hue, sat, val));
@@ -5275,25 +5295,31 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
         self.position_bar();
     }
     
-    this.drawColors = function(color_HEX){
-        var colors = inputBox.val().split(",");
-        colors[cp_current] = color_HEX.slice(1);
-        
-        var boxChip = colors[cp_current];
-        boxChip = "#"+boxChip;
-        var str = "#propInput" + attr;
-        $(str).css('border-color', boxChip);
-        $(str + "C").css('background-color', boxChip);
-          
-        var str = colors.toString();
+    this.drawColors = function(color_HEX) {
+		if (mode != 0) {
+			var colors = inputBox.val().split(",");
+			colors[cp_current] = color_HEX.slice(1);
 
-        if (str[str.length - 1] != ",")
-            str += ",";
-        inputBox.val(str);
+			var boxChip = colors[cp_current];
+			boxChip = "#" + boxChip;
+			inputBox.css('border-color', boxChip);
+			inputBoxChip.css('background-color', boxChip);
 
-        Draw();
-    }
+			var str = colors.toString();
 
+			if (str[str.length - 1] != ",")
+				str += ",";
+			inputBox.val(str);
+		}
+		else{
+			var boxChip = color_HEX;
+			inputBox.css('border-color', boxChip);
+			inputBoxChip.css('background-color', boxChip);
+			inputBox.val(boxChip.slice(1,boxChip.length));
+		}
+
+		Draw();
+	}
     this.setColor = function(h, s, v) {                       
         self.update("hue", h);
         self.update("saturation", s);
@@ -5395,5 +5421,4 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
     $(".slider a").hover(function() {
         $(this).css("cursor", "pointer");
     });
-
 }

@@ -2120,11 +2120,9 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 	if (!ops.colors)	delete ops.colors;
  	if (ops.dataSourceUrl) {	
  		ops.dataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");
-	 	trace(ops.dataSourceUrl)
 	 	if (ops.dataSourceUrl.toLowerCase().indexOf(".csv") != -1) {	
   			ops.dataTable=CSV(ops.dataDataSourceUrl,"hide","JSON");
-  			trace(ops.dataTable)
-  			ops.dataDataSourceUrl="";
+   			ops.dataDataSourceUrl="";
   		}	
   	}
   	if (ops.query) {

@@ -87,7 +87,7 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
           	break;
 		case "Timeglider": 													 // Time glider			
 			obj="timeglider";								    			 // Object to test for
-			lib="http://mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/timeglider/timeglider-all.js";
+			lib="http://mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/timeglider-all.js";
          	break;
 		case "Video": 														// Popcorn
 			obj="Popcorn.smart";											// Object to test for
@@ -5790,7 +5790,7 @@ function CSV(inputID, mode, output_type, callback) {
 			
 //  TIMEGLIDER   /////////////////////////////////////////////////////////////////////////////////////////// 
 
-SHIVA_Show.prototype.DrawTimeglider=function()                      //  DRAW TIMEGLIDER
+SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIMEGLIDER
 {
   var i;
   var stimeline = new Object();

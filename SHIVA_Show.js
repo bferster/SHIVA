@@ -2118,8 +2118,14 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 	$("#"+innerChartDiv).height($(con).height());
 	ops.containerId=innerChartDiv;
 	if (!ops.colors)	delete ops.colors;
- 	if (ops.dataDataSourceUrl)	
+ 	if (ops.dataDataSourceUrl) {	
  		ops.dataDataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");
+	 	if (ops.dataDataSourceUrl.toLowerCase().indexOf(".csv") != -1) {	
+  			ops.dataTable=CSV(ops.dataDataSourceUrl,"hide");
+  			trace(ops.dataTable)
+  			ops.dataDataSourceUrl="";
+  		}	
+  	}
   	if (ops.query) {
   		var v=ops.query.split(" ");
   		for (i=0;i<v.length;++i) {
@@ -5422,3 +5428,357 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
         $(this).css("cursor", "pointer");
     });
 }
+
+/* 	CSV has 3 required args, and one optional arg:
+	inputID: 			the id value of the source URL's <input>
+	mode: 				choose 'show' to enable user validation; 'hide' to run silently
+	output_type:		sets output type, choose 'JSON', or 'Array'; support for Gtables is possible but maybe not necessary...
+							the chartWrapper expects an array for its datasource not a Gtable
+	callback (optional): sets the callback function to be executed on completion...the final call will be callback(output_type)
+*/
+
+function CSV(inputID, mode, output_type, callback) {
+
+				var self = this;
+  
+				var cellopts = [',', '\t', 'other']
+				var textopts = ['\"', '\''];
+				var cellDelim = ',';
+				var quote = '\''
+				var CSV_title = '';
+				var csvHasHeader = false;
+				var CSV_data = [];
+
+				var input = '';
+				$.get('http://www.viseyes.org/shiva/proxy.php', {
+					url : $('#' + inputID).val()
+				}, function(data) {
+					input = data;
+					if (data == -1) {
+						console.log("Bad data source.");
+						alert("Please check your source URL...we didn't find anything at the other end.");
+						return;
+					} else {
+						CSV_title = $('#' + inputID).val().split('/').pop().split(".")[0];
+						if (mode === 'hide') {
+							self.prep();
+							self.parse();
+							self.done();
+						} else if (mode === 'show') {
+							self.prep();
+							self.show(10);
+						} else
+							console.log("Bad mode type.");
+					}
+				});
+
+				self.prep = function() {
+					input = input.replace(/\n\r/g, '\n');
+					input = input.replace(/\r\n/g, '\n');
+					input = input.replace(/\r/g, '\n');
+
+					var c = input.split(',').length;
+					var t = input.split('\t').length;
+					var cn = input.split(';').length
+
+					//try to autodetect cell delimiter
+					if (c >= t && c >= cn)
+						cellDelim = ',';
+					else if (t >= c && t >= cn)
+						cellDelim = '\t';
+					else if (cn >= c && cn >= t)
+						cellDelim = ';';
+					//try to autodetect quote delimiter
+					quote = (input.split("\"").length >= input.split("\'").length) ? "\"" : "\'";
+				}
+
+				self.parse = function(n) {
+					var cell = "";
+					var row = 0;
+					var text = false;
+					CSV_data[row] = [];
+
+					for (var i = 0; i < input.length; i++) {
+						if ( typeof n !== 'undefined' && row === n)
+							break;
+						text = (RegExp(quote, 'g').test(input[i])) ? !text : text;
+						if (text)
+							cell += input[i];
+						else {
+							if (/\n/g.test(input[i])) {
+								CSV_data[row].push(cell);
+								cell = "";
+								row++;
+								if ( typeof input[i + 1] != 'undefined')
+									CSV_data[row] = [];
+							} else if (RegExp(cellDelim, 'g').test(input[i])) {
+								CSV_data[row].push(cell);
+								cell = "";
+							} else {
+								cell += input[i];
+							}
+						}
+					}
+					if (typeof CSV_data[0][0] != typeof CSV_data[1][0]) {
+						csvHasHeader = true;
+					}
+				}
+
+				self.init = function() {
+					$('body').append($("<div>", {
+						id : 'CSV_overlay',
+						css : {
+							color : 'black',
+							position : 'absolute',
+							top : '0',
+							left : '0',
+							width : $(document).width(),
+							height : '150%',
+							opacity : '0.4',
+							backgroundColor : 'black'
+						}
+					}).append($('<div>', {
+						id : 'CSV_preview',
+						css : {
+							padding : '56px',
+							position : 'absolute',
+							top : '10%',
+							left : '20%',
+							width : '800px',
+							height : '400px',
+							backgroundColor : 'white',
+							borderRadius : '5px'
+						}
+					}).append($("<div>", {
+						id : 'CSV_preview_table',
+						marginLeft : 'auto',
+						marginRight : 'auto',
+						css : {
+							overflow : 'scroll',
+							position : 'absolute',
+							top : '25%',
+							height : '330px',
+							width : '86%',
+							borderRadius : '5px',
+							border : 'solid thin gray'
+						}
+					})).append($("<div>", {
+						id : 'csvControl',
+						css : {
+							position : 'absolute',
+							top : '2%',
+							bottom : '76%',
+							width : '86%',
+							borderRadius : '5px',
+						}
+					}))));
+					$("#csvControl").append($("<p>", {
+						css : {
+							position : 'relative',
+							left : '5px',
+						}
+					}).append($("<span>", {
+						html : "Title: ",
+					})).append($("<input>", {
+						id : 'titleInput',
+						value: CSV_title,
+						css : {
+							position : 'relative',
+							left : '5px',
+							marginRight : '40px',
+						},
+						change: function(){
+							CSV_title = $(this).val();
+						}
+					})).append($("<span>", {
+						html : 'Data has header row?',
+					})).append($("<input>", {
+						id : 'dataHasHeader',
+						type : 'checkbox',
+						checked : (csvHasHeader) ? true : false,
+						css : {
+							position : 'relative',
+							left : '5px',
+						},
+						change : function() {
+							csvHasHeader = ($(this).is(":checked")) ? true : false;
+							self.show()
+						}
+					}))).append($("<p>", {
+						css : {
+							position : 'relative',
+							left : '5px',
+						}
+					}).append($("<span>", {
+						html : "Cell delimiter: ",
+					})).append($("<select>", {
+						id : 'cellDelimInput',
+						html : '<option value=0>Comma (,)</option><option value=1>Tab (\\t)</option><option value=2> Other </option>',
+						css : {
+							width : '100px',
+							position : 'relative',
+							left : '5px',
+							marginRight : '40px',
+						},
+						change : function() {
+							if ($(this).val() == 2) {
+								$("#cellDelimOther").show();
+							} else {
+								$("#cellDelimOther").hide();
+								cellDelim = cellopts[$(this).val()];
+								self.show();
+							}
+						}
+					})).append($("<span>", {
+						html : 'Text delimitier: ',
+					})).append($("<select>", {
+						id : 'textDelimInput',
+						html : "<option value=0>Double quote (\")</option><option value=1>Single quote (\')</option>",
+						css : {
+							position : 'relative',
+							left : '5px',
+						},
+						change : function() {
+							quote = textopts[$(this).val()];
+							self.show();
+						}
+					})));
+					$('#CSV_overlay').append($("<input>", {
+						id : 'cellDelimOther',
+						css : {
+							height : $('#cellDelimInput').css('height') - 2,
+							width : '75px',
+							position : 'absolute',
+							left : $('#cellDelimInput').offset().left,
+							top : $('#cellDelimInput').offset().top
+						},
+						change : function() {
+							cellDelim = $(this).val();
+							self.show();
+						}
+					}).hide());
+
+					$('#CSV_preview').append($("<button>", {
+						html : 'Back',
+						css : {
+							position : 'absolute',
+							bottom : '15px',
+							left : '350px',
+						},
+						click : function() {
+							$(input).val("");
+							$('#CSV_overlay').remove();
+						}
+					}).button()).append($("<button>", {
+						html : 'Accept',
+						css : {
+							position : 'absolute',
+							bottom : '15px',
+							right : '391px',
+						},
+						click : function() {
+							self.done();
+						}
+					}).button())
+
+					$('#cellDelimInput').val(cellDelim);
+					$('#textDelimInput').val(quote);
+				}
+				self.show = function() {
+					if ($('#CSV_overlay').length > 0)
+						$('#CSV_preview_table').children().remove();
+					else
+						self.init();
+					self.parse(10);
+
+					var gwidth;
+
+					for (var i = 0; i < 10; i++) {
+						var odd = (i % 2 == 0) ? 'lightgray' : 'transparent';
+						$("#CSV_preview_table").append($("<div>", {
+							class : 'row',
+							css : {
+								height : $('#CSV_preview_table').height() / 10 + 'px',
+								backgroundColor : odd,
+							}
+						}));
+						for (var j = 0; j < CSV_data[i].length; j++) {
+							var alignment = 'right';
+							if (isNaN(CSV_data[i][j]))
+								alignment = 'left';
+							$("#CSV_preview_table").children().eq(i).append($("<div>", {
+								html : (i === 0 && csvHasHeader) ? '<center><strong>' + CSV_data[i][j] + '</strong></center>' : CSV_data[i][j],
+								class : 'col' + j,
+								align : alignment,
+								css : {
+									paddingLeft : '2px',
+									paddingRight : '2px',
+									height : $('#CSV_preview_table').height() / 10 + 'px',
+									float : 'left',
+									outline : '1px solid black',
+								}
+							}));
+							if ($('.col' + j).length > 1 && $('.col' + j).last().width() > $('.col' + j).eq($('.col' + j).last().index('.col' + j) - 1).width()) {
+								$('.col' + j).css('width', $('.col' + j).last().width() + 'px');
+							} else {
+								$('.col' + j).last().css('width', $('.col' + j).width() + 'px');
+							}
+						}
+					}
+					var gwidth = 0;
+					for (var i = 0; i < $('.row').last().children().length; i++) {
+						gwidth += $('.row').last().children().eq(i).width();
+					}
+					$('.row').css('width', (gwidth + (CSV_data[0].length * 4)) + 'px');
+				}
+
+				self.to_JSON = function() {
+					if (CSV_data.length == 0) {
+						throw new Error("The CSV_data source is empty.")
+						return;
+					} else {
+						var table = {
+							"title" : (CSV_title != "") ? CSV_title : "New Table",
+							"headers" : (csvHasHeader) ? CSV_data[0] : null,
+							"data" : (csvHasHeader) ? CSV_data.slice(1) : CSV_data
+						}
+						$("#CSV_overlay").remove();
+						return table;
+					}
+				}
+
+				/*self.to_Gtable = function() {
+					if (CSV_data.length == 0) {
+						throw new Error("The CSV_data source is empty.")
+						return;
+					} else{
+						return google.visualization.arrayToDataTable(CSV_data);
+					}
+				}*/
+
+				self.done = function() {
+					self.parse();
+					if (callback != null) {
+						if (output_type === 'JSON') {
+							callback(self.to_JSON());
+						} else if (output_type === 'Google')
+							callback(self.to_Gtable());
+						else if(output_type === 'Array'){
+							callback(CSV_data);
+						}						
+						else {
+							console.log('Output type not recognized or not implemented.');
+							return;
+						}
+					} else {
+						if (output_type === 'JSON')
+							return (self.toJSON());
+						else if (output_type === 'Google')
+							return (self.to_Gtable());
+						else if(output_type === 'Array')
+							return CSV_data;
+						else
+							console.log('Output type not recognized or not implemented.');
+					}
+				}
+			}

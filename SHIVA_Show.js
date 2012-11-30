@@ -2118,10 +2118,11 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 	$("#"+innerChartDiv).height($(con).height());
 	ops.containerId=innerChartDiv;
 	if (!ops.colors)	delete ops.colors;
- 	if (ops.dataDataSourceUrl) {	
- 		ops.dataDataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");
-	 	if (ops.dataDataSourceUrl.toLowerCase().indexOf(".csv") != -1) {	
-  			ops.dataTable=CSV(ops.dataDataSourceUrl,"hide");
+ 	if (ops.dataSourceUrl) {	
+ 		ops.dataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");
+	 	trace(ops.dataSourceUrl)
+	 	if (ops.dataSourceUrl.toLowerCase().indexOf(".csv") != -1) {	
+  			ops.dataTable=CSV(ops.dataDataSourceUrl,"hide","JSON");
   			trace(ops.dataTable)
   			ops.dataDataSourceUrl="";
   		}	
@@ -5450,7 +5451,7 @@ function CSV(inputID, mode, output_type, callback) {
 				var CSV_data = [];
 
 				var input = '';
-				$.get('http://www.viseyes.org/shiva/proxy.php', {
+				$.get('proxy.php', {
 					url : $('#' + inputID).val()
 				}, function(data) {
 					input = data;

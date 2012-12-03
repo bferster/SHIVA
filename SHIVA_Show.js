@@ -5861,11 +5861,13 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
         "id":"stl" + (new Date()).getTime(),
         "title":stimeline.options.title,
         "description":"<p>" + stimeline.options.description + "</p>",
-        "focus_date": stimeline.options.focus_date,
+        "focus_date": ConvertTimelineDate(stimeline.options.focus_date),
         "timezone":stimeline.options.timezone,
         "initial_zoom":stimeline.options.initial_zoom * 1,
         "events": stimeline.events
       }];
+ 
+     
       $(stimeline.con).timeline('destroy');
       $(stimeline.con).html('');
       window.shivaTimeline =  $(stimeline.con).timeline({
@@ -5889,6 +5891,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
       }, 500);
       
       function ConvertTimelineDate(dateTime) {
+        dateTime=Date.parse(dateTime)+50000000;
         var dt = new Date(dateTime);
         var mn = padZero(dt.getMonth() + 1);
         var dy = padZero(dt.getDate());

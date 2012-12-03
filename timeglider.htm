@@ -52,7 +52,7 @@
   var items=new Array();
   var shivaGroup="Timeglider"
   var curAtt=null;
-  var iconFolder = window.location.pathname.replace('timeline.htm','') + 'images/timeglider/icons/';
+  var iconFolder = window.location.pathname.replace('timeglider.htm','') + 'images/timeglider/icons/';
   var props={
       dataSourceUrl:        { def:'https://docs.google.com/spreadsheet/ccc?key=0An1lbBY1FYEDdC1wamxsU3pOQ1V1ODV3V0ZzVE9INVE',       opt:'string',     des:'Source of events'}, 
       title:                { def:'History of Javascript',       opt:'string',       des:'Title of timeline'}, 
@@ -69,8 +69,9 @@
       background_color:     { def:'',     opt:'colors',    des:'Background colors'},
       //icon_folder:          { def: window.location.pathname.replace('timeline.htm','') + 'timeglider/img/icons/', opt:'string', des:'Icon image folder'},
       max_modals:           { def: '1', opt: 'number', des: 'Maximum # of Popups'},
-      show_footer:          { def:'true', opt:'true|false', des:'Show the footer?'},
-      display_zoom_level:   { def:'true', opt:'true|false', des:'Show zoom bar?'}
+      show_desc:            { def:'false', opt:'true|false', des:'Show the description?'},
+      show_footer:          { def:'false', opt:'true|false', des:'Show the footer?'},
+      display_zoom_level:   { def:'false', opt:'true|false', des:'Show zoom bar?'}
   };
     
   var helpText=new Array();
@@ -87,6 +88,7 @@
   helpText['Font colors']="A list of multiple font colors of the timeline in the following order: <ol><li>main area font</li><li>header fonts for timeline and popups</li><li>text of modals</li></ol>";
   helpText['Background colors']="A list of multiple background colors for the following areas of the timeline: <ol><li>main background of the timeline</li><li>event spans</li><li>background for the header, footer, and zoom controls</li><li>background of popup boxes,</li><li>background  for the image lane at the top of the timeline</li><li>\'tick\' lane at the bottome of the timeline</li></ol>";
   helpText['Maximum # of Popups']="Maximum number of popups to keep open. After this number is reached, the first opened popup will automatically close.";
+  helpText['Show the description?']="Whether or not to show the description box upon loading timeline";
   helpText['Show the footer?']="Whether or not to show the footer of the timeline";
   helpText['Show zoom bar?']="Whether or not to show the zoom bar of the timeline. In edit mode, you may have to scroll horizontally to see the timeline";
   

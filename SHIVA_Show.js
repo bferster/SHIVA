@@ -5870,7 +5870,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
      
       $(stimeline.con).timeline('destroy');
       $(stimeline.con).html('');
-      window.shivaTimeline =  $(stimeline.con).timeline({
+	  window.shivaTimeline =  $(stimeline.con).timeline({
           "min_zoom":stimeline.options.min_zoom * 1, 
           "max_zoom":stimeline.options.max_zoom * 1, 
           "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
@@ -5881,10 +5881,12 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
           "image_lane_height":60,
           "loaded":function (args, data) { 
             $(stimeline.con).timeline('setOptions', stimeline.options, true);
+            $(stimeline.con).timeline('registerEvents', stimeline.events);
+            setTimeout('$(\'' + stimeline.con + '\').timeline(\'eventList\')', 500);
+            if(stimeline.options.show_desc == "false") { $('.tg-timeline-modal').fadeOut();  }
             shivaLib.SendReadyMessage(true); 
           }
-      });
-      
+      });     
       // Make event modal windows draggable
       window.stlInterval = setInterval(function() {
         $('.timeglider-ev-modal').draggable({cancel : 'div.tg-ev-modal-description'});

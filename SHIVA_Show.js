@@ -2579,7 +2579,24 @@ SHIVA_Show.prototype.SetAdvancedAttributes=function(prop, baseVar) 		// ADVANCED
 						slantedText:	{ opt:'string',	 des:'Slanted text'}
 						}			
 			break;
+		 case "backgroundColors":
+		          aProps= {   main:     { opt:'color',  des:'Main Background'},   // Sub-items
+		            eventspan:  { opt:'color',   des:'Event Span Background'},
+		            head:    { opt:'color',  des:'Header, Footer and Zoom Background'},
+		            popup:     { opt:'color',  des:'Popup Background'},
+		            imagelane:    { opt:'color',  des:'Image Lane Background'},
+		            ticklane:   { opt:'color',  des:'Time Ticks Background'},
+		            popuplink:  { opt:'color',  des:'Popup Link Background'}
+		            }     
+		          break;
+		        case "fontColors":
+		      aProps= {   main:     { opt:'color',  des:'Main Font Color'},   // Sub-items
+		            head:    { opt:'color',  des:'Header Font Color'},
+		            popup:   { opt:'color',  des:'Popup Font Color'},
+		            links:   { opt:'color',  des:'Link Font Color'}
+		            }  
 			}
+
 		for (o in aProps) {													// For each sub-item
 			str+="<tr style='height:26px' onClick='ShowHelp(\""+aProps[o].des+"\")'><td>"+aProps[o].des+"</td><td>";	// Add title
 			if (aProps[o].opt == "color") { 									// If a color

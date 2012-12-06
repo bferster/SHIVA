@@ -454,6 +454,10 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			}
 		else if (o.type == "goto")											// A goto													
 			pic="img/gotoicon.png";											// Use icon
+		else if (o.type == "shiva")											// A shiva element													
+			pic="img/shivaicon.png";										// Use icon
+		else if (o.type == "sound")											// A sound													
+			pic="img/audioicon.png";										// Use icon
 		str+="<tr id='mob"+i+"'";											// Row start
 		if (this.mobVis[i] > 0) 											// If visible
 			str+="' style='background-color:#ccccff'";						// Color background

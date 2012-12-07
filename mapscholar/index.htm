@@ -527,8 +527,10 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
  
  	function AddMapToTimeline(o,i) {									// ADD MAP TO TIMELINE
   		var x=Math.round((o.start-min)*pixPerYear)+8;						// X pos
-   		var str="<div id='timedot"+i+"' class='timelinedot' style='position:absolute;left:"+x+"px;top:"+8+"px' ";
-  		str+="title='"+o.start+"'></div>";									// Tooltip
+   		var str="<div id='timedot"+i+"' class='timelinedot' style='position:absolute;left:"+x+"px;top:"+8+"px;";
+   		if (mps.sh.mobVis[i] > 0)											// If selected
+  			str+='background-color:#000099';								// Make it blue
+   		str+=" ' title='"+o.start+"'></div>";								// Tooltip
   		return str;															// Return div
  		}
   

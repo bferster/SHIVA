@@ -43,7 +43,7 @@
 	function ShivaPostInit()
  	{
 		mps.dr.InitEvents();
-		mps.AddMapBoxes();		
+		mps.AddMapBoxes();
 	}
 	
      $(document).ready(function() {
@@ -219,6 +219,7 @@ MapScholar.prototype.AddMapBoxes=function()								// ADD MAP WIREFRAMES
 		sty.getColor().set("ff00ffff");  									// Set color in aabbggrr format
 		coords.setAltitudeMode(ge.ALTITUDE_RELATIVE_TO_GROUND);				// Relative to ground level
 		}
+	this.ShowMapBoxes(-1,"on");												// Show only open ones											
 }
 
 MapScholar.prototype.ShowMapBoxes=function(num, mode)					// HIDE/SHOW WIREFRAMES
@@ -233,11 +234,12 @@ MapScholar.prototype.ShowMapBoxes=function(num, mode)					// HIDE/SHOW WIREFRAME
 		if (m.type != "map")												// If not a map
 			continue;														// Continue
 		seg=ge.getElementById(m.gid);										// Get object
+		if ((!$("#mobPos"+i).position()) || (mode == "off"))	{			// If it's chapter is not open
+			seg.setVisibility(false);										// Hide it
+			continue;														// Next map
+			}
+		seg.setVisibility(true);											// Show it 
 		sty=seg.getStyleSelector().getLineStyle();							// Get line style
-		if (mode == "off")													// If off
-			sty.setWidth(0);												// Set width off	
-		else																// Show it
-			sty.setWidth(1);												// Set width	
 		if (mode == "select")												// If selecting
 			sty.getColor().set("ff0000ff");  								// Red
 		else																// Regular
@@ -300,7 +302,7 @@ MapScholar_Shelf.prototype.HighlightMob=function(which, multi, scroll)	// HIGHLI
 		i=Number(which);													// Get number
 	i=this.curMob=Math.min(Math.max(i,0),n);								// Set indexer and cap
 	var o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];   	// Point at mob
-	if ((!$("#mobPos"+i).position()) && (o.type != "chapter") && (o.type != "header")) {										// If not visible
+	if ((!$("#mobPos"+i).position()) && (o.type != "chapter") && (o.type != "header")) {	// If not visible
 		for (j=i;j>=0;--j) {												// Walk backwards													
 			if (mps.mobs[j].status == "closed") {							// If a closed header/chapter
 				mps.mobs[j].status="open";									// Open it
@@ -329,6 +331,8 @@ MapScholar_Shelf.prototype.HighlightMob=function(which, multi, scroll)	// HIGHLI
 	else																	// If on
 		this.mobVis[i]=0;													// Turn it off
 	this.FillShelf();														// Redraw shelf
+	mps.ShowMapBoxes(-1,"on");												// Show visible boxes
+
 	if (mps.showBoxes)														// If showing boxes
 		mps.ShowMapBoxes(i,"select");										// Highlight box
 }
@@ -415,8 +419,9 @@ MapScholar_Shelf.prototype.ToggleExpandCollapse=function()				// EXPAND/COLLAPSE
 		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];      // Point at mob
 		if ((o.type == "chapter") || (o.type == "header")) 					// A header													
 			o.status=this.expandAll?"closed":"open";						// Set status
-		this.Draw();														// Draw shelf
-	}
+		}
+	this.Draw();															// Draw shelf
+	mps.ShowMapBoxes(-1,"on");												// Show visible boxes
 }
 
 MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF

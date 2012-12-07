@@ -18,8 +18,8 @@
 		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
 		.chapterbar { -moz-border-radius:3px;-webkit-border-radius:3px;-khtml-border-radius:3px;border-radius:3px;width:192px;background-color:#999;height:14px;padding:3px;color:#fff}
 		.headerbar { border-bottom:1px solid #999;height:14px;width:192px;padding:3px;color:#333}
-		.timelinebar { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;width:192px;background-color:#fff;height:24px;border:1px solid #ccc}
-		.timelinedot { -moz-border-radius:4px;-webkit-border-radius:4px;-khtml-border-radius:4px;border-radius:4px;background-color:#990000;height:8px;width:8px;opacity:.8}
+		.timelinebar { -moz-border-radius:12px;-webkit-border-radius:12px;-khtml-border-radius:12px;border-radius:12px;background-color:#999;border:1px solid #ccc;color:#eee}
+		.timelinedot { -moz-border-radius:4px;-webkit-border-radius:4px;-khtml-border-radius:4px;border-radius:4px;background-color:#990000;height:8px;width:8px;opacity:.6;margin:0px;padding:0px}
 		tr.odd { background-color:#e0e0e0; }
 		.propTable { background-color:#eee;border-radius:8px;
 				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
@@ -339,10 +339,8 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 	var i;
 	var str="<p>";
 	str+="&nbsp;&nbsp;<img src='img/annotate.gif' style='vertical-align:bottom' title='Annotate' onclick='mps.dr.DrawControlBar(true)'>";		
-	str+="<label>&nbsp; Find: </label ><input id='mpsFind' style='font-size:x-small;width:65px' type='text'/>";
-	str+="&nbsp; &nbsp;<span style='font-style:italic' id='timelineMin'>1600</span>";
-	str+="<div id='timeline' style='position:absolute;left:165px;width:828px;top:6px;height:24px' class='timelinebar'></div>";
-	str+="<span style='font-style:italic;position:absolute;left:1000px;top:12px' id='timelineMax'>2000</span>";
+	str+="<label>&nbsp; Find: </label ><input id='mpsFind' style='font-size:x-small;width:80px' type='text'/>";
+	str+="<div id='timeline' style='position:absolute;left:150px;width:858px;top:7px;height:20px' class='timelinebar'></div>";
 	$("#controlBarDiv").html(str+"</p>");                                    // Add to DOM
 	str="<div id='contentShelf' style='position:absolute;width:216px;top:27px;height:559px;background-color:#eee;margin:0px;padding:6px;overflow-x:hidden;overflow-y:scroll;border:1px solid #ccc;'/></div>";
 	str+="<p>&nbsp;&nbsp;&nbsp;<img id='expandAll' src='img/";				// Image base
@@ -350,8 +348,7 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 		str+="expand2.gif'> Expand all";									// Expand all button
 	else																	// Collaspe
 		str+="collapse2.gif'> Collapse all";								// Collapse all button
-	
-	str+="<img src='img/settingsbut.png' style='position:absolute;left:215px' onclick='mps.sh.Settings()'></p>";		
+	str+="<img src='img/settingsbut.png' style='position:absolute;left:215px;top:613px' onclick='mps.sh.Settings()'></p>";		
 	$("#shelfDiv").html(str);												// Add div
 	var n=mps.atlas[this.curAtlas].mids.length;								// Number of mobs to add
 	this.mobVis=[];															// Remove old array
@@ -425,7 +422,7 @@ MapScholar_Shelf.prototype.ToggleExpandCollapse=function()				// EXPAND/COLLAPSE
 MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 {
 	var tim="";
-	var i,o,pic;
+	var i,o,x,y,pic;
 	var min=3000,max=0;
  	var n=mps.atlas[this.curAtlas].mids.length;                             // Number of mobs to add
 	var str="<table cellspacing='0'>";                                      // Table start
@@ -436,9 +433,14 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			max=Math.max(o.start,max);										// Find max
 			}
 		}
-	$("#timelineMin").html(min);											// Set min
-	$("#timelineMax").html(max);											// Set max
 	var pixPerYear=($("#timeline").width()-24)/(max-min);					// Pixels per year
+	i=min;																	// Start at  min
+	while (i < max-10) {													// While not max
+ 		i=(i-i%10)-0+10;													// Next decade
+		x=Math.round((i-min)*pixPerYear)+8;									// X pos
+   		tim+="<div style='position:absolute;left:"+(x+3)+"px;top:4px'><i>"+i+"</i></div>";
+   		tim+="<div style='position:absolute;left:"+x+"px;height:17px;width:1px;top:2px;background-color:#ccc'/>";
+		}
 	for (i=0;i<n;++i) {                                                     // For each mob
 		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];      // Point at mob
 		if ((o.type == "chapter") || (o.type == "header")) {				// A header													
@@ -527,7 +529,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
  
  	function AddMapToTimeline(o,i) {									// ADD MAP TO TIMELINE
   		var x=Math.round((o.start-min)*pixPerYear)+8;						// X pos
-   		var str="<div id='timedot"+i+"' class='timelinedot' style='position:absolute;left:"+x+"px;top:"+8+"px;";
+   		var str="<div id='timedot"+i+"' class='timelinedot' style='position:absolute;left:"+x+"px;top:"+7+"px;";
    		if (mps.sh.mobVis[i] > 0)											// If selected
   			str+='background-color:#000099';								// Make it blue
    		str+=" ' title='"+o.start+"'></div>";								// Tooltip

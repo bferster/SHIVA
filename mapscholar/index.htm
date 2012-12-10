@@ -175,6 +175,14 @@ MapScholar.prototype.FindMobByID=function(id)							// FIND MAP OBJECT INDEX BY 
 	return -1;																// Not found
 }
 
+MapScholar.prototype.ShowHelp=function(context)							// SHOW HELP
+{
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// EARTH CONTROL
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
 MapScholar.prototype.AddMapBoxes=function()								// ADD MAP WIREFRAMES
 {
 	var x,y,cx,cy,x1,y1,lx,ly,ar,sin,cos;
@@ -195,14 +203,13 @@ MapScholar.prototype.AddMapBoxes=function()								// ADD MAP WIREFRAMES
 		seg.setStyleSelector(ge.createStyle(''));							// Create style
 		seg.setGeometry(coords);											// Set coords in seg
 		folder.getFeatures().appendChild(seg);								// Add seg to folder
-
 		cx=((m.east-m.west)/2)+(m.west-0);									// Center x
 		cy=((m.south-m.north)/2)+(m.north-0);								// Center y
 		lx=cx+(m.west-cx)*cos-(m.north-cy)*sin;								// Rotate x
 		ly=cy+(m.west-cx)*sin+(m.north-cy)*cos;								// Rotate y
 		x=cx+(m.east-cx)*cos-(m.north-cy)*sin;								// Rotate x
 		y=cy+(m.east-cx)*sin+(m.north-cy)*cos;								// Rotate y
-		for (j=0;j<=8;++j) {													// Bisect line
+		for (j=0;j<=8;++j) {												// Bisect line
 			x1=lx+(x-lx)/8*j;												// Center x
 			y1=ly+(y-ly)/8*j;												// Center y
 			coords.getCoordinates().pushLatLngAlt(y1,x1,0);					// Add point
@@ -237,6 +244,8 @@ MapScholar.prototype.AddMapBoxes=function()								// ADD MAP WIREFRAMES
 		}
 	this.AddMapImages();													// Add images
 	this.ShowMapBoxes(-1,"on");												// Show only open ones											
+
+shivaLib.ShowIframe(150,95,610,450,"http://www.viseyes.org/shiva/go.htm?e=247","iframe22")
 
 }
 
@@ -342,11 +351,6 @@ MapScholar.prototype.ClickHandler=function(e)							// HANDLE CLICKS TO EARTH
 				}
 			}
 }
-
-MapScholar.prototype.ShowHelp=function(context)							// SHOW HELP
-{
-}
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // SHELF 
@@ -581,8 +585,8 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			}
 		else if (o.type == "goto")											// A goto													
 			pic="img/gotoicon.png";											// Use icon
-		else if (o.type == "shiva")											// A shiva element													
-			pic="img/shivaicon.png";										// Use icon
+		else if (o.type == "link")											// A shiva element													
+			pic="img/linkicon.png";											// Use icon
 		else if (o.type == "sound")											// A sound													
 			pic="img/audioicon.png";										// Use icon
 		str+="<tr id='mob"+i+"'";											// Row start
@@ -598,7 +602,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 		if (o.desc)															// If desc spec'd
 			str+=o.desc+"<br/>";											// Add desc
 		str+="<br/></td></tr>";												// Close entry
-		if ((this.curMob == i) && (this.mobVis[i] > 0) && (o.type != "goto")){	// If selected and visible
+		if ((this.curMob == i) && (this.mobVis[i] > 0) && (o.type != "goto") && (o.type != "link")){	// If selected and visible
 			str+="<tr style='background-color:#ccccff'><td valign='top' style='color:#009900' align='center'><b>Visibility</b></td><td>";
 			str+="<div id='mobVis' style='width:60%;display:inline-block'></div>";		// Add div for vis
 			str+="&nbsp;&nbsp;&nbsp;&nbsp;<img id='mobInfo' title='See citation' src='img/infobutton.gif'/>";

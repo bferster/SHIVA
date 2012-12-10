@@ -1068,3 +1068,18 @@ MapScholar_Draw.prototype.Undo=function()									// PERFORM UNDO
 	_this.AddSegsToEarth();														// Add them back
 	return true;																// Return did undo
 }
+
+
+/* DRAW ARROW
+
+			var xx=[],yy=[];												// Arrow arrays
+			var n=o.x.length-1;												// Last point
+			var aa=Math.atan2(o.y[n]-o.y[n-1],o.x[n]-o.x[n-1]);				// Angle of line
+			var h=Math.max(12,ewid*4);										// Set size
+			xx[0]=o.x[n]-h*Math.cos(aa-Math.PI/6),
+			yy[0]=o.y[n]-h*Math.sin(aa-Math.PI/6);			
+ 			xx[1]=o.x[n];	yy[1]=o.y[n];									// Tip point
+			xx[2]=o.x[n]-h*Math.cos(aa+Math.PI/6),
+			yy[2]=o.y[n]-h*Math.sin(aa+Math.PI/6);			
+ 			this.g.DrawPolygon(ctx,ecol,a,xx,yy,ecol,0,false);				// Regular draw arrow
+*/

@@ -244,9 +244,6 @@ MapScholar.prototype.AddMapBoxes=function()								// ADD MAP WIREFRAMES
 		}
 	this.AddMapImages();													// Add images
 	this.ShowMapBoxes(-1,"on");												// Show only open ones											
-
-//shivaLib.ShowIframe(150,95,610,450,"http://www.viseyes.org/shiva/go.htm?e=247","iframe22")
-
 }
 
 MapScholar.prototype.AddMapImages=function()								// ADD MAP IMAGES
@@ -351,13 +348,22 @@ MapScholar.prototype.ShowLink=function(num, mode)						// HIDE/SHOW LINK
 MapScholar.prototype.ShowSound=function(num, mode)						// HIDE/SHOW AUDIO
 {
 	var m=this.mobs[num];													// Point at mob
+	var url="http://www.viseyes.org/shiva/go.htm?shivaGroup=Video&dataSourceUrl="
+	url+=m.large+"&volume=50&height=30&width=290&start=";
+	if (m.start)															// If start set
+		url+=m.start+"&end=";												// Add it
+	else																	// No start
+		url+="0&end=";														// Use 0
+	if (m.end)																// If end set
+		url+=m.end;															// Add it
+	url+="&autoplay="+(m.status == "play");									// Autoplay?
 	if (mode) {																// If showing
 		if (!m.west)														// If no position defined
-			m.north=40,m.south=580,m.east=760,m.west=24;					// Set at bottom
-		shivaLib.ShowIframe(m.north,m.south-0,m.east-0,m.west-0,m.large,"iframe-"+num,"black");	// Show iframe
+			m.north=260,m.south=580,m.east=302,m.west=32;					// Set at bottom
+		shivaLib.ShowIframe(m.north,m.south-0,m.east-0,m.west-0,url,"iframe-"+num,"black");	// Show iframe
 		}
 	else
-		shivaLib.ShowIframe(0,0,0,0,"","iframe-"+num),trace(22);						// Hide iframe
+		shivaLib.ShowIframe(0,0,0,0,"","iframe-"+num);						// Hide iframe
 }
 
 MapScholar.prototype.ClickHandler=function(e)							// HANDLE CLICKS TO EARTH
@@ -551,7 +557,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 	var str="<table cellspacing='0'>";                                      // Table start
 	for (i=0;i<n;++i) {                                                     // For each mob
 		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];      // Point at mob
- 		if (o.start && !isNaN(o.start))	{									// A valid year
+ 		if (o.start && !isNaN(o.start) && o.type == "map")	{				// A valid year
 			min=Math.min(o.start,min);										// Find min
 			max=Math.max(o.start,max);										// Find max
 			}

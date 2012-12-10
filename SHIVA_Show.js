@@ -199,7 +199,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 	if (t == "auto")	t="0px";											// Turn auto into 0
 	i=$(con).css("height").replace(/px/g,"");								// Get hgt
 	if (this.player)														// If a player object
-		i-=40;																// Don't hide controls
+		i=Math.max(0,i-=40);												// Don't hide controls, cap at 0
 	if (!$("#shivaDrawCanvas").length) {									// No canvas yet	
 		str="<div id='shivaDrawDiv' style='position:absolute";				// Div
 		str+=";width:"+$(con).css("width");									// Make div

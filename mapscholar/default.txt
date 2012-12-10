@@ -7,7 +7,7 @@ id	type	title	desc	tags	small	med	large	status	start	end	citation	author	north	s
 106	header	Layers	Layers that define important geographic areas in the Carolinas					closed				Max					
 107	layer	The dividing line										Max					
 108	goto	Eastern region										Max					
-151	sound	Narration										Max					
+151	sound	Narration					http://www.primaryaccess.org/music.mp3	play				Max					
 154	link	Chart of crops					http://www.viseyes.org/shiva/go.htm?e=247					Max	150	95	610	450	
 109	map	A New Discription of Carolina	A New Discription of Carolina	Imagining Carolina	http://farm9.staticflickr.com/8427/7644140450_471bf43215_z.jpg	http://farm9.staticflickr.com/8427/7644140450_471bf43215_z.jpg	http://farm9.staticflickr.com/8282/7644113020_ef9123b2e5_o.jpg		1671		"John Ogilby, ?A new discription of Carolina by the order of the Lords Proprietors? in America ([London, ca. 1671]). From North Carolina Collection, Wilson Library, University of North Carolina at Chapel Hill. North Carolina Maps, http://dc.lib.unc.edu/u?/ncmaps,498. Cumming, 163; Burden II, 41-43."	Max	37.623392	28.59838	-75.161372	-83.351554	0
 110	map	A New Map of Carolina	A New Map of the Country of Carolina	Imagining Carolina	http://farm9.staticflickr.com/8286/7644332784_a3467c7fdf_z.jpg	http://farm9.staticflickr.com/8286/7644332784_a3467c7fdf_z.jpg	http://farm9.staticflickr.com/8151/7644331704_7ba6849c52_o.jpg		1682		"Joel Gascoyne, A New Map of the Country of Carolina ([S.l.], 1682). From Geography and Map Division, Library of Congress. American Memory, http://hdl.loc.gov/loc.gmd/g3870.np000146. Cumming, 174-175; Burden II, 193, 195-197."	Max	37.037949	30.370427	-74.994785	-81.462441	0

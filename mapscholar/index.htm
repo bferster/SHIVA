@@ -357,6 +357,8 @@ MapScholar.prototype.ShowSound=function(num, mode)						// HIDE/SHOW AUDIO
 	if (m.end)																// If end set
 		url+=m.end;															// Add it
 	url+="&autoplay="+(m.status == "play");									// Autoplay?
+	if ($.browser.mozilla)													// Firefox
+		url=url.replace(/\.mp3/g,".ogg");									// Needs oogs
 	if (mode) {																// If showing
 		if (!m.west)														// If no position defined
 			m.north=260,m.south=580,m.east=302,m.west=32;					// Set at bottom

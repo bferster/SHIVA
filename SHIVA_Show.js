@@ -2707,18 +2707,21 @@ SHIVA_Show.prototype.GetGoogleSpreadsheet=function(file, callback) 					//	GET G
      }
 }
 
-SHIVA_Show.prototype.ShowIframe=function(left, top, wid, hgt, url, id)
+SHIVA_Show.prototype.ShowIframe=function(left, top, wid, hgt, url, id, mode)
 {
 	$("#"+id).remove();															
 	$("#CL-"+id).remove();															
 	if ((hgt == 0) || (wid == 0))
 		return;
 	var	str="<iframe src='"+url+"' id='"+id+"' style='position:absolute;"; 					
+	if (mode == "black")
+		str+="border:none;background-color:black;"
 	str+="width:"+(wid+2)+"px;height:"+(hgt+2)+"px;left:+"+left+"px;top:"+top+"px;'/>";
 	$("body").append(str);	
 	str="<iframe src='closedot.gif' id='CL-"+id+"'style='position:absolute;border:none;"; 					
 	str+="width:18px;height:18px;left:"+(wid-12+left)+"px;top:"+(top+2)+"px'/>";
-	$("body").append(str);	
+	if (mode != "black")
+		$("body").append(str);	
 
 	$("#CL-"+id).bind("load",function(e) {
 		this.contentWindow.document.body.onclick=function(e) {

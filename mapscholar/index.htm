@@ -254,6 +254,14 @@ MapScholar.prototype.AddMapImages=function()							// ADD MAP IMAGES
 	var ge=shivaLib.map;													// Point to earth												
 	for (i=0;i<n;++i) {														// For each seg
 		m=this.mobs[i];														// Point at mob
+		if (m.type == "layer") {											// If a layer
+			var link=ge.createLink('');										// Create link object	
+			link.setHref(m.url);											// Set url
+			m.mid="LAYER-"+Math.floor(Math.random()*99999999);				// Make random #
+			seg=ge.createNetworkLink(m.mid);								// Create layer object
+			seg.set(link,true,m.status == "goto"); 							// Sets link and flyToView
+			ge.getFeatures().appendChild(seg);								// Add it to display list
+			}
 		if (m.type != "map")												// If not a map
 			continue;														// Continue
 		m.mid="MAP-"+Math.floor(Math.random()*99999999);					// Make random #
@@ -278,7 +286,7 @@ MapScholar.prototype.SetHiResMapImage=function(num)						// ADD HI-RES MAP
 {
 	var ge=shivaLib.map;													// Point to earth												
 	var	m=this.mobs[num];													// Point at mob
-	if (!m)																	// Not there
+	if ((!m)|| (m.type != "map"))											// Not there
 		return;																// Quit
 	var img=m.url;															// Get large map
 	if (!img)																// If exists
@@ -296,7 +304,7 @@ MapScholar.prototype.ShowMapImages=function(num)						// HIDE/SHOW MAPS
 		start=0,end=this.mobs.length;										// Whole list
 	for (i=start;i<end;++i) {												// For each seg
 		m=this.mobs[i];														// Point at mob
-		if ((m.type != "map") || !(m.mid))									// If not a map
+		if (((m.type != "map") && (m.type != "layer")) || !(m.mid))			// If not a map or layer
 			continue;														// Continue
 		seg=ge.getElementById(m.mid);										// Get object
 		if (mps.sh.mobVis[i]) {												// If active
@@ -638,7 +646,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			str+="<tr style='background-color:#ccccff'><td valign='top' style='color:#009900' align='center'><b>Visibility</b></td><td>";
 			str+="<div id='mobVis' style='width:60%;display:inline-block'></div>";		// Add div for vis
 			str+="&nbsp;&nbsp;&nbsp;&nbsp;<img id='mobInfo' title='See citation' src='img/infobutton.gif'/>";
-			if (o.url)
+			if ((o.url) && (o.type == "map"))
 				str+="&nbsp;&nbsp;<img id='hiresmap' title='See hi-res map' src='img/viewdot.gif'/>";
 			str+="<br/><br/></td></tr>";
 			str+="<tr><td colspan='2' id='mobCite'></td></tr>";

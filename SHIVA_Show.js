@@ -618,7 +618,7 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 				this.map.getFeatures().appendChild(obj);				// Add it to display list
 				}
 			var fly=(items[i].layerOptions.toLowerCase().indexOf("port") == -1)		// Preserve viewport?
-				obj.set(link,true,fly); 								// Sets the flyToView
+			obj.set(link,true,fly); 									// Sets the flyToView
 			}
 		if (obj) {														// If an object
 			obj.setOpacity(opacity);									// Set opacity

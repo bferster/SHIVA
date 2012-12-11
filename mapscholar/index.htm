@@ -246,65 +246,65 @@ MapScholar.prototype.AddMapBoxes=function()								// ADD MAP WIREFRAMES
 	this.ShowMapBoxes(-1,"on");												// Show only open ones											
 }
 
-MapScholar.prototype.AddMapImages=function()								// ADD MAP IMAGES
+MapScholar.prototype.AddMapImages=function()							// ADD MAP IMAGES
 {
 	var i,seg,m;
 	var latLonBox,icon;
 	var n=this.mobs.length;
-	var ge=shivaLib.map;														// Point to earth												
-	for (i=0;i<n;++i) {															// For each seg
-		m=this.mobs[i];															// Point at mob
-		if (m.type != "map")													// If not a map
-			continue;															// Continue
-		m.mid="MAP-"+Math.floor(Math.random()*99999999);						// Make random #
-		seg=ge.createGroundOverlay(m.mid);										// Create holder
-		latLonBox=ge.createLatLonBox('');										// Create box
+	var ge=shivaLib.map;													// Point to earth												
+	for (i=0;i<n;++i) {														// For each seg
+		m=this.mobs[i];														// Point at mob
+		if (m.type != "map")												// If not a map
+			continue;														// Continue
+		m.mid="MAP-"+Math.floor(Math.random()*99999999);					// Make random #
+		seg=ge.createGroundOverlay(m.mid);									// Create holder
+		latLonBox=ge.createLatLonBox('');									// Create box
 		latLonBox.setBox(m.north-0,m.south-0,m.east-0,m.west-0,m.rotation-0);	// Set coords
-		seg.setLatLonBox(latLonBox);											// Set geometry
-		icon=ge.createIcon('');													// Create icon
-		if (m.med)																// If a medium available
-			icon.setHref(m.med);												// Set url
-		else if (m.large)														// If a large
-			icon.setHref(m.large);												// Set url
-		else if (m.small)														// If a small
-			icon.setHref(m.small);												// Set url
-		seg.setDrawOrder(-1);													// Allow overlays on it
-		seg.setIcon(icon);														// Attach to seg
-		ge.getFeatures().appendChild(seg);										// Add seg to EDOM
+		seg.setLatLonBox(latLonBox);										// Set geometry
+		icon=ge.createIcon('');												// Create icon
+		if (m.med)															// If a medium available
+			icon.setHref(m.med);											// Set url
+		else if (m.url)														// If a large
+			icon.setHref(m.url);											// Set url
+		else if (m.small)													// If a small
+			icon.setHref(m.small);											// Set url
+		seg.setDrawOrder(-1);												// Allow overlays on it
+		seg.setIcon(icon);													// Attach to seg
+		ge.getFeatures().appendChild(seg);									// Add seg to EDOM
 		}
 }
 
-MapScholar.prototype.SetHiResMapImage=function(num)							// ADD HI-RES MAP
+MapScholar.prototype.SetHiResMapImage=function(num)						// ADD HI-RES MAP
 {
-	var ge=shivaLib.map;														// Point to earth												
-	var	m=this.mobs[num];														// Point at mob
-	if (!m)																		// Not there
-		return;																	// Quit
-	var img=m.large;															// Get large map
-	if (!img)																	// If exists
-		return;																	// Quit
-	var seg=ge.getElementById(m.mid);											// Get object
-		seg.getIcon().setHref(img);												// Set url
+	var ge=shivaLib.map;													// Point to earth												
+	var	m=this.mobs[num];													// Point at mob
+	if (!m)																	// Not there
+		return;																// Quit
+	var img=m.url;															// Get large map
+	if (!img)																// If exists
+		return;																// Quit
+	var seg=ge.getElementById(m.mid);										// Get object
+		seg.getIcon().setHref(img);											// Set url
 }
 
-MapScholar.prototype.ShowMapImages=function(num)							// HIDE/SHOW MAPS
+MapScholar.prototype.ShowMapImages=function(num)						// HIDE/SHOW MAPS
 {
 	var i,seg,m,sty;
-	var ge=shivaLib.map;														// Point to earth												
-	var start=num,end=num-0+1;													// Assume one
-	if (num < 0)																// If doing all
-		start=0,end=this.mobs.length;											// Whole list
-	for (i=start;i<end;++i) {													// For each seg
-		m=this.mobs[i];															// Point at mob
-		if ((m.type != "map") || !(m.mid))										// If not a map
-			continue;															// Continue
-		seg=ge.getElementById(m.mid);											// Get object
-		if (mps.sh.mobVis[i]) {													// If active
-			seg.setOpacity(mps.sh.mobVis[i]/100);								// Set alpha
-			seg.setVisibility(true);											// Show it
+	var ge=shivaLib.map;													// Point to earth												
+	var start=num,end=num-0+1;												// Assume one
+	if (num < 0)															// If doing all
+		start=0,end=this.mobs.length;										// Whole list
+	for (i=start;i<end;++i) {												// For each seg
+		m=this.mobs[i];														// Point at mob
+		if ((m.type != "map") || !(m.mid))									// If not a map
+			continue;														// Continue
+		seg=ge.getElementById(m.mid);										// Get object
+		if (mps.sh.mobVis[i]) {												// If active
+			seg.setOpacity(mps.sh.mobVis[i]/100);							// Set alpha
+			seg.setVisibility(true);										// Show it
 			} 
-		else																	// Not visible
-			seg.setVisibility(false);											// Hide it
+		else																// Not visible
+			seg.setVisibility(false);										// Hide it
 		}
 }
 
@@ -323,7 +323,7 @@ MapScholar.prototype.ShowMapBoxes=function(num, mode)					// HIDE/SHOW WIREFRAME
 		if (m.type != "map")												// If not a map
 			continue;														// Continue
 		seg=ge.getElementById(m.gid);										// Get object
-		if ((!$("#mobPos"+i).position()) || (mode == "off"))	{			// If it's chapter is not open
+		if ((!$("#mobPos"+i).position()) || (mode == "off")) {				// If it's chapter is not open
 			seg.setVisibility(false);										// Hide it
 			continue;														// Next map
 			}
@@ -340,7 +340,7 @@ MapScholar.prototype.ShowLink=function(num, mode)						// HIDE/SHOW LINK
 {
 	var m=this.mobs[num];													// Point at mob
 	if (mode)																// If showing
-		shivaLib.ShowIframe(m.north-0,m.south-0,m.east-0,m.west-0,m.large,"iframe-"+num);	// Show iframe
+		shivaLib.ShowIframe(m.north-0,m.south-0,m.east-0,m.west-0,m.url,"iframe-"+num);	// Show iframe
 	else
 		shivaLib.ShowIframe(0,0,0,0,"","iframe-"+num);						// Hide iframe
 }
@@ -349,7 +349,7 @@ MapScholar.prototype.ShowSound=function(num, mode)						// HIDE/SHOW AUDIO
 {
 	var m=this.mobs[num];													// Point at mob
 	var url="http://www.viseyes.org/shiva/go.htm?shivaGroup=Video&dataSourceUrl="
-	url+=m.large+"&volume=50&height=30&width=290&start=";
+	url+=m.url+"&volume=50&height=30&width=290&start=";
 	if (m.start)															// If start set
 		url+=m.start+"&end=";												// Add it
 	else																	// No start
@@ -358,13 +358,13 @@ MapScholar.prototype.ShowSound=function(num, mode)						// HIDE/SHOW AUDIO
 		url+=m.end;															// Add it
 	url+="&autoplay="+(m.status == "play");									// Autoplay?
 	if ($.browser.mozilla)													// Firefox
-		url=url.replace(/\.mp3/g,".ogg");									// Needs oogs
+		url=url.replace(/\.mp3/g,".ogg");									// Needs oggs
 	if (mode) {																// If showing
 		if (!m.west)														// If no position defined
-			m.north=260,m.south=580,m.east=302,m.west=32;					// Set at bottom
+			m.north=270,m.south=580,m.east=302,m.west=32;					// Set at bottom
 		shivaLib.ShowIframe(m.north,m.south-0,m.east-0,m.west-0,url,"iframe-"+num,"black");	// Show iframe
 		}
-	else
+	else																	// If hiding
 		shivaLib.ShowIframe(0,0,0,0,"","iframe-"+num);						// Hide iframe
 }
 
@@ -605,7 +605,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 				pic=o.small;												// Use it
 			else if (o.med)													// Else if a med defined															
 				pic=o.med;													// Use it
-			else if (o.large)												// Else if a large defined															
+			else if (o.url)												// Else if a large defined															
 			pic=o.med;														// Use it
 			tim+=AddMapToTimeline(o,i);										// Add map to timeline
 			}
@@ -638,7 +638,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			str+="<tr style='background-color:#ccccff'><td valign='top' style='color:#009900' align='center'><b>Visibility</b></td><td>";
 			str+="<div id='mobVis' style='width:60%;display:inline-block'></div>";		// Add div for vis
 			str+="&nbsp;&nbsp;&nbsp;&nbsp;<img id='mobInfo' title='See citation' src='img/infobutton.gif'/>";
-			if (o.large)
+			if (o.url)
 				str+="&nbsp;&nbsp;<img id='hiresmap' title='See hi-res map' src='img/viewdot.gif'/>";
 			str+="<br/><br/></td></tr>";
 			str+="<tr><td colspan='2' id='mobCite'></td></tr>";

@@ -2716,13 +2716,19 @@ SHIVA_Show.prototype.ShowIframe=function(left, top, wid, hgt, url, id, mode)
 	var	str="<iframe src='"+url+"' id='"+id+"' style='position:absolute;"; 					
 	if (mode == "black")
 		str+="border:none;background-color:black;"
-	str+="width:"+(wid+2)+"px;height:"+(hgt+2)+"px;left:+"+left+"px;top:"+top+"px;'";
+	else if (mode == "transparent")
+		str+="border:none;background-color:transparent;"
+	else
+		str+="background-color:white;"
+	str+="width:"+(wid+2)+"px;height:"+(hgt+2)+"px;left:"+left+"px;top:"+top+"px;'";
 	if (mode == "black")
 		str+=" scrolling='no'";
+	else if (mode == "transparent")
+		str+=" allowtransparency='true'";
 	$("body").append(str+"/>");	
 	str="<iframe src='closedot.gif' id='CL-"+id+"'style='position:absolute;border:none;"; 					
 	str+="width:18px;height:18px;left:"+(wid-12+left)+"px;top:"+(top+2)+"px'/>";
-	if (mode != "black")
+	if (!mode)
 		$("body").append(str);	
 
 	$("#CL-"+id).bind("load",function(e) {

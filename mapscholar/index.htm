@@ -353,6 +353,7 @@ MapScholar.prototype.Goto=function(pos)									// SET EARTH VIEWPOINT
 	if ((!pos) || (pos.length < 5))											// No where to go
 		return;																// Quit
 	var ge=shivaLib.map;													// Point to earth												
+	pos=pos.replace(/"/g,"");												// Remove quotes
 	var v=pos.split(",");													// Split up
 	var lookAt=ge.getView().copyAsLookAt(ge.ALTITUDE_RELATIVE_TO_GROUND);	// Lookat object
 	lookAt.setLatitude(v[0]-0);												// Set lat

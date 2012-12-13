@@ -83,15 +83,15 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
  	switch(which) {															// Route on type
 		case "Timeline": 													// Simile			
 			obj="Timeline.DefaultEventSource";								// Object to test for
-			lib="http://api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true";  // Lib to load
+			lib="//api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true";  // Lib to load
           	break;
 		case "Timeglider": 													 // Time glider			
 			obj="timeglider";								    			 // Object to test for
-			lib="http://mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/timeglider-all.js";
+			lib="//mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/timeglider-all.js";
          	break;
 		case "Video": 														// Popcorn
 			obj="Popcorn.smart";											// Object to test for
-			lib="http://popcornjs.org/code/dist/popcorn-complete.min.js";  	// Lib to load
+			lib="//popcornjs.org/code/dist/popcorn-complete.min.js";  	// Lib to load
           	break;
 		case "Image": 														// Ad gallery
 			obj="jQuery.prototype.adGallery";								// Object to test for
@@ -103,7 +103,7 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
            	break;
 		case "Map": 														// Google maps		
   			obj="google.maps.Map";											// Object to test for
-        	lib="http://maps.googleapis.com/maps/api/js?sensor=false&callback=shivaJSLoaded"; 		// Lib to load
+        	lib="//maps.googleapis.com/maps/api/js?sensor=false&callback=shivaJSLoaded"; 		// Lib to load
             break;
 		}
 	if (lib) {																// If a lib to load
@@ -568,8 +568,8 @@ SHIVA_Show.prototype.DrawEarth=function()
 }
 
 //38.07,-78.55,37.99,-78.41,75
-//http://www.viseyes.org/shiva/map.jpg
-//http://code.google.com/apis/earth/documentation/samples/kml_example.kml
+////www.viseyes.org/shiva/map.jpg
+////code.google.com/apis/earth/documentation/samples/kml_example.kml
 
 SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 {
@@ -1638,8 +1638,8 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 	var v,t;
 	var options=this.options;
 //	options.dataSourceUrl="kaltura_player_1_uyp6bkha"; 
-//	options.dataSourceUrl="http://player.vimeo.com/video/17853047"; 
-//	options.dataSourceUrl="http://www.primaryaccess.org/music.mp3";	
+//	options.dataSourceUrl="//player.vimeo.com/video/17853047"; 
+//	options.dataSourceUrl="//www.primaryaccess.org/music.mp3";	
 	var container=this.container;
 	var con="#"+container;
 	var id=options.dataSourceUrl;
@@ -1647,11 +1647,11 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		return;
 	if (typeof(Popcorn.smart) != "function")
 		return;
-	var base="http://www.youtube.com/watch?v=";
+	var base="//www.youtube.com/watch?v=";
 	$(con).css("width",options.width+"px");
 	$(con).css("height",options.height+"px");
 	if ((options.dataSourceUrl.match(/vimeo/)) || (!isNaN(options.dataSourceUrl)))
-		base="http://vimeo.com/";
+		base="//vimeo.com/";
 	else if (options.dataSourceUrl.match(/kaltura/)) {
 		var s=options.dataSourceUrl.indexOf("kaltura_player_");
 		id=options.dataSourceUrl.substring(s+15);
@@ -2022,7 +2022,7 @@ ShivaCustomMapOverlay.prototype.onAdd=function()						// ADD HANDLER
 	div.style.position="absolute";
 
 var img = document.createElement("img");
-img.src="http://www.viseyes.org/shiva/map.jpg";
+img.src="//www.viseyes.org/shiva/map.jpg";
 img.style.width = "100%";
 img.style.height = "100%";
 div.appendChild(img);
@@ -2239,7 +2239,7 @@ SHIVA_Show.prototype.SaveData=function(mode, style, items, props, type) 			// SA
 		else{
 			$('#formatter').val(0);
 			$("#helpDiv").html("");		
-			str="http://www.viseyes.org/shiva/go.htm";
+			str="//www.viseyes.org/shiva/go.htm";
 			str+="?shivaGroup="+style;
 			if (items && items.length) {
 				for (i=0;i<items.length;++i) {
@@ -2948,7 +2948,7 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 		str="\",\n\t\"shivaTitle\": \""+_title+"\"\n}";						// Add title
 		if ((type != "Canvas") && (type != "KML"))							// Not for canvas or KML
 			_data=_data.substr(0,_data.lastIndexOf("\""))+str;				// Remove last "\n}
-		$.post("http://www.primaryaccess.org/REST/addeasyfile.php",{ email:_email, type: _type, title:_title,data:_data.replace(/'/g,"\\'") });
+		$.post("//www.primaryaccess.org/REST/addeasyfile.php",{ email:_email, type: _type, title:_title,data:_data.replace(/'/g,"\\'") });
 		});
 	
 	$("#loadBut").button().click(function() {								// LOAD
@@ -2961,7 +2961,7 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 		var dat={ email:email };											// Set email to look for
 		if (type != "all")													// If not loading all
 			dat["type"]=type;												// Filter by type
-		str="http://www.primaryaccess.org/REST/listeasyfile.php";			// eStore list url
+		str="//www.primaryaccess.org/REST/listeasyfile.php";			// eStore list url
 		shivaLib.ezcb=callback;		shivaLib.ezmode="load";					// Set callback and mode
 		$.ajax({ url: str, data:dat, dataType:'jsonp' });					// Get jsonp
 		});
@@ -2976,7 +2976,7 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 		var dat={ email:email };											// Set emila to look for
 		if (type != "all")													// If not loading all
 			dat["type"]=type;												// Filter by type
-		str="http://www.primaryaccess.org/REST/listeasyfile.php";			// eStore list url
+		str="//www.primaryaccess.org/REST/listeasyfile.php";			// eStore list url
 		shivaLib.ezcb="";		shivaLib.ezmode="link";						// Set callback and mode
 		$.ajax({ url: str, data:dat, dataType:'jsonp' });					// Get jsonp
 		});
@@ -3021,14 +3021,14 @@ SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	/
 	for (i=0;i<files.length;++i) {											// For each file
 		type=files[i].type;													// Set type
 		$("#ezfile-"+files[i].id).click(function() {						// Add click handler
-			str="http://www.primaryaccess.org/REST/geteasyfile.php?id="+this.id.substr(7);
+			str="//www.primaryaccess.org/REST/geteasyfile.php?id="+this.id.substr(7);
 			if ((mode == "link") && (type == "KML"))						// If a KML link
-				alert("http://www.primaryaccess.org/REST/getkml.php?e="+this.id.substr(7));	// Show url
+				alert("//www.primaryaccess.org/REST/getkml.php?e="+this.id.substr(7));	// Show url
 			if ((mode == "link") && (type != "KML"))						// If a SHIVA link
 				alert("www.viseyes.org/shiva/go.htm?e="+this.id.substr(7));	// Show url
 			else{															// If a load
 				var dat={ id:this.id.substr(7) };							// Set id to look for
-				str="http://www.primaryaccess.org/REST/geteasyfile.php";	// eStore list url
+				str="//www.primaryaccess.org/REST/geteasyfile.php";	// eStore list url
 				shivaLib.ezcb=callback;										// Set callback
 				shivaLib.ezmode=this.id.substr(7);	 						// Set ID
 				$.ajax({ url: str, data:dat, dataType:'jsonp' });			// Get jsonp
@@ -3526,7 +3526,7 @@ SHIVA_QueryEditor.prototype.DrawQuery=function()
 		str="<textArea id='curQuery' rows='4' cols='50' />";
 		str+="<p><input type='checkbox' id='advedit' checked='checked' onclick='shivaLib.qe.AdvancedMode(false)'> Advanced editing mode";
 		str+="<p><Button id='queryAdvEdit'>Test</button> ";
-		str+="Click <a href='http://code.google.com/apis/chart/interactive/docs/querylanguage.html' target='_blank'>here</a> for information on formatting</p></p>";
+		str+="Click <a href='//code.google.com/apis/chart/interactive/docs/querylanguage.html' target='_blank'>here</a> for information on formatting</p></p>";
 		str+="<br/><div id='testShowDiv'/>"
 		$("#dataDialogDiv").html(str);
 		$("#curQuery").val(this.query.replace(/ORDER BY none/g,"").replace(/  /g," "));

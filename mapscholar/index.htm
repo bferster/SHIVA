@@ -416,12 +416,21 @@ function MapScholar_Shelf()												// CONSTRUCTOR
     this.mobVis=new Array();                                                // Holds hide/show status
 	
 	$("body").keydown(function(e) {										// KEY DOWN HANDLER
+			trace(e.keyCode)
 		if (e.keyCode == 40) {												// Down arrow
 			mps.sh.HighlightMob("next",false,true);							// Next mob
 			shivaLib.Sound("click");										// Click
 			}
 		else if (e.keyCode == 38) {											// Up arrow
 			mps.sh.HighlightMob("last",false,true);							// Previous mob
+			shivaLib.Sound("click");										// Click
+			}
+		else if (e.keyCode == 36) {											// Home
+			mps.sh.HighlightMob(0,false,true);								// First mob
+			shivaLib.Sound("click");										// Click
+			}
+		else if (e.keyCode == 35) {											// End
+			mps.sh.HighlightMob(mps.mobs.length-1,false,true);				// Last mob
 			shivaLib.Sound("click");										// Click
 			}
 		});

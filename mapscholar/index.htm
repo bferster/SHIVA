@@ -10,7 +10,7 @@
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false"></script>
  	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"earth","version":"1"}]}'></script>
- 	<script type="text/javascript" src="//www.viseyes.org/shiva/SHIVA_Show.js"></script>
+ 	<script type="text/javascript" src="../SHIVA_Show.js"></script>
  	<script type="text/javascript" src="MapScholar_Draw.js"></script>
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small}
@@ -375,7 +375,6 @@ MapScholar.prototype.ShowText=function(num, mode)						// HIDE/SHOW TEXT
 		}
 
 	if (mode) {																// If showing
-		shivaLib.ShowIframe(l,t,w,h,"","iframe-"+num);						// Show iframe
 		str="<div style='font-family:sans-serif;font-size:small'>";			// Div
 		str+="<p style='text-align:center;font-weight:bold'>"+m.title+"<br/>";	// Add title
 		if (m.small)														// If an image spec's
@@ -383,7 +382,7 @@ MapScholar.prototype.ShowText=function(num, mode)						// HIDE/SHOW TEXT
 		str+="</p>"+m.desc+"<div>";											// Add desc
 		if (m.url)															// If a link
 			str+="<br/>Click <a href='"+m.url+" ' target='_blank'>here</a> for more information";	// Add it		
-		$("#iframe-"+num).contents().find('body').append(str);				// Add content
+		shivaLib.ShowIframe(l,t,w,h,"blank.htm","iframe-"+num,"white",str);	// Show iframe
 		}
 	else																	// If hiding
 		shivaLib.ShowIframe(0,0,0,0,"","iframe-"+num);						// Hide iframe

@@ -2710,35 +2710,40 @@ SHIVA_Show.prototype.GetGoogleSpreadsheet=function(file, callback) 					//	GET G
      }
 }
 
-SHIVA_Show.prototype.ShowIframe=function(left, top, wid, hgt, url, id, mode)
+SHIVA_Show.prototype.ShowIframe=function(left, top, wid, hgt, url, id, mode, content)
 {
 	$("#"+id).remove();															
 	$("#CL-"+id).remove();															
 	if ((hgt == 0) || (wid == 0))
 		return;
-	var	str="<iframe id='"+id+"'";
+	var	str="<iframe id='"+id+"' ";
 	if (url)
 		str+="src='"+url+"' ";
 	str+="style='position:absolute;"; 					
 	if (mode == "black")
-		str+="border:none;background-color:black;"
+		str+="border:none;background:black;"
 	else if (mode == "transparent")
-		str+="border:none;background-color:transparent;"
+		str+="border:none;background:transparent;"
 	else
-		str+="background-color:white;"
+		str+="background:white;"
 	str+="width:"+(wid+2)+"px;height:"+(hgt+2)+"px;left:"+left+"px;top:"+top+"px;'";
 	if (mode == "black")
 		str+=" scrolling='no'";
 	else if (mode == "transparent")
 		str+=" allowtransparency='true'";
-	$("body").append(str+"/>");	
+//	str+="><html><body><div id='DV-"+id+"'>yes</div></body></html></iframe>";
+	$("body").append(str+"></iframe>");	
 	str="<iframe marginwidth='0' marginheight='0' src='closedot.gif' id='CL-"+id+"' style='position:absolute;margin:0px;padding:0px;border:none;"; 					
 	str+="width:17px;height:18px;left:"+(wid-13+left)+"px;top:"+(top+3)+"px'/>";
 	if (!mode)
 		$("body").append(str);	
 
+	$("#"+id).bind("load",function(e) {
+    	if (content)
+    		this.contentWindow.document.body.innerHTML=content;
+      });
 	$("#CL-"+id).bind("load",function(e) {
-		this.contentWindow.document.body.onclick=function(e) {
+  		this.contentWindow.document.body.onclick=function(e) {
      	shivaLib.Sound("delete");
 		$("#"+id).remove();															
 		$("#CL-"+id).remove();															

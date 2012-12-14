@@ -83,24 +83,6 @@ function MapScholar()													// CONSTRUCTOR
 
 MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 {
-/*	
- 
-  atlas[
-			name, desc, id, author
-			type (tour|collection)
-			mids[]
-			]
-		mobs[
-			title, desc, id, dur, author
-			small, med, large, kml
-			status (open|closed|flyto)
-			type (map|layer|goto|chapter|header)
-			start, end, tags, citation
-			north, south, east, west, rotation
-			]            
-
-*/
-			
 	var o,i,j,v;
 	this.atlas=new Array();													// Holds atlas data
 	this.mobs=new Array();													// Holds map objects data
@@ -486,7 +468,7 @@ MapScholar_Shelf.prototype.HighlightMob=function(which, multi, scroll)	// HIGHLI
 	if (which == "next") {													// Going forward										
 		i=Math.min(i+1,n);													// Cap at end
 		while (((mps.mobs[i].type == "header") || (mps.mobs[i].type == "chapter")) && (i < n))  // Skip over nav mobs
-			mps.Goto(mps.mobs[i++].goto);										// Set position
+			mps.Goto(mps.mobs[i++].goto);									// Set position
 		}
 	else if (which == "last") {												// Going backward										
 		i=Math.max(i-1,0);													// Cap at end
@@ -497,10 +479,11 @@ MapScholar_Shelf.prototype.HighlightMob=function(which, multi, scroll)	// HIGHLI
 		if (which < 0) {
 			which=-which;
 			o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[which])];   // Point at mob
-			var cy=o.north-0+(o.south-o.north)/2;
-			var cx=o.east-0+(o.west-o.east)/2;
-			mps.Goto(cy+","+cx+","+",0,0");
-			this.mobVis[which]=0;
+			var cy=o.north-0+(o.south-o.north)/2;							// Lat				
+			var cx=o.east-0+(o.west-o.east)/2;								// Lon
+			if (o.type == "map")											// If a map
+				mps.Goto(cy+","+cx+","+",0,0");								// Got to center of map
+			this.mobVis[which]=0;											// Turn off (toggle)
 			}
 		i=Number(which);													// Get number
 		}

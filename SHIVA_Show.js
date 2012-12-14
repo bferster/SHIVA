@@ -2674,10 +2674,13 @@ SHIVA_Show.prototype.ShiftItem=function(dir,items)
 
 SHIVA_Show.prototype.Sound=function(sound)
 {	
-	var clickSound=new Audio(sound+".mp3");
-	if (!clickSound.canPlayType("audio/mpeg"))
-		clickSound=new Audio(sound+".ogg");
-	clickSound.play();
+	
+	var snd=new Audio();
+	if (!snd.canPlayType("audio/mpeg"))
+		snd=new Audio(sound+".ogg");
+	else	
+		snd=new Audio(sound+".mp3");
+	snd.play();
 }
 
 SHIVA_Show.prototype.GetGoogleSpreadsheet=function(file, callback) 					//	GET GOOGLE DOCS SPREADSHEET
@@ -2713,7 +2716,10 @@ SHIVA_Show.prototype.ShowIframe=function(left, top, wid, hgt, url, id, mode)
 	$("#CL-"+id).remove();															
 	if ((hgt == 0) || (wid == 0))
 		return;
-	var	str="<iframe src='"+url+"' id='"+id+"' style='position:absolute;"; 					
+	var	str="<iframe id='"+id+"'";
+	if (url)
+		str+="src='"+url+"' ";
+	str+="style='position:absolute;"; 					
 	if (mode == "black")
 		str+="border:none;background-color:black;"
 	else if (mode == "transparent")
@@ -2726,8 +2732,8 @@ SHIVA_Show.prototype.ShowIframe=function(left, top, wid, hgt, url, id, mode)
 	else if (mode == "transparent")
 		str+=" allowtransparency='true'";
 	$("body").append(str+"/>");	
-	str="<iframe src='closedot.gif' id='CL-"+id+"'style='position:absolute;border:none;"; 					
-	str+="width:18px;height:18px;left:"+(wid-12+left)+"px;top:"+(top+2)+"px'/>";
+	str="<iframe marginwidth='0' marginheight='0' src='closedot.gif' id='CL-"+id+"' style='position:absolute;margin:0px;padding:0px;border:none;"; 					
+	str+="width:17px;height:18px;left:"+(wid-13+left)+"px;top:"+(top+3)+"px'/>";
 	if (!mode)
 		$("body").append(str);	
 

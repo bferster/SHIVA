@@ -332,6 +332,8 @@ MapScholar.prototype.ShowMapBoxes=function(num, mode)					// HIDE/SHOW WIREFRAME
 			this.ShowLink(i,mps.sh.mobVis[i] > 0);							// Show/hide iframe
 		else if (m.type == "sound")											// If a sound
 			mps.ShowSound(i,mps.sh.mobVis[i] > 0);							// Show/hide audio iframe
+		else if (m.type == "text")											// If a text
+			mps.ShowText(i,mps.sh.mobVis[i] > 0);							// Show/hide text iframe
 		if (m.type != "map")												// If not a map
 			continue;														// Continue
 		seg=ge.getElementById(m.gid);										// Get object
@@ -362,6 +364,41 @@ MapScholar.prototype.Goto=function(pos)									// SET EARTH VIEWPOINT
 	lookAt.setTilt(v[3]-0);													// Set tilt
 	lookAt.setHeading(v[4]-0);												// Set heading
 	ge.getView().setAbstractView(lookAt);									// Go there
+}
+
+MapScholar.prototype.ShowText=function(num, mode)						// HIDE/SHOW TEXT
+{
+	var l,t,h,w;
+	var m=this.mobs[num];													// Point at mob
+	if (m.east) 															// If spec'ing pos												
+		l=m.north,t=m.south,w=m.east,h=m.west;								// Use it		
+	else{ 
+		switch(m.north) {													// Rounte on north
+			case "1":	l=220;	t=170;	w=400;		h=300;		break;		// Half centered
+			case "2":	l=320;	t=245;	w=200;		h=150;		break;		// Quarter centered
+			case "3":	l=40;	t=40;	w=750;		h=120;		break;		// Top
+			case "4":	l=40;	t=470;	w=750;		h=120;		break;		// Bottom
+			case "5":	l=40;	t=40;	w=400;		h=300;		break;		// Half top left
+			case "6":	l=390;	t=40;	w=400;		h=300;		break;		// Half top right
+			case "7":	l=40;	t=290;	w=400;		h=300;		break;		// Half bot left
+			case "8":	l=390;	t=290;	w=400;		h=300;		break;		// Half bot right
+			default:	l=20;	t=20;	w=794;		h=594;		break;		// Full
+			}
+		}
+
+	if (mode) {																// If showing
+		shivaLib.ShowIframe(l,t,w,h,"","iframe-"+num);						// Show iframe
+		str="<div style='font-family:sans-serif;font-size:small'>";			// Div
+		str+="<p style='text-align:center;font-weight:bold'>"+m.title+"<br/>";	// Add title
+		if (m.small)														// If an image spec's
+			str+="<br/><img style='border:1px solid #999' src='"+m.small+"' width='"+w/3+"'><br/>";		// Add it		
+		str+="</p>"+m.desc+"<div>";											// Add desc
+		if (m.url)															// If a link
+			str+="<br/>Click <a href='"+m.url+" ' target='_blank'>here</a> for more information";	// Add it		
+		$("#iframe-"+num).contents().find('body').append(str);				// Add content
+		}
+	else																	// If hiding
+		shivaLib.ShowIframe(0,0,0,0,"","iframe-"+num);						// Hide iframe
 }
 
 MapScholar.prototype.ShowLink=function(num, mode)						// HIDE/SHOW LINK
@@ -416,7 +453,6 @@ function MapScholar_Shelf()												// CONSTRUCTOR
     this.mobVis=new Array();                                                // Holds hide/show status
 	
 	$("body").keydown(function(e) {										// KEY DOWN HANDLER
-			trace(e.keyCode)
 		if (e.keyCode == 40) {												// Down arrow
 			mps.sh.HighlightMob("next",false,true);							// Next mob
 			shivaLib.Sound("click");										// Click
@@ -653,6 +689,8 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			pic="img/linkicon.png";											// Use icon
 		else if (o.type == "sound")											// A sound													
 			pic="img/audioicon.png";										// Use icon
+		else if (o.type == "text")											// A text													
+			pic="img/texticon.png";											// Use icon
 		str+="<tr id='mob"+i+"'";											// Row start
 		if (this.mobVis[i] > 0) 											// If visible
 			str+="' style='background-color:#ccccff'";						// Color background
@@ -663,7 +701,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 		str+="<td valign='top'><span id='mobPos"+ i+"'><b>"+o.title+"</b><br/></span>";	// Add title
 		if ((o.type == "map") && (o.start))									// If a map and a date
 			str+="<span style='color:#770000'><b>"+o.start+"</b></span> ";	// Add date
-		if (o.desc)															// If desc spec'd
+		if ((o.desc)&& ((o.type == "map") || (o.type == "chapter") || (o.type == "header"))) // If desc spec'd
 			str+=o.desc+"<br/>";											// Add desc
 		str+="<br/></td></tr>";												// Close entry
 		if ((this.curMob == i) && (this.mobVis[i] > 0) && ((o.type == "map") || (o.type == "layer"))){	// If selected and visible

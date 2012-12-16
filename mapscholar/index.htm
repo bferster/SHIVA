@@ -439,7 +439,8 @@ function MapScholar_Shelf()												// CONSTRUCTOR
 	this.curMob=-1;															// Default to none
     this.expandAll=true;													// Expand/collapse button status
     this.mobVis=new Array();                                                // Holds hide/show status
-	this.playSpeed=50;
+	this.playSpeed=50;														// Player speed 
+	this.inPlay=false;														// Playing?
 	
 	$("body").keydown(function(e) {										// KEY DOWN HANDLER
 		if (e.keyCode == 40) {												// Down arrow
@@ -536,7 +537,12 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 
 	str+="<div style='position:absolute;left:887px;top:25px;font-size:8px;width:80px;color:#999'>Play speed</div>";
 	str+="<div id='playSpeed' style='position:absolute;left:874px;top:13px;width:70px'></div>";
-	str+="<img src='img/playbut.gif' style='position:absolute;left:954px;top:9px' title='Play' onclick='mps.sh.Play()'>";		
+	str+="<img id='playbut' style='position:absolute;left:954px;top:9px'"; 
+	if (this.inPlay)
+		str+="src='img/stopbut.gif' title='Stop'";
+	else
+	 	str+="src='img/playbut.gif' title='Play'";
+	str+="onclick='mps.sh.Play()'>";		
 	str+="<img src='img/againbut.gif' style='position:absolute;left:850px;top:9px' title='Start over' onclick='mps.sh.Play(0)'>";		
   
 	$("#controlBarDiv").html(str+"");                                    // Add to DOM
@@ -822,6 +828,17 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 	
 MapScholar_Shelf.prototype.Play=function(start)							// PLAY
 {
+	this.inPlay=!this.inPlay;												// Toggle state
+	if (this.inPlay) {														// If playing
+		shivaLib.Sound("click");											// Click
+		$("#playbut").attr("src","img/stopbut.gif");						// Change icon
+		$("#playbut").attr("title","Stop");									// Change title
+		}
+	else{																	// If stopped
+		shivaLib.Sound("delete");											// Click
+		$("#playbut").attr("src","img/playbut.gif");						// Change icon
+		$("#playbut").attr("title","Play");									// Change title
+		}
 }
 
 </script>

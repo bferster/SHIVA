@@ -20,6 +20,7 @@
 		.headerbar { border-bottom:1px solid #999;height:14px;width:192px;padding:3px;color:#333}
 		.timelinebar { -moz-border-radius:12px;-webkit-border-radius:2px;-khtml-border-radius:2px;border-radius:2px;background-color:#999}
 		.timelinedot { -moz-border-radius:4px;-webkit-border-radius:4px;-khtml-border-radius:4px;border-radius:4px;background-color:#990000;height:8px;width:8px;margin:0px;padding:0px}
+		.playerbar { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;background-color:#ccc;color:#fff}
 		tr.odd { background-color:#e0e0e0; }
 		.propTable { background-color:#eee;border-radius:8px;
 				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
@@ -438,6 +439,7 @@ function MapScholar_Shelf()												// CONSTRUCTOR
 	this.curMob=-1;															// Default to none
     this.expandAll=true;													// Expand/collapse button status
     this.mobVis=new Array();                                                // Holds hide/show status
+	this.playSpeed=50;
 	
 	$("body").keydown(function(e) {										// KEY DOWN HANDLER
 		if (e.keyCode == 40) {												// Down arrow
@@ -530,8 +532,14 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 	var str="<p>";
 	str+="&nbsp;&nbsp;<img src='img/annotate.gif' style='vertical-align:bottom' title='Annotate' onclick='mps.dr.DrawControlBar(true)'>";		
 	str+="<label>&nbsp; Find: </label ><input id='mpsFind' style='font-size:x-small;width:80px' type='text'/>";
-	str+="<div id='timeline' style='position:absolute;left:152px;width:872px;top:5px;height:26px'></div>";
-	$("#controlBarDiv").html(str+"</p>");                                    // Add to DOM
+	str+="<div id='timeline' style='position:absolute;left:152px;width:646px;top:5px;height:26px'></div></p>";
+
+	str+="<div style='position:absolute;left:887px;top:25px;font-size:8px;width:80px;color:#999'>Play speed</div>";
+	str+="<div id='playSpeed' style='position:absolute;left:874px;top:13px;width:70px'></div>";
+	str+="<img src='img/playbut.gif' style='position:absolute;left:954px;top:9px' title='Play' onclick='mps.sh.Play()'>";		
+	str+="<img src='img/againbut.gif' style='position:absolute;left:850px;top:9px' title='Start over' onclick='mps.sh.Play(0)'>";		
+  
+	$("#controlBarDiv").html(str+"");                                    // Add to DOM
 	str="<img src='img/helpicon.gif' style='position:absolute;left:214px;top:7px' onclick='mps.ShowHelp(\"shelf\")'>";		
 	str+="<div id='contentShelf' style='position:absolute;width:216px;top:27px;height:559px;background-color:#eee;margin:0px;padding:6px;overflow-x:hidden;overflow-y:scroll;border:1px solid #ccc;'/></div>";
 	str+="<p>&nbsp;&nbsp;&nbsp;<img id='expandAll' src='img/";				// Image base
@@ -547,6 +555,11 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 		this.mobVis.push(0);												// Make it hidden                                       
 	this.FillShelf();														// Draw shelf
 	
+	var ops={ min:0, max:100, value:mps.sh.playSpeed,						// Slider options
+		slide:function(event,ui) {											// Slide cb
+		}};    
+	$("#playSpeed" ).slider(ops);											// Init slider
+
 	$("#expandAll").click(function(e) {									// EXPAND/COLLAPSE ALL
 		shivaLib.Sound("click");											// Click
 		mps.sh.ToggleExpandCollapse();										// Expand or collapse
@@ -792,7 +805,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 
 	$("#hiresmap").click( function(e) {									// CLICK ON HIRES MAP
 		shivaLib.Sound("click");											// Click
-		mps.SetHiResMapImage(mps.sh.curMob);								// Srt hi-res map
+		mps.SetHiResMapImage(mps.sh.curMob);								// Set hi-res map
 		});
 
 	if ((this.curMob != -1) && (this.mobVis[this.curMob] > 0)) {			// If selected and visible
@@ -807,7 +820,9 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 		}
 }
 	
-
+MapScholar_Shelf.prototype.Play=function(start)							// PLAY
+{
+}
 
 </script>
 </body>

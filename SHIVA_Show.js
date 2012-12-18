@@ -12,8 +12,9 @@ function SHIVA_Show(container, options, editMode) 						// CONSTRUCTOR
 	this.g=null;
 	this.qe=null;
 	this.ev=null;
-	this.jit=null
-	this.cvs=null
+	this.jit=null;
+	this.cvs=null;
+	this.group=null;
 	if (options)
 		this.Draw(options);
 }
@@ -29,7 +30,7 @@ SHIVA_Show.prototype.Draw=function(ops) 								//	DRAW LOADER/DIRECTOR
 SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 {
 	var _this=this;
-	var group=ops.shivaGroup;
+	this.group=group=ops.shivaGroup;
 	if (group == 'Visualization') 
 		this.DrawChart();
 	else if (group == 'Map')
@@ -2761,8 +2762,10 @@ SHIVA_Show.prototype.ShowLightBox=function(width, top, title, content)
 	else
 		width=400;
 	var x=($("#shivaLightBoxDiv").width()-width)/2;
-	if (width < 0)
-		x=830;
+	if (width < 0) {												// EARTH KLUDGE!!
+		x=$("#"+this.container).css("left").replace(/px/,"");
+		x=x-0+$("#"+this.container).width()-0+20;
+		}
 	str+=";border-radius:12px;moz-border-radius:12px;z-index:2003;"
 	str+="border:1px solid; left:"+x+"px;top:"+top+"%;background-color:#f8f8f8'>";
 	str+="<img src='shivalogo32.png' style='vertical-align:-30%'/>&nbsp;&nbsp;";								
@@ -2927,8 +2930,9 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 	if (type != "all")
 		str+=" <button id='linkBut'>Link</button>";	
 	str+=" <button id='cancelBut'>Cancel</button></div>";	
-	if (type == "KML") w=-350;												// Force to right of Earth (KLUDGE)																
+	if ((type == "KML") || (this.group == "Earth")) w=-350;					// Force to right of Earth (KLUDGE)																
 	this.ShowLightBox(w,20,"SHIVA eStore",str)								// Create light box
+
 	$("#cancelBut").button().click(function() { $("#shivaLightBoxDiv").remove();});
 	$("#saveBut").button().click(function() {								// SAVE
 		var _email=$("#email").val();										// Get email

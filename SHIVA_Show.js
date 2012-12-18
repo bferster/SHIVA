@@ -554,7 +554,6 @@ SHIVA_Show.prototype.DrawEarth=function()
 	ge.getLayerRoot().enableLayerById(ge.LAYER_BORDERS,ops.borders);	// Show borders?
 	ge.getLayerRoot().enableLayerById(ge.LAYER_ROADS,ops.roads);		// Show roads?
 	ge.getLayerRoot().enableLayerById(ge.LAYER_TERRAIN,true);			// Show terrain
-	
 	this.DrawEarthOverlays();											// Draw overlays
 	this.DrawLayerControlBox(this.items,ops.controlbox);				// Draw control box
 	
@@ -1854,6 +1853,7 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 		};
 	this.map=new google.maps.Map(document.getElementById(container),ops);
 	this.AddClearMapStyle(this.map);
+	this.AddBlankMapStyle(this.map);
 	this.DrawMapOverlays();
 	this.DrawLayerControlBox(this.items,this.options.controlbox);
 	this.SendReadyMessage(true);											
@@ -2054,7 +2054,7 @@ ShivaCustomMapOverlay.prototype.onRemove=function()							// REMOVE HANDLER
 
 SHIVA_Show.prototype.AddClearMapStyle=function(map)						// SET MAP STYLE
 {
-	var clearStyle=[
+	var style=[
 		{ featureType:"road", 	        elementType:"all",      stylers: [ { visibility:"off"} ] },
 		{ featureType:"transit",        elementType:"all",      stylers: [ { visibility:"off"} ] },
 		{ featureType:"poi",            elementType:"all",      stylers: [ { visibility:"off"} ] },
@@ -2063,8 +2063,24 @@ SHIVA_Show.prototype.AddClearMapStyle=function(map)						// SET MAP STYLE
 		{ featureType:"all", 			elementType:"labels",   stylers: [ { visibility:"off"} ] },
 		{ featureType:"all", 			elementType:"geometry", stylers: [ { lightness:-20}    ] }
 		];
-	var clearMap=new google.maps.StyledMapType(clearStyle,{name:"Land"});
-	map.mapTypes.set("LAND",clearMap);
+	var type=new google.maps.StyledMapType(style,{name:"Land"});
+	map.mapTypes.set("LAND",type);
+}
+
+SHIVA_Show.prototype.AddBlankMapStyle=function(map)						// SET BLANK MAP STYLE
+{
+	var style=[
+		{ featureType:"road", 	        elementType:"all",      stylers: [ { visibility:"off"} ] },
+		{ featureType:"transit",        elementType:"all",      stylers: [ { visibility:"off"} ] },
+		{ featureType:"poi",            elementType:"all",      stylers: [ { visibility:"off"} ] },
+		{ featureType:"administrative", elementType:"all",      stylers: [ { visibility:"off"} ] },
+		{ featureType:"landscape",      elementType:"all",      stylers: [ { visibility:"off"} ] },
+		{ featureType:"water",      	elementType:"all",      stylers: [ { visibility:"off"} ] },
+		{ featureType:"all", 			elementType:"labels",   stylers: [ { visibility:"off"} ] },
+		{ featureType:"all", 			elementType:"geometry", stylers: [ { lightness:-20}    ] }
+		];
+	var type=new google.maps.StyledMapType(style,{name:"Blank"});
+	map.mapTypes.set("BLANK",type);
 }
 
 //  CHART   /////////////////////////////////////////////////////////////////////////////////////////// 

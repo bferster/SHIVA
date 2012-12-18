@@ -9,8 +9,8 @@
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false"></script>
- 	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"earth","version":"1"}]}'></script>
- 	<script type="text/javascript" src="../SHIVA_Show.js"></script>
+ 	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"earth","version":"1"},{"name":"visualization","version":"1"}]}'></script>
+ 	<script type="text/javascript" src="//www.viseyes.org/shiva/SHIVA_Show.js"></script>
  	<script type="text/javascript" src="MapScholar_Draw.js"></script>
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small}
@@ -43,8 +43,17 @@
  
 	function ShivaPostInit()
  	{
-		mps.dr.InitEvents();
-		mps.AddMapBoxes();
+		var url="https://docs.google.com/spreadsheet/pub?key=0AohdE1_3ZElJdDhIbTRVRkhHSWNBWUUtYS1rZmJoSEE&output=html";
+		mps.dr.InitEvents();													// Init draw events
+		if (url.indexOf("docs.google.com") != -1)								// On a goodle doc
+			shivaLib.GetGoogleSpreadsheet(url,function(data) {					// Get from docs
+			mps.InitProject("",data);											// Init project from file
+			mps.AddMapBoxes();													// Add boxes
+			});
+		else{																	// From file
+			mps.InitProject(url);												// Init project from file
+			mps.AddMapBoxes();													// Add boxes
+			}
 	}
 	
      $(document).ready(function() {
@@ -74,15 +83,15 @@ function MapScholar()													// CONSTRUCTOR
  						terrainexag:"1", borders:"false", roads:"false"
  						};
 	
-	this.InitProjectData();													// Init project data
+	shivaLib.Sound("click","init");											// Init sound
+	shivaLib.Sound("ding","init");											// Init sound
+	shivaLib.Sound("delete","init");										// Init sound
 	shivaLib.Draw(shivaLib.options);										// Draw map
 	this.dr=new MapScholar_Draw();											// Alloc draw module
 	this.sh=new MapScholar_Shelf();											// Alloc shelf module
-	this.dr.DrawControlBar(false);											// Draw control bar and shelf
-
 }	
 
-MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
+MapScholar.prototype.InitProject=function(url, data)					// INIT PROJECT 
 {
 	var o,i,j,v;
 	this.atlas=new Array();													// Holds atlas data
@@ -95,8 +104,15 @@ MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 				id:0
 				};
 	this.AddNewAtlas(atlas);
-
-	var mobs=shivaLib.GetTextFile("default.txt");							// Load data
+	if (data) {																// If loading from data
+		for (i=0;i<data.length;++i) {										// For each row
+			this.mobs.push(data[i]);										// Add new mob to project
+			this.AddMobToAtlas(this.atlas[0].id,this.mobs[i].id);			// Add to atlas
+			}
+		this.dr.DrawControlBar(false);										// Draw control bar and shelf
+		return;
+		}
+	var mobs=shivaLib.GetTextFile(url);										// Load data
 	mobs.replace(/\n\r/g,"\n");												// \n\r -> \n
 	mobs.replace(/\r\n/g,"\n");												// \r\n -> \n
 	mobs.replace(/\r/g,"");													// Remove \r's
@@ -113,6 +129,7 @@ MapScholar.prototype.InitProjectData=function()							// INIT PROJECT DATA
 		this.mobs.push(o);													// Add new mob to project
 		this.AddMobToAtlas(this.atlas[0].id,this.mobs[i-1].id);				// Add to atlas
 		}
+	this.dr.DrawControlBar(false);											// Draw control bar and shelf
 }
 
 MapScholar.prototype.AddNewAtlas=function(atlas)						// ADD NEW ATLAS TO PROJECT
@@ -362,19 +379,18 @@ MapScholar.prototype.ShowText=function(num, mode)						// HIDE/SHOW TEXT
 	if (m.east) 															// If spec'ing pos												
 		l=m.north,t=m.south,w=m.east,h=m.west;								// Use it		
 	else{ 
-		switch(m.north) {													// Rounte on north
-			case "1":	l=220;	t=170;	w=400;		h=300;		break;		// Half centered
-			case "2":	l=320;	t=245;	w=200;		h=150;		break;		// Quarter centered
-			case "3":	l=40;	t=40;	w=750;		h=120;		break;		// Top
-			case "4":	l=40;	t=470;	w=750;		h=120;		break;		// Bottom
-			case "5":	l=40;	t=40;	w=400;		h=300;		break;		// Half top left
-			case "6":	l=390;	t=40;	w=400;		h=300;		break;		// Half top right
-			case "7":	l=40;	t=290;	w=400;		h=300;		break;		// Half bot left
-			case "8":	l=390;	t=290;	w=400;		h=300;		break;		// Half bot right
+		switch(m.north-0) {													// Route on north
+			case 1:		l=220;	t=170;	w=400;		h=300;		break;		// Half centered
+			case 2:		l=320;	t=245;	w=200;		h=150;		break;		// Quarter centered
+			case 3:		l=40;	t=40;	w=750;		h=120;		break;		// Top
+			case 4:		l=40;	t=470;	w=750;		h=120;		break;		// Bottom
+			case 5:		l=40;	t=40;	w=400;		h=300;		break;		// Half top left
+			case 6:		l=390;	t=40;	w=400;		h=300;		break;		// Half top right
+			case 7:		l=40;	t=290;	w=400;		h=300;		break;		// Half bot left
+			case 8:		l=390;	t=290;	w=400;		h=300;		break;		// Half bot right
 			default:	l=20;	t=20;	w=794;		h=594;		break;		// Full
 			}
 		}
-
 	if (mode) {																// If showing
 		str="<div style='font-family:sans-serif;font-size:small'>";			// Div
 		str+="<p style='text-align:center;font-weight:bold'>"+m.title+"<br/>";	// Add title

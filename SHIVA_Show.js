@@ -2673,15 +2673,15 @@ SHIVA_Show.prototype.ShiftItem=function(dir,items)
 	return pos;
 }
 
-SHIVA_Show.prototype.Sound=function(sound)
+SHIVA_Show.prototype.Sound=function(sound, mode)									// PLAY SOUND
 {	
-	
 	var snd=new Audio();
 	if (!snd.canPlayType("audio/mpeg"))
 		snd=new Audio(sound+".ogg");
 	else	
 		snd=new Audio(sound+".mp3");
-	snd.play();
+	if (mode != "init")
+		snd.play();
 }
 
 SHIVA_Show.prototype.GetGoogleSpreadsheet=function(file, callback) 					//	GET GOOGLE DOCS SPREADSHEET

@@ -415,6 +415,8 @@ function MapScholar_Shelf()												// CONSTRUCTOR
 	this.playSpeed=50;														// Player speed 
 	this.inPlay=null;														// Playing timer
 	this.playTime=3000;														// Time for 1 mob
+	this.playStart=0;														// Mob to start playing on
+	this.playEnd=0;															// Mob to stop playing on
 	
 	$("body").keydown(function(e) {										// KEY DOWN HANDLER
 		if (e.keyCode == 40) {												// Down arrow
@@ -441,7 +443,7 @@ MapScholar_Shelf.prototype.HighlightMob=function(which, multi, scroll)	// HIGHLI
 	var j,o;
 	var i=Math.max(this.curMob,0);											// Start point
 	var n=mps.mobs.length-1;												// Last mob
-	if ((this.inPlay) && (i >= n)) {										// At end when playing
+	if ((this.inPlay) && (i >= this.playEnd)) {								// At end when playing
 		this.Play();														// Turn off playing
 		return;																// Quit
 		}
@@ -520,7 +522,7 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 	else
 	 	str+="src='img/playbut.gif' title='Play'";
 	str+="onclick='mps.sh.Play()'>";		
-	str+="<img src='img/againbut.gif' style='position:absolute;left:850px;top:9px' title='Start over' onclick='mps.sh.Play(\"0\")'>";		
+	str+="<img src='img/againbut.gif' style='position:absolute;left:850px;top:9px' title='Start over' onclick='mps.sh.Play(\"1\")'>";		
   
 	$("#controlBarDiv").html(str+"");                                    // Add to DOM
 	str="<img src='img/helpicon.gif' style='position:absolute;left:214px;top:7px' onclick='mps.ShowHelp(\"shelf\")'>";		
@@ -646,6 +648,8 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			if (o.type == "header")											// If a header
 				str+="2";													// Use dark icons
 			str+=".gif'><b>"+o.title+"</div>";								// Title
+			if (o.type == "chapter")
+				str+="<img src='img/cplaybut.gif' style='position:relative;left:182px;top:-16px' title='Play chapter' onclick='mps.sh.Play(\"0\",\""+i+"\")'>";		
 			str+="</td><tr>";												// End 
 			if ((o.desc)&& (o.status != "closed"))							// If a description
 				str+="<tr><td colspan='2'><i>"+o.desc+"</i><br/><br/></td></tr>";	// Add it
@@ -804,18 +808,28 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 		}
 }
 	
-MapScholar_Shelf.prototype.Play=function(reset)							// PLAY
+MapScholar_Shelf.prototype.Play=function(again, chapter)				// PLAY
 {
 	var _this=mps.sh;														// Point here
 	var time=this.playTime;													// Time per mob
 	if (!this.inPlay) {														// If not playing
+		this.playStart=0;													// Assume playing
+		this.playEnd=mps.mobs.length-1;										// all
+		if (chapter != undefined) {											// If a chapter spec'd
+			this.curMob=this.playStart=chapter;								// Start on chapter
+			for (i=chapter-0+1;i<this.playEnd;++i)							// For each mob
+				if (mps.mobs[i].type == "chapter") {						// If a new chapter
+					this.playEnd=i-1;										// Set end
+					break;													// Quit looking
+					}
+			}
 		shivaLib.Sound("click");											// Click
 		if (this.playSpeed < 50)											// Slowing down
 			time*=((50-this.playSpeed)/10);									// Slow it down
 		if (this.playSpeed > 50)											// Speeding up
 			time/=((this.playSpeed-50)/10);									// Speed it up
-		if (reset)															// If starting over
-			this.curMob=reset;												// From the top
+		if (again == "1")															// If starting over
+			this.curMob=this.playStart;										// From the top
 		this.HighlightMob("next",false,true);								// Start 1st immediately
 		this.inPlay=setInterval(function(){_this.HighlightMob("next",false,true)},time);	// Set up timer to play 
 		$("#playbut").attr("src","img/stopbut.gif");						// Change icon
@@ -824,8 +838,8 @@ MapScholar_Shelf.prototype.Play=function(reset)							// PLAY
 		mps.ShowMapBoxes(-1,"off");											// Hide boxes
 		}
 	else{																	// If playing
-		if (reset) { 														// Starting over
-			this.curMob=reset;												// From the top
+		if (again == "1") { 												// Starting over
+			this.curMob=this.playStart;										// From the top
 			shivaLib.Sound("click");										// Click
 			return;															// Don't stop
 			}
@@ -833,7 +847,7 @@ MapScholar_Shelf.prototype.Play=function(reset)							// PLAY
 		window.clearInterval(this.inPlay);									// Stop timer
 		this.inPlay=null;													// Clear
 		$("#playbut").attr("src","img/playbut.gif");						// Change icon
-		$("#playbut").attr("title","Play");									// Change title
+		$("#playbut").attr("title","Play all");								// Change title
 		mps.showBoxes=true;													// Show boxes
 		mps.ShowMapBoxes(-1,"on");											// Show boxes
 		}

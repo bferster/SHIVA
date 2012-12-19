@@ -2751,7 +2751,7 @@ SHIVA_Show.prototype.ShowIframe=function(left, top, wid, hgt, url, id, mode, con
 	$("body").append(str+"></iframe>");	
 	str="<iframe marginwidth='0' marginheight='0' src='closedot.gif' id='CL-"+id+"' style='position:absolute;margin:0px;padding:0px;border:none;"; 					
 	str+="width:17px;height:18px;left:"+(wid-13+left)+"px;top:"+(top+3)+"px'/>";
-	if (!mode)
+	if (mode != "black")
 		$("body").append(str);	
 
 	$("#"+id).bind("load",function(e) {

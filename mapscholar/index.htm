@@ -93,21 +93,10 @@ function MapScholar()													// CONSTRUCTOR
 MapScholar.prototype.InitProject=function(url, data)					// INIT PROJECT 
 {
 	var o,i,j,v;
-	this.atlas=new Array();													// Holds atlas data
 	this.mobs=new Array();													// Holds map objects data
-
-	var atlas={ type:"collection",		
-				name:"Florida Maps",
-				desc:"This is a collection of florida maps",
-				mids:[],
-				id:0
-				};
-	this.AddNewAtlas(atlas);
 	if (data) {																// If loading from data
-		for (i=0;i<data.length;++i) {										// For each row
+		for (i=0;i<data.length;++i) 										// For each row
 			this.mobs.push(data[i]);										// Add new mob to project
-			this.AddMobToAtlas(this.atlas[0].id,this.mobs[i].id);			// Add to atlas
-			}
 		this.dr.DrawControlBar(false);										// Draw control bar and shelf
 		return;
 		}
@@ -126,46 +115,13 @@ MapScholar.prototype.InitProject=function(url, data)					// INIT PROJECT
 			if ((fields[j]) && (fields[j].length > 1))						// If a real field
 				o[fields[j]]=v[j];											// Set it
 		this.mobs.push(o);													// Add new mob to project
-		this.AddMobToAtlas(this.atlas[0].id,this.mobs[i-1].id);				// Add to atlas
 		}
 	this.dr.DrawControlBar(false);											// Draw control bar and shelf
-}
-
-MapScholar.prototype.AddNewAtlas=function(atlas)						// ADD NEW ATLAS TO PROJECT
-{
-	atlas.id=""+Math.floor(Math.random()*999999999999);						// Make random id #
-	this.atlas.push($.extend(true,{},atlas));								// Copy new atlas to project
 }
 
 MapScholar.prototype.AddNewMob=function(mob)							// ADD NEW MAP OBJECT TO PROJECT
 {
 	this.mobs.push($.extend(true,{},mob));									// Copy new mob  to project
-}
-
-MapScholar.prototype.AddMobToAtlas=function(atlasID, mobID, num)		// ADD MOB ID TO ATLAS
-{
-	var aNum;
-	if ((aNum=this.FindAtlasByID(atlasID)) == -1)							// Get index
-		return false;														// Return if none
-	if (num == undefined)													// If num not spec'd
-		num=this.atlas[aNum].mids.length;									// Add to end
-	this.atlas[aNum].mids.splice(num,0,mobID);								// Add mob id to atlas
-}
-
-MapScholar.prototype.ShiftMob=function(aNum, from, to)					// SHIFT MAP OBJECT IN ATLAS
-{
-	var mob=this.atlas[aNum].mobs.splice(from,1);							// Remove it from old loc
-	if (to != -1)															// If not deleting
-		this.atlas[aNum].mobs.splice(to,0,mob);								// Move it to new loc
-}
-
-MapScholar.prototype.FindAtlasByID=function(id)							// FIND ATLAS INDEX BY ID
-{
-	var i;
-	for (i=0;i<this.atlas.length;++i)										// For each atlas
-		if (id == this.atlas[i].id)											// If matched
-			return i;														// Return index
-	return -1;																// Not found
 }
 
 MapScholar.prototype.FindMobByID=function(id)							// FIND MAP OBJECT INDEX BY ID
@@ -233,6 +189,7 @@ MapScholar.prototype.AddMapBoxes=function()								// ADD MAP WIREFRAMES
 			y1=ly+(y-ly)/8*j;												// Center y
 			coords.getCoordinates().pushLatLngAlt(y1,x1,0);					// Add point
 			}
+
 		lx=x1;	ly=y1;														// Then is now
 		x=cx+(m.west-cx)*cos-(m.north-cy)*sin;								// Rotate x
 		y=cy+(m.west-cx)*sin+(m.north-cy)*cos;								// Rotate y
@@ -452,7 +409,6 @@ MapScholar.prototype.ClickHandler=function(e)							// HANDLE CLICKS TO EARTH
 
 function MapScholar_Shelf()												// CONSTRUCTOR
 {
-	this.curAtlas=0;														// Default to all
 	this.curMob=-1;															// Default to none
     this.expandAll=true;													// Expand/collapse button status
     this.mobVis=new Array();                                                // Holds hide/show status
@@ -502,7 +458,7 @@ MapScholar_Shelf.prototype.HighlightMob=function(which, multi, scroll)	// HIGHLI
 	else{																	// Absolute
 		if (which < 0) {
 			which=-which;
-			o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[which])];   // Point at mob
+			o=mps.mobs[which];   											// Point at mob
 			var cy=o.north-0+(o.south-o.north)/2;							// Lat				
 			var cx=o.east-0+(o.west-o.east)/2;								// Lon
 			if (o.type == "map")											// If a map
@@ -512,7 +468,7 @@ MapScholar_Shelf.prototype.HighlightMob=function(which, multi, scroll)	// HIGHLI
 		i=Number(which);													// Get number
 		}
 	i=this.curMob=Math.min(Math.max(i,0),n);								// Set indexer and cap
-	o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];   		// Point at mob
+	o=mps.mobs[i];   														// Point at mob
 	mps.Goto(o.goto);														// Position
 	if ((!$("#mobPos"+i).position()) && (o.type != "chapter") && (o.type != "header")) {	// If not visible
 		for (j=i;j>=0;--j) {												// Walk backwards													
@@ -568,7 +524,7 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
   
 	$("#controlBarDiv").html(str+"");                                    // Add to DOM
 	str="<img src='img/helpicon.gif' style='position:absolute;left:214px;top:7px' onclick='mps.ShowHelp(\"shelf\")'>";		
-	str+="<div id='contentShelf' style='position:absolute;width:216px;top:27px;height:559px;background-color:#f8f8f8;margin:0px;padding:6px;overflow-x:hidden;overflow-y:scroll;border:1px solid #ccc;'/></div>";
+	str+="<div id='contentShelf' style='position:absolute;width:216px;top:27px;height:559px;background-color:#fafafa;margin:0px;padding:6px;overflow-x:hidden;overflow-y:scroll;border:1px solid #ccc;'/></div>";
 	str+="<p>&nbsp;&nbsp;&nbsp;<img id='expandAll' src='img/";				// Image base
 	if (this.expandAll)														// If expand
 		str+="expand2.gif'> Expand all";									// Expand all button
@@ -576,7 +532,7 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
 		str+="collapse2.gif'> Collapse all";								// Collapse all button
 	str+="<img src='img/settingsbut.gif' style='position:absolute;left:196px;top:7px' onclick='mps.sh.Settings()'></p>";		
 	$("#shelfDiv").html(str);												// Add div
-	var n=mps.atlas[this.curAtlas].mids.length;								// Number of mobs to add
+	var n=mps.mobs.length;													// Number of mobs to add
 	this.mobVis=[];															// Remove old array
 	for (i=0;i<n;++i)														// For each mob
 		this.mobVis.push(0);												// Make it hidden                                       
@@ -645,9 +601,9 @@ MapScholar_Shelf.prototype.ToggleExpandCollapse=function()				// EXPAND/COLLAPSE
 {
 	var i,o,n;
 	this.expandAll=!this.expandAll;											// Toggle state
-	var n=mps.atlas[this.curAtlas].mids.length;                             // Number of mobs to add
+	var n=mps.mobs.length;                            						// Number of mobs
 	for (i=0;i<n;++i) {                                                     // For each mob
-		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];      // Point at mob
+		o=mps.mobs[i];      												// Point at mob
 		if ((o.type == "chapter") || (o.type == "header")) 					// A header													
 			o.status=this.expandAll?"closed":"open";						// Set status
 		}
@@ -661,10 +617,10 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 	var i,j,o,x,y,pic;
 	var min=3000,max=0;
 	var dates=new Array();
- 	var n=mps.atlas[this.curAtlas].mids.length;                             // Number of mobs to add
+ 	var n=mps.mobs.length;                            						// Number of mobs
 	var str="<table cellspacing='0'>";                                      // Table start
 	for (i=0;i<n;++i) {                                                     // For each mob
-		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];      // Point at mob
+		o=mps.mobs[i];     													// Point at mob
  		if (o.start && !isNaN(o.start) && o.type == "map")	{				// A valid year
 			min=Math.min(o.start,min);										// Find min
 			max=Math.max(o.start,max);										// Find max
@@ -679,7 +635,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
    		tim+="<div style='position:absolute;left:"+x+"px;height:16px;width:1px;top:2px;background-color:#999'/>";
 		}
 	for (i=0;i<n;++i) {                                                     // For each mob
-		o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[i])];      // Point at mob
+		o=mps.mobs[i];      												// Point at mob
 		if ((o.type == "chapter") || (o.type == "header")) {				// A header													
 			str+="<tr id='heading"+i+"' valign='top' height='30'><td colspan='2'><div class='"+o.type+"bar'>"; // Start
 			str+="<img id='mob"+i+"' src='img/";							// Img base
@@ -696,7 +652,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
 			if (o.status == "closed")	{									// If closed
 				var type=o.type;											// Search type
 				for (j=i+1;j<n;++j) {										// For each mob
-					o=mps.mobs[mps.FindMobByID(mps.atlas[this.curAtlas].mids[j])];   // Point at mob
+					o=mps.mobs[j];   										// Point at mob
 					if (o.type == type)										// If a match
 						break;												// Quit
 					if ((type == "header") && (o.type == "chapter"))		// Quit on chapter if a header
@@ -808,7 +764,7 @@ MapScholar_Shelf.prototype.FillShelf=function()							// FILL SHELF
    
 	$("#mobInfo").click( function(e) {									// CLICK ON INFO BUTTON
 		shivaLib.Sound("click");											// Click
-		var o=mps.mobs[mps.FindMobByID(mps.atlas[mps.sh.curAtlas].mids[mps.sh.curMob])];	// Point at mob
+		var o=mps.mobs[mps.sh.curMob];										// Point at mob
 		if ($("#mobCite").html()) {											// If something there already
 			$("#mobCite").html("");											// Clear it
 			$("#mobCite").css("padding","0px");								// No padding

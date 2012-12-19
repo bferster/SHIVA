@@ -497,6 +497,8 @@ MapScholar_Draw.prototype.StyleSeg=function(num)							// SET SEGMENT STYLING
 
 MapScholar_Draw.prototype.MakeArrow=function(xs, ys, wid, coords)			// CONSTRUCT ARROW
 {		
+	var x=new Array();
+	var y=new Array();
 	var dx=xs[0]-xs[1];															// Delta x
 	var dy=ys[0]-ys[1];															// Delta x
 	var aa=Math.atan2(dy,dx);													// Angle of line -pi - +pi
@@ -506,33 +508,30 @@ MapScholar_Draw.prototype.MakeArrow=function(xs, ys, wid, coords)			// CONSTRUCT
 	var sin2=Math.sin(aa);														// 0 degree sin
 	wid/=10;																	// Use only .1 of width
 	var wid2=wid*3;																// Tip width
-
-	if ((coords.setLatLngAlt) && (!coords.getLength()))							// If coords not added yet
+	
+	if ((coords) && (!coords.getLength()))										// If coords not added yet
 		for (i=0;i<7;++i)														// For each point in arrow
 			coords.pushLatLngAlt(0,0,0);										// Add coord
-	var pct=1-wid/Math.sqrt(dx*dx+dy*dy);										// Pct of shaft
-	x=wid*cos+xs[1];			y=wid*sin+ys[1];								// TLC								
-	Save(0,y,x,0);																// Set point
-	x=wid*cos+xs[0];			y=wid*sin+ys[0];								// Arrow start		
-	Save(1,y,x,0);																// Set point
-	x=wid2*cos+xs[0];			y=wid2*sin+ys[0];								// Arrow top		
-	Save(2,y,x,0);																// Set point
-	x=wid2*cos2+xs[0];			y=wid2*sin2+ys[0];								// Arrow tip		
-	Save(3,y,x,0);																// Set point
-	x=-wid2*cos+xs[0];			y=-wid2*sin+ys[0];								// Arrow bot		
-	Save(4,y,x,0);																// Set point
-	x=-wid*cos+xs[0];	y=-wid*sin+ys[0];										// Arrow End		
-	Save(5,y,x,0);																// Set point
-	x=-wid*cos+xs[1];		y=-wid*sin+ys[1];									// BLC							
-	Save(6,y,x,0);																// Set point
 
-	function Save(n, y, x) {												// SAVE COORD
-		if (coords.setLatLngAlt)												// If saving to Earth
-			coords.setLatLngAlt(n,y,x,0);										// Set point
-		else {																	// Saving to array
-			coords[n*2]=x;														// Lon
-			coords[n*2+1]=y;													// Lat
+	var pct=1-wid/Math.sqrt(dx*dx+dy*dy);										// Pct of shaft
+	x.push(wid*cos+xs[1]);		y.push(wid*sin+ys[1]);							// TLC								
+	x.push(wid*cos+xs[0]);		y.push(wid*sin+ys[0]);							// Arrow start		
+	x.push(wid2*cos+xs[0]);		y.push(wid2*sin+ys[0]);							// Arrow top		
+	x.push(wid2*cos2+xs[0]);	y.push(wid2*sin2+ys[0]);						// Arrow tip		
+	x.push(-wid2*cos+xs[0]);	y.push(-wid2*sin+ys[0]);						// Arrow bot		
+	x.push(-wid*cos+xs[0]);		y.push(-wid*sin+ys[0]);							// Arrow End		
+	x.push(-wid*cos+xs[1]);		y.push(-wid*sin+ys[1]);							// BLC							
+	if (coords) {																// If saving to Earth
+		for (i=0;i<7;++i)														// For each point in arrow
+			coords.setLatLngAlt(i,y[i]-0,x[i]-0,0);								// Set point
+			}
+	else{																		// Saving to array
+		coords=new Array();														// Alloc array
+		for (i=0;i<7;++i) {														// For each point in arrow
+			coords[i*2]=x[i];													// Lon
+			coords[i*2+1]=y[i];													// Lat
 			}	
+		return coords;															// Return array
 		}
 } 	
 	
@@ -964,8 +963,7 @@ MapScholar_Draw.prototype.CreateKML=function()								// CREATE KML FILE
 				str+="\t\t"+s.lons[0]+","+s.lats[0]+",0\n";						// Last coord
 				}
 			else if (s.type == "Arrow") {										// Arrow
-				var coords=new Array();											// Holds coords
-				this.MakeArrow(s.lons,s.lats,s.ewid,coords);					// Make arrow into array
+				coords=this.MakeArrow(s.lons,s.lats,s.ewid,null);				// Make arrow into array
 				for (j=0;j<coords.length;j+=2)									// Go by 2s
 					str+="\t\t"+coords[j]+","+coords[j+1]+",0\n";				// Add coord
 				}
@@ -1034,7 +1032,7 @@ MapScholar_Draw.prototype.ParseKML=function(data)							// PARSE KML FILE
 			}
 		else{																	// Other seg type
 			e=kml.indexOf("|*Placemark*|",i+10);								// Get end
-			id=kml.substring(s,s+30);											// Get id
+			id=kml.substring(i,i+30);											// Get id
 			s=e+10;																// Set new start
 			if (((j=kml.indexOf("|*IconStyle*|",i)) != -1) && (j < e)) {		// If an icon within end
 				o.vis=100;														// Alpha

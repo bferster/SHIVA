@@ -566,7 +566,7 @@ MapScholar_Shelf.prototype.Draw=function()								  // DRAW SHELF
   
 	$("#controlBarDiv").html(str+"");                                    // Add to DOM
 	str="<img src='img/helpicon.gif' style='position:absolute;left:214px;top:7px' onclick='mps.ShowHelp(\"shelf\")'>";		
-	str+="<div id='contentShelf' style='position:absolute;width:216px;top:27px;height:559px;background-color:#eee;margin:0px;padding:6px;overflow-x:hidden;overflow-y:scroll;border:1px solid #ccc;'/></div>";
+	str+="<div id='contentShelf' style='position:absolute;width:216px;top:27px;height:559px;background-color:#f8f8f8;margin:0px;padding:6px;overflow-x:hidden;overflow-y:scroll;border:1px solid #ccc;'/></div>";
 	str+="<p>&nbsp;&nbsp;&nbsp;<img id='expandAll' src='img/";				// Image base
 	if (this.expandAll)														// If expand
 		str+="expand2.gif'> Expand all";									// Expand all button
@@ -865,7 +865,12 @@ MapScholar_Shelf.prototype.Play=function(reset)							// PLAY
 		mps.showBoxes=false;												// Hide boxes
 		mps.ShowMapBoxes(-1,"off");											// Hide boxes
 		}
-	else{																	// If stopped
+	else{																	// If playing
+		if (reset) { 														// Starting over
+			this.curMob=reset;												// From the top
+			shivaLib.Sound("click");										// Click
+			return;															// Don't stop
+			}
 		shivaLib.Sound("delete");											// Click
 		window.clearInterval(this.inPlay);									// Stop timer
 		this.inPlay=null;													// Clear

@@ -1688,6 +1688,9 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
     	}
 	this.player.on("timeupdate",drawOverlay);
 	this.player.on("loadeddata",onVidLoaded);
+	this.player.on("ended",function(){ shivaLib.SendShivaMessage("ShivaPlayer=done")});
+	this.player.on("playing",function(){ shivaLib.SendShivaMessage("ShivaPlayer=play")});
+	this.player.on("pause",function(){ shivaLib.SendShivaMessage("ShivaPlayer=pause")});
 
 	if (this.ev) 
 		t=this.ev.events;

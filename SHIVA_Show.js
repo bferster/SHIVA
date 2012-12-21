@@ -152,6 +152,15 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE 
 		window.parent.postMessage("ShivaReady="+mode.toString(),"*");		// Send message to parent wind		
 }
 
+SHIVA_Show.prototype.SendShivaMessage=function(msg) 					// SEND SHIVA MESSAGE 
+{
+	if (window.parent)														// If has a parent
+		window.parent.postMessage(msg,"*");									// Send message to parent wind
+	else																	// Local	
+		window.postMessage(msg,"*");										// Send message to wind
+}
+
+
 SHIVA_Show.prototype.AddOverlay=function() 								// ADD OVERLAY
 {
 	var key;
@@ -1672,7 +1681,10 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		v=options.end.split(":");
 		if (v.length == 1)
 			v[1]=v[0],v[0]=0;
-    	this.player.cue(Number(v[0]*60)+Number(v[1]),function() { this.pause()} );
+    	this.player.cue(Number(v[0]*60)+Number(v[1]),function() { 
+     		this.pause()
+			shivaLib.SendShivaMessage("ShivaPlayer=done");
+    		});
     	}
 	this.player.on("timeupdate",drawOverlay);
 	this.player.on("loadeddata",onVidLoaded);
@@ -1696,6 +1708,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
     	else
      		shivaLib.player.pause();
 		$("#shivaEventDiv").height(Math.max(shivaLib.player.media.clientHeight-40,0));
+ 		shivaLib.SendShivaMessage("ShivaPlayer=ready");
    	}
 
   	function drawOverlay()	{

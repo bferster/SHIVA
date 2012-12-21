@@ -404,7 +404,10 @@ SHIVA_Event.prototype.AddToCue=function(num) 							// ADD EVENT TO EVENT QUEUE
 	var o=this.events[num];													// Point at event
 	if (!o.start)															// If no start defined
 		return;																// Don't add to cue
-	this.player.cue(o.start,function() 	 { _this.Draw(num,true);  });		// Add start cue
+	this.player.cue(o.start,function() 	{ 									// A cue
+		_this.Draw(num,true); 												// Add start cue
+		shivaLib.SendShivaMessage("ShivaPlayer=Event-"+num);				// Send message
+ 		 });		
 	if (o.end)																// If an end set
 		this.player.cue(o.end,function() { _this.Draw(num,false); });		// Add end cue
 }
@@ -566,7 +569,6 @@ SHIVA_Event.prototype.CloseEvent=function(id) 							// CLOSE EVENT
 	var i,v;
 	mustBeCorrect=false;
 	var num=id.substr(id.lastIndexOf("-")+1);								// Get id number
-	
 	var o=this.events[num];													// Point at event
 	var lines=o.text.split(">>");											// Split into lines
 	for (i=1;i<lines.length;++i) 											// For each line
@@ -583,11 +585,13 @@ SHIVA_Event.prototype.CloseEvent=function(id) 							// CLOSE EVENT
 					$("#shivaEvent-"+num).hide();							// Hide it
 					this.EventRouter(o.done,"");							// Run events(s)
 					this.modalEvent=-1;										// Clear modal event flag
+					shivaLib.SendShivaMessage("ShivaPlayer=Menu-right");	// Send message
 					break;													// Stop looking
 					}
 				}
 			}
 		if (i >= lines.length-1) {											// Wrong answer
+			shivaLib.SendShivaMessage("ShivaPlayer=Menu-wrong");			// Send message
 			if (!mustBeCorrect) {											// If any answer will do to move on
 				$("#shivaEvent-"+num).hide();								// Hide it
 				this.EventRouter(o.done,"");								// Run events(s)

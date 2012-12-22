@@ -15,9 +15,13 @@ function SHIVA_Show(container, options, editMode) 						// CONSTRUCTOR
 	this.jit=null;
 	this.cvs=null;
 	this.group=null;
+	this.msgAction=new Array();
 	if (options)
 		this.Draw(options);
 }
+
+
+
 
 SHIVA_Show.prototype.Draw=function(ops) 								//	DRAW LOADER/DIRECTOR
 {
@@ -160,6 +164,19 @@ SHIVA_Show.prototype.SendShivaMessage=function(msg) 					// SEND SHIVA MESSAGE
 		window.postMessage(msg,"*");										// Send message to wind
 }
 
+SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
+{
+	if (e == "init") {														// If installing listener
+		if (window.addEventListener) 
+			window.addEventListener("message",shivaLib.ShivaEventHandler,false);
+		else
+			window.attachEvent("message",shivaLib.ShivaEventHandler);	
+		return;
+		}
+	for (var i=0;i<shivaLib.msgAction.length;++i)							// For each possible event								
+		if (e.data.indexOf(shivaLib.msgAction[i].id) != -1)					// The one						
+			shivaLib.msgAction[i].do(i);									// Run callback
+}
 
 SHIVA_Show.prototype.AddOverlay=function() 								// ADD OVERLAY
 {
@@ -1873,6 +1890,9 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 	this.DrawMapOverlays();
 	this.DrawLayerControlBox(this.items,this.options.controlbox);
 	this.SendReadyMessage(true);											
+	google.maps.event.addListener(this.map,'click', function(e) {
+	 	shivaLib.SendShivaMessage("ShivaMap=click::"+e.latLng+"::"+e.pixel);
+ 		});
 }
 
 SHIVA_Show.prototype.AddInternalOptions=function(options, newOps) 							//	PARSE ITEMS
@@ -1900,6 +1920,8 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 	curLatlng=new google.maps.LatLng(v[0],v[1]);
 	curZoom=v[2];
 	for (i=0;i<items.length;++i) {
+		if (items[i].listener)
+			google.maps.event.removeListener(items[i].listener);
 		ops=new Object();
 		if (items[i].obj) 
 			items[i].obj.setMap(null);
@@ -1916,6 +1938,9 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 				ops["icon"]=v[3]
  			if (ops && items[i].obj)
 				items[i].obj.setOptions(ops);
+			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
+		 		shivaLib.SendShivaMessage("ShivaMap=overlay::"+i+"::"+e.latLng);
+	 			});
 			}
 		else if (items[i].layerType == "Overlay") {
 			v=items[i].layerOptions.split(",");
@@ -1925,6 +1950,10 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 			if (items[i].layerSource)
 				items[i].obj=new google.maps.GroundOverlay(items[i].layerSource,imageBounds,ops);
 //	38.07,-78.55,37.99,-78.41
+//	//www.viseyes.org/shiva/map.jpg
+			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
+	 			shivaLib.SendShivaMessage("ShivaMap=overlay::"+i+"::"+e.latLng);
+ 				});
 			}
 		else if (items[i].layerType == "KML") {
 			if (items[i].layerOptions) {	
@@ -1933,6 +1962,10 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 					ops[v[j].split("=")[0]]=v[j].split("=")[1];
 				}
 			items[i].obj=new google.maps.KmlLayer(items[i].layerSource,ops);
+			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
+	  			var str=e.featureData.name+"::"+e.featureData.id+"::"+e.latLng;
+		 		shivaLib.SendShivaMessage("ShivaMap=kml::"+i+"::"+str);
+	 			});
 			}
 		else if ((items[i].layerType == "GoTo") && (items[i].visible == "true")) {
 			v=items[i].layerSource.split(",");							// Split into parts
@@ -1941,10 +1974,8 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 			if (v.length > 2)											// If set
 				curZoom=v[2];											// Set zoom
 			}
-		if ((items[i].visible == "true") && (items[i].obj))
-			items[i].obj.setMap(this.map);	
-		if ((items[i].obj) && (!items[i].listener))
-			items[i].listener=google.maps.event.addListener(items[i].obj,'click',function(e) { _this.RunGlue(_this.container,i-1,"clicked"); });
+		if ((items[i].visible == "true") && (items[i].obj))				// If showing
+			items[i].obj.setMap(this.map);								// Add to map
 		}
 	this.map.setCenter(curLatlng);										// Center map
 	this.map.setZoom(Number(curZoom));									// Zoom map

@@ -589,6 +589,11 @@ SHIVA_Show.prototype.DrawEarth=function()
 		this.DrawEarth();												// Draw it
 		if (typeof(ShivaPostInit) == "function") 						// If called from earth.htm
 			ShivaPostInit();											// Do any post-init actions					
+		google.earth.addEventListener(this.map.getGlobe(),'click', function(e) {	 // Click event
+			var str="("+e.getLatitude()+", "+e.getLongitude()+")::"+"("+e.getClientX()+", "+e.getClientY()+")";
+	 		shivaLib.SendShivaMessage("ShivaEarth=click::"+str);		// Send shiva message
+ 			});
+
 		}
 	this.SendReadyMessage(true);										// Send ready message									
 }
@@ -626,6 +631,8 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 				obj=this.map.createGroundOverlay("Layer-"+(i+1));		// Alloc overlay obj
 				this.map.getFeatures().appendChild(obj);				// Add it to display list
 				}
+			if (items[i].listener)										// If exist
+				google.earth.removeEventListener(obj,'click', null)		// Click event
 			v=items[i].layerOptions.split(",");							// Split dest pos
 			var icon=this.map.createIcon('');							// Create icon
 			icon.setHref(items[i].layerSource);							// Set url
@@ -645,6 +652,10 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 				}
 			var fly=(items[i].layerOptions.toLowerCase().indexOf("port") == -1)		// Preserve viewport?
 			obj.set(link,true,fly); 									// Sets the flyToView
+			items[i].listener=google.earth.addEventListener(obj,'click', function(e) {		 // Click event
+				var str=i+"::("+e.getLatitude()+", "+e.getLongitude()+")";	// Get lon and lat
+		 		shivaLib.SendShivaMessage("ShivaEarth=kml::"+str);		// Send shiva message
+	 			});
 			}
 		if (obj) {														// If an object
 			obj.setOpacity(opacity);									// Set opacity

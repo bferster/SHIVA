@@ -75,7 +75,7 @@
 		layerSource: 				{	def:'', 			opt:'string',		 	des:'Layer source'}, 
 		layerOptions: 				{	def:'', 			opt:'string',		 	des:'Layer options'}, 
 		visible:					{	def:'true', 		opt:'true|false',		des:'Layer visibility'}, 
-		layerType: 					{	def:'GoTo', 		opt:'GoTo|KML|Overlay|Drawn',	des:'Layer type'} 
+		layerType: 					{	def:'GoTo', 		opt:'GoTo|KML|Overlay',	des:'Layer type'} 
 		}
 		
 	var helpText=new Array();
@@ -173,6 +173,7 @@
 
 	function shivaEventHandler(e)
 	{
+		trace(e.data)
 		if (e.data.indexOf("GetJSON") == 0) 
 			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
 		else if (e.data.indexOf("GetWebPage") == 0) 

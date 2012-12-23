@@ -1408,14 +1408,13 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			if (options.style == "Toggle")
 				$("#sel"+i).click(function(){
 					var ch=this.checked?"checked":"unchecked"
-					shivaLib.SendShivaMessage("ShivaSelect="+i+"|"+ch)
+					var id=this.id.substr(3)
+					shivaLib.SendShivaMessage("ShivaSelect="+id+"|"+ch)
 					});
 			else
-				$("#sel"+i).click(function(){shivaLib.SendShivaMessage("ShivaSelect="+i+"|checked")});
+				$("#sel"+i).click(function(){shivaLib.SendShivaMessage("ShivaSelect="+this.id.substr(3)+"|checked")});
 			} 
- 
-		
-		
+ 		
 		$(con).css("text-align","left");		
 		$("#"+dd).buttonset();
 		$(con).css("width",(nChars*6)+"px");		
@@ -1620,10 +1619,6 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			$("#shiva_stepa").val(obj.items[num].ans);
 			}			
 		$("#"+obj.container).append(str);
-		if (obj.items[num].ques) 
-			RunGlue(obj.container,num,obj.items[num].ans);
-		else
-			RunGlue(obj.container,num,"checked");
 		if ($("#accord").length)
 			$("#accord").accordion({ active: num });
 	}

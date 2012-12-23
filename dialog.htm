@@ -182,8 +182,6 @@
 
 	function shivaEventHandler(e)
 	{
-		trace(e.data)
-
 		if (e.data.indexOf("GetJSON") == 0) 
 			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
 		else if (e.data.indexOf("GetType") == 0) 

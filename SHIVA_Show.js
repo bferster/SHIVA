@@ -1389,12 +1389,11 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			nChars+=o.label.length+5;
 			if (items[i].type)	nChars+=4;
 			if (options.style == "Button") 
-				str+="<input type='button' id='sel"+i+"' onclick='shivaLib.SendShivaMessage(\"ShivaSelect="+i+"\")' value='"+o.label+"'>"; 
+				str+="<input type='button' id='sel"+i+"' value='"+o.label+"'>"; 
 			else if (options.style == "Toggle") 
- 				str+="<input type='checkbox' id='sel"+i+"' onclick='shivaLib.SendShivaMessage(\"ShivaSelect="+i+"\")'/><label for="+"'sel"+i+"'>"+o.label+"</label>"; 
-			
+ 				str+="<input type='checkbox' id='sel"+i+"'/><label for="+"'sel"+i+"'>"+o.label+"</label>"; 
 			else{
-				str+="<input type='radio' id='sel"+i+"' name='selector' onclick='shivaLib.SendShivaMessage(\"ShivaSelect="+i+"\")'";				
+				str+="<input type='radio' id='sel"+i+"' name='selector'";				
 				if (o.def == "true")
 					str+=" checked='sel"+i+"'";
 				if (!items[i].label)
@@ -1405,7 +1404,16 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			}
 		str+="</span>";
 		$(con).html(str);		
-	
+		for (i=0;i<items.length;++i) { 
+			if (options.style == "Toggle")
+				$("#sel"+i).click(function(){
+					var ch=this.checked?"checked":"unchecked"
+					shivaLib.SendShivaMessage("ShivaSelect="+i+"|"+ch)
+					});
+			else
+				$("#sel"+i).click(function(){shivaLib.SendShivaMessage("ShivaSelect="+i+"|checked")});
+			} 
+ 
 		
 		
 		$(con).css("text-align","left");		
@@ -1444,7 +1452,6 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				str+=" name='"+o.name+"' id='"+o.name+"'";
 				if (o.def)
 					str+=" checked=checked";
-				str+=" onClick='RunGlue(\""+container+"\","+i+",this.checked?\"Checked\":\"Unchecked\")'";
 				str+="/> ";
 				if (o.label)
 					str+=o.label;
@@ -1454,12 +1461,11 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				str+=" name='"+o.group+"' id='"+o.name+"'";
 				if (o.def)
 					str+=" checked=checked";
-				str+=" onChange='RunGlue(\""+container+"\","+i+",this.checked?\"Checked\":\"Unchecked\",this.name)'";
 				str+="/> ";
 				if (o.label)
 					str+=o.label;
 				}
-			else if ((sty == 'input')  || (sty == 'range') || (sty == 'button')) {
+			else if ((sty == 'input') || (sty == 'button')) {
 				str+="<input type='"+sty+"' size='23'";
 				str+=" name='"+o.name+"' id='"+o.name+"'";
 				str+="style='margin-top:.5em;margin-bottom:.5em'";
@@ -1473,6 +1479,8 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				if (o.label)
 					str+=o.label;
 				}
+			else if  (sty == 'range')
+				str+="<div style='width:120px;display:inline-block' id='"+o.name+"'></div> "+o.label;
 			else if (sty == 'combo') {
 				str+="<select ";
 				str+=" onChange='RunGlue(\""+container+"\","+i+",this.value)'";
@@ -1498,12 +1506,40 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				str+="<input type='"+sty+"' src='"+o.def+"'";
 				str+=" name='"+o.name+"' id='"+o.name+"'";
 				str+="style='margin-top:.5em;margin-bottom:.5em'";
-				str+=" onClick='RunGlue(\""+container+"\","+i+",\"Clicked\")'";
 				str+="/>";
 				}
 			str+="<br/> ";
 			}
 		$(dd).html(str);
+		for (i=0;i<items.length;++i) {
+			o=items[i];
+			if (o.type)
+				sty=o.type.toLowerCase();
+			if ((sty == "radio") || (sty == "image") || (sty == "button")) 
+				$("#"+o.name).click(function(){ 
+					var id=this.id.substr(5)
+					shivaLib.SendShivaMessage("ShivaDialog="+id+"|checked")
+					});
+			else if (sty == "checkbox") 
+				$("#"+o.name).click(function(){ 
+					var id=this.id.substr(5)
+					var ch=this.checked?"checked":"unchecked"
+					shivaLib.SendShivaMessage("ShivaDialog="+id+"|"+ch)
+					});
+			else if ((sty == "input") || (sty == "combo"))				
+				$("#"+o.name).change(function(){ 
+					var id=this.id.substr(5)
+					var ch=this.value;
+					shivaLib.SendShivaMessage("ShivaDialog="+id+"|"+ch)
+					});
+			else if (sty == "range") {
+					var ops={ min:0, max:100, value:o.def, slide:function(event,ui) {											
+					var id=this.id.substr(5)
+					shivaLib.SendShivaMessage("ShivaDialog="+id+"|"+ui.value)
+					}};    
+				$("#"+o.name).slider(ops);	
+				}										
+			}
 	}
 	
 	function DrawInfoBox(items)

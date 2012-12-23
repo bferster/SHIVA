@@ -20,9 +20,6 @@ function SHIVA_Show(container, options, editMode) 						// CONSTRUCTOR
 		this.Draw(options);
 }
 
-
-
-
 SHIVA_Show.prototype.Draw=function(ops) 								//	DRAW LOADER/DIRECTOR
 {
 	if (!ops)
@@ -590,8 +587,8 @@ SHIVA_Show.prototype.DrawEarth=function()
 		if (typeof(ShivaPostInit) == "function") 						// If called from earth.htm
 			ShivaPostInit();											// Do any post-init actions					
 		google.earth.addEventListener(this.map.getGlobe(),'click', function(e) {	 // Click event
-			var str="("+e.getLatitude()+", "+e.getLongitude()+")::"+"("+e.getClientX()+", "+e.getClientY()+")";
-	 		shivaLib.SendShivaMessage("ShivaEarth=click::"+str);		// Send shiva message
+			var str="("+e.getLatitude()+", "+e.getLongitude()+")|"+"("+e.getClientX()+", "+e.getClientY()+")";
+	 		shivaLib.SendShivaMessage("ShivaEarth=click|"+str);		// Send shiva message
  			});
 
 		}
@@ -653,8 +650,8 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 			var fly=(items[i].layerOptions.toLowerCase().indexOf("port") == -1)		// Preserve viewport?
 			obj.set(link,true,fly); 									// Sets the flyToView
 			items[i].listener=google.earth.addEventListener(obj,'click', function(e) {		 // Click event
-				var str=i+"::("+e.getLatitude()+", "+e.getLongitude()+")";	// Get lon and lat
-		 		shivaLib.SendShivaMessage("ShivaEarth=kml::"+str);		// Send shiva message
+				var str=i+"|("+e.getLatitude()+", "+e.getLongitude()+")";	// Get lon and lat
+		 		shivaLib.SendShivaMessage("ShivaEarth=kml|"+str);		// Send shiva message
 	 			});
 			}
 		if (obj) {														// If an object
@@ -1315,7 +1312,8 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				which=0;														// Set name
 				val=ui.values[1];												// Use 2nd val
 				}
-			RunGlue(con.substr(1),which,val,"") 
+			shivaLib.SendShivaMessage("ShivaSlider="+(which+1)+"|"+val);		// Send message
+ 			RunGlue(con.substr(1),which,val,"") 
 			});
 		DrawSliderTicks();
 	}
@@ -1391,11 +1389,12 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			nChars+=o.label.length+5;
 			if (items[i].type)	nChars+=4;
 			if (options.style == "Button") 
-				str+="<input type='button' id='sel"+i+"' onclick='RunGlue(\""+container+"\","+i+",\"Checked\")' value='"+o.label+"'>"; 
+				str+="<input type='button' id='sel"+i+"' onclick='shivaLib.SendShivaMessage(\"ShivaSelect="+i+"\")' value='"+o.label+"'>"; 
 			else if (options.style == "Toggle") 
-				str+="<input type='checkbox' id='sel"+i+"' onclick='RunGlue(\""+container+"\","+i+",this.checked?\"Checked\":\"Unchecked\")'/><label for="+"'sel"+i+"'>"+o.label+"</label>"; 
+ 				str+="<input type='checkbox' id='sel"+i+"' onclick='shivaLib.SendShivaMessage(\"ShivaSelect="+i+"\")'/><label for="+"'sel"+i+"'>"+o.label+"</label>"; 
+			
 			else{
-				str+="<input type='radio' id='sel"+i+"' name='selector' onclick='RunGlue(\""+container+"\","+i+",\"Checked\",this.name)'"; 
+				str+="<input type='radio' id='sel"+i+"' name='selector' onclick='shivaLib.SendShivaMessage(\"ShivaSelect="+i+"\")'";				
 				if (o.def == "true")
 					str+=" checked='sel"+i+"'";
 				if (!items[i].label)
@@ -1406,10 +1405,11 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 			}
 		str+="</span>";
 		$(con).html(str);		
+	
+		
+		
 		$(con).css("text-align","left");		
 		$("#"+dd).buttonset();
-		if (options.style == "Radio") 
-			$("#"+dd).change=function() { RunGlue(container,i,this.checked?"Checked":"Unchecked",this.name) };
 		$(con).css("width",(nChars*6)+"px");		
 		for (i=0;i<items.length;++i)  
 			if (items[i].type != "Button")	{
@@ -1563,6 +1563,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 		$("#stp"+num).attr("checked",true);
 		$("#shiva_stepq").remove();
 		var str="<div id='shiva_stepq'><br/><b>"+obj.items[num].label+"</b><br/>";
+		shivaLib.SendShivaMessage("ShivaStep="+num+"|"+obj.items[num].ques+"|"+obj.items[num].ans);
 		if (obj.items[num].ques.indexOf("|") != -1) {
 			str+="<select name='shiva_stepa' id='shiva_stepa' onChange='shiva_onStepAnswer("+num+","+this+")'>";
 			var v=obj.items[num].ques.split("|");
@@ -1902,7 +1903,7 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 	this.DrawLayerControlBox(this.items,this.options.controlbox);
 	this.SendReadyMessage(true);											
 	google.maps.event.addListener(this.map,'click', function(e) {
-	 	shivaLib.SendShivaMessage("ShivaMap=click::"+e.latLng+"::"+e.pixel);
+	 	shivaLib.SendShivaMessage("ShivaMap=click|"+e.latLng+"|"+e.pixel);
  		});
 }
 
@@ -1950,7 +1951,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
  			if (ops && items[i].obj)
 				items[i].obj.setOptions(ops);
 			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
-		 		shivaLib.SendShivaMessage("ShivaMap=overlay::"+i+"::"+e.latLng);
+		 		shivaLib.SendShivaMessage("ShivaMap=overlay|"+i+"|"+e.latLng);
 	 			});
 			}
 		else if (items[i].layerType == "Overlay") {
@@ -1963,7 +1964,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 //	38.07,-78.55,37.99,-78.41
 //	//www.viseyes.org/shiva/map.jpg
 			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
-	 			shivaLib.SendShivaMessage("ShivaMap=overlay::"+i+"::"+e.latLng);
+	 			shivaLib.SendShivaMessage("ShivaMap=overlay|"+i+"|"+e.latLng);
  				});
 			}
 		else if (items[i].layerType == "KML") {
@@ -1974,8 +1975,8 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 				}
 			items[i].obj=new google.maps.KmlLayer(items[i].layerSource,ops);
 			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
-	  			var str=e.featureData.name+"::"+e.featureData.id+"::"+e.latLng;
-		 		shivaLib.SendShivaMessage("ShivaMap=kml::"+i+"::"+str);
+	  			var str=e.featureData.name+"|"+e.featureData.id+"|"+e.latLng;
+		 		shivaLib.SendShivaMessage("ShivaMap=kml|"+i+"|"+str);
 	 			});
 			}
 		else if ((items[i].layerType == "GoTo") && (items[i].visible == "true")) {
@@ -2235,6 +2236,15 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
  	wrap.setOptions(ops);
     wrap.draw();
   	google.visualization.events.addListener(wrap,"ready", function() { _this.SendReadyMessage(true); });
+  	google.visualization.events.addListener(wrap,"select", function(r) { 
+  		var o=wrap.getChart().getSelection()[0];
+   		var row="-", col="-";
+   		if ((o) && (o.row != undefined))
+   			row=o.row;
+   		if ((o) && (o.column != undefined))
+   			col=o.column;
+  		_this.SendShivaMessage("ShivaChart="+row+"|"+col); 
+   		});
 }
 
 SHIVA_Show.prototype.RunGlue=function(con, item, val, group) 						//	RUN GLUE

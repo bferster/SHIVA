@@ -1352,8 +1352,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				val=ui.values[1];												// Use 2nd val
 				}
 			shivaLib.SendShivaMessage("ShivaSlider="+(which+1)+"|"+val);		// Send message
- 			RunGlue(con.substr(1),which,val,"") 
-			});
+ 			});
 		DrawSliderTicks();
 	}
 
@@ -1509,10 +1508,6 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				str+="style='margin-top:.5em;margin-bottom:.5em'";
 				if (o.def)
 					str+=" value='"+o.def+"'";
-				if (sty == 'button')
-					str+=" onClick='RunGlue(\""+container+"\","+i+",\"Clicked\")'";
-				else
-					str+=" onChange='RunGlue(\""+container+"\","+i+",this.value)'";
 				str+="/> ";
 				if (o.label)
 					str+=o.label;
@@ -1521,7 +1516,6 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				str+="<div style='width:120px;display:inline-block' id='"+o.name+"'></div> "+o.label;
 			else if (sty == 'combo') {
 				str+="<select ";
-				str+=" onChange='RunGlue(\""+container+"\","+i+",this.value)'";
 				str+=" name='"+o.name+"' id='"+o.name+"'";
 				str+="style='margin-top:.5em;margin-bottom:.5em'";
 				str+=">";
@@ -1619,10 +1613,15 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 		else 							$(content).css("overflow","hidden");
 		if (options.closer) {
 			var x=$(dd).width()-2;							
-			str="<img id='Clo"+dd+"' src='closedot.gif' style='position:absolute;left:"+x+"px;top:5px' onclick='$(\"#\"+this.id.substr(4)).hide()'/>";
+			str="<img id='Clo"+dd.substr(1)+"' src='closedot.gif' style='position:absolute;left:"+x+"px;top:5px'/>" 
 			$(dd).append(str);
+			$("#Clo"+dd.substr(1)).click(function(){
+				var id=this.id.substr(3);
+				$("#"+id).hide();
+				shivaLib.SendShivaMessage("ShivaDialog="+options.title+"|closed");
+				});
 			}
-	}
+		}
 		
 }	// Dialog closure end
 
@@ -1686,7 +1685,6 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
  	   	GetSpreadsheetData(options.dataSourceUrl,options.imgHgt,options.showImage,options.showSlide,options.transition,options.width);
  	 else if (options.dataSourceUrl) {
 	   	$("#"+this.container).html("<img id='"+this.container+"Img' "+"width='"+options.width+"' src='"+options.dataSourceUrl+"'/>");
-		$("#"+this.container).click( function() { _this.RunGlue(_this.container,-1,"clicked"); });
 		this.SendReadyMessage(true);											
 		}
 	else
@@ -2354,11 +2352,6 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
    			col=o.column;
   		_this.SendShivaMessage("ShivaChart="+row+"|"+col); 
    		});
-}
-
-SHIVA_Show.prototype.RunGlue=function(con, item, val, group) 						//	RUN GLUE
-{
-	RunGlue(con,item,val,group);														// Call global function
 }
 
 SHIVA_Show.prototype.SaveData=function(mode, style, items, props, type) 			// SAVE DATA FROM FROM TO JSON, ETC
@@ -3882,23 +3875,6 @@ SHIVA_QueryEditor.prototype.SetQueryString=function()
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	OTHER
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function RunGlue(con, item, val, group)
-{
-	if (group) {
-		var g=$("input[name="+group+"]");
-		var j=g[0].id.substr(5);
-		for (var i=0;i<g.length;++i) {
-			if (j != item+1)
-				window.postMessage("ShivaTrigger="+con.substr(4)+","+j+",Unchecked","*");
-			++j;
-			}
-		}
-	if (typeof(con) == "object") {
-		}	
-	else
-		window.postMessage("ShivaTrigger="+con.substr(4)+","+(++item)+","+val,"*");
-}
 
 function trace(msg)
 {

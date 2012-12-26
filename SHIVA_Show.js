@@ -173,7 +173,14 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 	for (var i=0;i<shivaLib.msgAction.length;++i)							// For each possible event								
 		if (e.data.indexOf(shivaLib.msgAction[i].id) != -1)					// The one						
 			shivaLib.msgAction[i].do(i);									// Run callback
+	if (e.data.indexOf("ShivaAct") != -1) {									// If an action
+		if (e.data.indexOf("ShivaActMap=") != -1)							// If a map action
+			shivaLib.MapActions(e.data);									// Route to map actions
+		else if (e.data.indexOf("ShivaActEarth=") != -1)					// If an earth action
+			shivaLib.EarthActions(e.data);									// Route to earth actions
+		}
 }
+
 
 SHIVA_Show.prototype.AddOverlay=function() 								// ADD OVERLAY
 {
@@ -587,10 +594,15 @@ SHIVA_Show.prototype.DrawEarth=function()
 		if (typeof(ShivaPostInit) == "function") 						// If called from earth.htm
 			ShivaPostInit();											// Do any post-init actions					
 		google.earth.addEventListener(this.map.getGlobe(),'click', function(e) {	 // Click event
-			var str="("+e.getLatitude()+", "+e.getLongitude()+")|"+"("+e.getClientX()+", "+e.getClientY()+")";
-	 		shivaLib.SendShivaMessage("ShivaEarth=click|"+str);		// Send shiva message
+			var str=e.getLatitude()+"|"+e.getLongitude()+"|"+e.getClientX()+"|"+e.getClientY();
+	 		shivaLib.SendShivaMessage("ShivaEarth=click|"+str);			// Send shiva message
  			});
-
+		google.earth.addEventListener(shivaLib.map.getView(),'viewchangeend', function() { 
+			var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
+			var view=Math.floor(lookAt.getLatitude()*10000)/10000+"|"+Math.floor(lookAt.getLongitude()*10000)/10000+"|";
+			view+=Math.floor(lookAt.getRange())+"|"+Math.floor(lookAt.getTilt()*100)/100+"|"+Math.floor(lookAt.getHeading()*100)/100;
+ 			shivaLib.SendShivaMessage("ShivaEarth=move|"+view);			// Send shiva message
+			});
 		}
 	this.SendReadyMessage(true);										// Send ready message									
 }
@@ -650,7 +662,7 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 			var fly=(items[i].layerOptions.toLowerCase().indexOf("port") == -1)		// Preserve viewport?
 			obj.set(link,true,fly); 									// Sets the flyToView
 			items[i].listener=google.earth.addEventListener(obj,'click', function(e) {		 // Click event
-				var str=i+"|("+e.getLatitude()+", "+e.getLongitude()+")";	// Get lon and lat
+				var str=i+"|"+e.getLatitude()+"|"+e.getLongitude();		// Get lon and lat
 		 		shivaLib.SendShivaMessage("ShivaEarth=kml|"+str);		// Send shiva message
 	 			});
 			}
@@ -661,6 +673,26 @@ SHIVA_Show.prototype.DrawEarthOverlays=function() 					//	DRAW MAP OVERLAYS
 		}
 	this.map.getView().setAbstractView(lookAt);							// Go there
 }
+
+SHIVA_Show.prototype.EarthActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
+{
+	var v=msg.split("|");												// Split msg into parts
+	if (v[0] == "ShivaActEarth=goto") {									// GOTO
+		var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);
+		if (v[1] != undefined)	lookAt.setLatitude(Number(v[1]));		// Set lat
+		if (v[2] != undefined)	lookAt.setLongitude(Number(v[2]));		// Set lon
+		if (v[3] != undefined)	lookAt.setRange(Number(v[3]));			// Set range
+		if (v[4] != undefined)	lookAt.setTilt(Number(v[4]));			// Set tilt
+		if (v[5] != undefined)	lookAt.setHeading(Number(v[5]));		// Set heading
+		shivaLib.map.getView().setAbstractView(lookAt);					// Go there
+		}
+	else if ((v[0] == "ShivaActEarth=show") || (v[0] == "ShivaActEarth=hide")) {	// SHOW/SHOW
+		if (this.items[v[1]]) 											// If valid item	
+			this.items[v[1]].visible=(v[0] == "ShivaActEarth=show").toString();	// Set visibility 
+		this.DrawEarthOverlays();											// Redraw
+		}
+}
+
 
 //  WEBPAGE   /////////////////////////////////////////////////////////////////////////////////////////// 
 
@@ -855,6 +887,7 @@ VIZ.prototype.Init = {
 			domElement.className = 'shiva-node-label';
 			domElement.innerHTML = node.name;
 			domElement.onclick = function(){
+				shivaLib.SendShivaMessage("ShivaNetwork="+node.id);				
 				rgraph.onClick(node.id,{});
 			};
 			var style = domElement.style;
@@ -931,6 +964,9 @@ VIZ.prototype.Init = {
 			style.left = (left - w / 2) + 'px';
 			style.top = (top + 10) + 'px';
 			style.display = '';
+			domElement.onclick = function(){
+				shivaLib.SendShivaMessage("ShivaNetwork="+node.id);				
+			};
 		};
 
 		config.onPlaceLabel = function(domElement, node) { };
@@ -954,7 +990,6 @@ VIZ.prototype.Init = {
 		config.Tips.onShow = function(tip, node) {
 			var count = 0;
 			node.eachAdjacency(function() { count++; });
-			console.log(node.data);
 			if (node.data.tip) {
 				tip.innerHTML = "<div class='tip-title'>" + node.data.tip + "</div>";
 			} else {
@@ -1013,6 +1048,7 @@ VIZ.prototype.Init = {
 			$jit.util.addEvent(domElement, 'click', function () {
 				ht.onClick(node.id, {
 					onComplete: function() {
+						shivaLib.SendShivaMessage("ShivaNetwork="+node.id);				
 						ht.controller.onComplete();
 					}
 				});
@@ -1177,6 +1213,7 @@ SHIVA_Show.prototype.DrawSubway=function(oldItems) 											//	DRAW SUBWAY
 			else
 				str+=lab;
 			$("#textLayer").append(str+"</div>");
+			$("#shivaSubtx"+j).click(function(){shivaLib.SendShivaMessage("ShivaSubway="+this.id.substr(10))});
 			if (tp == "t") 	
 				$("#shivaSubtx"+j).css("top",(y2-$("#shivaSubtx"+j).height()+4)+"px");
 			else if ((tp == "r") || (tp == "l")) 	
@@ -1934,7 +1971,14 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 	this.DrawLayerControlBox(this.items,this.options.controlbox);
 	this.SendReadyMessage(true);											
 	google.maps.event.addListener(this.map,'click', function(e) {
-	 	shivaLib.SendShivaMessage("ShivaMap=click|"+e.latLng+"|"+e.pixel);
+	 	var l=e.latLng.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");
+	 	var p=e.pixel.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");
+	 	shivaLib.SendShivaMessage("ShivaMap=click|"+l+"|"+p);
+ 		});
+	google.maps.event.addListener(this.map,'center_changed', function(e) {
+	 	var map=shivaLib.map;
+	 	var lat=map.getCenter();
+	 	shivaLib.SendShivaMessage("ShivaMap=move|"+lat.Ya+"|"+lat.Za+"|"+map.getZoom());
  		});
 }
 
@@ -1982,7 +2026,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
  			if (ops && items[i].obj)
 				items[i].obj.setOptions(ops);
 			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
-		 		shivaLib.SendShivaMessage("ShivaMap=overlay|"+i+"|"+e.latLng);
+	 			shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.Ya+"|"+e.latLng.Za);
 	 			});
 			}
 		else if (items[i].layerType == "Overlay") {
@@ -1995,7 +2039,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 //	38.07,-78.55,37.99,-78.41
 //	//www.viseyes.org/shiva/map.jpg
 			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
-	 			shivaLib.SendShivaMessage("ShivaMap=overlay|"+i+"|"+e.latLng);
+	 			shivaLib.SendShivaMessage("ShivaMap=overlay|"+this.url+"|"+e.latLng.Ya+"|"+e.latLng.Za);
  				});
 			}
 		else if (items[i].layerType == "KML") {
@@ -2006,8 +2050,8 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 				}
 			items[i].obj=new google.maps.KmlLayer(items[i].layerSource,ops);
 			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
-	  			var str=e.featureData.name+"|"+e.featureData.id+"|"+e.latLng;
-		 		shivaLib.SendShivaMessage("ShivaMap=kml|"+i+"|"+str);
+	  			var str=this.url+"|"+e.featureData.name+"|"+e.latLng.Ya+"|"+e.latLng.Za;
+		 		shivaLib.SendShivaMessage("ShivaMap=kml|"+str);
 	 			});
 			}
 		else if ((items[i].layerType == "GoTo") && (items[i].visible == "true")) {
@@ -2022,6 +2066,22 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 		}
 	this.map.setCenter(curLatlng);										// Center map
 	this.map.setZoom(Number(curZoom));									// Zoom map
+}
+
+
+SHIVA_Show.prototype.MapActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
+{
+	var v=msg.split("|");												// Split msg into parts
+	if (v[0] == "ShivaActMap=goto") {									// GOTO
+		var curLatlng=new google.maps.LatLng(v[1],v[2]);				// Set lat/lon
+		this.map.setCenter(curLatlng);									// Center map
+		this.map.setZoom(Number(v[3]));									// Zoom map
+		}
+	else if ((v[0] == "ShivaActMap=show") || (v[0] == "ShivaActMap=hide")) {	// SHOW/SHOW
+		if (this.items[v[1]]) 											// If valid item	
+			this.items[v[1]].visible=(v[0] == "ShivaActMap=show").toString();	// Set visibility 
+		this.DrawMapOverlays();											// Redraw
+		}
 }
 
 SHIVA_Show.prototype.DrawLayerControlBox=function(items, show)			// DRAW LAYER CONTROLBOX

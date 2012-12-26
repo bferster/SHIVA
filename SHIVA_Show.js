@@ -178,6 +178,8 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 			shivaLib.MapActions(e.data);									// Route to map actions
 		else if (e.data.indexOf("ShivaActEarth=") != -1)					// If an earth action
 			shivaLib.EarthActions(e.data);									// Route to earth actions
+		else if (e.data.indexOf("ShivaActVideo=") != -1)					// If a video action
+			shivaLib.VideoActions(e.data);									// Route to earth actions
 		}
 }
 
@@ -1815,6 +1817,22 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
    		shivaLib.DrawOverlay();
    		}		
 	this.SendReadyMessage(true);											
+}
+  
+SHIVA_Show.prototype.VideoActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
+{
+	var v=msg.split("|");												// Split msg into parts
+	if (v[0] == "ShivaActVideo=play") {									// PLAY
+		this.player.play();												// Play from current spot
+		if (v[1] != undefined)											// If a time set
+				this.player.play(v[1]);									// Play from then
+			}
+	else if (v[0] == "ShivaActVideo=pause")								// PAUSE
+		this.player.pause();											// Pause
+	else if (v[0] == "ShivaActVideo=load") {							// LOAD
+		this.player.media.src=v[1];										// Set new source
+		this.player.load(); 											// Load
+		}
 }
   
 //  TIMELINE   /////////////////////////////////////////////////////////////////////////////////////////// 

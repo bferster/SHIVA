@@ -4056,24 +4056,23 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 			str+="<tr><td>&nbsp;&nbsp;Draw curves?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
 			str+="<tr><td>&nbsp;&nbsp;Draw arrow?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"arrow\",this.checked)' type='checkbox' id='arrow'></td></tr>";
 			}		
-		str+="<tr><td>&nbsp;&nbsp;Fill color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"color\")' onChange='shivaLib.dr.SetVal(\"color\",this.value)' type='text' id='color'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Visibility</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"alpha\",this.value)' type='range' id='alpha'></td></tr>";
+		str+="<tr height='20'><td>&nbsp;&nbsp;Visibility</td><td><div style='width:78px;margin-left:6px' id='alpha'/></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Line color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"edgeColor\")' onChange='shivaLib.dr.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Line width</td><td>&nbsp;<input style='width:85px;height:12px;background-color:transparent;' onChange='shivaLib.dr.SetVal(\"edgeWidth\",this.value)' type='range' id='edgeWidth'></td></tr>";
+		str+="<tr height='20'><td>&nbsp;&nbsp;Line width</td><td><div style='width:78px;margin-left:6px' id='edgeWidth'/></td></tr>";
 		}
 	else if (tool == 3) {
 		str+="<tr><td>&nbsp;&nbsp;Back color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"boxColor\")' onChange='shivaLib.dr.SetVal(\"boxColor\",this.value)' type='text' id='boxColor'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Round box?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"curve\",this.checked)' type='checkbox' id='curve'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Visibility</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"alpha\",this.value)' type='range' id='alpha'></td></tr>";
+		str+="<tr height='20'><td>&nbsp;&nbsp;Visibility</td><td><div style='width:78px;margin-left:6px' id='alpha'/></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Align</td><td>&nbsp;<select style='width:85px;height:18px;font-size:x-small' onChange='shivaLib.dr.SetVal(\"textAlign\",this.value)' id='textAlign'><option>Left</option><option>Right</option><option>Center</option></select></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Text size</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"textSize\",this.value)' type='range' id='textSize'></td></tr>";
+		str+="<tr height='20'><td>&nbsp;&nbsp;Text size</td><td><div style='width:78px;margin-left:6px' id='textSize'/></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Text color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"textColor\")' onChange='shivaLib.dr.SetVal(\"textColor\",this.value)' type='text' id='textColor'></td></tr>";
 		}
 	else if (tool == 4) {
 		str+="<tr><td>&nbsp;&nbsp;Snap to grid?</td><td>&nbsp;<input onClick='shivaLib.dr.SetVal(\"snap\",this.checked)' type='checkbox' id='snap'></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Edge color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='shivaLib.dr.ColorPicker(\"edgeColor\")' onChange='shivaLib.dr.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Edge width</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"edgeWidth\",this.value)' type='range' id='edgeWidth'></td></tr>";
-		str+="<tr><td>&nbsp;&nbsp;Visibility</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"alpha\",this.value)' type='range' id='alpha'></td></tr>";
+		str+="<tr height='20'><td>&nbsp;&nbsp;Line width</td><td><div style='width:78px;margin-left:6px' id='edgeWidth'/></td></tr>";
+		str+="<tr height='20'><td>&nbsp;&nbsp;Visibility</td><td><div style='width:78px;margin-left:6px' id='alpha'/></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Image URL</td><td>&nbsp;<input style='width:85px;height:12px' onChange='shivaLib.dr.SetVal(\"imageURL\",this.value)' type='text' id='imageURL'></td></tr>";
 		}
 	else if (tool == 6) {
@@ -4111,6 +4110,11 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 	$("#sdtb5").button({text: false, icons: { primary: "ui-icon-image"}});
 	$("#sdtb6").button({text: false, icons: { primary: "ui-icon-arrowthick-1-nw"}}).css("width","100");
 	$("#sdtb7").button({text: false, icons: { primary: "ui-icon-lightbulb"}}).css("width","100");
+
+	$("#alpha").slider({slide:function(event, ui) {shivaLib.dr.SetVal("alpha",ui.value);}});	
+	$("#edgeWidth").slider({slide:function(event, ui) {shivaLib.dr.SetVal("edgeWidth",ui.value);}});	
+	$("#textSize").slider({slide:function(event, ui) {shivaLib.dr.SetVal("textSize",ui.value);}});	
+
 	this.SetMenuProperties();												// Set menu properties
 }
 
@@ -4141,9 +4145,9 @@ SHIVA_Draw.prototype.SetMenuProperties=function() 						//	SET MENU PROPERTIES
 	$("#snap").attr("checked",this.snap);									// Check it
 	$("#curve").attr("checked",this.curve);									// Check it
 	$("#arrow").attr("checked",this.arrow);									// Check it
-	$("#edgeWidth").val(this.edgeWidth); 									// Set edge width
-	$("#alpha").val(this.alpha); 											// Set alpha
-	$("#textSize").val(this.textSize); 										// Set text size
+	$("#edgeWidth").slider("value",this.edgeWidth); 						// Set edge width
+	$("#alpha").slider("value",this.alpha); 								// Set alpha
+	$("#restSize").slider("value",this.textSize); 							// Set edge width
 	$("#textAlign").val(this.textAlign); 									// Set text align
 	$("#imageURL").val(this.imageURL); 										// Set image url
 	$("#startEndTime").text(this.startTime+" -> "+this.endTime);			// Set times
@@ -4409,7 +4413,7 @@ SHIVA_Draw.prototype.SetTool=function(num) 								//	SET TOOL
 		$("#shivaDrawDiv").css("cursor","auto");							// Regular cursor
 		this.DrawWireframes(false);											// Show wireframes
 		}
-	else (this.curTool != -1)												// If not closed
+	else if (this.curTool != -1)											// If not closed
 		this.DrawMenu();													// Draw menu
 }
 

@@ -180,9 +180,10 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 			shivaLib.EarthActions(e.data);									// Route to earth actions
 		else if (e.data.indexOf("ShivaActVideo=") != -1)					// If a video action
 			shivaLib.VideoActions(e.data);									// Route to earth actions
+		else if (e.data.indexOf("ShivaActTime=") != -1)						// If a timelin action
+			shivaLib.TimeActions(e.data);									// Route to earth actions
 		}
 }
-
 
 SHIVA_Show.prototype.AddOverlay=function() 								// ADD OVERLAY
 {

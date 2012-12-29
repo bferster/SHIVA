@@ -2551,8 +2551,6 @@ SHIVA_Show.prototype.ShowHelp=function(att, helpText, chartType)
 			str+="<b>How to set "+v[0]+"</b><br/><br/>";
 			if (helpText[v[0]])
 				str+=helpText[v[0]];
-			if (att.toLowerCase().indexOf("(s)") != -1) 
-				str+="<br><br><input type='button' onClick='shivaLib.ColorPicker(-1,-1)' value='Click to get a color number'/><div id='colorDiv'>&nbsp;<i>(Color will appear here)</i></div>";
 			}
 		else
 			str+="Click on a label to show help."

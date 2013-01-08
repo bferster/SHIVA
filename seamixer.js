@@ -32,10 +32,12 @@ seaMixer.prototype.RunOnDo=function(ondo) 							//	RUN AN INIT ONDO
 			str=ondo.src;												// Set url
 			if (ondo.src.indexOf("e=") == 0)							// An eStore
 				str="//www.viseyes.org/shiva/go.htm?"+ondo.src;			// Make url
-			else if (ondo.src.indexOf("M=") == 0)						// Drupal test
-				str="//127.0.0.1:8020/SHIVA/go.htm?m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);	// Make url
 			else if (ondo.src.indexOf("m=") == 0)						// A Drupal manager
 				str="//shiva.shanti.virginia.edu/go.htm?m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);	// Make url
+			else if (ondo.src.indexOf("E=") == 0)						// eStore test
+				str="//127.0.0.1:8020/SHIVA/go.htm?"+ondo.src;			// Make url
+			else if (ondo.src.indexOf("M=") == 0)						// Drupal test
+				str="//127.0.0.1:8020/SHIVA/go.htm?m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);	// Make url
 			$("#"+ondo.div).attr("src",str);							// Set src
 			break;
 		case "data": 													// Load data
@@ -47,7 +49,7 @@ seaMixer.prototype.RunOnDo=function(ondo) 							//	RUN AN INIT ONDO
 			break;
 		case "call": 													// Run a callback
 			break;
-		case "load": 													// Run a queey
+		case "query": 													// Run a query
 			break;
 		}
 }

@@ -29,6 +29,7 @@
 	
 	var mix=new seaMixer();
 	mix.Run(events);
+	window.postMessage("hey","*");											// Send message to div
 	 
 	function SetMap(lat, lon, zoom)
 	{

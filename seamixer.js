@@ -2,8 +2,7 @@
 //   SEAMIXER  
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-function seamMixer() 												// CONSTRUCTOR
+function seaMixer() 												// CONSTRUCTOR
 {
 	this.ondos=new Array();												// Hold ondo statements
 	this.q=new SHIVA_Query();											// Alloc query library
@@ -17,7 +16,7 @@ seaMixer.prototype.Stop=function() 									//	STOP
 {
 }
 
-seaMixer.prototype.Do=function(on, do, p1, p2, p3, p4) 				//	DO
+seaMixer.prototype.Do=function(on, act, p1, p2, p3, p4) 				//	DO
 {
 }
 

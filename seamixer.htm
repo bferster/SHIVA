@@ -13,28 +13,33 @@
 	</style>
 </head>
 <body>
-	<div id="timelineDiv" style="position:absolute;top:10px;left:20px;width:100%;height:300px"/>
-	<div id="mapDiv" style="position:absolute;top:320px;left:20px;width:100%;height:500px"/>
-
+	<iframe id="timelineCon" style="position:absolute;top:20px;left:20px;width:90%;height:300px;border:none"></iframe>
+	<iframe id="mapCon" style="position:absolute;top:330px;left:20px;width:90%;height:500px;border:none"></iframe>
+	<input type="button" onclick="test()">
 <script>
 
-	var events=[{ on:"init",		do:"load",  p1:"e=247",  p2:"timelineDiv", p3:"false" },
-		{ on:"init",				do:"load",  p1:"m=153",  p2:"mapDiv" },
-		{ on:"init",				do:"load",  p1:"www.google.docs.com",  p2:"myData" },
-		{ on:"timelineDiv.event", 	do:"act",   p1:"mapDiv.show" },
-		{ on:"timelineDiv.time",  	do:"query", p1:"myData", p2:"mySubset", p3:"age LT 20" },
-		{ on:"timelineDiv.time",  	do:"fill",  p1:"mySubset", p2:"mapDiv" },
-		{ on:"mapDiv.move",       	do:"call",  p1:"SetMap" }
+	var events=[{ on:"init",		do:"load",  src:"e=252",  div:"timelineCon", preload:"false" },
+		{ on:"init",				do:"load",  src:"M=779",  div:"mapCon" },
+		{ on:"init",				do:"data",  src:"www.google.docs.com",  id:"myData" },
+		{ on:"init", 				do:"act",   id:"mapCon", type:"ShivaActMap=hide", p1:"1" },
+		{ on:"timelineDiv.time",  	do:"query", src:"myData", id:"mySubset", query:"age LT 20" },
+		{ on:"timelineDiv.time",  	do:"fill",  src:"mySubset", div:"mapCon" },
+		{ on:"mapDiv.move",       	do:"call",  id:"SetMap" }
 		];
 	
 	var mix=new seaMixer();
 	mix.Run(events);
-	window.postMessage("hey","*");											// Send message to div
 	 
 	function SetMap(lat, lon, zoom)
 	{
 //	     	...Do something in JavaScript...
-		mix.Do("act","mapDiv.show");     	// Add a new event on the queue      	
+		mix.RunOnDo({ on:"init", do:"act", id:"mapCon", type:"ShivaActMap=show" });     	// Add a new event on the queue      	
+	}
+	
+	
+	function test()
+	{
+		mix.RunOnDo({ on:"init", do:"act", id:"mapCon", type:"ShivaActMap=hide", p1:"1" });     	    	
 	}
 	
 	function trace(str) 

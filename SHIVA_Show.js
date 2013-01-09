@@ -180,8 +180,10 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 			shivaLib.EarthActions(e.data);									// Route to earth actions
 		else if (e.data.indexOf("ShivaActVideo=") != -1)					// If a video action
 			shivaLib.VideoActions(e.data);									// Route to earth actions
-		else if (e.data.indexOf("ShivaActTime=") != -1)						// If a timelin action
+		else if (e.data.indexOf("ShivaActTime=") != -1)						// If a timeline action
 			shivaLib.TimeActions(e.data);									// Route to earth actions
+		else if (e.data.indexOf("ShivaActChart=") != -1)					// If a chart action
+			shivaLib.ChartActions(e.data);									// Route to chart actions
 		}
 }
 
@@ -2354,6 +2356,17 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
   		_this.SendShivaMessage("ShivaChart="+row+"|"+col); 
    		});
 }
+
+SHIVA_Show.prototype.ChartActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
+{
+	var v=msg.split("|");												// Split msg into parts
+	if (v[0] == "ShivaActChart=data") {									// DATA
+		var data=google.visualization.arrayToDataTable($.parseJSON(v[1]));	// Convert to table format
+		this.map.setDataTable(data);									// Set data
+		this.map.draw();												// Redraw chart
+		}
+}
+
 
 SHIVA_Show.prototype.SaveData=function(mode, style, items, props, type) 			// SAVE DATA FROM FROM TO JSON, ETC
 {

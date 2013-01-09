@@ -18,7 +18,7 @@ seaMixer.prototype.Run=function(ondoList) 							// RUN
 		this.AddOnDo(ondoList[i]);										// Add to list and run if an init
   	var preInt=setInterval(onPreloadHandler,100); 						// Start preload timer
 	
-	function onPreloadHandler() {										// ON PRELOAD HANDLER
+	function onPreloadHandler() {										// PRELOAD HANDLER
 		if (_this.preload <= 1)	{										// If preload is done
 			clearInterval(preInt);										// Stop timer									
 			_this.Start();												// Start listening

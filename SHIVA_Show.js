@@ -2367,7 +2367,6 @@ SHIVA_Show.prototype.ChartActions=function(msg)						// REACT TO SHIVA ACTION ME
 		}
 }
 
-
 SHIVA_Show.prototype.SaveData=function(mode, style, items, props, type) 			// SAVE DATA FROM FROM TO JSON, ETC
 {
 		var i,j,k,o,str1;

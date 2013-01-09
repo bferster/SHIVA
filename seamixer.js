@@ -19,7 +19,7 @@ seaMixer.prototype.Run=function(ondoList) 							// RUN
   	var preInt=setInterval(onPreloadHandler,100); 						// Start preload timer
 	
 	function onPreloadHandler() {										// PRELOAD HANDLER
-		if (_this.preload <= 1)	{										// If preload is done
+		if (_this.preload < 1)	{										// If preload is done
 			clearInterval(preInt);										// Stop timer									
 			_this.Start();												// Start listening
 			}
@@ -77,7 +77,6 @@ seaMixer.prototype.RunOnDo=function(ondo) 							// RUN AN INIT ONDO
 
 seaMixer.prototype.Start=function() 								// START
 {
-	trace("Listening")
 	window.addEventListener("message",$.proxy(this.ShivaEventHandler,this),false); // Add event listener
 }
 

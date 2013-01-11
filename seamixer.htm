@@ -37,17 +37,15 @@
 	function SetMap(lat, lon, zoom)
 	{
 //	     	...Do something in JavaScript...
-
-		mix.data.myData[3][2]=(40-lat)*100
+		mix.data.myData[3][2]=(lat-39)*100
 		mix.RunOnDo({ on:"init", do:"fill", id:"timelineCon", src:"myData" });     	    	
 	}
 	
 	function MyScript(ondo)
 	{
-		ondo.p1=Math.random()*10+38;
+//	     	...Do something in JavaScript and modify undo params...
 		return(ondo)
 	}
-	
 	
 	function test()
 	{

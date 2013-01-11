@@ -29,9 +29,8 @@ seaMixer.prototype.Run=function(ondoList) 							// RUN
 seaMixer.prototype.AddOnDo=function(ondo) 							// ADD NEW ONDO
 {
 	this.ondos.push(ondo);												// Add to array
-	
 	if (ondo.on == "init")												// If an init
-		trace(ondo),this.RunOnDo(ondo);												// Run it
+		this.RunOnDo(ondo);												// Run it
 }
 
 seaMixer.prototype.RunOnDo=function(ondo) 							// RUN AN INIT ONDO
@@ -72,6 +71,8 @@ seaMixer.prototype.RunOnDo=function(ondo) 							// RUN AN INIT ONDO
 			window[ondo.id](ondo.p1,ondo.p2,ondo.p3,ondo.p4,ondo.p5,ondo.p6);	// Callback
 			break;
 		case "query": 													// Run a query
+			trace(ondo)
+			this.Query(ondo.src,ondo.id,ondo.query);					// Run query on table
 			break;
 		}
 }
@@ -88,6 +89,7 @@ seaMixer.prototype.Stop=function() 									// STOP
 
 seaMixer.prototype.Query=function(src, dst, query) 					// QUERY
 {
+	this.q.query(_this.data[src],_this.data[dst],query);				// Run query on table
 }
 
 seaMixer.prototype.ShivaEventHandler=function(e) 					// CATCH SHIVA EVENTS
@@ -186,6 +188,31 @@ seaMixer.prototype.TableToString=function(table) 					// SAVE TABLE AS STRING
 //   QUERY  
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function SHIVA_Query() 												// CONSTRUCTOR
+function SHIVA_Query(src, dst, query, fields) 						// CONSTRUCTOR
 {
-}
+	var v,i=0;
+	if (!src || !dst)													// No data
+		return;															// Quit
+	var clause=new Array()
+	if (!fields)														// If no fields spec'd
+		fields="*";														// Return all fields
+	if ((!query) || (query == "*"))										// If no query spec'd
+		query="* EQ *";													// Return all rows
+	var o=new Object();													// Create obj
+	clause.push(o);														// Add 1st clause
+	o.type="AND";														// 1st is AND
+	v=query.split(" ");													// Tokenize
+	while (i < v.length) {												// For each token	
+		o.hits=[];														// No hits yet
+		o.field=v[i++];													// Field
+		o.cond=v[i++];													// Condition
+		o.what=v[i++];													// Field
+		if (i < v.length) {												// For each token
+			o={};														// Fresh obj
+			o.type=v[i++];												// Field
+			clause.push(o);												// Add new clause
+			}
+		}	
+	trace(clause)
+}	
+	

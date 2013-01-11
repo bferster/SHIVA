@@ -5,7 +5,6 @@
 function seaMixer() 												// CONSTRUCTOR
 {
 	this.ondos=new Array();												// Hold ondo statements
-	this.q=new SHIVA_Query();											// Alloc query library
 	this.preload=0;														// No preload
 	this.data=new Object();												// Holds table data
 }
@@ -71,8 +70,8 @@ seaMixer.prototype.RunOnDo=function(ondo) 							// RUN AN INIT ONDO
 			window[ondo.id](ondo.p1,ondo.p2,ondo.p3,ondo.p4,ondo.p5,ondo.p6);	// Callback
 			break;
 		case "query": 													// Run a query
-			trace(ondo)
-			this.Query(ondo.src,ondo.id,ondo.query);					// Run query on table
+			this.data[ondo.id]=[];										// New array
+			this.Query(this.data[ondo.src],this.data[ondo.id],ondo.query, ondo.sort);	// Run query on table
 			break;
 		}
 }
@@ -85,11 +84,6 @@ seaMixer.prototype.Start=function() 								// START
 seaMixer.prototype.Stop=function() 									// STOP
 {
 	window.removeEventListener("message",$.proxy(this.ShivaEventHandler,this));	 // Remove event listener
-}
-
-seaMixer.prototype.Query=function(src, dst, query) 					// QUERY
-{
-	this.q.query(_this.data[src],_this.data[dst],query);				// Run query on table
 }
 
 seaMixer.prototype.ShivaEventHandler=function(e) 					// CATCH SHIVA EVENTS
@@ -183,21 +177,17 @@ seaMixer.prototype.TableToString=function(table) 					// SAVE TABLE AS STRING
 	return str+"]";														// Return stringified array
 }
 
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//   QUERY  
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-function SHIVA_Query(src, dst, query, fields) 						// CONSTRUCTOR
+seaMixer.prototype.Query=function(src, dst, query, fields, sort) 	// RUN QUERY
 {
 	var v,i=0;
 	if (!src || !dst)													// No data
 		return;															// Quit
+	var n=src.length;													// Length of table
 	var clause=new Array()
 	if (!fields)														// If no fields spec'd
 		fields="*";														// Return all fields
 	if ((!query) || (query == "*"))										// If no query spec'd
-		query="* EQ *";													// Return all rows
+		query="* * *";													// Return all rows
 	var o=new Object();													// Create obj
 	clause.push(o);														// Add 1st clause
 	o.type="AND";														// 1st is AND
@@ -213,6 +203,55 @@ function SHIVA_Query(src, dst, query, fields) 						// CONSTRUCTOR
 			clause.push(o);												// Add new clause
 			}
 		}	
-	trace(clause)
+	for (i=0;i<clause.length;++i) {										// For each clause
+		o=clause[i];													// Point at clause
+		for (j=0;j<src[0].length;++j) 									// For each field
+			if (o.field == src[0][j]) {									// If name matches
+				o.field=j;												// Replace name with num
+				break;													// Quit looking
+				}
+		for (j=1;j<n;++j) {												// If each row
+			if (o.cond == "*")	{										// Always
+				o.hits.push(j-1);										// Add it to clause									
+				}
+			if (o.cond == "LT")	{										// Less than
+				if (src[j][o.field] < o.what)							// A hit
+					o.hits.push(j-1);									// Add it to clause									
+				}
+			else if (o.cond == "GT") {									// Greater than
+				if (src[j][o.field] > o.what)							// A hit
+					o.hits.push(j-1);									// Add it to clause		
+				}							
+			if (o.cond == "LE")	{										// Less than or equal
+				if (src[j][o.field] <= o.what)							// A hit
+					o.hits.push(j-1);									// Add it to clause									
+				}
+			else if (o.cond == "GE") {									// Greater than or equal
+				if (src[j][o.field] >= o.what)							// A hit
+					o.hits.push(j-1);									// Add it to clause		
+				}							
+			if (o.cond == "EQ")	{										// Equal
+				if (src[j][o.field] == o.what)							// A hit
+					o.hits.push(j-1);									// Add it to clause									
+				}
+			if (o.cond == "NE")	{										// Not equal
+				if (src[j][o.field] != o.what)							// A hit
+					o.hits.push(j-1);									// Add it to clause									
+				}
+			if (o.cond == "LK")	{										// Like
+				if (src[j][o.field].toLowerCase().indexOf(o.what.toLowerCase()) != -1)	// A hit
+					o.hits.push(j-1);									// Add it to clause									
+				}
+			if (o.cond == "NL")	{										// Not like
+				if (src[j][o.field].toLowerCase().indexOf(o.what.toLowerCase()) == -1)	// A hit
+					o.hits.push(j-1);									// Add it to clause									
+				}
+			}
+		}
+	for (i=0;i<clause.length;++i) {										// For each clause
+		o=clause[i];													// Point at clause
+		trace(o)
+		}
+
 }	
 	

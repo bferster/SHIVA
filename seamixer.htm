@@ -24,9 +24,11 @@
 		{ on:"init",				do:"load",   src:"m=779",  id:"mapCon" },
 		{ on:"init",				do:"data",   src:"0AsMQEd_YoBWldHZNbGU2czNfa004UmpzeC13MkZZb0E",  id:"myData",  preload:"true" },
 		{ on:"init", 				do:"action", id:"mapCon", type:"ShivaActMap=hide", p1:"1" },
+		{ on:"init",       			do:"call",   id:"Callback", p1:"Hello", p2:" world" },
+
 		{ on:"timelineCon.time",  	do:"query",  src:"myData", id:"mySubset", query:"age LT 20" },
 		{ on:"timelineCon.time",  	do:"fill",   src:"mySubset", id:"mapCon" },
-		{ on:"mapCon.move",       	do:"call",   id:"SetMap" }
+		{ on:"ShivaMap=click",     	do:"call",   id:"SetMap", script:"MyScript" }
 		];
 	
 	var mix=new seaMixer();
@@ -35,15 +37,27 @@
 	function SetMap(lat, lon, zoom)
 	{
 //	     	...Do something in JavaScript...
-		mix.RunOnDo({ on:"init", do:"action", id:"mapCon", type:"ShivaActMap=show" });     	// Add a new event on the queue      	
+
+		mix.data.myData[3][2]=(40-lat)*100
+		mix.RunOnDo({ on:"init", do:"fill", id:"timelineCon", src:"myData" });     	    	
+	}
+	
+	function MyScript(ondo)
+	{
+		ondo.p1=Math.random()*10+38;
+		return(ondo)
 	}
 	
 	
 	function test()
 	{
 		mix.data.myData[3][2]+=10
-		
 		mix.RunOnDo({ on:"init", do:"fill", id:"timelineCon", src:"myData" });     	    	
+	}
+	
+	function Callback(p1, p2, p3, p4)
+	{
+		trace(p1+" "+p2);
 	}
 	
 	function trace(str) 

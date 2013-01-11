@@ -29,14 +29,14 @@ seaMixer.prototype.Run=function(ondoList) 							// RUN
 seaMixer.prototype.AddOnDo=function(ondo) 							// ADD NEW ONDO
 {
 	this.ondos.push(ondo);												// Add to array
-	this.RunOnDo(ondo);													// Run it
+	
+	if (ondo.on == "init")												// If an init
+		trace(ondo),this.RunOnDo(ondo);												// Run it
 }
 
 seaMixer.prototype.RunOnDo=function(ondo) 							// RUN AN INIT ONDO
 {
 	var str,o,i;
-	if (ondo.on != "init")												// If not an init
-		return;															// Quit
 	switch(ondo.do) {													// Route on type
 		case "load": 													// Load an iframe
 			str=ondo.src;												// Set url
@@ -69,6 +69,7 @@ seaMixer.prototype.RunOnDo=function(ondo) 							// RUN AN INIT ONDO
 			this.SendMessage(ondo.id,ondo.type+"|"+ondo.p1);			// Send message to iframe
 			break;
 		case "call": 													// Run a callback
+			window[ondo.id](ondo.p1,ondo.p2,ondo.p3,ondo.p4,ondo.p5,ondo.p6);	// Callback
 			break;
 		case "query": 													// Run a query
 			break;
@@ -91,7 +92,31 @@ seaMixer.prototype.Query=function(src, dst, query) 					// QUERY
 
 seaMixer.prototype.ShivaEventHandler=function(e) 					// CATCH SHIVA EVENTS
 {
-	trace(e.data);
+	var i,o,n=this.ondos.length;
+	for (i=0;i<n;++i) {													// For each ondo
+		o=this.ondos[i];												// Point at it
+		if (e.data.indexOf(o.on) == 0)									// Got one
+			this.HandleOnEvent(o,e.data);
+		}
+}
+
+seaMixer.prototype.HandleOnEvent=function(ondo, data) 				// HANDLE INCOMING EVENT
+{
+	var run=new Object();												// New run obj
+	for (o in ondo)														// For each field in on field
+		run[o]=ondo[o];													// Add to run obj
+	if (!run.p1) {														// If params not define
+		var v=data.split("|");											// Get on params
+		if (v[1] != undefined)	run.p1=v[1];							// Add param from on
+		if (v[2] != undefined)	run.p2=v[2];							// Add 
+		if (v[3] != undefined)	run.p3=v[3];							// Add 
+		if (v[4] != undefined)	run.p4=v[4];							// Add 
+		if (v[5] != undefined)	run.p5=v[5];							// Add 
+		if (v[6] != undefined)	run.p6=v[6];							// Add 
+		}	
+	if (ondo.script) 													// If a script
+		run=window[ondo.script](run);									// Callback
+	this.RunOnDo(run);													// Run it
 }
 
 seaMixer.prototype.SendMessage=function(con, msg) 					// SEND HTML5 MESSAGE TO IFRAME

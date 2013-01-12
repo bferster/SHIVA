@@ -59,7 +59,7 @@ seaMixer.prototype.RunOnDo=function(ondo) 							// RUN AN INIT ONDO
 			if ((!ondo.src) || (!this.data[ondo.src]))					// No src
 				break;													// Quit
 			str="ShivaActChart=data|";									// Base			
-			 o=this.data[ondo.src];										// Point at table
+			o=this.data[ondo.src];										// Point at table
 			str+=this.TableToString(this.data[ondo.src])				// Add table data
 			this.SendMessage(ondo.id,str);								// Send message to iframe
 			break;
@@ -71,7 +71,8 @@ seaMixer.prototype.RunOnDo=function(ondo) 							// RUN AN INIT ONDO
 			break;
 		case "query": 													// Run a query
 			this.data[ondo.id]=[];										// New array
-			this.Query(this.data[ondo.src],this.data[ondo.id],ondo.query, ondo.sort);	// Run query on table
+			this.Query(this.data[ondo.src],this.data[ondo.id],ondo.query,ondo.fields,ondo.sort);	// Run query on table
+trace(this.data[ondo.id])
 			break;
 		}
 }
@@ -180,6 +181,7 @@ seaMixer.prototype.TableToString=function(table) 					// SAVE TABLE AS STRING
 seaMixer.prototype.Query=function(src, dst, query, fields, sort) 	// RUN QUERY
 {
 	var v,j,i=0;
+	var allFields=false;												// Assume selected fields
 	var nAnds=0;														// Assume no AND clauses yet
 	if (!src || !dst)													// No data
 		return;															// Quit
@@ -188,8 +190,12 @@ seaMixer.prototype.Query=function(src, dst, query, fields, sort) 	// RUN QUERY
 	var ands=new Array();												// Holds hits of AND clauses
 	var ors=new Array();												// Holds hits of OR clauses
 
-	if (!fields)														// If no fields spec'd
-		fields="*";														// Return all fields
+	if ((!fields) || (fields == "*")) { 								// If no fields spec'd
+		fields=src[0];													// Return all fields
+		allFields=true;													// Fast track
+		}
+	else																// Only these fields
+		fields=fields.split("+");										// Split buy '+'
 	if ((!query) || (query == "*"))										// If no query spec'd
 		query="* * *";													// Return all rows
 
@@ -280,8 +286,8 @@ seaMixer.prototype.Query=function(src, dst, query, fields, sort) 	// RUN QUERY
 				}
 			}
 		}
+	n=results.length;													// Number of hits
 	if (ors.length) {													// If any OR clauses
-		n=results.length;												// Number of AND hits
 		for (i=0;i<ors.length;++i) {									// For each or hit
 			for (j=0;j<n;++j) 											// For each result
 				if (ors[i] == results[j])								// If already in
@@ -291,7 +297,42 @@ seaMixer.prototype.Query=function(src, dst, query, fields, sort) 	// RUN QUERY
 			}
 		}
 	
-	trace(results)
+	n=fields.length;													// Number of fields
+	if (allFields) {													// If doing all fields
+		for (i=0;i<results.length;++i) 									// For each result
+			dst.push(src[results[i]]);									// Add row
+		}
+	else{																// Selected fields
+		var ids=new Array();
+		for (i=0;i<n;++i) { 											// For each field
+			for (j=0;j<n;++j) 											// For each field
+				if (fields[i] == src[0][j]) {							// If name matches
+					ids[i]=j;											// Replace name with num
+					break;												// Quit looking
+					}
+			}
+		for (i=0;i<results.length;++i) {								// For each result
+			o=[];														// New array
+			for (j=0;j<n;++j) 											// For each result
+				o.push(src[results[i]+1][ids[j]]);						// Add data (skip header)
+			dst.push(o);												// Add row
+			}
+		}
+	
+	if (sort) {															// If sorting
+		var dir=-1;														// Assume ascending
+		if (sort.charAt(0) == "-") {									// If neg	
+			dir=1;														// Sort descending
+			sort=sort.substr(1);										// Eemove '-'
+			}
+		for (j=0;j<n;++j) 												// For each field
+			if (sort == src[0][j]) {									// If name matches
+				sort=j;													// Replace name with num
+				break;													// Quit looking
+				}
+		dst.sort(function(a,b) { return a[sort] > b[sort]?-1*dir:1*dir });	// Sort it
+		}
+	dst.splice(0,0,fields);												// Set header
 }
 
 	

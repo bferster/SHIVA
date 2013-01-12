@@ -26,7 +26,7 @@
 		{ on:"init", 				do:"action", id:"mapCon", type:"ShivaActMap=hide", p1:"1" },
 		{ on:"init",       			do:"call",   id:"Callback", p1:"Hello", p2:" world" },
 
-		{ on:"ShivaChart=data",  	do:"query",  src:"myData", id:"mySubset", query:"Gold GT 150 AND Silver LT 150", fields:"Team+Gold", sort:"-Gold" },
+		{ on:"ShivaChart=data",  	do:"query",  src:"myData", id:"mySubset", query:"Gold GT 150 AND Silver LT 150", fields:"Team+Gold", sort:"Gold" },
 		{ on:"timelineCon.time",  	do:"fill",   src:"mySubset", id:"mapCon" },
 		{ on:"ShivaMap=click",     	do:"call",   id:"SetMap", script:"MyScript" }
 		];

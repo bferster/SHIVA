@@ -179,15 +179,20 @@ seaMixer.prototype.TableToString=function(table) 					// SAVE TABLE AS STRING
 
 seaMixer.prototype.Query=function(src, dst, query, fields, sort) 	// RUN QUERY
 {
-	var v,i=0;
+	var v,j,i=0;
+	var nAnds=0;														// Assume no AND clauses yet
 	if (!src || !dst)													// No data
 		return;															// Quit
 	var n=src.length;													// Length of table
-	var clause=new Array()
+	var clause=new Array();												// Holds clauses
+	var ands=new Array();												// Holds hits of AND clauses
+	var ors=new Array();												// Holds hits of OR clauses
+
 	if (!fields)														// If no fields spec'd
 		fields="*";														// Return all fields
 	if ((!query) || (query == "*"))										// If no query spec'd
 		query="* * *";													// Return all rows
+
 	var o=new Object();													// Create obj
 	clause.push(o);														// Add 1st clause
 	o.type="AND";														// 1st is AND
@@ -199,59 +204,95 @@ seaMixer.prototype.Query=function(src, dst, query, fields, sort) 	// RUN QUERY
 		o.what=v[i++];													// Field
 		if (i < v.length) {												// For each token
 			o={};														// Fresh obj
-			o.type=v[i++];												// Field
+			o.type=v[i++];												// Type
 			clause.push(o);												// Add new clause
 			}
 		}	
+
 	for (i=0;i<clause.length;++i) {										// For each clause
 		o=clause[i];													// Point at clause
+		h=ands;															// Point at ands array to store hits
+		if (o.type == "OR")												// Unless it's an OR
+			h=ors;														// Point at ors array
+		else															// An AND
+			nAnds++;													// Add to count
 		for (j=0;j<src[0].length;++j) 									// For each field
 			if (o.field == src[0][j]) {									// If name matches
 				o.field=j;												// Replace name with num
 				break;													// Quit looking
 				}
+		
 		for (j=1;j<n;++j) {												// If each row
 			if (o.cond == "*")	{										// Always
-				o.hits.push(j-1);										// Add it to clause									
+				h.push(j-1);											// Add it to clause									
 				}
 			if (o.cond == "LT")	{										// Less than
 				if (src[j][o.field] < o.what)							// A hit
-					o.hits.push(j-1);									// Add it to clause									
+					h.push(j-1);										// Add it to clause									
 				}
 			else if (o.cond == "GT") {									// Greater than
 				if (src[j][o.field] > o.what)							// A hit
-					o.hits.push(j-1);									// Add it to clause		
+					h.push(j-1);										// Add it to clause		
 				}							
 			if (o.cond == "LE")	{										// Less than or equal
 				if (src[j][o.field] <= o.what)							// A hit
-					o.hits.push(j-1);									// Add it to clause									
+					h.push(j-1);										// Add it to clause									
 				}
 			else if (o.cond == "GE") {									// Greater than or equal
 				if (src[j][o.field] >= o.what)							// A hit
-					o.hits.push(j-1);									// Add it to clause		
+					h.push(j-1);										// Add it to clause		
 				}							
 			if (o.cond == "EQ")	{										// Equal
 				if (src[j][o.field] == o.what)							// A hit
-					o.hits.push(j-1);									// Add it to clause									
+					h.push(j-1);										// Add it to clause									
 				}
 			if (o.cond == "NE")	{										// Not equal
 				if (src[j][o.field] != o.what)							// A hit
-					o.hits.push(j-1);									// Add it to clause									
+					h.push(j-1);										// Add it to clause									
 				}
 			if (o.cond == "LK")	{										// Like
 				if (src[j][o.field].toLowerCase().indexOf(o.what.toLowerCase()) != -1)	// A hit
-					o.hits.push(j-1);									// Add it to clause									
+					h.push(j-1);										// Add it to clause									
 				}
 			if (o.cond == "NL")	{										// Not like
 				if (src[j][o.field].toLowerCase().indexOf(o.what.toLowerCase()) == -1)	// A hit
-					o.hits.push(j-1);									// Add it to clause									
+					h.push(j-1);										// Add it to clause									
 				}
 			}
 		}
-	for (i=0;i<clause.length;++i) {										// For each clause
-		o=clause[i];													// Point at clause
-		trace(o)
+	var results=new Array();											// Make new array to hold results
+	if (nAnds == 1) 													// If just one AND clauses
+		results=ands;													// Take hits from ands
+	else {																// Multiple AND clauses
+		var thisOne;
+		n=ands.length;													// Number of AND hits
+		var matches=1;													// Set matches counter
+		for (i=0;i<n;++i) {												// For each and hit
+			thisOne=ands[i];											// Point at current and hit
+			for (j=i+1;j<n;++j) {										// For following ands
+				if (ands[j] == thisOne)									// A match
+					++matches;											// Add to count
+				if (matches == nAnds)	{								// Enough to add row to results	
+					results.push(ands[i]);								// Add to results
+					matches=1;											// Reset matches
+					break;												// Stop looking for this one
+					}
+				}
+			}
 		}
+	if (ors.length) {													// If any OR clauses
+		n=results.length;												// Number of AND hits
+		for (i=0;i<ors.length;++i) {									// For each or hit
+			for (j=0;j<n;++j) 											// For each result
+				if (ors[i] == results[j])								// If already in
+					break;												// Quit
+			if (j == n)													// Didn't have it already
+				results.push(ors[i]);									// Add to results
+			}
+		}
+	
+	trace(results)
+}
 
-}	
+	
 	

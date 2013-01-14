@@ -6039,15 +6039,15 @@ function CSV(inputID, mode, output_type, callback) {
 			
 //  TIMEGLIDER   /////////////////////////////////////////////////////////////////////////////////////////// 
 
-SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIMEGLIDER
+SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
 {
   var i;
   var stimeline = new Object();
-  
+
   if($('link[href*=timeglider]').length == 0) {
     $('head').append('<link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">');
   }
-  
+
   stimeline.events=null;
   stimeline.options=this.options;
   stimeline.container=this.container;
@@ -6060,24 +6060,24 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
     if(ret) {
       $(stimeline.con).timeline('resize');
       return;
-    } 
-  } 
+    }
+  }
   // Always set width and height before drawing timeline as the layout depends on the container size.
   $(stimeline.con).css('width',stimeline.options['width']+"px");
   $(stimeline.con).css('height',stimeline.options['height']+"px");
-  
+
   GetSpreadsheetData(stimeline.options.dataSourceUrl);   // Get data from spreadsheet, contains callback to draw timeline
-      
-  function GetSpreadsheetData(file, conditions) 
+
+  function GetSpreadsheetData(file, conditions)
   {
-    lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
+lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
     var query=new google.visualization.Query(lastDataUrl);
     if (conditions)
       query.setQuery(conditions);
       query.send(handleQueryResponse);
- 
+
     function handleQueryResponse(response) {
-      
+
       var i,j,key,s=0;
       var data=response.getDataTable();
       var rows=data.getNumberOfRows();
@@ -6095,16 +6095,14 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
             continue;
         if ((key == "startdate") || (key == "enddate")) {
           if (data.getFormattedValue(i,j))
-            //o[key]=data.getFormattedValue(i,j).replace(/\//g,'-');
             o[key]=ConvertTimelineDate(data.getValue(i,j));
-            //console.log(o[key]);
           }
-        else  
+        else
           o[key]=data.getValue(i,j);
         }
         eventData.events.push(o);
       }
-      
+
       stimeline.events = eventData.events;
       var stldata = [{
         "id":"stl" + (new Date()).getTime(),
@@ -6113,34 +6111,35 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
         "focus_date": ConvertTimelineDate(stimeline.options.focus_date),
         "timezone":stimeline.options.timezone,
         "initial_zoom":stimeline.options.initial_zoom * 1,
-        "events": stimeline.events
+        "events": normalizeEventData(stimeline.events)
       }];
- 
-     
+
+
       $(stimeline.con).timeline('destroy');
       $(stimeline.con).html('');
-	  window.shivaTimeline =  $(stimeline.con).timeline({
-          "min_zoom":stimeline.options.min_zoom * 1, 
-          "max_zoom":stimeline.options.max_zoom * 1, 
+        window.shivaTimeline =  $(stimeline.con).timeline({
+          "min_zoom":stimeline.options.min_zoom * 1,
+          "max_zoom":stimeline.options.max_zoom * 1,
           "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
           "data_source":stldata,
           "show_footer":Boolean(stimeline.options.show_footer),
-          "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
+"display_zoom_level":Boolean(stimeline.options.display_zoom_level),
           "constrain_to_data":false,
           "image_lane_height":60,
-          "loaded":function (args, data) { 
+          "loaded":function (args, data) {
             $(stimeline.con).timeline('setOptions', stimeline.options, true);
             $(stimeline.con).timeline('registerEvents', stimeline.events);
             setTimeout('$(\'' + stimeline.con + '\').timeline(\'eventList\')', 500);
             if(stimeline.options.show_desc == "false") { $('.tg-timeline-modal').fadeOut();  }
-            shivaLib.SendReadyMessage(true); 
+            shivaLib.SendReadyMessage(true);
           }
-      });     
+      });
+
       // Make event modal windows draggable
       window.stlInterval = setInterval(function() {
         $('.timeglider-ev-modal').draggable({cancel : 'div.tg-ev-modal-description'});
       }, 500);
-      
+
       function ConvertTimelineDate(dateTime) {
         dateTime=Date.parse(dateTime)+50000000;
         var dt = new Date(dateTime);
@@ -6152,11 +6151,38 @@ SHIVA_Show.prototype.DrawTimeGlider=function()                      //  DRAW TIM
         var dtstr = dt.getFullYear() + "-" + mn + "-" + dy + " " + hrs + ":" + mns + ":" + scs;
         return dtstr;
       }
-      
+
       function padZero(n) {
         if(n < 10) { n = '0' + n; }
         return n;
       }
+
+      function normalizeEventData(events) {
+        var ct = 0;
+        for(var i in events) {
+          ct++;
+          var ev = events[i];
+          if(typeof(ev.id) == "undefined") {
+            ev.id = "event" + ct;
+          }
+          if(typeof(ev.startdate) == "undefined" && typeof(ev.start) != "undefined") {
+            ev.startdate = ConvertTimelineDate(ev.start);
+          }
+          if(typeof(ev.enddate) == "undefined" && typeof(ev.end) != "undefined") {
+            ev.enddate = ConvertTimelineDate(ev.end);
+          }
+          if(typeof(ev.importance) == "undefined") {
+            ev.importance = 50;
+          }
+          if(typeof(ev.date_display) == "undefined") {
+            ev.date_display = "ye";
+          }
+          if(typeof(ev.icon) == "undefined") {
+            ev.icon = "none";
+          }
+        }
+        return events;
+      }
     }
-  } 
+  }
 }

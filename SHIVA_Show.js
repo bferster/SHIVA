@@ -1,5 +1,7 @@
 function SHIVA_Show(container, options, editMode) 						// CONSTRUCTOR
 {
+	// THIS IS MASTER
+	
 	this.drupalMan=false;
 	this.options=null;
 	this.map=null;															
@@ -172,7 +174,7 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 		}
 	for (var i=0;i<shivaLib.msgAction.length;++i)							// For each possible event								
 		if (e.data.indexOf(shivaLib.msgAction[i].id) != -1)					// The one						
-			shivaLib.msgAction[i].do(i);									// Run callback
+			shivaLib.msgAction[i].Do(i);									// Run callback
 	if (e.data.indexOf("ShivaAct") != -1) {									// If an action
 		if (e.data.indexOf("ShivaActMap=") != -1)							// If a map action
 			shivaLib.MapActions(e.data);									// Route to map actions
@@ -760,8 +762,8 @@ function VIZ(container)
 			Tips:		{ enable: true	},
 			Events: 	{ enable: true,	enableForEdges: true },
 			NodeStyles: { enable: true	},
-			CanvasStyles: {},
-			},	
+			CanvasStyles: {}
+			}	
 	}
 }
 
@@ -1089,7 +1091,7 @@ VIZ.prototype.Init = {
 		ht.loadJSON(data);
 		ht.refresh();
 		ht.controller.onComplete();
-	},	
+	}	
 }
 
 
@@ -3887,9 +3889,17 @@ SHIVA_QueryEditor.prototype.SetQueryString=function()
 //	OTHER
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function trace(msg)
+function trace(msg, p1, p2, p3)
 {
+	if (p3)
+		console.log(msg,p1,p2,p3);
+	else if (p2)
+		console.log(msg,p1,p2);
+	else if (p1)
+		console.log(msg,p1);
+	else
 	console.log(msg);
+	
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////

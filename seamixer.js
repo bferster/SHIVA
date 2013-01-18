@@ -36,7 +36,7 @@ seaMixer.prototype.AddOnDo=function(ondo) 							// ADD NEW ONDO
 seaMixer.prototype.RunOnDo=function(ondo) 							// RUN AN INIT ONDO
 {
 	var str,o,i;
-	switch(ondo.do) {													// Route on type
+	switch(ondo.Do) {													// Route on type
 		case "load": 													// Load an iframe
 			str=ondo.src;												// Set url
 			if (ondo.src.indexOf("e=") == 0)							// An eStore
@@ -84,7 +84,10 @@ trace(this.data[ondo.id])
 
 seaMixer.prototype.Start=function() 								// START
 {
-	window.addEventListener("message",$.proxy(this.ShivaEventHandler,this),false); // Add event listener
+	if (window.addEventListener) 
+		window.addEventListener("message",$.proxy(this.ShivaEventHandler,this),false); // Add event listener
+	else
+		window.attachEvent("message",$.proxy(this.ShivaEventHandler,this),false); // Add event listener
 }
 
 seaMixer.prototype.Stop=function() 									// STOP

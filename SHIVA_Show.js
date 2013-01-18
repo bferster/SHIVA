@@ -1,7 +1,5 @@
 function SHIVA_Show(container, options, editMode) 						// CONSTRUCTOR
 {
-	// THIS IS MASTER
-	
 	this.drupalMan=false;
 	this.options=null;
 	this.map=null;															
@@ -5047,8 +5045,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
 	var z = ($('.ui-widget-overlay').length > 0)?($('.ui-widget-overlay').css('z-index')+1):'auto';
     $('body').append($("<div>", {
         id : 'shiva_dialogDiv',
-        class : 'propTable',
-        css : {
+         css : {
         	zIndex: z,
             position : 'absolute',
             right : '100px',
@@ -5058,9 +5055,9 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             marginRight : '2px',
             padding : '5px',
             paddingBottom : '30px',
-            paddingTop : '10px',
-        },
-    }).draggable());
+            paddingTop : '10px'
+        }
+    }).draggable().addClass("propTable"));
     //TABS
     $("#shiva_dialogDiv").append($("<div>", {
         id : 'cp_colorbar',
@@ -5071,12 +5068,11 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             width : '244px',
             height : '22px',
             borderTopLeftRadius : '8px',
-            borderTopRightRadius : '8px',
+            borderTopRightRadius : '8px'
         }
     }));
-    $("#cp_colorbar").append($("<a>", {
-        class : 'cbar_control',
-        css : {
+   $("#cp_colorbar").append($("<a>", {
+      css : {
             width : '30px',
             height : '20px',
             position : 'relative',
@@ -5086,21 +5082,20 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             borderRadius : '0',
             borderTopLeftRadius : '8px',
             borderRight : '1px solid gray',
-            borderBottom : '1px solid gray',
-        },
+            borderBottom : '1px solid gray'
+        	},
         click : function() {
             if (cp_first > 0)
                 cp_first--;
             self.position_bar();
-        },
-    }).button({
-        icons : {
-            primary : 'ui-icon-arrowthick-1-w'
-        },
-        text : false
-    }));
+        	}
+	    }).button({
+	        icons : {
+	            primary : 'ui-icon-arrowthick-1-w'
+	        	},
+	        text : false
+	 }).addClass("cbar_control"));
     $("#cp_colorbar").append($("<a>", {
-        class : 'cbar_control',
         css : {
             width : '28px',
             height : '20px',
@@ -5111,7 +5106,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             borderRadius : '0',
             borderTopRightRadius : '8px',
             borderLeft : '1px solid gray',
-            borderBottom : '1px solid gray',
+            borderBottom : '1px solid gray'
         },
         click : function() {
             if (cp_first < $(".tab").length - 5)
@@ -5123,10 +5118,9 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             primary : 'ui-icon-arrowthick-1-e'
         },
         text : false
-    }));
+    }).addClass("cbar_control"));
     $("#cp_colorbar").append($("<a>", {
-        class : 'cbar_control',
-        css : {
+         css : {
             width : '18.5px',
             height : '20px',
             position : 'absolute',
@@ -5135,7 +5129,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             border : '0',
             borderRadius : '0',
             borderLeft : '1px solid gray',
-            borderBottom : '1px solid gray',
+            borderBottom : '1px solid gray'
         },
         click : function() {
             cp_first++;
@@ -5146,7 +5140,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             primary : 'ui-icon-plusthick'
         },
         text : false
-    }));
+    }).addClass("cbar_control"));
     $("#cp_colorbar a").hover(function() {
         $(this).css("cursor", "pointer");
     });
@@ -5157,7 +5151,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             position : 'absolute',
             top : '25px',
             left : 
-            '186px',
+            '186px'
         }
     }));
     $("#shiva_dialogDiv").append($("<div>", {
@@ -5167,14 +5161,14 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             top : '20px',
             width : '150px',
             padding : '2px',
-            height : '150px',
+            height : '150px'
         }
     }));
     $("#cp_colormap").append($("<img>", {
         src : 'hsv_wheel.png',
         click : function(e) {
             self.position((e.pageX - $(this).parent().offset().left), (e.pageY - $(this).parent().offset().top));
-        },
+        }
     }))
     $("#shiva_dialogDiv").append($("<input>", {
         id : 'cp_current',
@@ -5187,7 +5181,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             height : '20px',
             border : '0',
             textAlign : 'center',
-            backgroundColor : 'transparent',
+            backgroundColor : 'transparent'
         },
         change : function() {
             var val = $(this).attr("value");
@@ -5212,7 +5206,6 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
     //SLIDERS
     $("#shiva_dialogDiv").append($("<div>", {
         id : 'cp_brightness',
-        class : 'slider',
         title : 'brightness',
         css : {
             width : '5px',
@@ -5222,16 +5215,15 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             top : '-120px',
             float : 'right',
             borderRadius : '8px',
-            border : '1px solid gray',
+            border : '1px solid gray'
         }
     }).slider({
         value : 100,
         orientation : 'vertical'
-    }));
+    }).addClass("slider"));
     $("#shiva_dialogDiv").append($("<div>", {
         id : 'cp_saturation',
         title : 'saturation',
-        class : 'slider',
         css : {
             width : '5px',
             height : '85px',
@@ -5240,12 +5232,12 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             top : '-120px',
             float : 'right',
             borderRadius : '8px',
-            border : '1px solid gray',
+            border : '1px solid gray'
         }
     }).slider({
         value : 100,
         orientation : 'vertical'
-    }));
+    }).addClass("slider"));
     $(".slider a").css("width", '20px');
     $(".slider a").css("height", '10px');
     $(".slider a").css("left", "-8px");
@@ -5264,15 +5256,15 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             height : '30px',
             position : 'relative',
             left : '172px',
-            top: '-25px',
-        },
+            top: '-25px'
+        }
     }));
     $("#shiva_dialogDiv").append($("<div>", {
         id : 'cp_basic',
         css : {
             width : '216px',
             position : 'relative',
-            left : '10px',
+            left : '10px'
         }
     }));
     $("#cp_basic").append($("<div>", {
@@ -5281,7 +5273,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             position : 'absolute',
             width : '216px',
             height : '20px',
-            border : '1px solid gray',
+            border : '1px solid gray'
         }
     }))
     $("#cp_basic").append($("<div>", {
@@ -5291,7 +5283,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             top : '20px',
             width : '216px',
             height : '20px',
-            border : '1px solid gray',
+            border : '1px solid gray'
         }
     }))
     var form = [16, 16];
@@ -5322,36 +5314,35 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             width : '216px',
             height : '30px',
             position : 'relative',
-            top : '50px',
+            top : '50px'
         }
     }));
 
     //SCHEMES
     $("#cp_control").append($("<button>", {
         id : 'cp_schemes',
-        class : 'button',
         html : 'Schemes',
         css : {
-            left : '18px',
+            left : '18px'
         },
         click : function() {
             $("#cp_schemediv").toggle();
         }
-    }))
+    }).addClass("button"));
     $("#shiva_dialogDiv").append($("<div>", {
         id : 'cp_schemediv',
         css : {
             height : '160px',
             position : 'relative',
             top : '60px',
-            paddingBottom : '30px',
+            paddingBottom : '30px'
 
         }
     }));
     $("#cp_schemediv").hide();
 
     $("#cp_schemediv").append($("<div>", {
-        id : 'cp_schemebox',
+        id : 'cp_schemebox'
     }));
     for (var i = 0; i < 4; i++) {
         $("#cp_schemebox").append($("<div>", {
@@ -5361,7 +5352,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
                 position : 'relative',
                 top : '-5px',
                 paddingBottom : '2px',
-                paddingTop : '2px',
+                paddingTop : '2px'
             }
         }));
     };
@@ -5378,7 +5369,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
                     left : (((92 / form[i].length) + 2) * j) + 2 + "%",
                     fontSize : '10px',
                     width : 92 / form[i].length + "%",
-                    height : '100%',
+                    height : '100%'
                 }
             }));
             for (var k = 0; k < form[i][j]; k++) {
@@ -5388,7 +5379,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
                         position : 'relative',
                         top : '1px',
                         width : 100 / form[i][j] + "%",
-                        height : '50%',
+                        height : '50%'
                     }
                 }));
             }
@@ -5408,36 +5399,34 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
 
     $("#cp_control").append($("<button>", {
         id : 'cp_nocolor',
-        class : 'button',
-        html : "No color",
+         html : "No color",
         css : {
-            left : '22px',
+            left : '22px'
         },
         click : function() {
             self.update("none");
         }
-    }));
+    }).addClass("button"));
 
     $("#cp_control").append($("<button>", {
         id : 'cp_OK',
-        class : 'button',
         html : "OK",
         css : {
             width : '60px',
-            left : '35px',
+            left : '35px'
         },
         click : function() {
             $("#shiva_dialogDiv").remove();
             return;
         }
-    }))
+    }).addClass("button"));
     $(".button").button();
     $(".button").css({
         position : 'relative',
         borderRadius : '8px',
         float : 'left',
         fontSize : '9px',
-        top : '3px',
+        top : '3px'
     });
 
     this.scheme = function() {    //Dynamically builds the schemes                                      
@@ -5503,7 +5492,6 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
     this.add = function(color_HEX) {                //Adds a new chip to the tabs
         cp_current = $(".tab").length;
         $("#cp_colorbar a:eq(1)").before($("<div>", {
-            class : 'tab',
             css : {
                 height : '16px',
                 width : '28px',
@@ -5512,18 +5500,18 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
                 padding : '2px',
                 position : 'relative',
                 left : '-6px',
-                float : 'left',
+                float : 'left'
             },
             click : function() {
                 $(".tab:not(:eq(" + $(this).index(".tab") + "))").css("borderBottom", '1px solid gray');
                 $(this).css("borderBottom", '0');
                 cp_current = $(this).index(".tab");
             }
-        }).append($("<div>", {
+        }).addClass("tab").append($("<div>", {
             css : {
                 fontSize : '10px',
                 width : "100%",
-                height : '100%',
+                height : '100%'
             }
         })).append($("<img>", {
             src : 'cpclose.png',
@@ -5531,16 +5519,16 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
                 width : '4px',
                 position : 'absolute',
                 top : '2.5px',
-                right : '2.5px',
+                right : '2.5px'
             },
             mouseenter : function() {
                 $(this).css({
-                    width : '10px',
+                    width : '10px'
                 })
             },
             mouseleave : function() {
                 $(this).css({
-                    width : '4px',
+                    width : '4px'
                 })
             },
             click : function() {
@@ -5833,48 +5821,48 @@ function CSV(inputID, mode, output_type, callback) {
 							top : '2%',
 							bottom : '76%',
 							width : '86%',
-							borderRadius : '5px',
+							borderRadius : '5px'
 						}
 					}))));
 					$("#csvControl").append($("<p>", {
 						css : {
 							position : 'relative',
-							left : '5px',
+							left : '5px'
 						}
 					}).append($("<span>", {
-						html : "Title: ",
+						html : "Title: "
 					})).append($("<input>", {
 						id : 'titleInput',
 						value: CSV_title,
 						css : {
 							position : 'relative',
 							left : '5px',
-							marginRight : '40px',
+							marginRight : '40px'
 						},
 						change: function(){
 							CSV_title = $(this).val();
 						}
 					})).append($("<span>", {
-						html : 'Data has header row?',
+						html : 'Data has header row?'
 					})).append($("<input>", {
 						id : 'dataHasHeader',
 						type : 'checkbox',
 						checked : (csvHasHeader) ? true : false,
 						css : {
 							position : 'relative',
-							left : '5px',
-						},
+							left : '5px'
+							},
 						change : function() {
 							csvHasHeader = ($(this).is(":checked")) ? true : false;
 							self.show()
-						}
+							}
 					}))).append($("<p>", {
 						css : {
 							position : 'relative',
-							left : '5px',
+							left : '5px'
 						}
 					}).append($("<span>", {
-						html : "Cell delimiter: ",
+						html : "Cell delimiter: "
 					})).append($("<select>", {
 						id : 'cellDelimInput',
 						html : '<option value=0>Comma (,)</option><option value=1>Tab (\\t)</option><option value=2> Other </option>',
@@ -5882,7 +5870,7 @@ function CSV(inputID, mode, output_type, callback) {
 							width : '100px',
 							position : 'relative',
 							left : '5px',
-							marginRight : '40px',
+							marginRight : '40px'
 						},
 						change : function() {
 							if ($(this).val() == 2) {
@@ -5894,13 +5882,13 @@ function CSV(inputID, mode, output_type, callback) {
 							}
 						}
 					})).append($("<span>", {
-						html : 'Text delimitier: ',
+						html : 'Text delimitier: '
 					})).append($("<select>", {
 						id : 'textDelimInput',
 						html : "<option value=0>Double quote (\")</option><option value=1>Single quote (\')</option>",
 						css : {
 							position : 'relative',
-							left : '5px',
+							left : '5px'
 						},
 						change : function() {
 							quote = textopts[$(this).val()];
@@ -5927,7 +5915,7 @@ function CSV(inputID, mode, output_type, callback) {
 						css : {
 							position : 'absolute',
 							bottom : '15px',
-							left : '350px',
+							left : '350px'
 						},
 						click : function() {
 							$(input).val("");
@@ -5938,7 +5926,7 @@ function CSV(inputID, mode, output_type, callback) {
 						css : {
 							position : 'absolute',
 							bottom : '15px',
-							right : '391px',
+							right : '391px'
 						},
 						click : function() {
 							self.done();
@@ -5960,28 +5948,26 @@ function CSV(inputID, mode, output_type, callback) {
 					for (var i = 0; i < 10; i++) {
 						var odd = (i % 2 == 0) ? 'lightgray' : 'transparent';
 						$("#CSV_preview_table").append($("<div>", {
-							class : 'row',
 							css : {
 								height : $('#CSV_preview_table').height() / 10 + 'px',
-								backgroundColor : odd,
+								backgroundColor : odd
 							}
-						}));
+						}).addClass("row"));
 						for (var j = 0; j < CSV_data[i].length; j++) {
 							var alignment = 'right';
 							if (isNaN(CSV_data[i][j]))
 								alignment = 'left';
 							$("#CSV_preview_table").children().eq(i).append($("<div>", {
 								html : (i === 0 && csvHasHeader) ? '<center><strong>' + CSV_data[i][j] + '</strong></center>' : CSV_data[i][j],
-								class : 'col' + j,
 								align : alignment,
 								css : {
 									paddingLeft : '2px',
 									paddingRight : '2px',
 									height : $('#CSV_preview_table').height() / 10 + 'px',
 									float : 'left',
-									outline : '1px solid black',
+									outline : '1px solid black'
 								}
-							}));
+							}).addClass("col"+j));
 							if ($('.col' + j).length > 1 && $('.col' + j).last().width() > $('.col' + j).eq($('.col' + j).last().index('.col' + j) - 1).width()) {
 								$('.col' + j).css('width', $('.col' + j).last().width() + 'px');
 							} else {

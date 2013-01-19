@@ -122,7 +122,7 @@ function SavePollValue(value)											// SAVE POLL VALUE
 function NewPollValue(val) 												// REACT TO DIAL
 {
 	if (!touch)																// If desktop
-		Sound("click");														// Click sound
+		Sound("detent");													// Click sound
 	$("#dial").css('top',val*-250);											// Set on proper image
 	SavePollValue(val);														// Save poll value
 }	

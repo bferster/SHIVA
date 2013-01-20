@@ -2146,7 +2146,6 @@ SHIVA_Show.prototype.MapAddMarkers=function(json)					// ADD MARKERS TO MAP FROM
 			for (j=0;j<cols;++j)  										// For each value
 				o[json[0][j]]=json[i][j];								// Key value pair
 			json[i]=o;													// Add to array
-			trace(o)
 			}
 		json=json.slice(1);												// Remove header
 		}

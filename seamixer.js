@@ -17,7 +17,7 @@ seaMixer.prototype.Run=function(ondoList) 							// RUN
  	for (var i=0;i<ondoList.length;++i)									// For each one
 		this.AddOnDo(ondoList[i]);										// Add to list and run if an init
   	var preInt=setInterval(onPreloadHandler,100); 						// Start preload timer
-	
+ 
 	function onPreloadHandler() {										// PRELOAD HANDLER
 		if (_this.preload < 1)	{										// If preload is done
 			clearInterval(preInt);										// Stop timer									
@@ -59,13 +59,18 @@ seaMixer.prototype.RunOnDo=function(ondo) 							// RUN AN INIT ONDO
 		case "fill": 													// Fill an iframe
 			if ((!ondo.src) || (!this.data[ondo.src]))					// No src
 				break;													// Quit
-			str="ShivaActChart=data|";									// Base			
+			str="ShivaAct"+ondo.type+"=data|";							// Base			
 			o=this.data[ondo.src];										// Point at table
 			str+=this.TableToString(this.data[ondo.src])				// Add table data
 			this.SendMessage(ondo.id,str);								// Send message to iframe
 			break;
 		case "action": 													// Run an action
-			this.SendMessage(ondo.id,ondo.type+"|"+ondo.p1);			// Send message to iframe
+			str=ondo.type;												// Add base
+			for (i=1;i<7;++i) {											// For each possible param
+				if (ondo["p"+i]) 										// If it is set
+					str+="|"+ondo["p"+i];								// Add it
+				}
+			this.SendMessage(ondo.id,str);								// Send message to iframe
 			break;
 		case "call": 													// Run a callback
 			window[ondo.id](ondo.p1,ondo.p2,ondo.p3,ondo.p4,ondo.p5,ondo.p6);	// Callback
@@ -98,6 +103,7 @@ seaMixer.prototype.Stop=function() 									// STOP
 seaMixer.prototype.ShivaEventHandler=function(e) 					// CATCH SHIVA EVENTS
 {
 	var i,o,n=this.ondos.length;
+	trace(e.data)
 	for (i=0;i<n;++i) {													// For each ondo
 		o=this.ondos[i];												// Point at it
 		if (e.data.indexOf(o.on) == 0)									// Got one
@@ -176,8 +182,9 @@ seaMixer.prototype.TableToString=function(table) 					// SAVE TABLE AS STRING
 		str+="[";														// Begin row
 		for (j=0;j<=cols;++j) { 										// For each value
 			val=table[i][j];											// Get value
-			if (isNaN(val))												// If not a number			
+			if ((isNaN(val)) || (!val)) {								// If not a number or blank		
 				str+="\""+val+"\"";										// Add value
+				}
 			else														// A number
 				str+=val;												// Add it
 			if (j != cols)												// If not last

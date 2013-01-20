@@ -696,8 +696,15 @@ SHIVA_Show.prototype.EarthActions=function(msg)						// REACT TO SHIVA ACTION ME
 			this.items[v[1]].visible=(v[0] == "ShivaActEarth=show").toString();	// Set visibility 
 		this.DrawEarthOverlays();											// Redraw
 		}
+	else if (v[0] == "ShivaActEarth=data")  {							// FILL MARKERS
+		if (v[1]) 														// If valid item	
+			this.EarthAddMarkers(v[1]);									// Add markers
+		}
 }
 
+SHIVA_Show.prototype.EarthAddMarkers=function(json)				// ADD MARKERS FROM JSON
+{
+}
 
 //  WEBPAGE   /////////////////////////////////////////////////////////////////////////////////////////// 
 
@@ -2045,8 +2052,24 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
  			if (ops && items[i].obj)
 				items[i].obj.setOptions(ops);
 			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
-	 			shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.Ya+"|"+e.latLng.Za);
+				var j,v;
+ 				for (j=0;j<_this.markerData.length;++j)	{				
+					v=_this.items[j].layerSource.split(",")
+					if (v[2] == this.title)					
+ 						break;											
+  					}
+   				shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.Ya+"|"+e.latLng.Za+"|"+j);
 	 			});
+			}
+		else if (items[i].layerType == "MarkerSet") {
+			if (items[i].visible == "true")
+				this.GetGoogleSpreadsheet(items[i].layerSource,this.MapAddMarkers);
+			else if (this.markerData) { 											
+				for (j=0;j<this.markerData.length;++j) {						
+					google.maps.event.removeListener(this.markerData[j].listener);	
+					this.markerData[j].obj.setMap(null);						
+					}
+				}
 			}
 		else if (items[i].layerType == "Overlay") {
 			v=items[i].layerOptions.split(",");
@@ -2087,7 +2110,6 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 	this.map.setZoom(Number(curZoom));									// Zoom map
 }
 
-
 SHIVA_Show.prototype.MapActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
 {
 	var v=msg.split("|");												// Split msg into parts
@@ -2100,6 +2122,58 @@ SHIVA_Show.prototype.MapActions=function(msg)						// REACT TO SHIVA ACTION MESS
 		if (this.items[v[1]]) 											// If valid item	
 			this.items[v[1]].visible=(v[0] == "ShivaActMap=show").toString();	// Set visibility 
 		this.DrawMapOverlays();											// Redraw
+		}
+	else if (v[0] == "ShivaActMap=data")  {								// FILL MARKERS
+		if (v[1]) 														// If valid item	
+			this.MapAddMarkers(v[1]);									// Add markers
+		}
+	else if (v[0] == "ShivaActMap=marker") { 							// SHOW/HIDE MARKERS
+		if (v[1] < this.markerData.length) 								// If valid
+			this.markerData[v[1]].obj.setMap(v[2]=="true"?this.map:null);	// Hide/show
+		}
+}
+
+
+SHIVA_Show.prototype.MapAddMarkers=function(json)					// ADD MARKERS TO MAP FROM JSON
+{
+	var i,j,o,mark,list,ops;
+	var _this=shivaLib;
+	if (typeof(json) == "string") {										// If stringified
+		json=$.parseJSON(json);											// Objectify
+		var cols=json[0].length;										// Number of fields
+		for (i=1;i<json.length;++i) {									// For each event
+			o={}
+			for (j=0;j<cols;++j)  										// For each value
+				o[json[0][j]]=json[i][j];								// Key value pair
+			json[i]=o;													// Add to array
+			trace(o)
+			}
+		json=json.slice(1);												// Remove header
+		}
+	if (_this.markerData) 												// If data
+		for (i=0;i<_this.markerData.length;++i) {						// For each old maker
+			google.maps.event.removeListener(_this.markerData[i].listener);	// Remove listener
+			_this.markerData[i].obj.setMap(null);						// Remove marker
+			}
+	_this.markerData=[];												// Clear data 
+	for (i=0;i<json.length;++i) {										// For each marker
+		mark=new google.maps.Marker();									// Create marker obj
+		ops={};															// New obj
+		if (json[i].title)												// If a title
+			ops["title"]=json[i].title;									// Set title
+		ops["position"]=new google.maps.LatLng(json[i].lat-0,json[i].lon-0); // Set position
+		if (json[i].icon)												// If an icon
+			ops["icon"]=json[i].icon;									// Set icon
+		mark.setOptions(ops);											// Set options
+		mark.setMap(shivaLib.map);										// Add to map
+		list=google.maps.event.addListener(mark,'click', function(e) {	// Add listener
+ 			var j;
+ 			for (j=0;j<_this.markerData.length;++j)						// Look thru data	
+ 				if (_this.markerData[j].title == this.title)			// If titles match
+ 						break;											// Quit looking
+  			shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.Ya+"|"+e.latLng.Za+"|"+j);
+			});
+		_this.markerData.push({ obj:mark, title:json[i].title,listener:list });	// Add to array
 		}
 }
 

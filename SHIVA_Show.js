@@ -2053,7 +2053,7 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 				items[i].obj.setOptions(ops);
 			items[i].listener=google.maps.event.addListener(items[i].obj,'click', function(e) {
 				var j,v;
- 				for (j=0;j<_this.markerData.length;++j)	{				
+ 				for (j=0;j<_this.items.length;++j)	{				
 					v=_this.items[j].layerSource.split(",")
 					if (v[2] == this.title)					
  						break;											

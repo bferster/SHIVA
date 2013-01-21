@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>SVT</name>
+	<name>SHIVA</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -14,14 +14,4 @@
 	<natures>
 		<nature>com.aptana.projects.webnature</nature>
 	</natures>
-	<filteredResources>
-		<filter>
-			<id>1356126080297</id>
-			<name></name>
-			<type>6</type>
-			<matcher>
-				<id>org.eclipse.ui.ide.multiFilter</id>
-			</matcher>
-		</filter>
-	</filteredResources>
 </projectDescription>

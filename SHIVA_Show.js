@@ -472,7 +472,6 @@ SHIVA_Show.prototype.SetLayer=function(num, mode, type) 				// SET LAYER
 {
 	var i;
 	var group=this.options.shivaGroup;										// Get group
-
 	if (this.items) {														// If items
 		if (type == "GoTo")	{												// If a goto 
 			for (i=0;i<this.items.length;++i) {								// For each item
@@ -2026,17 +2025,25 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 {
  	if (!this.items)
   		return;
-	var i,j,latlng,v,ops,curZoom,curLatLon;
+ 	var i,j,latlng,v,ops,curZoom,curLatLon;
 	var _this=this;
  	var items=this.items; 
     v=this.options.mapcenter.split(",")
 	curLatlng=new google.maps.LatLng(v[0],v[1]);
 	curZoom=v[2];
 	for (i=0;i<items.length;++i) {
+		ops=new Object();
 		if (items[i].listener)
 			google.maps.event.removeListener(items[i].listener);
-		ops=new Object();
-		if (items[i].obj) 
+		if ((items[i].obj) && (items[i].layerType == "MarkerSet")) {
+			trace(22)
+			for (j=0;j<items[i].obj.length;++j) {						
+				google.maps.event.removeListener(items[i].obj[j].listener);	
+				items[i].obj[j].obj.setMap(null);
+				}
+			items[i].obj=null;
+			}
+		else if (items[i].obj)
 			items[i].obj.setMap(null);
 		if (items[i].layerType == "Drawn") {
 			items[i].obj=new ShivaCustomMapOverlay()
@@ -2062,14 +2069,12 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 	 			});
 			}
 		else if (items[i].layerType == "MarkerSet") {
-			if (items[i].visible == "true")
-				this.GetGoogleSpreadsheet(items[i].layerSource,this.MapAddMarkers);
-			else if (this.markerData) { 											
-				for (j=0;j<this.markerData.length;++j) {						
-					google.maps.event.removeListener(this.markerData[j].listener);	
-					this.markerData[j].obj.setMap(null);						
-					}
+			if (items[i].visible == "true") {
+				this.items[i].obj=[];
+				this.markerData=i;
+				this.GetGoogleSpreadsheet(items[i].layerSource,function(d){_this.MapAddMarkers(d,_this.items[_this.markerData].obj)});
 				}
+			continue;
 			}
 		else if (items[i].layerType == "Overlay") {
 			v=items[i].layerOptions.split(",");
@@ -2133,28 +2138,29 @@ SHIVA_Show.prototype.MapActions=function(msg)						// REACT TO SHIVA ACTION MESS
 		}
 }
 
-
-SHIVA_Show.prototype.MapAddMarkers=function(json)					// ADD MARKERS TO MAP FROM JSON
+SHIVA_Show.prototype.MapAddMarkers=function(json, mData)			// ADD MARKERS TO MAP FROM JSON
 {
 	var i,j,o,mark,list,ops;
 	var _this=shivaLib;
-	if (typeof(json) == "string") {										// If stringified
+	if (typeof(json) == "string") {										// If it came from shivaEvent
 		json=$.parseJSON(json);											// Objectify
 		var cols=json[0].length;										// Number of fields
 		for (i=1;i<json.length;++i) {									// For each event
-			o={}
+			o={};														// Fresh obj
 			for (j=0;j<cols;++j)  										// For each value
 				o[json[0][j]]=json[i][j];								// Key value pair
 			json[i]=o;													// Add to array
 			}
 		json=json.slice(1);												// Remove header
-		}
-	if (_this.markerData) 												// If data
-		for (i=0;i<_this.markerData.length;++i) {						// For each old maker
-			google.maps.event.removeListener(_this.markerData[i].listener);	// Remove listener
-			_this.markerData[i].obj.setMap(null);						// Remove marker
+		mData=this.markerData;											// Point at markerdata
+		if (mData) {													// If data
+			for (i=0;i<mData.length;++i) {								// For each old maker
+				google.maps.event.removeListener(mData[i].listener);	// Remove listener
+				mData[i].obj.setMap(null);								// Remove marker
+				}
 			}
-	_this.markerData=[];												// Clear data 
+		this.markerData=mData=[];										// Clear data 
+		}
 	for (i=0;i<json.length;++i) {										// For each marker
 		mark=new google.maps.Marker();									// Create marker obj
 		ops={};															// New obj
@@ -2167,12 +2173,12 @@ SHIVA_Show.prototype.MapAddMarkers=function(json)					// ADD MARKERS TO MAP FROM
 		mark.setMap(shivaLib.map);										// Add to map
 		list=google.maps.event.addListener(mark,'click', function(e) {	// Add listener
  			var j;
- 			for (j=0;j<_this.markerData.length;++j)						// Look thru data	
- 				if (_this.markerData[j].title == this.title)			// If titles match
+ 			for (j=0;j<mData.length;++j)								// Look thru data	
+ 				if (mData[j].title == this.title)						// If titles match
  						break;											// Quit looking
   			shivaLib.SendShivaMessage("ShivaMap=marker|"+this.title+"|"+e.latLng.Ya+"|"+e.latLng.Za+"|"+j);
 			});
-		_this.markerData.push({ obj:mark, title:json[i].title,listener:list });	// Add to array
+		mData.push({ obj:mark, title:json[i].title,listener:list });	// Add to array
 		}
 }
 

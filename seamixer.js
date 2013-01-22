@@ -60,7 +60,6 @@ seaMixer.prototype.RunOnDo=function(ondo) 							// RUN AN INIT ONDO
 			if ((!ondo.src) || (!this.data[ondo.src]))					// No src
 				break;													// Quit
 			str="ShivaAct"+ondo.type+"=data|";							// Base			
-			o=this.data[ondo.src];										// Point at table
 			str+=this.TableToString(this.data[ondo.src])				// Add table data
 			this.SendMessage(ondo.id,str);								// Send message to iframe
 			break;
@@ -148,13 +147,13 @@ seaMixer.prototype.LoadSpreadsheet=function(ondo) 					// GET GOOGLE DOCS SPREAD
  	var _this=this;														// Point at mixer obj
   
     function handleQueryResponse(response) {							// HANDLE LOAD CALLBACK
-	    var i,j,lab,n;
-		var o=new Array();
+ 	    var i,j,lab,n;
+		var o=[],oo=[];
 		var data=response.getDataTable();								// Point at table
 		var cols=data.getNumberOfColumns();								// Get num cols
 		var rows=data.getNumberOfRows();								// Get num rows
- 		var oo=_this.data[ondo.id]=new Array();							// Alloc data array
-		for (i=0;i<cols;++i) {											// For each field
+ 		
+ 		for (i=0;i<cols;++i) {											// For each field
 		 	lab=$.trim(data.getColumnLabel(i));							// Get trimmed label
 		 	if (!lab)													// If nothing there					
 		 		break;													// Quit 
@@ -170,6 +169,7 @@ seaMixer.prototype.LoadSpreadsheet=function(ondo) 					// GET GOOGLE DOCS SPREAD
  			}
   		if (ondo.preload)												// If set for preloading
  			_this.preload=Math.max(_this.preload-1,0);					// Dec count
+		_this.data[ondo.id]=oo;											// Alloc data array
        }
 }
 

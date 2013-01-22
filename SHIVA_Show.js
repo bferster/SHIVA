@@ -2036,7 +2036,6 @@ SHIVA_Show.prototype.DrawMapOverlays=function() 										//	DRAW MAP OVERLAYS
 		if (items[i].listener)
 			google.maps.event.removeListener(items[i].listener);
 		if ((items[i].obj) && (items[i].layerType == "MarkerSet")) {
-			trace(22)
 			for (j=0;j<items[i].obj.length;++j) {						
 				google.maps.event.removeListener(items[i].obj[j].listener);	
 				items[i].obj[j].obj.setMap(null);

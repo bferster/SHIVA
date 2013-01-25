@@ -423,3 +423,4 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 		obj.items[num].ans=$("#shiva_stepa").val();
 	}
 
+

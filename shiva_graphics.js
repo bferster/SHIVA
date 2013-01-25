@@ -1,7 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // SHIVA GRAPHICS
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-
 function SHIVA_Graphics() 																			// CONSTRUCTOR
 {
 	this.shadowOffX=this.shadowOffY=this.curShadowCol=this.curShadowBlur=0;	
@@ -276,5 +275,106 @@ SHIVA_Graphics.prototype.GetImage=function(ctx, file, left, top, wid, hgt)						
 		ctx.drawImage(image,left,top,wid,hgt)
 		}
 	return image;
+}
+
+///////// EVENTS   //////////
+
+SHIVA_Graphics.prototype.resolveID=function(id)															// CONVERT STRING ID TO DOM ID
+{
+	if (typeof(id) != "object")
+		id=document.getElementById(id);
+	return id;
+}
+
+SHIVA_Graphics.prototype.AddListener=function(id, eventType, handler) 									// ADD EVENT LISTENER
+{	
+	$("#"+id)[0].addEventListener(eventType,handler,false);
+}
+
+SHIVA_Graphics.prototype.RemoveListener=function(id, eventType, handler) 								// REMOVE EVENT LISTENER
+{	
+	this.resolveID(id).removeEventListener(eventType,handler,false);
+}
+
+SHIVA_Graphics.prototype.SetDrag=function(id, mode) 													// START/STOP DRAG
+{
+	id=$("#"+id);
+	id.g=this;
+	id.draggable=mode;	
+	if (!mode)
+		this.removeListener(id,'mousedown',dragDown);
+	else
+		this.addListener(id,'mousedown',dragDown)
+
+	function dragDown(e) {
+		if (!e.target.draggable)
+			return
+		e.target.dragX=e.pageX-e.target.style.left.slice(0,-2);
+		e.target.dragY=e.pageY-e.target.style.top.slice(0,-2)
+		e.target.g.addListener(e.target,'mousemove',dragMove)
+		e.target.g.addListener(e.target,'mouseup',dragUp)
+		e.target.inDrag=true;
+		}
+	function dragMove(e) {
+		e.target.style.left=e.pageX-e.target.dragX;
+		e.target.style.top=e.pageY-e.target.dragY;
+		}
+	function dragUp(e) {
+		e.target.g.removeListener(e.target,'mousemove',dragMove)
+		e.target.g.removeListener(e.target,'mouseup',dragUp)
+		e.target.inDrag=false;
+		}
+}
+
+///////// STRING   //////////
+
+SHIVA_Graphics.prototype.SecsToTime=function(time, frameRate) 											// CONVERT MS TO TIMECODE
+{				
+	var timecode="";																
+	if (!frameRate)
+		frameRate=24;
+	time/=1000;																		
+	var mins=(time/60)>>0;																					
+	var secs=(time%60)>>0;														
+	var frms=((time-(secs+(mins*60)))*frameRate)>>0;							
+	if (mins < 10)																	
+		timecode+="0";															
+	timecode+=mins+":";																				
+	if (secs < 10)																
+		timecode+="0";															
+	timecode+=secs+":";																						
+	if (frms < 10)																
+		timecode+="0";															
+	timecode+=frms;																							
+	return timecode
+}
+
+SHIVA_Graphics.prototype.SetTextFormat=function(ctx, format) 									// SET TEXT FORMAT
+{		
+	var v=format.split(",");
+	var pair,key,val;
+	var bold="",ital="",font="",size="12";		
+	for (var i=0;i<v.length;++i) {
+		pair=v[i].split("=")
+		key=pair[0];			val=pair[1];
+		if (key == "align") 	ctx.textAlign=val;
+		if (key == "color") 	ctx.fillStyle=val;
+		if (key == "font")  	font=val;
+		if (key == "size")  	size=val+"px";
+		if (key == "bold")  	bold="bold";
+		if (key == "italic")  	ital="italic";
+		}
+	if (font)	
+		ctx.font=bold+" "+ital+" "+size+" "+font;
+	return size.substring(0,size.length-2);
+}
+
+SHIVA_Graphics.prototype.DrawText=function(ctx, text, x, y, format) 							// DRAW TEXT
+{		
+	try {
+		if (format)
+			this.SetTextFormat(ctx,format);
+		ctx.fillText(text,x,y);	
+	} catch(e){};
 }
 

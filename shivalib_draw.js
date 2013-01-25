@@ -615,15 +615,6 @@ SHIVA_Draw.prototype.onMouseMove=function(e)							// MOUSE MOVE HANDLER
 		}
 }
 
-SHIVA_Draw.prototype.isTouchDevice=function() 							// IS THIS A TOUCH DEVICE?
-{
-	var el=document.createElement('div');									// Make div
-	el.setAttribute('ongesturestart', 'return;');							// Try to set gesture
-	if (typeof el.ongesturestart == "function")								// If supports touch		
-		return true;														// Return true
-	else 																	// Doesn't support touch
-		return false;														// Return false
-}
 
 SHIVA_Draw.prototype.onKeyDown=function(e)								// KEY DOWN HANDLER
 {
@@ -980,5 +971,4 @@ SHIVA_Draw.prototype.IdeaDrop=function(from, to) 						//	HANDLE IDEA NODE DRAG 
 }
 
                                                                      
-                                                                     
-             
+                                                                                  

@@ -478,6 +478,16 @@ SHIVA_Show.prototype.GetDataFromManager=function(type, index)
 		window.parent.postMessage("GetFile=KML="+index,"*");
 }
 
+/////// QUERY EDITOR
+
+SHIVA_Show.prototype.QueryEditor=function(id)
+{
+	if ($("#propInput0").val())
+		new SHIVA_QueryEditor($("#propInput0").val(),$("#"+id).val(),id,false);
+	else
+		this.Prompt("Data Filter","You need to define a data source first!","")
+}
+
 SHIVA_Show.prototype.ShiftItem=function(dir,items)
 {
 	var active=$("#accord").accordion("option","active");
@@ -493,5 +503,237 @@ SHIVA_Show.prototype.ShiftItem=function(dir,items)
 	items[active]=o;
 	this.Draw();
 	return pos;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//	QUERY EDITOR
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function SHIVA_QueryEditor(source, query, returnID,fieldNames) 										
+{
+	this.advancedMode=false;
+	$("#dataDialogDiv").dialog("destroy");
+	$("#dataDialogDiv").remove();
+	shivaLib.qe=this;
+	if (query.indexOf("  ") == 0) 
+		this.advancedMode=true,query=query.substr(2);
+	else if (!query) 
+ 		query="SELECT * WHERE A = ? ORDER BY none"
+ 	if (query.indexOf(" ORDER BY ") == -1)
+ 		query+=" ORDER BY none";
+	this.source=source;
+	this.query=query.replace(/  /g," ");
+	this.curFields=["A","B","C"];
+	var thisObj=this;
+	var ops={ 
+		width:'auto',height:'auto',modal:true,title:'Data filter',position:[330,40],
+		buttons: {
+			OK: function() {
+				if (thisObj.advancedMode)
+					thisObj.query="  "+$("#curQuery").val();
+				if (!fieldNames) {
+					for (i=0;i<thisObj.curFields.length;++i)
+						thisObj.query=thisObj.query.replace(RegExp(thisObj.curFields[i],"g"),String.fromCharCode(i+65));
+					}
+				if (!thisObj.query.match(/\?/)) {
+					thisObj.query=thisObj.query.replace(/ORDER BY none/g,"");
+					if (returnID == "curQueryDiv")
+						$("#"+returnID).html(thisObj.query);
+					else if (returnID)
+						$("#"+returnID).val(thisObj.query);
+					window.postMessage("ShivaDraw","*");
+					}
+				$(this).dialog("destroy");
+				$("#dataDialogDiv").remove();
+				$("#propInput0").trigger("onchange");
+				},
+			'Cancel': function() {
+				$(this).dialog("destroy");
+				$("#dataDialogDiv").remove();
+				}
+			}
+		}
+	$("body").append("<div id='dataDialogDiv'/>");
+	$("#dataDialogDiv").dialog(ops);
+	if (source) {
+		var googleQuery=new google.visualization.Query(source);
+	   	googleQuery.send(handleQueryResponse);
+ 		}
+	this.DrawQuery();
+
+	function handleQueryResponse(response) {
+	    var i,j,key;
+		var data=response.getDataTable();
+		var rows=data.getNumberOfRows();
+		var cols=data.getNumberOfColumns();
+	 	thisObj.curFields=[];
+	 	if ((thisObj.query.indexOf(" A ") != -1) && (thisObj.query.charAt(thisObj.query.length-1) != " "))
+	 		thisObj.query+=" ";	
+	 	for (j=0;j<cols;++j) {
+			key=$.trim(data.getColumnLabel(j)).replace(/ /g,"_");
+			if (!key)
+				continue;
+			thisObj.query=thisObj.query.replace(RegExp(" "+String.fromCharCode(j+65)+" ","g")," "+key+" ");
+	  		thisObj.curFields.push(key);
+			}
+		thisObj.query=$.trim(thisObj.query);
+		thisObj.DrawQuery();
+	}
+}
+
+SHIVA_QueryEditor.prototype.DrawQuery=function() 
+{
+	var i,num;
+	var select="all";
+	var order="none";
+	var thisObj=this;
+	if (this.advancedMode) {
+		str="<textArea id='curQuery' rows='4' cols='50' />";
+		str+="<p><input type='checkbox' id='advedit' checked='checked' onclick='shivaLib.qe.AdvancedMode(false)'> Advanced editing mode";
+		str+="<p><Button id='queryAdvEdit'>Test</button> ";
+		str+="Click <a href='http://code.google.com/apis/chart/interactive/docs/querylanguage.html' target='_blank'>here</a> for information on formatting</p></p>";
+		str+="<br/><div id='testShowDiv'/>"
+		$("#dataDialogDiv").html(str);
+		$("#curQuery").val(this.query.replace(/ORDER BY none/g,"").replace(/  /g," "));
+		$("#queryAdvEdit").click( function() { thisObj.TestQuery(); });
+		this.TestQuery();
+		return;
+		}
+	i=this.query.indexOf(" WHERE ");
+	if (i == -1)
+		i=this.query.indexOf(" ORDER BY ");
+	select=this.query.substring(7,i);
+	if (select == "*")
+		select="all";
+	i=this.query.indexOf(" ORDER BY ");
+	order=this.query.substring(i+10);
+	i=this.query.indexOf(" WHERE ");
+	var str="<div style='border 1px solid'><br/><table id='clauseTable' cellspacing='0' cellpadding='0'>";
+	if (i != -1) {
+		j=this.query.indexOf(" ORDER BY ");
+		var v=this.query.substring(i+7,j).split(" ");
+		i=0;
+		str+=this.AddClause("IF",v[0],v[1],v[2],v.length<6,i++);
+		for (j=3;j<v.length;j+=4)
+			str+=this.AddClause(v[j],v[j+1],v[j+2],v[j+3],(j+5)>v.length,i++);
+		}
+	var q=this.query.replace(/WHERE /g,"<br/>WHERE ").replace(/ORDER BY /g,"<br/>ORDER BY ")
+	str+="<tr height='12'></tr>";
+	str+="</div><tr><td><b>SHOW&nbsp;&nbsp;</b></td><td align='middle'>&nbsp;";
+	str+="<select multiple='multiple' size='3'id='sel' onchange='shivaLib.qe.SetQueryString()'>";
+	str+="<option>all</option>";
+	for (i=0;i<this.curFields.length;++i)	str+="<option>"+this.curFields[i]+"</option>";
+	str+="</select></td><td>&nbsp;&nbsp;<b>ORDER BY</B> &nbsp;<select id='ord' onchange='shivaLib.qe.SetQueryString()'>";
+	str+="<option>none</option>";
+	for (i=0;i<this.curFields.length;++i)	str+="<option>"+this.curFields[i]+"</option>";
+	str+="</select></td></tr>";
+	str+="</table><p><input type='checkbox' id='advedit' onclick='shivaLib.qe.AdvancedMode(true)'/> Advanced editing mode</p>";
+	str+="<div id='curQuery' style='overflow:auto'><span style='color:#999'><b>"+q+"</b></span></div>";
+	str+="<br/><div id='testShowDiv'/>"
+	$("#dataDialogDiv").html(str);
+	$("#sel").val(select.split(","));
+	$("#ord").val(order);
+	this.TestQuery();
+}
+
+SHIVA_QueryEditor.prototype.TestQuery=function() 
+{
+	var q=this.query;
+	if (q.match(/\?/)) 
+		q="";
+	for (i=0;i<this.curFields.length;++i)
+		q=q.replace(RegExp(this.curFields[i],"g"),String.fromCharCode(i+65));
+	q=q.replace(/ORDER BY none/g,"");
+	if (this.advancedMode)
+		q=$("#curQuery").val();
+	var tbl={"chartType": "Table","dataSourceUrl":this.source,"query":q,"shivaGroup":"Data"};
+	$("#testShowDiv").empty();
+	$("#testShowDiv").css("width",$("#dataDialogDiv").css("width"));
+	$("#testShowDiv").css("height","200px");
+	$("#testShowDiv").css("overflow","auto");
+	new SHIVA_Show("testShowDiv",tbl);
+}
+
+SHIVA_QueryEditor.prototype.AdvancedMode=function(mode)
+{
+	this.advancedMode=mode;
+	if (!mode)	
+		this.query="SELECT * WHERE A = * ORDER BY none";
+	this.DrawQuery();
+	if (mode)	
+		$("#curQuery").val(this.query.replace(/ORDER BY none/g,"").replace(/  /g," "));
+}
+
+SHIVA_QueryEditor.prototype.AddClause=function(clause, subj, pred, obj, last, row)	
+{
+	var str="<tr valign='top'><td>";
+	if (clause != "IF") 
+		str+=shivaLib.MakeSelect("clause"+row,0,["AND","OR","NOT"],clause,"onchange='shivaLib.qe.SetQueryString()'");
+	else
+		str+="<b>IF</b>";
+	str+="</td><td>&nbsp;"+shivaLib.MakeSelect("subject"+row,0,this.curFields,subj,"onchange='shivaLib.qe.SetQueryString()'");
+	str+="</td><td>&nbsp;&nbsp;<b>IS&nbsp; </b>"+shivaLib.MakeSelect("predicate"+row,0,["<",">","=","!=","<=",">=","has"],pred,"onchange='shivaLib.qe.SetQueryString()'");
+	str+=" <input type='input' size='8' id='object"+row+"' value='"+obj+"' onchange='shivaLib.qe.SetQueryString()'/>";
+	if (clause == "IF") 
+		str+="&nbsp;<img src='adddot.gif' onclick='shivaLib.qe.AddNewClause("+row+")'style='vertical-align:middle'>";
+	else	
+		str+="&nbsp;<img src='trashdot.gif' onclick='shivaLib.qe.DeleteClause("+row+")' style='vertical-align:middle'>";
+	str+="</td></tr>";
+	$("#pred").val(pred);
+	return str;
+}
+
+SHIVA_QueryEditor.prototype.AddNewClause=function(num)
+{
+	var i=this.query.indexOf(" ORDER BY ");
+	this.query=this.query.substr(0,i)+" AND * = ?"+this.query.substr(i);
+	this.DrawQuery();
+	shivaLib.Sound("ding");
+}
+
+SHIVA_QueryEditor.prototype.DeleteClause=function(num)
+{
+	var v=this.query.split(" ");
+	var n,i,str="";
+	for (n=0;n<v.length;++n)
+		if (v[n] == "WHERE")
+			break;
+	n=n+(num*4)
+	for (i=0;i<n;++i)
+		str+=v[i]+" ";
+	for (i=n+4;i<v.length;++i)
+		str+=v[i]+" ";
+	this.query=str;
+	this.DrawQuery();
+	shivaLib.Sound("delete");
+}
+
+SHIVA_QueryEditor.prototype.SetQueryString=function()
+{
+	var i,j,num=0;
+	i=this.query.indexOf(" WHERE ");
+	if (i != -1) {
+		j=this.query.indexOf(" ORDER BY ");
+		var v=this.query.substring(i+7,j).split(" ");
+		num=(v.length+1)/4;
+		}
+	str="SELECT "
+	var sel=$("#sel").val();
+	if (sel == "all")
+		sel="*";
+	str+=sel+" ";
+	if (num)
+		str+="WHERE ";
+	for (i=0;i<num;++i) {
+		if (i)
+			str+=$("#clause"+i).val()+" ";
+		str+=$("#subject"+i).val()+" ";
+		str+=$("#predicate"+i).val()+" ";
+		str+=$("#object"+i).val();
+		str+=" ";
+		}		
+	str+="ORDER BY "+ $("#ord").val();
+	this.query=str;
+	this.DrawQuery();
 }
 

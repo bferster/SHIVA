@@ -14,7 +14,7 @@
 		.knob {
 		   	width:250px;
 		   	height:250px;
-		   	top:85px;
+		   	top:55px;
 		   	left:25px;
 		   	overflow:hidden;
 		   	position:absolute;
@@ -23,18 +23,26 @@
 		   	position:relative;
 		   	top:-1500px;
 			}
-		.propTable { background-color:#eee;border-radius:8px;
+		.shadedBack { background-color:#eee;border-radius:8px;
 				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
 				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
 				  	 border-collapse: collapse;
 				  	 }
+		.noSelect {	
+			-webkit-touch-callout: none;-webkit-user-select:none;-khtml-user-select: none;
+			-moz-user-select: none;-ms-user-select: none;user-select: none;
+			}	  	 
+		.noDrag {
+			 -webkit-user-drag: none; -moz-user-drag: none; user-drag: none;
+			}	
+				  	 
 	</style>
 </head>
 <body>
-	<div id='back' class="propTable" style='position:absolute;width:300px;height:375px;left:50%;margin:0 0 0 -150px'>
-		<p style='font-size:xx-large;text-shadow:1px 1px #ccc;text-align:center'>ClassPoll</p>
-		<div id="slider" style='position:absolute;top:350px;left:33px;width:250px'></div>
-		<div class="knob"><img id='dial' src="VolumeKnob.png"></div>
+	<div id='back' class="shadedBack" style='position:absolute;width:300px;height:345px;left:50%;margin:0 0 0 -150px'>
+		<div style='font-size:xx-large;text-shadow:1px 1px #ccc;text-align:center'>ClassPoll</div>
+		<div id="slider" style='position:absolute;top:320px;left:33px;width:250px'></div>
+		<div class="knob"><img id='dial' src="VolumeKnob.png" class="noDrag"></div>
 	</div>
 <script>
 
@@ -70,6 +78,7 @@
 			$("#slider" ).slider( "value",val);								// Move slider
 			NewPollValue(val);												// Set value
 			});
+		$("#back").addClass("noSelect");									// Don't select
 		});
 
 

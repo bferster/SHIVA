@@ -1,5 +1,5 @@
 cd ../mapscholar
-echo "Committing MapScholar:"  \"$@\"
+echo "Committing MapScholar:"
 msg=$@
 git commit -a -m "$msg" 
 git push

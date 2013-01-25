@@ -3669,6 +3669,7 @@ SHIVA_Graphics.prototype.SetDrag=function(id, mode) 													// START/STOP D
 }
 
 
+
 ///////// DEBUG   //////////
 
 SHIVA_Graphics.prototype.EnumObject=function(obj) 														// DEBUG TOOL

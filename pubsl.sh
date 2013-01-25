@@ -9,5 +9,6 @@ shivalib_video.js \
 shivalib_subway.js \
 shivalib_network.js \
 shivalib_timeline.js \
-> shivalib-min.js 
-jsmin <shivalib-min.js >shivalib-min2.js
+> tmp 
+jsmin <tmp >shivalib-min.js
+rm tmp

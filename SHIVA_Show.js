@@ -1582,6 +1582,7 @@ SHIVA_Show.prototype.DrawControl=function() 											//	DRAW CONTROL
 				}										
 			}
 	}
+
 	
 	function DrawInfoBox(items)
 	{
@@ -3627,7 +3628,6 @@ SHIVA_Graphics.prototype.resolveID=function(id)															// CONVERT STRING 
 		id=document.getElementById(id);
 	return id;
 }
-
 
 SHIVA_Graphics.prototype.AddListener=function(id, eventType, handler) 									// ADD EVENT LISTENER
 {	

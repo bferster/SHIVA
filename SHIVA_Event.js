@@ -527,7 +527,8 @@ SHIVA_Event.prototype.CreateEventDisplay=function(num, params) 			// CREATE EVEN
 			$("#shivaEvent-"+num).html(str);								// Set content								
 			this.SetPoller(50);												// Set poller bar centered	
 			$("#shivaEvent-"+num).mouseup( function(e) {					// ON MOUSEUP HANDLER
-				var val=1-(e.offsetY/$("#shivaPoller").parent().height());	// Get value 1-0
+				var y=e.clientY-$("#shivaPoller").parent().css("top").replace(/px/,"");		// Get top
+				var val=1-(y/$("#shivaPoller").parent().height());			// Get value 1-0
 				_this.SetPoller(val*100)
 				_this.mouseDown=false;										// Set mouse status
 				});
@@ -536,7 +537,8 @@ SHIVA_Event.prototype.CreateEventDisplay=function(num, params) 			// CREATE EVEN
 				});
 			$("#shivaEvent-"+num).mousemove( function(e) {					// ON MOUSEMOVE HANDLER
 				if (_this.mouseDown) {										// If mouse down
-					var val=1-(e.offsetY/$("#shivaPoller").parent().height());	// Get value 1-0
+					var y=e.clientY-$("#shivaPoller").parent().css("top").replace(/px/,"");		// Get top
+					var val=1-(y/$("#shivaPoller").parent().height());		// Get value 1-0
 					_this.SetPoller(val*100);
 					}
 				});
@@ -583,7 +585,7 @@ SHIVA_Event.prototype.SetPoller=function(val) 							// SET POLLER BAR
 	var h=$("#shivaPoller").parent().height()/2;							// Get height of bar
 	var t=$("#shivaPoller").parent().position().top-32;						// Get top of bar
 	var d=Math.max(Math.abs(val-50),2)/50*h;								// Poll bar hgt
-	$("#shivaPoller").height(d);											// Set bar height
+	$("#shivaPoller").height(d-1);											// Set bar height
 	if (val < 50)															// Negative
 		$("#shivaPoller").css("background-color","#990000").css("top",(t+h)+"px"); // Red, below middle
 	else																	// Positive

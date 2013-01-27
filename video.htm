@@ -103,6 +103,8 @@
 
 	function shivaEventHandler(e)
 	{
+		if (e.data.indexOf("ShivaVideo") != -1)
+			trace(e.data)
 		if (e.data.indexOf("GetJSON") == 0) 
 			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
 		else if (e.data.indexOf("GetWebPage") == 0) 
@@ -175,17 +177,11 @@
 		shivaLib.ev.EventEditor();
 	}
 
-
 	function SetAttributes()
 	{
 		shivaLib.SetAttributes(props);
 	}	
 
-	function trace(str) 
-	{ 
-		console.log(str) 
-	}
-	
 	
 </script>
 </body></html>

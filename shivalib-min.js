@@ -445,8 +445,7 @@ this.advancedMode=true,query=query.substr(2);else if(!query)
 query="SELECT * WHERE A = ? ORDER BY none"
 if(query.indexOf(" ORDER BY ")==-1)
 query+=" ORDER BY none";this.source=source;this.query=query.replace(/  /g," ");this.curFields=["A","B","C"];var thisObj=this;var ops={width:'auto',height:'auto',modal:true,title:'Data filter',position:[330,40],buttons:{OK:function(){if(thisObj.advancedMode)
-thisObj.query="  "+$("#curQuery").val();if(!fieldNames){for(i=0;i<thisObj.curFields.length;++i)
-thisObj.query=thisObj.query.replace(RegExp(thisObj.curFields[i],"g"),String.fromCharCode(i+65));}
+thisObj.query="  "+$("#curQuery").val();if(!fieldNames){var i,f;for(i=0;i<thisObj.curFields.length;++i){f=thisObj.curFields[i].replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,"\\$&");thisObj.query=thisObj.query.replace(RegExp(f,"g"),String.fromCharCode(i+65));}}
 if(!thisObj.query.match(/\?/)){thisObj.query=thisObj.query.replace(/ORDER BY none/g,"");if(returnID=="curQueryDiv")
 $("#"+returnID).html(thisObj.query);else if(returnID)
 $("#"+returnID).val(thisObj.query);window.postMessage("ShivaDraw","*");}
@@ -467,9 +466,9 @@ var q=this.query.replace(/WHERE /g,"<br/>WHERE ").replace(/ORDER BY /g,"<br/>ORD
 str+="<tr height='12'></tr>";str+="</div><tr><td><b>SHOW&nbsp;&nbsp;</b></td><td align='middle'>&nbsp;";str+="<select multiple='multiple' size='3'id='sel' onchange='shivaLib.qe.SetQueryString()'>";str+="<option>all</option>";for(i=0;i<this.curFields.length;++i)str+="<option>"+this.curFields[i]+"</option>";str+="</select></td><td>&nbsp;&nbsp;<b>ORDER BY</B> &nbsp;<select id='ord' onchange='shivaLib.qe.SetQueryString()'>";str+="<option>none</option>";for(i=0;i<this.curFields.length;++i)str+="<option>"+this.curFields[i]+"</option>";str+="</select></td></tr>";str+="</table><p><input type='checkbox' id='advedit' onclick='shivaLib.qe.AdvancedMode(true)'/> Advanced editing mode</p>";str+="<div id='curQuery' style='overflow:auto'><span style='color:#999'><b>"+q+"</b></span></div>";str+="<br/><div id='testShowDiv'/>"
 $("#dataDialogDiv").html(str);$("#sel").val(select.split(","));$("#ord").val(order);this.TestQuery();}
 SHIVA_QueryEditor.prototype.TestQuery=function()
-{var q=this.query;if(q.match(/\?/))
-q="";for(i=0;i<this.curFields.length;++i)
-q=q.replace(RegExp(this.curFields[i],"g"),String.fromCharCode(i+65));q=q.replace(/ORDER BY none/g,"");if(this.advancedMode)
+{var f,q=this.query;if(q.match(/\?/))
+q="";for(i=0;i<this.curFields.length;++i){f=this.curFields[i].replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g,"\\$&");q=q.replace(RegExp(f,"g"),String.fromCharCode(i+65));}
+q=q.replace(/ORDER BY none/g,"");if(this.advancedMode)
 q=$("#curQuery").val();var tbl={"chartType":"Table","dataSourceUrl":this.source,"query":q,"shivaGroup":"Data"};$("#testShowDiv").empty();$("#testShowDiv").css("width",$("#dataDialogDiv").css("width"));$("#testShowDiv").css("height","200px");$("#testShowDiv").css("overflow","auto");new SHIVA_Show("testShowDiv",tbl);}
 SHIVA_QueryEditor.prototype.AdvancedMode=function(mode)
 {this.advancedMode=mode;if(!mode)

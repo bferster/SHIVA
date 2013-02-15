@@ -12,7 +12,7 @@ function SHIVA_Show(container, options, editMode) 						// CONSTRUCTOR
 	this.container=container;
 	this.editMode=editMode;
 	this.items=null;
-	this.overlay=null;
+	this.overlay=null;t
 	this.g=null;
 	this.qe=null;
 	this.ev=null;
@@ -93,7 +93,7 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
           	break;
 		case "Timeglider": 													 // Time glider			
 			obj="timeglider";								    			 // Object to test for
-			lib="//mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/timeglider-all.js";
+			lib="timeglider-all.js";
          	break;
 		case "Video": 														// Popcorn
 			obj="Popcorn.smart";											// Object to test for

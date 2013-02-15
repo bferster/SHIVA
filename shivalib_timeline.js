@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 //  TIMEGLIDER /////////////////////////////////////////////////////////////////////////////////////////// 
-//  From Than 1/31/13
+//  From Than 2/14/13
 
 SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
 {
@@ -31,7 +31,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
 
   function GetSpreadsheetData(file, conditions)
   {
-lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
+    lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
     var query=new google.visualization.Query(lastDataUrl);
     if (conditions)
       query.setQuery(conditions);
@@ -46,7 +46,7 @@ lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
           return;
       }
       var i,j,key,s=0;
-      var data=response.getDataTable();
+      var data=new google.visualization.DataView(response.getDataTable());
       var rows=data.getNumberOfRows();
       var cols=data.getNumberOfColumns();
       eventData={ events:new Array() };
@@ -64,8 +64,9 @@ lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
           if (data.getFormattedValue(i,j))
             o[key]=ConvertTimelineDate(data.getValue(i,j));
           }
-        else
-          o[key]=data.getValue(i,j);
+        else {
+            o[key]=data.getValue(i,j);
+          }
         }
         eventData.events.push(o);
       }
@@ -90,7 +91,7 @@ lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
             "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
             "data_source":stldata,
             "show_footer":Boolean(stimeline.options.show_footer),
-"display_zoom_level":Boolean(stimeline.options.display_zoom_level),
+            "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
             "constrain_to_data":false,
             "image_lane_height":60,
             "loaded":function (args, data) {
@@ -117,7 +118,7 @@ lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
             "icon_folder": 'images/timeglider/icons/', // check to see if we can make this a parameter
             "data_source": stldata,
             "show_footer":Boolean(stimeline.options.show_footer),
-"display_zoom_level":Boolean(stimeline.options.display_zoom_level),
+            "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
             "constrain_to_data":false,
             "image_lane_height":60
           },
@@ -135,10 +136,44 @@ lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
       }, 500);
 
       function ConvertTimelineDate(dateTime) {
-        var sign = (dateTime < 0) ? -1 : 1;  // account for BC (or minus) years
-        dateTime=Date.parse(dateTime)+50000000;
-        var dt = new Date(dateTime);
-        dt.setFullYear(dt.getFullYear() * sign);
+        var dt = dateTime;
+        // First deal with dates that only have month/year, as these break the date object
+        // Add the day to be 15th of the month (TO DO: make it into a span if no end date or if there is then use the first of the month)
+        if( typeof(dateTime) == 'string' ) {
+          var m = dateTime.match(/\//g);
+          if(m != null && m.length == 1) {
+            var dp = dateTime.split('/');
+            dp.splice(1,0,"15");
+            dateTime = dp.join('/');
+          }
+          // Parse Date piece by piece to account for BC or - years
+          var dt = new Date();
+          var dp = dateTime.split('/');
+          var y = $.trim(dp[dp.length - 1]);
+          if(y.indexOf(' ')> -1) {
+            pts = y.split(' ');
+            y = pts[0];
+            if (pts[1].indexOf(':') > -1) {
+              tpts = pts[1].split(":");
+              if (tpts.length == 3) {
+                dt.setHours(tpts[0]);
+                dt.setMinutes(tpts[1]);
+                dt.setSeconds(tpts[2]);
+              }
+            }
+          }
+          dt.setFullYear(y);
+          var m = (dp.length > 1)? dp[dp.length - 2] : 1;
+          dt.setMonth((m * 1) - 1);
+          var d = (dp.length > 2)? dp[dp.length - 3] : 15;
+          dt.setDate(d)
+        }
+        
+        // Adjust positive years to match the tick (doesn't work with BCE years)
+        if(typeof(dt.getFullYear()) == "number" && dt.getFullYear() > 0) {
+          dateTime=Date.parse(dt)+50000000;
+          dt = new Date(dateTime);
+        }
         var mn = padZero(dt.getMonth() + 1);
         var dy = padZero(dt.getDate());
         var hrs = padZero(dt.getHours());
@@ -250,8 +285,8 @@ SHIVA_Show.prototype.DrawTimeline=function(oldItems) 											//	DRAW TIMELINE
 		
 	function GetSpreadsheetData(file, conditions, _this) 
 	{
-  		lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
-  		var query=new google.visualization.Query(lastDataUrl);
+		lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
+		var query=new google.visualization.Query(lastDataUrl);
 		if (conditions)
 			query.setQuery(conditions);
    		query.send(handleQueryResponse);

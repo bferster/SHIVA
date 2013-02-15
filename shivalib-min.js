@@ -143,7 +143,7 @@ SHIVA_Show.prototype.DrawWebpage=function()
 SHIVA_Show.prototype.DrawImage=function()
 {var options=this.options;var container=this.container;var con="#"+container;var h=$(con).css('height');var w=$(con).css('width');var _this=this;if(options.dataSourceUrl.indexOf("//docs.google.com")!=-1)
 GetSpreadsheetData(options.dataSourceUrl,options.imgHgt,options.showImage,options.showSlide,options.transition,options.width);else if(options.dataSourceUrl){$("#"+this.container).html("<img id='"+this.container+"Img' "+"width='"+options.width+"' src='"+options.dataSourceUrl+"'/>");if(options.height)
-$(con).css('height',options.height),trace(options.height);this.SendReadyMessage(true);}
+$(con).css('height',options.height);this.SendReadyMessage(true);}
 else
 this.SendReadyMessage(true);function GetSpreadsheetData(file,imgHgt,showImage,showSlide,trans,wid){var query=new google.visualization.Query(file);query.send(handleQueryResponse);function handleQueryResponse(response){var a,i,j;var data=response.getDataTable();var cols=data.getNumberOfColumns();var rows=data.getNumberOfRows();var rowData=new Array();for(i=0;i<rows;++i){a=new Array()
 for(j=0;j<cols;++j)
@@ -1159,18 +1159,21 @@ stimeline.events=null;stimeline.options=this.options;stimeline.container=this.co
 {lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");var query=new google.visualization.Query(lastDataUrl);if(conditions)
 query.setQuery(conditions);query.send(handleQueryResponse);function handleQueryResponse(response){if(response.isError()){alert("Either your internet connection is down or the Google spreadsheet that  \n"+
 +"holds the data for this visualization has not been properly shared.\n"+"The owner of the spreadsheet should set permissions to 'Anyone with Link' or 'Public'.");return;}
-var i,j,key,s=0;var data=response.getDataTable();var rows=data.getNumberOfRows();var cols=data.getNumberOfColumns();eventData={events:new Array()};if(!$.trim(data.getColumnLabel(0)))
+var i,j,key,s=0;var data=new google.visualization.DataView(response.getDataTable());var rows=data.getNumberOfRows();var cols=data.getNumberOfColumns();eventData={events:new Array()};if(!$.trim(data.getColumnLabel(0)))
 s=1;for(i=s;i<rows;++i){o=new Object();for(j=0;j<cols;++j){key=$.trim(data.getColumnLabel(j));if(!key)
 key=$.trim(data.getValue(0,j));if((key=="icon")&&(!data.getValue(i,j)))
 continue;if((key=="startdate")||(key=="enddate")){if(data.getFormattedValue(i,j))
 o[key]=ConvertTimelineDate(data.getValue(i,j));}
-else
-o[key]=data.getValue(i,j);}
+else{o[key]=data.getValue(i,j);}}
 eventData.events.push(o);}
 stimeline.events=eventData.events;var stldata=[{"id":"stl"+(new Date()).getTime(),"title":stimeline.options.title,"description":"<p>"+stimeline.options.description+"</p>","focus_date":ConvertTimelineDate(stimeline.options.focus_date),"timezone":stimeline.options.timezone,"initial_zoom":stimeline.options.initial_zoom*1,"events":normalizeEventData(stimeline.events)}];if(typeof(window.shivaTimeline)=="undefined"){window.shivaTimeline=$(stimeline.con).timeline({"min_zoom":stimeline.options.min_zoom*1,"max_zoom":stimeline.options.max_zoom*1,"icon_folder":'images/timeglider/icons/',"data_source":stldata,"show_footer":Boolean(stimeline.options.show_footer),"display_zoom_level":Boolean(stimeline.options.display_zoom_level),"constrain_to_data":false,"image_lane_height":60,"loaded":function(args,data){$(stimeline.con).timeline('setOptions',stimeline.options,true);$(stimeline.con).timeline('registerEvents',stimeline.events);setTimeout('$(\''+stimeline.con+'\').timeline(\'eventList\')',500);if(stimeline.options.show_desc=="false"){$('.tg-timeline-modal').fadeOut();}
 shivaLib.SendReadyMessage(true);}});}else{var callbackObj={fn:function(args,data){setTimeout(function(){$(stimeline.con).timeline('setOptions',stimeline.options,true);$(stimeline.con).timeline('registerEvents',stimeline.events);$(stimeline.con).timeline('eventList');if(stimeline.options.show_desc=="false"){$('.tg-timeline-modal').fadeOut();}},500);},args:{"min_zoom":stimeline.options.min_zoom*1,"max_zoom":stimeline.options.max_zoom*1,"icon_folder":'images/timeglider/icons/',"data_source":stldata,"show_footer":Boolean(stimeline.options.show_footer),"display_zoom_level":Boolean(stimeline.options.display_zoom_level),"constrain_to_data":false,"image_lane_height":60},display:true};setTimeout(function(){if(typeof(console)=="object"){console.info(stldata);}
 $(stimeline.con).timeline('loadTimeline',stldata,callbackObj);},500);}
-window.stlInterval=setInterval(function(){$('.timeglider-ev-modal').draggable({cancel:'div.tg-ev-modal-description'});},500);function ConvertTimelineDate(dateTime){var sign=(dateTime<0)?-1:1;dateTime=Date.parse(dateTime)+50000000;var dt=new Date(dateTime);dt.setFullYear(dt.getFullYear()*sign);var mn=padZero(dt.getMonth()+1);var dy=padZero(dt.getDate());var hrs=padZero(dt.getHours());var mns=padZero(dt.getMinutes());var scs=padZero(dt.getSeconds());var dtstr=dt.getFullYear()+"-"+mn+"-"+dy+" "+hrs+":"+mns+":"+scs;return dtstr;}
+window.stlInterval=setInterval(function(){$('.timeglider-ev-modal').draggable({cancel:'div.tg-ev-modal-description'});},500);function ConvertTimelineDate(dateTime){var dt=dateTime;if(typeof(dateTime)=='string'){var m=dateTime.match(/\//g);if(m!=null&&m.length==1){var dp=dateTime.split('/');dp.splice(1,0,"15");dateTime=dp.join('/');}
+var dt=new Date();var dp=dateTime.split('/');var y=$.trim(dp[dp.length-1]);if(y.indexOf(' ')>-1){pts=y.split(' ');y=pts[0];if(pts[1].indexOf(':')>-1){tpts=pts[1].split(":");if(tpts.length==3){dt.setHours(tpts[0]);dt.setMinutes(tpts[1]);dt.setSeconds(tpts[2]);}}}
+dt.setFullYear(y);var m=(dp.length>1)?dp[dp.length-2]:1;dt.setMonth((m*1)-1);var d=(dp.length>2)?dp[dp.length-3]:15;dt.setDate(d)}
+if(typeof(dt.getFullYear())=="number"&&dt.getFullYear()>0){dateTime=Date.parse(dt)+50000000;dt=new Date(dateTime);}
+var mn=padZero(dt.getMonth()+1);var dy=padZero(dt.getDate());var hrs=padZero(dt.getHours());var mns=padZero(dt.getMinutes());var scs=padZero(dt.getSeconds());var dtstr=dt.getFullYear()+"-"+mn+"-"+dy+" "+hrs+":"+mns+":"+scs;return dtstr;}
 function padZero(n){if(n<10){n='0'+n;}
 return n;}
 function normalizeEventData(events){var ct=0;for(var i in events){ct++;var ev=events[i];if(typeof(ev.id)=="undefined"){ev.id="event-"+ct;}else{ev.id=ev.id+"-"+ct;}

@@ -538,8 +538,16 @@ SHIVA_Show.prototype.Annotate=function() 												// SHOW ANNOTATION PALATTE
 SHIVA_Show.prototype.DrawWebpage=function() 											//	DRAW WEBPAGE
 {
 	$("#"+this.container+"IF").remove();													// Remove old one
+	var h=this.options.height;																// Get height
+	var w=this.options.width;																// Get width
+	if (!isNaN(h))	h+="px";																// Add px
+	if (!isNaN(w))	w+="px";																// Add px
+	h=h.replace(/%25/,"%");																	// Unencode
+	w=w.replace(/%25/,"%");																	// Unencode
+	$("#"+this.container).css("height",h);													// Container height
+	$("#"+this.container).css("width",w);													// Container width
 	var	str="<iframe src='"+this.options.url+"' id='"+this.container+"IF' style='"; 		// Iframe
-	str+="width:"+this.options.width+";height:"+this.options.height+"'>";					// Dimensions
+	str+="width:"+w+";height:"+h+"'>";														// Dimensions
 	$("#"+this.container).append(str);														// Add to container
 	this.SendReadyMessage(true);															// Send ready message									
 }

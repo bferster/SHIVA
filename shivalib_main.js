@@ -12,7 +12,7 @@ function SHIVA_Show(container, options, editMode) 						// CONSTRUCTOR
 	this.container=container;
 	this.editMode=editMode;
 	this.items=null;
-	this.overlay=null;t
+	this.overlay=null;
 	this.g=null;
 	this.qe=null;
 	this.ev=null;
@@ -91,13 +91,13 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
 			obj="Timeline.DefaultEventSource";								// Object to test for
 			lib="//api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true";  // Lib to load
           	break;
-		case "Timeglider": 													 // Time glider			
-			obj="timeglider";								    			 // Object to test for
-			lib="timeglider-all.js";
+		case "Timeglider": 													// Time glider			
+			obj="timeglider";								    			// Object to test for
+			lib="timeglider-all.js";										// Lib to load
          	break;
 		case "Video": 														// Popcorn
 			obj="Popcorn.smart";											// Object to test for
-			lib="//popcornjs.org/code/dist/popcorn-complete.min.js";  	// Lib to load
+			lib="//popcornjs.org/code/dist/popcorn-complete.min.js";  		// Lib to load
           	break;
 		case "Image": 														// Ad gallery
 			obj="jQuery.prototype.adGallery";								// Object to test for
@@ -539,7 +539,7 @@ SHIVA_Show.prototype.DrawWebpage=function() 											//	DRAW WEBPAGE
 {
 	$("#"+this.container+"IF").remove();													// Remove old one
 	var	str="<iframe src='"+this.options.url+"' id='"+this.container+"IF' style='"; 		// Iframe
-	str+="width:"+$("#"+this.container).css("width")+";height:"+$("#"+this.container).css("height")+"'>";
+	str+="width:"+this.options.width+";height:"+this.options.height+"'>";					// Dimensions
 	$("#"+this.container).append(str);														// Add to container
 	this.SendReadyMessage(true);															// Send ready message									
 }

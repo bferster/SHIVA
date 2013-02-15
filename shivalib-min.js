@@ -22,7 +22,7 @@ else if(group=='Webpage')
 this.DrawWebpage();if(ops["draw-1"])
 this.AddOverlay();var ud=ops["ud"];if(ud=="true")ud=true;else if(ud=="false")ud=false;if(ud){if((this.drupalMan)||((window.parent)&&(window.parent.name!="topWindow"))){var h=$("#"+this.container).css("height").replace(/px/g,"");var str="<img  id='shivaAnnotateBut' src='annotate.gif' style='position:absolute";str+=";top:"+(h-0+12)+"px'>";$("body").append(str);$("#shivaAnnotateBut").click(function(){_this.Annotate();});$("#shivaAnnotateBut").css('pointer-events','auto');}}}
 SHIVA_Show.prototype.LoadJSLib=function(which,callback)
-{var i,obj,lib="";switch(which){case"Timeline":obj="Timeline.DefaultEventSource";lib="//api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true";break;case"Timeglider":obj="timeglider";lib="//mandala.drupal-dev.shanti.virginia.edu/sites/all/modules/shivanode/SHIVA/timeglider-all.js";break;case"Video":obj="Popcorn.smart";lib="//popcornjs.org/code/dist/popcorn-complete.min.js";break;case"Image":obj="jQuery.prototype.adGallery";lib="jquery.ad-gallery.min.js";break;case"Network":obj="$jit.id";lib="jit-yc.js";break;case"Map":obj="google.maps.Map";lib="//maps.googleapis.com/maps/api/js?sensor=false&callback=shivaJSLoaded";break;}
+{var i,obj,lib="";switch(which){case"Timeline":obj="Timeline.DefaultEventSource";lib="//api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true";break;case"Timeglider":obj="timeglider";lib="timeglider-all.js";break;case"Video":obj="Popcorn.smart";lib="//popcornjs.org/code/dist/popcorn-complete.min.js";break;case"Image":obj="jQuery.prototype.adGallery";lib="jquery.ad-gallery.min.js";break;case"Network":obj="$jit.id";lib="jit-yc.js";break;case"Map":obj="google.maps.Map";lib="//maps.googleapis.com/maps/api/js?sensor=false&callback=shivaJSLoaded";break;}
 if(lib){var v=obj.split(".");var n=v.length;var o=$(window)[0];for(i=0;i<n;++i)
 if(!(o=o[v[i]]))
 break;if(o&&(i==n)){callback();return;}
@@ -139,7 +139,7 @@ SHIVA_Show.prototype.Annotate=function()
 {if(!this.dr){this.Draw({shivaGroup:"Draw"});this.dr=new SHIVA_Draw(this.container);}
 else this.dr.DrawPalette();this.Sound("click");}
 SHIVA_Show.prototype.DrawWebpage=function()
-{$("#"+this.container+"IF").remove();var str="<iframe src='"+this.options.url+"' id='"+this.container+"IF' style='";str+="width:"+$("#"+this.container).css("width")+";height:"+$("#"+this.container).css("height")+"'>";$("#"+this.container).append(str);this.SendReadyMessage(true);}
+{$("#"+this.container+"IF").remove();var str="<iframe src='"+this.options.url+"' id='"+this.container+"IF' style='";str+="width:"+this.options.width+";height:"+this.options.height+"'>";$("#"+this.container).append(str);this.SendReadyMessage(true);}
 SHIVA_Show.prototype.DrawImage=function()
 {var options=this.options;var container=this.container;var con="#"+container;var h=$(con).css('height');var w=$(con).css('width');var _this=this;if(options.dataSourceUrl.indexOf("//docs.google.com")!=-1)
 GetSpreadsheetData(options.dataSourceUrl,options.imgHgt,options.showImage,options.showSlide,options.transition,options.width);else if(options.dataSourceUrl){$("#"+this.container).html("<img id='"+this.container+"Img' "+"width='"+options.width+"' src='"+options.dataSourceUrl+"'/>");if(options.height)

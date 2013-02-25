@@ -5120,8 +5120,8 @@ tg.TG_TimelinePlayer = function (widget, mediator) {
     
   }) // end draggable
   .delegate(CONTAINER + " .timeglider-timeline-event", CLICKORTOUCH, function () {  // EVENT CLICK
-    // Code added by ndg for Shanti
-    // If max # of open modals is reached, close the first one before opening a new one
+    // Code added by ndg8f for Shanti (2013-01)
+    // If open modals is greater than the maxnumber set, close the first one before opening a new one
     var openModals = $('.timeglider-ev-modal');
     if(openModals.length == me.max_modals) {
       $(openModals[0]).find('.tg-close-button').click();
@@ -10177,7 +10177,7 @@ tg.validateOptions = function (widget_settings) {
           'main': '#tg-truck', 
           'eventspan': '.timeglider-event-spanner', 
           'head': '.tg-widget-header, .tg-widget-header h2, .timeglider-footer, .timeglider-slider-container', 
-          'popup': '.tg-ev-modal, .tg-timeline-modal', 
+          'popup': '.timeglider-ev-modal, .timeglider-ev-modal *, .tg-timeline-modal', 
           'imagelane': '.tg-image-lane-bg', 
           'ticklane': '.tg-tick-body',
           'popuplink': '.timeglider-ev-modal-links li a',
@@ -10185,24 +10185,24 @@ tg.validateOptions = function (widget_settings) {
         };
         
         var bcolors = tlopts.backgroundColors.replace(/,$/,'').split(',');
-        for (var i in bcolors) {
+        for (var i in bcolors) { 
           var pts = bcolors[i].split('=');
           var type = pts[0];
           var sel = bstyles[type];
           var newcolor = ('#' + pts[1]).replace('##','#');
           var prescolor = $(sel.split(',')[0]).css('background-color');
-          if(typeof(prescolor) == "undefined" || prescolor == '' || prescolor.colorToHex() != newcolor) {
-            if(type == 'main') {
-              $(sel).css({ 'background-color' : newcolor, 'background-image' : 'none' });
-              $('.timeglider-container').css({ 'background-color' : newcolor, 'background-image' : 'none' });
-            } else if (type == 'eventspan' || type == 'popup' || type == 'ticklane') {
-              tg.updatePageStyles(sel, { 'background-color' : newcolor });
-            } else {
-              $(sel).css({ 'background-color' : newcolor });
-              //tg.updatePageStyles('.tg-single-timeline-header h2', {'background' : 'transparent'});
-            }
-            bstyles[type] = 'done';
+          if(typeof(prescolor) == "undefined" || prescolor == '' || prescolor.colorToHex() != newcolor) { 
+              if(type == 'main') {
+                $(sel).css({ 'background-color' : newcolor, 'background-image' : 'none' });
+                $('.timeglider-container').css({ 'background-color' : newcolor, 'background-image' : 'none' });
+              } else if (type == 'eventspan' || type == 'popup' || type == 'ticklane') {
+                tg.updatePageStyles(sel, { 'background-color' : newcolor });
+              } else {
+                $(sel).css({ 'background-color' : newcolor });
+                //tg.updatePageStyles('.tg-single-timeline-header h2', {'background' : 'transparent'});
+              }
           }
+          bstyles[type] = 'done';  // register this "type" as being done. If not "done", then it's css color will be removed below
         }
         
         for (var t in bstyles) {
@@ -10216,6 +10216,18 @@ tg.validateOptions = function (widget_settings) {
       tlopts.max_modals = parseInt(tlopts.max_modals);
       if(timelinePlayer.max_modals != tlopts.max_modals) {
         timelinePlayer.max_modals = tlopts.max_modals;
+      }
+      
+      // Show Hide Description
+      tlopts.show_desc = (tlopts.show_desc == 'true'); // convert to boolean
+      if(tlopts.show_desc) {
+        setTimeout(function() {
+          $('li#info').click();
+        }, 100);
+      } else {
+        setTimeout(function() {
+          $('div.tg-timeline-modal li.tg-close').click();
+        }, 100);
       }
       
       // Show Hide Footer

@@ -1076,9 +1076,8 @@ SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	/
 	for (i=0;i<files.length;++i) {											// For each file
 		type=files[i].type;													// Set type
 		$("#ezfile-"+files[i].id).click(function() {						// Add click handler
-			str="http://www.primaryaccess.org/REST/geteasyfile.php?id="+this.id.substr(7);
 			if ((mode == "link") && (type == "KML"))						// If a KML link
-				alert("http://www.primaryaccess.org/REST/getkml.php?e="+this.id.substr(7));	// Show url
+				alert("http://www.primaryaccess.org/REST/getkml.php?id="+this.id.substr(7));	// Show url
 			if ((mode == "link") && (type != "KML"))						// If a SHIVA link
 				alert("www.viseyes.org/shiva/go.htm?e="+this.id.substr(7));	// Show url
 			else{															// If a load

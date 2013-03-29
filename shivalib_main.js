@@ -67,6 +67,8 @@ SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 		}
 	else if (group == 'Webpage')
 		this.DrawWebpage();
+   else if (group == 'WordCloud')
+        this.DrawWordCloud();
 	if (ops["draw-1"])
 		this.AddOverlay();
 	var ud=ops["ud"];														// Get ud flag
@@ -110,6 +112,9 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
   			obj="google.maps.Map";											// Object to test for
         	lib="//maps.googleapis.com/maps/api/js?sensor=false&callback=shivaJSLoaded"; 		// Lib to load
             break;
+       case "WordCloud":
+            obj="d3.layout.cloud";
+            lib="d3_cloud_combined.js";
 		}
 	if (lib) {																// If a lib to load
 		var v=obj.split(".");												// Split by parts

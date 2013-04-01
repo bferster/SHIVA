@@ -1165,11 +1165,10 @@ config.Tips.onShow=function(tip,node){var count=0;node.eachAdjacency(function(){
 tip.style.color='black';tip.style.fontFamily=config.Label.family;tip.style.backgroundColor='white';tip.style.padding='1em';tip.style.maxWidth='200px';tip.style.fontSize='10pt';tip.style.border='1px solid black';tip.style.opacity='0.99';tip.style.boxShadow='#555 2px 2px 8px';};var ht=new $jit.Hypertree(config);ht.loadJSON(data);ht.refresh();ht.controller.onComplete();}}
 SHIVA_Show.prototype.DrawTimeGlider=function()
 {if($('#cp_colorbar').is(":visible")==true||$('#cp_colormap').is(":visible")==true){return;}
-var i;var stimeline=new Object();var cr=String.fromCharCode(10);if($('link[href*=timeglider]').length==0){$('head').append('<link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">');}
+var i;var stimeline=new Object();if($('link[href*=timeglider]').length==0){$('head').append('<link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">');}
 stimeline.events=null;stimeline.options=this.options;stimeline.container=this.container;stimeline.con="#"+stimeline.container;$(stimeline.con).css('width',stimeline.options['width']+"px");$(stimeline.con).css('height',stimeline.options['height']+"px");$(stimeline.con).timeline('resize');GetSpreadsheetData(stimeline.options.dataSourceUrl);function GetSpreadsheetData(file,conditions)
 {lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");var query=new google.visualization.Query(lastDataUrl);if(conditions)
-query.setQuery(conditions);query.send(handleQueryResponse);function handleQueryResponse(response){if(response.isError()){alert("Either your internet connection is down or the Google spreadsheet that  \n"+
-+"holds the data for this visualization has not been properly shared.\n"+"The owner of the spreadsheet should set permissions to 'Anyone with Link' or 'Public'.");return;}
+query.setQuery(conditions);query.send(handleQueryResponse);function handleQueryResponse(response){if(response.isError()){alert("Either your internet connection is down or the Google spreadsheet that  \n"+"holds the data for this visualization has not been properly shared.\n"+"The owner of the spreadsheet should set permissions to 'Anyone with Link' or 'Public'.");return;}
 var i,j,key,s=0;var data=new google.visualization.DataView(response.getDataTable());var rows=data.getNumberOfRows();var cols=data.getNumberOfColumns();eventData={events:new Array()};if(!$.trim(data.getColumnLabel(0)))
 s=1;for(i=s;i<rows;++i){o=new Object();for(j=0;j<cols;++j){key=$.trim(data.getColumnLabel(j));if(!key)
 key=$.trim(data.getValue(0,j));if((key=="icon")&&(!data.getValue(i,j)))

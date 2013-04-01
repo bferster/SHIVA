@@ -7741,7 +7741,6 @@ tg.TG_TimelinePlayer.prototype = {
         modal_type = "full";
       }
             // return false;
-      
       switch (modal_type) {
       
         case "full":
@@ -7889,8 +7888,10 @@ tg.TG_TimelinePlayer.prototype = {
           // for any of the small modals...
           // $event.parent()
             $modal = $.tmpl(me._templates.event_modal_small,templ_obj).appendTo($event.parent());
-          
-          
+          // added code to replace escaped markup with valid tags (ndg, 2013-03-28)
+          var ihtml = $modal[0].innerHTML;
+          ihtml = ihtml.replace(/&lt;(\/?[^&]+)&gt;/g, "<$1>");
+          $modal[0].innerHTML = ihtml;
           var pad = 8;
           var arrow_class = "", tb_class = "", lr_class = "";
           

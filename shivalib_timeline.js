@@ -12,6 +12,8 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
   }
   var i;
   var stimeline = new Object();
+  var cr = String.fromCharCode(10); // create a carriage return character to search for in values
+  
 
   if($('link[href*=timeglider]').length == 0) {
     $('head').append('<link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">');
@@ -66,13 +68,31 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
           }
         else {
             o[key]=data.getValue(i,j);
+            // replace carriage returns with <br/> html
+            if(typeof(o[key]) == "string" ) {
+              o[key] = o[key].replace(/[\n\r\f]/g, "<br/>");
+            }
           }
         }
         eventData.events.push(o);
       }
 
       stimeline.events = eventData.events;
-      
+      if (typeof(stimeline.options.min_zoom) == "undefined" ||
+           stimeline.options.min_zoom == "" || 
+           stimeline.options.min_zoom == "0") {
+              stimeline.options.min_zoom = 1
+      }
+      if (typeof(stimeline.options.max_zoom) == "undefined" ||
+           stimeline.options.max_zoom == "" || 
+           stimeline.options.max_zoom == "0") {
+              stimeline.options.max_zoom = 99
+      }
+      if (typeof(stimeline.options.initial_zoom) == "undefined" ||
+           stimeline.options.initial_zoom == "" || 
+           stimeline.options.initial_zoom == "0") {
+              stimeline.options.initial_zoom = 50
+      }
       var stldata = [{
         "id":"stl" + (new Date()).getTime(),
         "title":stimeline.options.title,
@@ -84,6 +104,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
       }];
       
       if(typeof(window.shivaTimeline) == "undefined") {
+        // Load the initial timeline with default data
         window.shivaTimeline =  $(stimeline.con).timeline({
             "min_zoom":stimeline.options.min_zoom * 1,
             "max_zoom":stimeline.options.max_zoom * 1,
@@ -96,12 +117,13 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
             "loaded":function (args, data) {
               $(stimeline.con).timeline('setOptions', stimeline.options, true);
               $(stimeline.con).timeline('registerEvents', stimeline.events);
-              setTimeout('$(\'' + stimeline.con + '\').timeline(\'eventList\')', 500);
+              $(stimeline.con).timeline('eventList'); //setTimeout('$(\'' + stimeline.con + '\').timeline(\'eventList\')', 500);
               if(stimeline.options.show_desc == "false") { $('.tg-timeline-modal').fadeOut();  }
               shivaLib.SendReadyMessage(true);
             }
         });
      } else {
+        // Inserting or updating data into timeline structure already created
         var callbackObj = {
           fn : function (args, data) {
               setTimeout(function() {
@@ -123,10 +145,11 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
           },
           display : true
         };
-        setTimeout(function() {
+        $(stimeline.con).timeline('loadTimeline', stldata, callbackObj);
+        /*setTimeout(function() {
           if(typeof(console)=="object") { console.info(stldata); }
           $(stimeline.con).timeline('loadTimeline', stldata, callbackObj);
-        }, 500);
+        }, 500);*/
       }
 
       // Make event modal windows draggable

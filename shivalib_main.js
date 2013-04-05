@@ -346,6 +346,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 						var dy=ui.position.top-shivaLib.dr.segs[num].ideaTop;	// Dy
 						shivaLib.dr.segs[num].ideaLeft=ui.position.left;	// Set left
 						shivaLib.dr.segs[num].ideaTop=ui.position.top;		// Set top
+						shivaLib.dr.segs[num].ideaText=$("#"+this.id).val();	// Set current text
 						shivaLib.dr.MoveIdeaChildren(num,dx,dy);			// Move children
 						shivaLib.DrawIdeaLinks(true);						// Draw idea link lines										
 						},
@@ -532,13 +533,17 @@ SHIVA_Show.prototype.FillElement=function(table, query) 								// FILL ELEMENT 
 	}
 }
 
-SHIVA_Show.prototype.Annotate=function() 												// SHOW ANNOTATION PALATTE
+SHIVA_Show.prototype.Annotate=function(x,y) 											// SHOW ANNOTATION PALATTE
 {
 	if (!this.dr) {																			// If not already instantiated
 		this.Draw({shivaGroup:"Draw"});														// Create canvas
 		this.dr=new SHIVA_Draw(this.container);												// Alloc drawing module
 		}
 	else this.dr.DrawPalette();																// Draw palette
+	if (x != undefined) {																	// If a position set
+		$("#shivaDrawPaletteDiv").css("left",x+"px");										// Set x
+		$("#shivaDrawPaletteDiv").css("top",y+"px");										// Set y
+		}
 	this.Sound("click");																	// Click
 }
 

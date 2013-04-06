@@ -16,7 +16,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		return;
 	if (typeof(Popcorn.smart) != "function")
 		return;
-	var base="http://www.youtube.com/watch?v=";
+	var base="http://www.youtube.com/watch?autoplay=1&v=";
 	$(con).css("width",options.width+"px");
 	$(con).css("height",options.height+"px");
 	if ((options.dataSourceUrl.match(/vimeo/)) || (!isNaN(options.dataSourceUrl)))

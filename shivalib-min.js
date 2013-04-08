@@ -160,6 +160,12 @@ for(var i=1;i<data.length;++i){str+="<li><a href='"+data[i][0]+"'><img height='"
 str+=" title='"+data[i][1]+"'";if(data[i][2])
 str+=" alt='"+data[i][2]+"'";str+=" class='image"+i+"'></a></li>";}
 str+="</ul></div></div></div>";$("#"+container).html(str);$('.ad-gallery').adGallery()[0].settings.effect=transition;$("#gallery").css("background","#ddd");$(".ad-gallery").css("width",wid)}}
+SHIVA_Show.prototype.AnimateDivPosition=function(div,pct,mob,playing)
+{$("#"+shivaLib.container).css("overflow","hidden");if($("#"+shivaLib.container+"PlyBut").length==0)
+$("#"+shivaLib.container).append("<img id='"+this.container+"PlyBut' src='playbut.gif' style='position:absolute;top:0px;left:0px'>");if(mob.easeIn&&mob.easeOut)
+pct=1.0-((Math.cos(3.1414*pct)+1)/2.0);else if(easeIn)
+pct=1.0-(Math.cos(1.5707*pct));else if(easeOut)
+pct=1.0-(Math.cos(1.5707+(1.5707*pct))+1.0);var o={position:"relative"};o.left=-(mob.sx+((mob.ex-mob.sx)*pct))+"%";o.top=-(mob.sy+((mob.ey-mob.sy)*pct))+"%";o.width=(mob.sw+((mob.ew-mob.sw)*pct)+"%");o.opacity=mob.sa+((mob.ea-mob.sa)*pct);$("#"+div).css(o);}
 SHIVA_Show.prototype.DrawChart=function()
 {var i=0,array,val;var ops=new Object();var options=this.options;var container=this.container;var con="#"+container;var _this=this;for(o in options){val="";if(options[o]){val=options[o].toString();val=ops[o]=val.replace(/~/g,"#")}
 if((val.indexOf(",")!=-1)&&(o!="query")&&(o!="title")){if(val){array=true;if(val.indexOf('=')==-1)
@@ -1328,7 +1334,7 @@ Array.prototype.diff=function(arr){return this.filter(function(val){return arr.i
 Array.prototype.find=function(item,attr){for(var i=0;i<this.length;i++){if(this[i][attr]==item)
 return this[i];}
 return false;}
-var cloud;var fill=d3.scale.category20();if(!this.wcloud){cloud=new wordCloud(this.container);this.wcloud=cloud;cloud.options=this.options;cloud.load(this.options.dataSourceUrl);}else{cloud=this.wcloud;var props=Object.keys(this.options);for(var i=0;i<props.length;i++){var prop=props[i];if(this.wcloud.options[prop]!=this.options[prop]){if(prop=="dataSourceUrl"){cloud.options=this.options;cloud.load();break;}else if(prop=="width"||prop=="height"||prop=="wordcount"){cloud.options=this.options;cloud.buildLayout(cloud.d.slice(0,cloud.options.wordcount),cloud.d[0].size);}else{switch(prop){case'font_name':d3.selectAll('text').style('font-family',this.options.font_name);break;case'backgroundColor':d3.select('rect').style('fill','#'+this.options.backgroundColor);break;case'spectrum':var opts=this.options.spectrum.split(',').slice(0,-1);if(opts.length==1)
+var cloud;var fill=d3.scale.category20();if(!this.wcloud){cloud=new wordCloud(this.container);this.wcloud=cloud;cloud.options=this.options;cloud.load(this.options.dataSourceUrl);}else{cloud=this.wcloud;var props=Object.keys(this.options);for(var i=0;i<props.length;i++){var prop=props[i];if(this.wcloud.options[prop]!=this.options[prop]){if(prop=="dataSourceUrl"){cloud.options=this.options;cloud.load(cloud.options['dataSourceUrl']);break;}else if(prop=="width"||prop=="height"||prop=="wordcount"){cloud.options=this.options;cloud.buildLayout(cloud.d.slice(0,cloud.options.wordcount),cloud.d[0].size);}else{switch(prop){case'font_name':d3.selectAll('text').style('font-family',this.options.font_name);break;case'backgroundColor':d3.select('rect').style('fill','#'+this.options.backgroundColor);break;case'spectrum':var opts=this.options.spectrum.split(',').slice(0,-1);if(opts.length==1)
 opts.push('ffffff');var spec=[];for(var j=1;j<opts.length;j++){var s=d3.hsl('#'+opts[j-1]);var e=d3.hsl('#'+opts[j]);spec.push(d3.interpolate(s,e));}
 var size=cloud.d[0].size+1;d3.selectAll('.word').style('fill',function(d,i){var hole=Math.floor((cloud.d[i].size/size)*spec.length);var rem=(cloud.d[i].size/size)*spec.length%1;return spec[hole](rem);});break;case'title':d3.select('#cloudTitle').text(this.options.title);break;case'titleColor':d3.select('#cloudTitle').attr('fill','#'+this.options.titleColor);break;case'titleFontSize':d3.select('#cloudTitle').style('font-size',this.options.titleFontSize+'px');break;}}}}
 cloud.options=this.options;}

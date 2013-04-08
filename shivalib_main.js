@@ -580,17 +580,18 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 	var h=$(con).css('height');
 	var w=$(con).css('width');
 	var _this=this;
-//options.dataSourceUrl="http://www.primaryaccess.org/test.jpg";	
+	this.imageMob={sx:0,ex:1,sy:00,ey:0,sw:200,ew:100,sa:1,ea:1,easeIn:1,easeOut:1,dur:4000,div:this.container+"Img",start:0 };
+if ($("#propInput6").val() == "666") options.dataSourceUrl="http://www.primaryaccess.org/test.jpg";	
 	if (options.dataSourceUrl.indexOf("//docs.google.com") != -1)
  	   	GetSpreadsheetData(options.dataSourceUrl,options.imgHgt,options.showImage,options.showSlide,options.transition,options.width);
  	 else if (options.dataSourceUrl) {
 	   	$("#"+this.container).html("<img id='"+this.container+"Img' "+"width='"+options.width+"' src='"+options.dataSourceUrl+"'/>");
 		if (options.height)
 			$(con).css('height',options.height);
+			trace($("#propInput6").val())
+if ($("#propInput6").val() == "666") 
+			this.AnimateDiv();
 		this.SendReadyMessage(true);											
-//		var mob={sx:0,ex:1,sy:00,ey:0,sw:200,ew:100,sa:1,ea:1,easeIn:1,easeOut:1 };
-//		this.AnimateDivPosition(this.container+"Img",0,mob,false);
-		
 		}
 	else
 		this.SendReadyMessage(true);											
@@ -642,11 +643,26 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 }  // Closure end
 
 
-SHIVA_Show.prototype.AnimateDivPosition=function(div, pct, mob, playing)		// ANIMATE/POSITION DIB
+SHIVA_Show.prototype.AnimateDiv=function()										// ANIMATE/POSITION DIV
 {
+	var mob=shivaLib.imageMob;														// Point at mob
 	$("#"+shivaLib.container).css("overflow","hidden");								// Extra is hidden
-	if ($("#"+shivaLib.container+"PlyBut").length == 0)								// If no playbut yet
-		$("#"+shivaLib.container).append("<img id='"+this.container+"PlyBut' src='playbut.gif' style='position:absolute;top:0px;left:0px'>");
+	if (($("#"+shivaLib.container+"PlyBut").length == 0) && mob.dur) {				// If no playbut yet, but animated
+		$("#"+shivaLib.container).append("<img id='"+this.container+"PlyBut' src='playbut.gif' style='position:absolute;top:50%;left:50%;padding:2px;padding-left:18px;padding-right:18px' class='propTable' width='18'>");
+		$("#"+shivaLib.container+"PlyBut").click( function(){						// Play button click handler
+			 $(this).hide();														// Hide it 
+			 shivaLib.imageMob.start=new Date().getTime();							// Set start
+			 shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);		// Set timer ~24fps
+			 });	
+		}
+	
+	var pct=(new Date().getTime()-mob.start)/mob.dur;								// Get percentage
+	if (mob.start == 0)																// If first timw
+		pct=0;																		// Start at beginning
+	if (pct >= 1) { 																// If done
+		$("#"+shivaLib.container+"PlyBut").show();									// Show play button
+		clearInterval(shivaLib.imageMob.interval);									// Clear timer
+		}
 	if (mob.easeIn && mob.easeOut)													// Both
 		pct=1.0-((Math.cos(3.1414*pct)+1)/2.0);										// Full cosine curve
 	else if (easeIn)																// Slow in
@@ -658,7 +674,7 @@ SHIVA_Show.prototype.AnimateDivPosition=function(div, pct, mob, playing)		// ANI
 	o.top=-(mob.sy+((mob.ey-mob.sy)*pct))+"%";										// Calc left
 	o.width=(mob.sw+((mob.ew-mob.sw)*pct)+"%");										// Calc width
 	o.opacity=mob.sa+((mob.ea-mob.sa)*pct);											// Calc alpha
-	$("#"+div).css(o);																// Set css 
+	$("#"+mob.div).css(o);															// Set css 
 }
 
 

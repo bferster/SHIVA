@@ -5,7 +5,7 @@
 
 SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 {
-	var v;
+	var v,o;
 	var options=this.options;
 	var container=this.container;
 	var con="#"+container;
@@ -25,18 +25,30 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 			this.SendReadyMessage(true);	
 		}										
 	else if (options.chartType == "Montage") {												// If montage
+		var items=new Array();																// Alloc iteems array
+	   	for (var key in options) {															// For each item
+			if (key.indexOf("item-") != -1) {												// If an item
+				o={};																		// Alloc obj
+				v=options[key].split(';');													// Split by ;
+				for (i=0;i<v.length;++i)													// For each field
+					o[v[i].split(':')[0]]=v[i].split(':')[1].replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");
+				items.push(o);
+				}
+			}
+		this.items=items;
 		$(con).css('height',options.height+"px");											// Set height
 		$(con).css('width',options.width+"px");												// Set width
-   		this.imageMob={sx:0,ex:1,sy:00,ey:0,sw:100,ew:100,sa:1,ea:1,easeIn:1,easeOut:1,dur:4,div:this.container+"Img",start:0 };
-		var o=items[0];
-		v=o.sp.split(";");	this.imageMob.sx=v[0]-0; 	this.imageMob.sy=v[1]-0; 	this.imageMob.sw=v[2]-0;
-  		v=o.ep.split(";");	this.imageMob.ex=v[0]-0; 	this.imageMob.ey=v[1]-0; 	this.imageMob.ew=v[2]-0;
+   		this.imageMob={ div:this.container+"Img",start:0 };									// Motion settings
+		var o=this.items[0];
+		v=o.sp.split(",");	this.imageMob.sx=v[0]-0; 	this.imageMob.sy=v[1]-0; 	this.imageMob.sw=v[2]-0;
+  		v=o.ep.split(",");	this.imageMob.ex=v[0]-0; 	this.imageMob.ey=v[1]-0; 	this.imageMob.ew=v[2]-0;
    		this.imageMob.dur=o.dur;	
    		this.imageMob.title=o.title;
    		this.imageMob.fx=o.fx;			
    		this.imageMob.url=o.url;			
+  		this.imageMob.ease=o.ease;			
    		$(con).html("<img id='"+this.container+"Img' "+"' src='"+o.url+"'/>");
-		this.AnimateDiv();
+		this.AnimateDiv("full");
 		}
 		
  	  function GetSpreadsheetData(file, imgHgt, showImage, showSlide, trans, wid) 	{
@@ -86,7 +98,7 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 }  // Closure end
 
 
-SHIVA_Show.prototype.AnimateDiv=function()										// ANIMATE/POSITION DIV
+SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 {
 	var mob=shivaLib.imageMob;														// Point at mob
 	$("#"+shivaLib.container).css("overflow","hidden");								// Extra is hidden
@@ -98,7 +110,6 @@ SHIVA_Show.prototype.AnimateDiv=function()										// ANIMATE/POSITION DIV
 			 shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);		// Set timer ~24fps
 			 });	
 		}
-	
 	var pct=(new Date().getTime()-mob.start)/(mob.dur*1000);						// Get percentage
 	if (mob.start == 0)																// If first time
 		pct=0;																		// Start at beginning
@@ -106,14 +117,13 @@ SHIVA_Show.prototype.AnimateDiv=function()										// ANIMATE/POSITION DIV
 		$("#"+shivaLib.container+"PlyBut").show();									// Show play button
 		clearInterval(shivaLib.imageMob.interval);									// Clear timer
 		}
-	if (mob.easeIn && mob.easeOut)													// Both
+	if (mob.ease == "both")															// Both
 		pct=1.0-((Math.cos(3.1414*pct)+1)/2.0);										// Full cosine curve
-	else if (easeIn)																// Slow in
+	else if (mob.ease == "in")														// Slow in
 		pct=1.0-(Math.cos(1.5707*pct));												// 1st quadrant of cosine curve
-	else if (easeOut)																// Slow out
+	else if (mob.ease == "out")														// Slow out
 		pct=1.0-(Math.cos(1.5707+(1.5707*pct))+1.0);								// 2nd quadrant of cosine curve
-	var o={ position:"relative"};													// Posioton mode
-	
+	var o={ position:"relative"};													// Position mode
 	o.left=(mob.sx+((mob.ex-mob.sx)*pct))/100;										// Calc left
 	o.top=(mob.sy+((mob.ey-mob.sy)*pct))/100;										// Calc top
 	o.width=1000000/((mob.sw+((mob.ew-mob.sw)*pct)));								// Calc width
@@ -121,6 +131,8 @@ SHIVA_Show.prototype.AnimateDiv=function()										// ANIMATE/POSITION DIV
 	o.left=(-o.width*(o.left/100))+"%";												// Scale left
 	o.top=(-o.width*(o.top/100))+"%";												// Scale top
 	o.width+="%"																	// Add %
+	if (mode == "full")																// If full image
+   		o.top=o.left="0%",o.width="100%",o.opacity=1;								// Ignore settings	
 	$("#"+mob.div).css(o);															// Set css 
 }
 

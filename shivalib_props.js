@@ -270,7 +270,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
    		else if (props[o].opt == "list")
    			str+="<textarea cols='12' rows='2' onChange='Draw()' id='"+id+"' onFocus='ShowHelp(\""+props[o].des+"\")'/>";
    		else if (props[o].opt == "sizer") 
-			str+="<button type='button' id='"+id+"' onclick='shivaLib.SizingBox(\"containerDiv\",this.id)'>Set box</button>";		   			
+			str+="<button type='button' id='"+id+"' onclick='shivaLib.SizingBox(\"containerDiv\",this.id)'>Set</button>";		   			
    		else if (props[o].opt == "hidden") 
    			str="<tr><td width='12'></td><td width='200'><input type='hidden' id='"+id+"'/>";
   		else if (props[o].opt.indexOf('|') != -1) {
@@ -312,7 +312,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 							str+="</select>";
 				   			}
 				   		else if (props[oo].opt == "sizer") 
-  							str+="<button type='button' id='"+id2+"' onclick='shivaLib.SizingBox(\"containerDiv\",this.id)'>Set box</button>";		   			
+  							str+="<button type='button' id='"+id2+"' onclick='shivaLib.SizingBox(\"containerDiv\",this.id)'>Set</button>";		   			
 				   		else
    							str+="<input size='14' onChange='Draw()' type='text' id='"+id2+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";
 				   		str+="</span></p>";
@@ -481,11 +481,12 @@ SHIVA_Show.prototype.SizingBox=function(div, id, pos, alpha, col, edge)		// SIZI
 		Draw();																// Redraw
 		return;																// Quit
 		}
+	Draw();																	// Redraw
 	if (id.indexOf("Input")!= -1) 											// If an id
 		pos=$("#"+id).val();												// Get value
 	var v,top=0,left=0,wid=10000;											// Defs
 	if (pos)																// If a pos
-		v=pos.split(";");													// Split pos
+		v=pos.split(",");													// Split pos
 	if ($("#shivaSizingBox").length == 0) {									// If doesn't exit yet
 		if (alpha == undefined)	alpha=.5;									// Default alpha
 		if (col == undefined)	col="#ccc;"									// Default color
@@ -509,7 +510,7 @@ SHIVA_Show.prototype.SizingBox=function(div, id, pos, alpha, col, edge)		// SIZI
 		var left=Math.round(ui.position.left/box.parent().width()*10000);	// Get x
 		var top=Math.round(ui.position.top/box.parent().height()*10000);	// Get y
 		var wid=Math.round(box.width()/con.width()*10000);					// Get w
-		$("#"+id).val(left+";"+top+";"+wid);								// Concat and set in structure
+		$("#"+id).val(left+","+top+","+wid);								// Concat and set in structure
 		SaveData("GetJSON");												// Set items
 		}
 }

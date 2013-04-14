@@ -344,9 +344,7 @@
 	{	
 		if (shivaLib.drupalMan)
 			window.parent.postMessage("DataChanged="+chartType,"*");
-	trace('options')
 		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
-//	trace(options)
 	}
 
 	function ChangeChart(type)

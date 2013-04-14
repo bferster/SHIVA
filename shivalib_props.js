@@ -269,6 +269,8 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
    			}
    		else if (props[o].opt == "list")
    			str+="<textarea cols='12' rows='2' onChange='Draw()' id='"+id+"' onFocus='ShowHelp(\""+props[o].des+"\")'/>";
+   		else if (props[o].opt == "sizer") 
+			str+="<button type='button' id='"+id+"' onclick='shivaLib.SizingBox(\"containerDiv\",this.id)'>Set box</button>";		   			
    		else if (props[o].opt == "hidden") 
    			str="<tr><td width='12'></td><td width='200'><input type='hidden' id='"+id+"'/>";
   		else if (props[o].opt.indexOf('|') != -1) {
@@ -297,7 +299,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 			   			else if (props[oo].opt == "slider")
    							str+="<input style='width:90px' onChange='Draw(\"opacity\")' type='range' id='"+id+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";
 			   			else if (props[oo].opt == "list")
-   							str+="<textarea cols='12' rows='2' onChange='Draw()' id='"+id2+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";
+   							str+="<textarea cols='13' rows='2' onChange='Draw()' id='"+id2+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";
 				   		else if (props[oo].opt == "hidden") 
    							str+="<input type='hidden' id='"+id2+"'/>";
 			   			else if (props[oo].opt.indexOf('|') != -1) {
@@ -309,6 +311,8 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 								}
 							str+="</select>";
 				   			}
+				   		else if (props[oo].opt == "sizer") 
+  							str+="<button type='button' id='"+id2+"' onclick='shivaLib.SizingBox(\"containerDiv\",this.id)'>Set box</button>";		   			
 				   		else
    							str+="<input size='14' onChange='Draw()' type='text' id='"+id2+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";
 				   		str+="</span></p>";
@@ -470,6 +474,46 @@ SHIVA_Show.prototype.SetAdvancedAttributes=function(prop, baseVar) 		// ADVANCED
 		$("#"+baseVar+v[i].split("=")[0]).val(v[i].split("=")[1]);			// Set last value
 }
 
+SHIVA_Show.prototype.SizingBox=function(div, id, pos, alpha, col, edge)		// SIZING BOX
+{ 	 	
+	if (div == undefined) {													// If no div
+		$("#shivaSizingBox").remove();										// Kill it
+		Draw();																// Redraw
+		return;																// Quit
+		}
+	if (id.indexOf("Input")!= -1) 											// If an id
+		pos=$("#"+id).val();												// Get value
+	var v,top=0,left=0,wid=10000;											// Defs
+	if (pos)																// If a pos
+		v=pos.split(";");													// Split pos
+	if ($("#shivaSizingBox").length == 0) {									// If doesn't exit yet
+		if (alpha == undefined)	alpha=.5;									// Default alpha
+		if (col == undefined)	col="#ccc;"									// Default color
+		if (edge == undefined)	edge="#000;"								// Default edge color
+		var str="<div id='shivaSizingBox' style='background:"+col+"border:1px solid "+edge+";position:absolute;opacity:"+alpha+"'>";
+		str+="<img src='addeventdot.gif' onclick='shivaLib.SizingBox()'></div>";	// Add close box
+		$("#"+div).append(str);												// Add to container div		
+ 		}
+	
+	var box=$("#shivaSizingBox");											// Point at box
+	var con=$("#"+div);														// Point at container
+	if (v[0] != undefined)	left=v[0] 										// Default left
+	if (v[1] != undefined)	top=v[1];										// Default top
+	if (v[2] != undefined)	wid=v[2];										// Default width
+	box.css({left:left/100+"%",top:top/100+"%",width:wid/100+"%",height:wid/100+"%"});	// Set position
+ 	box.resizable( { aspectRatio:true, cursor:"se-resize", resize:SetBox } );	// Make resizable
+ 	box.draggable( { containment:"parent", cursor:"move", drag:SetBox  } );	// Make draggable
+	
+	function SetBox(event, ui) {											// MOVE/DRAG EVENT HANDLER
+		var box=$(this);													// Point at box
+		var left=Math.round(ui.position.left/box.parent().width()*10000);	// Get x
+		var top=Math.round(ui.position.top/box.parent().height()*10000);	// Get y
+		var wid=Math.round(box.width()/con.width()*10000);					// Get w
+		$("#"+id).val(left+";"+top+";"+wid);								// Concat and set in structure
+		SaveData("GetJSON");												// Set items
+		}
+}
+	
 SHIVA_Show.prototype.GetDataFromManager=function(type, index)
 {
 	if (type == "gdoc")
@@ -742,4 +786,3 @@ SHIVA_QueryEditor.prototype.SetQueryString=function()
 	this.query=str;
 	this.DrawQuery();
 }
-

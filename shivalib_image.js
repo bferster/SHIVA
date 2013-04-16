@@ -38,17 +38,16 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 		this.items=items;
 		$(con).css('height',options.height+"px");											// Set height
 		$(con).css('width',options.width+"px");												// Set width
-   		this.imageMob={ div:this.container+"Img",start:0 };									// Motion settings
-		var o=this.items[0];
-		v=o.sp.split(",");	this.imageMob.sx=v[0]-0; 	this.imageMob.sy=v[1]-0; 	this.imageMob.sw=v[2]-0;
-  		v=o.ep.split(",");	this.imageMob.ex=v[0]-0; 	this.imageMob.ey=v[1]-0; 	this.imageMob.ew=v[2]-0;
-   		this.imageMob.dur=o.dur;	
-   		this.imageMob.title=o.title;
-   		this.imageMob.fx=o.fx;			
-   		this.imageMob.url=o.url;			
-  		this.imageMob.ease=o.ease;			
-   		$(con).html("<img id='"+this.container+"Img' "+"' src='"+o.url+"'/>");
-		this.AnimateDiv("full");
+		var act=$("#accord").accordion("option","active");									// Get active
+   		if ((act == false) || (isNaN(act)) || (!$("#accord").length))						// If no image or in go.htm
+   			act=0;																			// Force to first
+		if (!this.imageMob)																	// If fist time
+			this.imageMob={ div:this.container+"Img" };										// Init obj
+ 		this.imageMob.start=0;																// Start fresh
+  		this.imageMob.curMob=act;															// Set curMob
+ 		clearInterval(shivaLib.imageMob.interval);											// Clear timer
+		$(con).html("<img id='"+this.container+"Img' "+"' src='"+items[act].url+"' onclick='Draw()'/>");		// Add image
+		this.AnimateDiv("full");															// Draw image
 		}
 		
  	  function GetSpreadsheetData(file, imgHgt, showImage, showSlide, trans, wid) 	{
@@ -100,23 +99,49 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 
 SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 {
+	var o,v;
 	var mob=shivaLib.imageMob;														// Point at mob
-	$("#"+shivaLib.container).css("overflow","hidden");								// Extra is hidden
+ 	if (mode == "next") {															// Advance to next pic
+ 		if (mob.curMob < shivaLib.items.length-1)	{								// If not last pic
+ 			mob.curMob++;															// Inc
+			shivaLib.imageMob.start=new Date().getTime();							// Set start
+			shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);			// Set timer ~24fps
+ 			}
+ 		else{																		// All done
+			if (!$("#accord").length)												// If in go.htm
+				mob.curMob=0;														// Back to the top
+			$("#"+shivaLib.container+"PlyBut").show();								// Show play button
+			return;																	// Quit
+	 		}
+	 	}
+ 	var o=shivaLib.items[mob.curMob];												// Point at current item
+	v=o.sp.split(",");	mob.sx=v[0]-0; 	mob.sy=v[1]-0; 	mob.sw=v[2]-0;				// Start pos
+  	v=o.ep.split(",");	mob.ex=v[0]-0; 	mob.ey=v[1]-0; 	mob.ew=v[2]-0;				// Emd pos
+   	mob.dur=o.dur-0;	mob.fx=o.fx;	mob.url=o.url;	mob.ease=o.ease;			// Misc options
+   	mob.title=o.title;													
+ 	$("#"+shivaLib.container).css("overflow","hidden");								// Extra is hidden
 	if (($("#"+shivaLib.container+"PlyBut").length == 0) && mob.dur) {				// If no playbut yet, but animated
 		$("#"+shivaLib.container).append("<img id='"+this.container+"PlyBut' src='playbut.gif' style='position:absolute;top:48%;left:47%;padding:2px;padding-left:18px;padding-right:18px' class='propTable' width='18'>");
 		$("#"+shivaLib.container+"PlyBut").click( function(){						// Play button click handler
 			 $(this).hide();														// Hide it 
+			 clearInterval(shivaLib.imageMob.interval);								// Clear timer
 			 shivaLib.imageMob.start=new Date().getTime();							// Set start
 			 shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);		// Set timer ~24fps
 			 });	
 		}
+ 	if (mob.url != $("#"+shivaLib.container+"Img").attr('src'))						// If not same url
+ 	 	$("#"+shivaLib.container+"Img").attr('src',shivaLib.items[mob.curMob].url);	// Set src
 	var pct=(new Date().getTime()-mob.start)/(mob.dur*1000);						// Get percentage
 	if (mob.start == 0)																// If first time
 		pct=0;																		// Start at beginning
 	if (pct >= .99) { 																// If done
-		$("#"+shivaLib.container+"PlyBut").show();									// Show play button
 		clearInterval(shivaLib.imageMob.interval);									// Clear timer
+		mob.start=0;																// Stop recursing for some reason
+		shivaLib.AnimateDiv("next");												// Get next pic
+ 		return;
 		}
+ 	if (mob.start == 0)																// If first time
+		pct=0;																		// Start at beginning
 	if (mob.ease == "both")															// Both
 		pct=1.0-((Math.cos(3.1414*pct)+1)/2.0);										// Full cosine curve
 	else if (mob.ease == "in")														// Slow in
@@ -131,8 +156,8 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 	o.left=(-o.width*(o.left/100))+"%";												// Scale left
 	o.top=(-o.width*(o.top/100))+"%";												// Scale top
 	o.width+="%"																	// Add %
-	if (mode == "full")																// If full image
-   		o.top=o.left="0%",o.width="100%",o.opacity=1;								// Ignore settings	
+	if ((mode == "full") &&	($("#accord").length))									// If full image
+  		o.top=o.left="0%",o.width="100%",o.opacity=1;								// Ignore settings	
 	$("#"+mob.div).css(o);															// Set css 
 }
 

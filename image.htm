@@ -76,8 +76,8 @@
 			showSlide: 					{	def:'true', 		opt:'true|false',		des:'Show slideshow?'}, 
 			imgHgt: 					{	def:'60', 			opt:'number',			des:'Thumbnail height'}}, 
 		Montage: {
-			height: 					{	def:'600', 			opt:'number',			des:'Height of image'},
-			width: 						{	def:'800', 			opt:'number',			des:'Width of image'}, 
+			height: 					{	def:'600', 			opt:'number',			des:'Height of player'},
+			width: 						{	def:'800', 			opt:'number',			des:'Width of player'}, 
 			audio: 						{	def:'', 			opt:'string',			des:'URL of sound track'}, 
 			volume: 					{	def:'100', 			opt:'string',			des:'Sound level'}, 
 			autoplay: 					{	def:'false', 		opt:'true|false',		des:'Auto play?'}, 
@@ -86,7 +86,7 @@
 			url: 						{	def:'', 			opt:'string',			des:'URL of image'}, 
 			sp: 						{	def:'0,0,10000', 	opt:'sizer',			des:'Starting position'}, 
 			ep: 						{	def:'0,0,10000', 	opt:'sizer',			des:'Ending position'}, 
-			dur: 						{	def:'4', 			opt:'number',			des:'Duration(seconds)'}, 
+			dur: 						{	def:'4', 			opt:'number',			des:'Duration (seconds)'}, 
 			ease: 						{	def:'both', 		opt:'both|in|out|none',	des:'Motion eases'}, 
 //			fx: 						{	def:'none', 		opt:'none|dissolve|fade-in|fade-out|slide-horiz|slide-vert',		des:'Transition style'},
 			fx: 						{	def:'', 			opt:'hidden',			des:'fx'},
@@ -105,6 +105,19 @@
 	helpText['OVERVIEW']+="Want to add text, line drawings, circles or pictures to your project?  Just click on the grey colored pencil in a circle button below the attributes box and to activate the SHIVA drawing tool.<br/><br/>";
 	helpText['OVERVIEW']+="For more information and detailed instructions for utilizing this tool please visit the UVa Knowledge Base documentation for the <a href='https://wiki.shanti.virginia.edu/x/VZ21AQ' target='_blank'> Images Tool</a>."
 	helpText['Enable user draw?']="Use the drop-down menu to the right to toggle whether or not users can interactively draw on your visualization. Note these drawings are for users only and are not saved with the visualization. In order to draw users will need to click on the pencil icon in the bottom left of your visualization.";
+
+	helpText['Height of player']="The height of the player box where the montage will play in";
+	helpText['Width of player']="The width of the player box where the montage will play in";
+	helpText['URL of sound track']="The URL of an audio file to play with the montage. IE and Chrome can play MP3s while Firefox can only play OOGs. To ensure cross-browser capability, include both formats in the same folder on the server.";
+	helpText['Sound level']="The loudness of the audio track, from 0-100";
+	helpText['Auto play?']="Montage will play when loaded if set to true when shared.";
+	helpText['URL of image']="The URL of the image itself  in JPEG, GIF, or PNG format.";
+	helpText['Starting position']="A translucent box to appear over the image to select the starting position and size of the motion. The boxes shape is constrained by the aspect ratio of the container. Clicking on the button in the top-left corner will hide the box.";
+	helpText['Ending position']="A translucent box to appear over the image to select the ending position and size of the motion. The boxes shape is constrained by the aspect ratio of the container. Clicking on the button in the top-left corner will hide the box.";
+	helpText['Duration (seconds)']="The number of seconds the move will occur in.";
+	helpText['Motion eases']="Motions look more natural if they ease in and out rather than abruptly start and  stop. Possible choices are both, in, out, or none.";
+	helpText['Title']="Not implemented yet";
+
 
 ///// INIT  /////////////
 	

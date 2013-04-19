@@ -78,13 +78,15 @@
 		Montage: {
 			height: 					{	def:'600', 			opt:'number',			des:'Height of image'},
 			width: 						{	def:'800', 			opt:'number',			des:'Width of image'}, 
-			audio: 						{	def:'', 			opt:'string',			des:'URL of audio track'}, 
+			audio: 						{	def:'', 			opt:'string',			des:'URL of sound track'}, 
+			volume: 					{	def:'100', 			opt:'string',			des:'Sound level'}, 
+			autoplay: 					{	def:'false', 		opt:'true|false',		des:'Auto play?'}, 
 	 		ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'}, 
 			item: 						{	def:'None', 		opt:'None|',			des:'<b>Choose image to edit</b>'}, 
 			url: 						{	def:'', 			opt:'string',			des:'URL of image'}, 
 			sp: 						{	def:'0,0,10000', 	opt:'sizer',			des:'Starting position'}, 
-			ep: 						{	def:'0,0,10000', 	opt:'sizer',			des:'Endinging position'}, 
-			dur: 						{	def:'4', 			opt:'number',			des:'Duration (seconds)'}, 
+			ep: 						{	def:'0,0,10000', 	opt:'sizer',			des:'Ending position'}, 
+			dur: 						{	def:'4', 			opt:'number',			des:'Duration(seconds)'}, 
 			ease: 						{	def:'both', 		opt:'both|in|out|none',	des:'Motion eases'}, 
 //			fx: 						{	def:'none', 		opt:'none|dissolve|fade-in|fade-out|slide-horiz|slide-vert',		des:'Transition style'},
 			fx: 						{	def:'', 			opt:'hidden',			des:'fx'},
@@ -140,7 +142,7 @@
 	{
 		if (shivaLib.drupalMan)
 			window.parent.postMessage("ChartChanged="+type,"*");
-		SetAttributes(type,true);	
+		SetAttributes(type,false);	
 	}
 
 	function shivaEventHandler(e)
@@ -188,10 +190,11 @@
 				if ((e=query.indexOf("&",s+1)) != -1)
 					chartType=query.substring(s+11,e);
 			}
-		var it=shivaLib.ReEdit(jsonData,props[chartType]);
+		
+		var it=shivaLib.ReEdit(jsonData,props[chartType],false);
 		if (it)
 			items=it;
-		SetAttributes(chartType,items,true);
+		SetAttributes(chartType,true);
 		$("#chartType").val(chartType);
 		Draw();
 	}
@@ -204,10 +207,10 @@
 			shivaLib.ShowHelp(att,helpText);
 	}	
 
-	function SetAttributes(type)
+	function SetAttributes(type,keep)
 	{
 		chartType=type;
-		shivaLib.SetAttributes(props[chartType],items);
+		shivaLib.SetAttributes(props[chartType],items,keep);
 	}	
 
 ///////// ITEMS  /////////////

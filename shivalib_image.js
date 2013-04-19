@@ -42,12 +42,29 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
    		if ((act == false) || (isNaN(act)) || (!$("#accord").length))						// If no image or in go.htm
    			act=0;																			// Force to first
 		if (!this.imageMob)																	// If fist time
-			this.imageMob={ div:this.container+"Img" };										// Init obj
+			this.imageMob={ div:this.container+"Img", numMobs:items.length };				// Init obj
  		this.imageMob.start=0;																// Start fresh
   		this.imageMob.curMob=act;															// Set curMob
- 		clearInterval(shivaLib.imageMob.interval);											// Clear timer
-		$(con).html("<img id='"+this.container+"Img' "+"' src='"+items[act].url+"' onclick='Draw()'/>");		// Add image
-		this.AnimateDiv("full");															// Draw image
+  		clearInterval(shivaLib.imageMob.interval);											// Clear timer
+		$(con).html("<img id='"+this.container+"Img' "+"' src='"+items[act].url+"' onclick='shivaLib.DrawImage()'/>"); // Add image
+		if (act < items.length-1)															// If not last image
+			$(con).append("<img id='"+this.container+"Img2' "+"' src='"+items[act+1].url+"' style='display:none' />");	// Preload next image
+		$("#"+this.container+"Snd").remove();												// Remover old ones
+		this.imageMob.snd=null;																// No audio object		
+		if (options.audio) {																// If an audio file
+			var file=options.audio.substr(0,options.audio.length-4);						// Remove extension
+			var str="<audio id='"+this.container+"Snd'";									// Base
+			str+="><source src='"+file+".ogg' type='audio/ogg'><source src='"+file+".mp3' type='audio/mpeg'></audio>";	// Add sources
+			$(con).append(str);																// Add audio to container
+			this.imageMob.snd=document.getElementById(this.container+"Snd");				// Point at audio object
+			this.imageMob.snd.volume=options.volume/100;									// Set volume
+			}
+		if ($("#accord").length)															// If editing	
+			this.AnimateDiv("full");														// Draw full image
+		else																				// Playing in go.htm
+			this.AnimateDiv("start");														// Draw image at start pos
+		if ((options.autoplay == "true") && (!$("#accord").length))							// If autoplay in go.htm
+			$("#"+this.container+"PlyBut").trigger("click");								// Trigger play								
 		}
 		
  	  function GetSpreadsheetData(file, imgHgt, showImage, showSlide, trans, wid) 	{
@@ -59,7 +76,7 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 			var data=response.getDataTable();
 			var cols=data.getNumberOfColumns();
 			var rows=data.getNumberOfRows();
-	 		var rowData=new Array();
+	 		var rowData=new Array()
  			for (i=0;i<rows;++i) {
  				a=new Array()
 				for (j=0;j<cols;++j) 
@@ -108,6 +125,8 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 			shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);			// Set timer ~24fps
  			}
  		else{																		// All done
+			if (shivaLib.imageMob.snd)												// If a sound object
+				shivaLib.imageMob.snd.pause();										// Stop playing
 			if (!$("#accord").length)												// If in go.htm
 				mob.curMob=0;														// Back to the top
 			$("#"+shivaLib.container+"PlyBut").show();								// Show play button
@@ -124,13 +143,18 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 		$("#"+shivaLib.container).append("<img id='"+this.container+"PlyBut' src='playbut.gif' style='position:absolute;top:48%;left:47%;padding:2px;padding-left:18px;padding-right:18px' class='propTable' width='18'>");
 		$("#"+shivaLib.container+"PlyBut").click( function(){						// Play button click handler
 			 $(this).hide();														// Hide it 
+			if (shivaLib.imageMob.snd)												// If a sound object
+				shivaLib.imageMob.snd.play();										// Start playing
 			 clearInterval(shivaLib.imageMob.interval);								// Clear timer
 			 shivaLib.imageMob.start=new Date().getTime();							// Set start
 			 shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);		// Set timer ~24fps
 			 });	
 		}
- 	if (mob.url != $("#"+shivaLib.container+"Img").attr('src'))						// If not same url
- 	 	$("#"+shivaLib.container+"Img").attr('src',shivaLib.items[mob.curMob].url);	// Set src
+ 	if (mob.url != $("#"+mob.div).attr('src'))	{									// If not same url
+ 	 	$("#"+mob.div).attr('src',shivaLib.items[mob.curMob].url);					// Set src
+ 	 	if (mob.curMob < mob.numMobs-1)												// If not last mob
+ 	 		$("#"+mob.div+"2").attr('src',shivaLib.items[mob.curMob+1].url);		// Preload next one
+		}
 	var pct=(new Date().getTime()-mob.start)/(mob.dur*1000);						// Get percentage
 	if (mob.start == 0)																// If first time
 		pct=0;																		// Start at beginning
@@ -156,8 +180,10 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 	o.left=(-o.width*(o.left/100))+"%";												// Scale left
 	o.top=(-o.width*(o.top/100))+"%";												// Scale top
 	o.width+="%"																	// Add %
-	if ((mode == "full") &&	($("#accord").length))									// If full image
+	if ((mode == "full") &&	($("#accord").length)) {								// If full image
   		o.top=o.left="0%",o.width="100%",o.opacity=1;								// Ignore settings	
+  		$("#"+shivaLib.container).css("overflow","visible");						// Show extra
+  		}
 	$("#"+mob.div).css(o);															// Set css 
 }
 

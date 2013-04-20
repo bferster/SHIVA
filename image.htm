@@ -12,7 +12,7 @@
  	<script type="text/javascript" src="shivalib-min.js"></script>
  	<script type="text/javascript" src="shivalib_image.js"></script>
  	<script type="text/javascript" src="jquery.ad-gallery.min.js"></script>
- 	<style type="text/css">
+	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
 		p.pb { text-align:right; color:#999999; }
 		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
@@ -89,7 +89,6 @@
 			dur: 						{	def:'4', 			opt:'number',			des:'Duration (seconds)'}, 
 			ease: 						{	def:'both', 		opt:'both|in|out|none',	des:'Motion eases'}, 
 //			fx: 						{	def:'none', 		opt:'none|dissolve|fade-in|fade-out|slide-horiz|slide-vert',		des:'Transition style'},
-			fx: 						{	def:'', 			opt:'hidden',			des:'fx'},
 			title: 						{	def:'', 			opt:'list',				des:'Title'}}
 			}
 	
@@ -116,8 +115,7 @@
 	helpText['Ending position']="A translucent box to appear over the image to select the ending position and size of the motion. The boxes shape is constrained by the aspect ratio of the container. Clicking on the button in the top-left corner will hide the box.";
 	helpText['Duration (seconds)']="The number of seconds the move will occur in.";
 	helpText['Motion eases']="Motions look more natural if they ease in and out rather than abruptly start and  stop. Possible choices are both, in, out, or none.";
-	helpText['Title']="Not implemented yet";
-
+	helpText['Title']="Type the title you wish to appear atop this image, if any. You can add HTML tags is desired.";
 
 ///// INIT  /////////////
 	
@@ -203,7 +201,7 @@
 				if ((e=query.indexOf("&",s+1)) != -1)
 					chartType=query.substring(s+11,e);
 			}
-		
+		SetAttributes(chartType,false);	
 		var it=shivaLib.ReEdit(jsonData,props[chartType],false);
 		if (it)
 			items=it;

@@ -29,8 +29,12 @@ SHIVA_Show.prototype.SaveData=function(mode, style, items, props, type) 			// SA
 					str+="\t\"item-"+(i+1)+"\": \"";
 					for (k=itemStart;k<atts.length;++k)	{
 						str1=items[i][atts[k]];
-						if (str1)
-							str1=str1.replace(/\n/g,",").replace(/\r/g,"").replace(/\:/g,"`");
+						if (str1) {
+							if ((props[atts[k]]) && (props[atts[k]].opt == "list"))
+								str1=str1.replace(/\n/g,"<br/>").replace(/\r/g,"").replace(/\:/g,"`");
+							else
+								str1=str1.replace(/\n/g,",").replace(/\r/g,"").replace(/\:/g,"`");
+							}
 						str+=atts[k]+":"+str1+";"; 
 						}
 					str=str.substring(0,str.length-1)+"\",\n";	
@@ -299,7 +303,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 			   			else if (props[oo].opt == "slider")
    							str+="<input style='width:90px' onChange='Draw(\"opacity\")' type='range' id='"+id+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";
 			   			else if (props[oo].opt == "list")
-   							str+="<textarea cols='13' rows='2' onChange='Draw()' id='"+id2+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";
+   							str+="<textarea cols='13' rows='2' onChange='Draw()' onInput='Draw()' id='"+id2+"' onFocus='ShowHelp(\""+props[oo].des+"\")'/>";
 				   		else if (props[oo].opt == "hidden") 
    							str+="<input type='hidden' id='"+id2+"'/>";
 			   			else if (props[oo].opt.indexOf('|') != -1) {

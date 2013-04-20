@@ -5,7 +5,7 @@
 
 SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 {
-	var v,o;
+	var i,v,o,str;
 	var options=this.options;
 	var container=this.container;
 	var con="#"+container;
@@ -39,13 +39,18 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 		$(con).css('height',options.height+"px");											// Set height
 		$(con).css('width',options.width+"px");												// Set width
 		var act=$("#accord").accordion("option","active");									// Get active
-   		if ((act == false) || (isNaN(act)) || (!$("#accord").length))						// If no image or in go.htm
+   		if ((act === false) || (isNaN(act)) || (!$("#accord").length))						// If no image or in go.htm
    			act=0;																			// Force to first
 		if (!this.imageMob)																	// If fist time
-			this.imageMob={ div:this.container+"Img", numMobs:items.length };				// Init obj
+			this.imageMob={ div:this.container+"Img" };										// Init obj
  		this.imageMob.start=0;																// Start fresh
   		this.imageMob.curMob=act;															// Set curMob
-  		clearInterval(shivaLib.imageMob.interval);											// Clear timer
+  	 	this.imageMob.audioStart=0;															// Start fresh
+		for (i=0;i<act;++i)																	// Run up to act
+			this.imageMob.audioStart+=items[i].dur-0;										// Add time
+		this.imageMob.numMobs=items.length;													// Number of mobs
+  
+   		clearInterval(shivaLib.imageMob.interval);											// Clear timer
 		$(con).html("<img id='"+this.container+"Img' "+"' src='"+items[act].url+"' onclick='shivaLib.DrawImage()'/>"); // Add image
 		if (act < items.length-1)															// If not last image
 			$(con).append("<img id='"+this.container+"Img2' "+"' src='"+items[act+1].url+"' style='display:none' />");	// Preload next image
@@ -53,12 +58,20 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 		this.imageMob.snd=null;																// No audio object		
 		if (options.audio) {																// If an audio file
 			var file=options.audio.substr(0,options.audio.length-4);						// Remove extension
-			var str="<audio id='"+this.container+"Snd'";									// Base
+			str="<audio id='"+this.container+"Snd'";										// Base
 			str+="><source src='"+file+".ogg' type='audio/ogg'><source src='"+file+".mp3' type='audio/mpeg'></audio>";	// Add sources
 			$(con).append(str);																// Add audio to container
 			this.imageMob.snd=document.getElementById(this.container+"Snd");				// Point at audio object
 			this.imageMob.snd.volume=options.volume/100;									// Set volume
 			}
+		str="<div id='"+this.container+"Title'";											// Base
+		if (options.etitle == "true") 	str+=" contenteditable='true'";						// If editable, set flag
+		else							str+=" onclick='shivaLib.DrawImage()'";				// If not, repond to clicks
+		str+="style='top:0px;left:0px;height:90%;width:90%;padding:5%;position:absolute;"; 	// Pos
+		str+="font-size:"+options.height/20+"px;"											// Set height
+		str+="text-align:center;text-shadow:5px 5px 10px black;color:white'>";				// Text format		
+		str+=items[act].title+"</div>";														// Add title
+		$(con).append(str);																	// Add title overlay to container
 		if ($("#accord").length)															// If editing	
 			this.AnimateDiv("full");														// Draw full image
 		else																				// Playing in go.htm
@@ -67,7 +80,7 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 			$("#"+this.container+"PlyBut").trigger("click");								// Trigger play								
 		}
 		
- 	  function GetSpreadsheetData(file, imgHgt, showImage, showSlide, trans, wid) 	{
+ 	  function GetSpreadsheetData(file, imgHgt, showImage, showSlide, trans, wid) {
   		var query=new google.visualization.Query(file);
    		query.send(handleQueryResponse);
  
@@ -138,13 +151,16 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
   	v=o.ep.split(",");	mob.ex=v[0]-0; 	mob.ey=v[1]-0; 	mob.ew=v[2]-0;				// Emd pos
    	mob.dur=o.dur-0;	mob.fx=o.fx;	mob.url=o.url;	mob.ease=o.ease;			// Misc options
    	mob.title=o.title;													
- 	$("#"+shivaLib.container).css("overflow","hidden");								// Extra is hidden
+ 	$("#"+shivaLib.container+"Title").html(mob.title);								// Set title
+	$("#"+shivaLib.container).css("overflow","hidden");								// Extra is hidden
 	if (($("#"+shivaLib.container+"PlyBut").length == 0) && mob.dur) {				// If no playbut yet, but animated
 		$("#"+shivaLib.container).append("<img id='"+this.container+"PlyBut' src='playbut.gif' style='position:absolute;top:48%;left:47%;padding:2px;padding-left:18px;padding-right:18px' class='propTable' width='18'>");
 		$("#"+shivaLib.container+"PlyBut").click( function(){						// Play button click handler
 			 $(this).hide();														// Hide it 
-			if (shivaLib.imageMob.snd)												// If a sound object
+			if (shivaLib.imageMob.snd) {											// If a sound object
+				shivaLib.imageMob.snd.currentTime=shivaLib.imageMob.audioStart;		// Cue audio
 				shivaLib.imageMob.snd.play();										// Start playing
+				}
 			 clearInterval(shivaLib.imageMob.interval);								// Clear timer
 			 shivaLib.imageMob.start=new Date().getTime();							// Set start
 			 shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);		// Set timer ~24fps

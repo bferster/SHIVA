@@ -85,7 +85,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             var word = data;
             $('svg').remove();
             $('#cloudLoad').remove();
-            d3.select("#" + cloud.container).append("svg").attr("id", "wordCloud").attr("width", cloud.options.width).attr("height", cloud.options.height).append("g").attr("transform", "translate(" + cloud.options.width / 2.15 + "," + ((cloud.options.height / 2.15)) + ")").append('rect').attr("transform", "translate(-" + cloud.options.width / 2.15 + ",-" + ((cloud.options.height / 2.15)) + ")").attr('x', 0).attr('y', 0).attr('width', '100%').attr('height', '80%').style('fill', (cloud.options.backgroundColor == "") ? 'white' : cloud.options.backgroundColor);
+            d3.select("#" + cloud.container).append("svg").attr("id", "wordCloud").attr("width", cloud.options.width).attr("height", cloud.options.height).append("g").attr("transform", "translate(" + ((cloud.options.width/2)) + "," + ((cloud.options.height/2)) + ")").append('rect').attr("transform", "translate(-" + ((cloud.options.width/2)) + ",-" + ((cloud.options.height/2)*0.8) + ")").attr('x', 0).attr('y', 0).attr('width', '100%').attr('height', '80%').style('fill', (cloud.options.backgroundColor == "") ? 'white' : cloud.options.backgroundColor);
             d3.select('g').selectAll("text").data(data).enter().append("text").attr('class', 'word').style("font-size", function(d) {
                 return d.size + "px";
             }).style("font-family", cloud.options.font_name).style("fill", function(d, i) {
@@ -95,7 +95,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             }).text(function(d) {
                 return d.text;
             });
-            d3.select('svg').append('text').attr('id', 'cloudTitle').text(cloud.options.title).style('font-size', cloud.options.titleFontSize + 'px').attr('text-anchor', 'middle').attr('y', cloud.options.height - 35).attr('x', cloud.options.width / 2);
+            d3.select('svg').append('text').attr('id', 'cloudTitle').text(cloud.options.title).style('font-size', cloud.options.titleFontSize + 'px').attr('text-anchor', 'middle').attr('y', cloud.options.height - (cloud.options.titleFontSize)).attr('x', cloud.options.width / 2);
 
             //add wordlist
             if($('#wordCloudWordList').length ==0){
@@ -131,7 +131,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             }
             d3.selectAll('.listEntry').remove();
             
-            d3.select('#wordCloudWordList').selectAll('.listEntry').data(data).enter().append('div').attr('class','listEntry').style('vertical-align','middle').style('height','20px').style('width', '100px').text(function(d) {
+            d3.select('#wordCloudWordList').selectAll('.listEntry').data(cloud.d).enter().append('div').attr('class','listEntry').style('vertical-align','middle').style('height','20px').style('width', '100px').text(function(d) {
                 return d.text + " (" + d.freq + ")";
             }).on('click', function(d){
                 //More SEA events
@@ -144,7 +144,17 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
                 css: {
                     float: 'right'
                 }
-            }).addClass('listEntryFilter ui-icon ui-icon-close').click(function(e){
+            }).addClass('listEntryFilter ui-icon ui-icon-close').on('click', function(e){
+                var pass; 
+                if(typeof e.data =="undefined")
+                    pass = false;
+                else{
+                    if(typeof e.data.pass=="undefined")
+                        pass = false;
+                    else{
+                        pass = e.data.pass;
+                    }
+                }
                 e.stopPropagation();
                 if($(this).hasClass('ui-icon-close')){
                     $(this).removeClass('ui-icon-close').addClass('ui-icon-arrowreturnthick-1-w');
@@ -155,8 +165,14 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
                     $(this).parent().css('opacity',1);   
                 }
                 var word = $(this).parent().text().split(' ')[0];
-                cloud.filter();                
+                if(!pass)
+                    cloud.filter();                
             }));
+            
+            $('.listEntry').each(function(){
+                if(!data.find($(this).text().split(' ')[0], "text"))
+                    $(this).find('span').click({pass: true})
+            });
             
             if (cloud.options.wordlist == "true") {
                 $('#cloudShowListButton').show();
@@ -224,7 +240,12 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
                 words.push($(this).text().split(' ')[0]);
             });
             var d = cloud.d.filter(function(el){
-               return words.indexOf(el.text) >= 0;
+                if(words.indexOf(el.text) == -1){
+                    cloud.filterSet.push(el.text);
+                    return false;
+                }
+                else
+                    return true;
             });
             cloud.buildLayout(d);
         };

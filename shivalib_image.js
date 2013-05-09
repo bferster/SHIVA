@@ -68,7 +68,7 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 		if (options.etitle == "true") 	str+=" contenteditable='true'";						// If editable, set flag
 		else							str+=" onclick='shivaLib.DrawImage()'";				// If not, repond to clicks
 		str+="style='top:0px;left:0px;height:90%;width:90%;padding:5%;position:absolute;"; 	// Pos
-		str+="font-size:"+options.height/20+"px;font-weight:bold;"							// Set height/bold
+		str+="font-size:"+options.height/20+"px;font-weight:bold;";							// Set height/bold
 		str+="text-align:center;text-shadow:5px 5px 10px black;color:white'>";				// Text format		
 		str+=items[act].title+"</div>";														// Add title
 		$(con).append(str);																	// Add title overlay to container

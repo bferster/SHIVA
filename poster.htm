@@ -45,7 +45,7 @@
  	<div id="helpDiv"> </div>
 	<div id="outputDiv" style="width:460px"> </div>
 	</div>
-	<div id="containerDiv" style="position:absolute;top:0px;left:308px;height:600px;width:800px"> </div>
+	<div id="containerDiv" style="position:absolute;top:0px;left:308px;height:600px;width:800px;"> </div>
  
 <script>
 
@@ -58,15 +58,20 @@
 	
 	var props={
 		Canvas: {
+			top: 						{	def:'0', 			opt:'hidden',			des:'top'}, 
+			left: 						{	def:'0', 			opt:'hidden',			des:'left'}, 
 			height: 					{	def:'600', 			opt:'number',			des:'Height of poster'},
 			width: 						{	def:'800', 			opt:'number',			des:'Width of poster'}, 
-			ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'},
+			scale: 						{	def:'2', 			opt:'number',			des:'Poster scale'}, 
+			backCol: 					{	def:'eeeeee', 		opt:'color',			des:'Background color'}, 
+			overview: 					{	def:'true', 		opt:'true|false',		des:'Show overview?'},
+				ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'},
 			item: 						{	def:'None', 		opt:'None|',			des:'<b>Choose pane to edit</b>'}, 
 			url: 						{	def:'', 			opt:'string',			des:'URL of pane'}, 
 			hgt: 						{	def:'300', 			opt:'hidden',			des:'hgt'},
 			wid: 						{	def:'400', 			opt:'hidden',			des:'wid'}, 
-			top: 						{	def:'100', 			opt:'hidden',			des:'top'}, 
-			left: 						{	def:'100', 			opt:'hidden',			des:'left'}, 
+			top: 						{	def:'0', 			opt:'hidden',			des:'top'}, 
+			left: 						{	def:'0', 			opt:'hidden',			des:'left'}, 
 			}
 		}
 	
@@ -75,6 +80,9 @@
 	helpText['Width of poster']="The width of the player box where the montage will play in";
 	helpText['Enable user draw?']="Use the drop-down menu to the right to toggle whether or not users can interactively draw on your visualization. Note these drawings are for users only and are not saved with the visualization. In order to draw users will need to click on the pencil icon in the bottom left of your visualization.";
 	helpText['URL of pane']="The URL of the pane to add to the poster.";
+	helpText['Poster scale']="The number of times the post is larger than the frame it can be viewed in.";
+	helpText['Background color']="Use the text box to the right to set the background color for the poster. Either click on the square color chip icon in the text box to launch the color picker and select a color, or enter a hexadecimal color value directly into the text box.";
+	helpText['Show Overview?']="Whether or not to add a small icon at the bottom right of your poster. Clicking this icon will will show or hide a small mini-poser at the bottom right corner of the poster; this mini-poster allows easy navigation through the poster.";
 
 ///// INIT  /////////////
 	
@@ -138,6 +146,7 @@
 
 	function SaveData(mode)
 	{
+		return shivaLib.SaveData(mode,shivaGroup,items,props[chartType],chartType);
 	}	
 
 	function ReEdit(jsonData)

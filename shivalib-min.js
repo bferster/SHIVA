@@ -20,7 +20,8 @@ this.DrawNetwork();else if(group=='Earth')
 this.DrawEarth();else if(group=='Draw'){if(ops.width)$("#"+this.container).css("width",ops.width+"px");if(ops.height)$("#"+this.container).css("height",ops.height+"px");this.DrawOverlay();this.SendReadyMessage(true);}
 else if(group=='Webpage')
 this.DrawWebpage();else if(group=='WordCloud')
-this.DrawWordCloud();if(ops["draw-1"])
+this.DrawWordCloud();else if(group=='Poster')
+this.DrawPoster();if(ops["draw-1"])
 this.AddOverlay();var ud=ops["ud"];if(ud=="true")ud=true;else if(ud=="false")ud=false;if((ud)&&(this.inGo)){var h=$("#"+this.container).css("height").replace(/px/g,"");var str="<img  id='shivaAnnotateBut' src='annotate.gif' style='position:absolute";str+=";top:"+(h-0+12)+"px'>";$("body").append(str);$("#shivaAnnotateBut").click(function(){_this.Annotate();});$("#shivaAnnotateBut").css('pointer-events','auto');}}
 SHIVA_Show.prototype.LoadJSLib=function(which,callback)
 {var i,obj,lib="";switch(which){case"Timeline":obj="Timeline.DefaultEventSource";lib="//api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true";break;case"Timeglider":obj="timeglider";lib="timeglider-all.js";break;case"Video":obj="Popcorn.smart";lib="//popcornjs.org/code/dist/popcorn-complete.min.js";break;case"Image":obj="jQuery.prototype.adGallery";lib="jquery.ad-gallery.min.js";break;case"Network":obj="$jit.id";lib="jit-yc.js";break;case"Map":obj="google.maps.Map";lib="//maps.googleapis.com/maps/api/js?sensor=false&callback=shivaJSLoaded";break;case"WordCloud":obj="d3.layout.cloud";lib="d3_cloud_combined.js";}

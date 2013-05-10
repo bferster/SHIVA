@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<title>SHIVA Image</title>
+	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
+ 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+  	<script type="text/javascript" src="shivalib-min.js"></script>
+  	<script type="text/javascript" src="shivalib_poster.js"></script>
+	<style type="text/css">
+		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
+		p.pb { text-align:right; color:#999999; }
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		tr.odd { background-color:#e0e0e0; }
+		.propTable { background-color:#eee;border-radius:8px;
+				  	 background:-moz-linear-gradient(top,#f0f0f0,#dfdfdf);
+				  	 background:-webkit-linear-gradient(top, #f0f0f0 0%, #dfdfdf 100%);
+				  	 border-collapse: collapse;
+				  	 }
+  </style>
+</head>
+<body>
+	<div style="width:279px;position:absolute;top:0px;left:0px">
+ 		<!-----------
+ 		<p><select id="chartType" onchange="ChangeChart(this.value)">
+			<option>Slideshow</option>
+			<option>Montage</option>
+		</select></p!>
+		---->
+    <table id="propertyTable" class="propTable">
+		<tr style="height:8px"><td> </td></tr>
+	</table> 
+   <p style="text-align:right"><span style="vertical-align:50%">Montage images </span><span id="toolbar" style="font-size:medium">
+		<button type='button' id='tb1' onclick='ShiftItem(-1)'> </button>
+		<button type='button' id='tb2' onclick='ShiftItem(1)'> </button>
+		<button type='button' id='tb3' onclick='RemoveItem()'> </button>
+		<button type='button' id='tb4' onclick='AddNewItem()'> </button>
+	</span></p>
+	<p style="text-align:right"><img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate()'>
+		<span id='saveAsDiv'></span>
+	<span><br/><br/><a onclick='ShowSample()'><i>Click <u>here</u> to add Poster sample</i></a></span>
+		</p>		
+ 	<div id="helpDiv"> </div>
+	<div id="outputDiv" style="width:460px"> </div>
+	</div>
+	<div id="containerDiv" style="position:absolute;top:0px;left:308px;height:600px;width:800px"> </div>
+ 
+<script>
+
+///////// GLOBALS   //////////
+
+	var items=new Array();
+	var shivaLib=null;
+	var shivaGroup="Poster"
+	var chartType="Canvas";
+	
+	var props={
+		Canvas: {
+			height: 					{	def:'600', 			opt:'number',			des:'Height of poster'},
+			width: 						{	def:'800', 			opt:'number',			des:'Width of poster'}, 
+			ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'},
+			item: 						{	def:'None', 		opt:'None|',			des:'<b>Choose pane to edit</b>'}, 
+			url: 						{	def:'', 			opt:'string',			des:'URL of pane'}, 
+			hgt: 						{	def:'300', 			opt:'hidden',			des:'hgt'},
+			wid: 						{	def:'400', 			opt:'hidden',			des:'wid'}, 
+			top: 						{	def:'100', 			opt:'hidden',			des:'top'}, 
+			left: 						{	def:'100', 			opt:'hidden',			des:'left'}, 
+			}
+		}
+	
+	var helpText=new Array();
+	helpText['Height of poster']="The height of the player box where the montage will play in";
+	helpText['Width of poster']="The width of the player box where the montage will play in";
+	helpText['Enable user draw?']="Use the drop-down menu to the right to toggle whether or not users can interactively draw on your visualization. Note these drawings are for users only and are not saved with the visualization. In order to draw users will need to click on the pencil icon in the bottom left of your visualization.";
+	helpText['URL of pane']="The URL of the pane to add to the poster.";
+
+///// INIT  /////////////
+	
+	$(document).ready(function() {
+  		shivaLib=new SHIVA_Show("containerDiv");
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
+	  	shivaLib.SetAttributes(props[chartType],items,false);
+		shivaLib.callback=Draw;
+		ReEdit();
+		ShowHelp("startup");
+		if (window.addEventListener) 
+			window.addEventListener("message",shivaEventHandler,false);
+		else
+			window.attachEvent("message",shivaEventHandler);
+		if (!shivaLib.drupalMan) {
+			var str="&nbsp;&nbsp;Share as: <select id='formatter' onChange='SaveData(this.value)'>";
+			str+="<option>Choose format</option>";
+			str+="<option>WordPress</option>";
+			str+="<option>eStore</option>";
+			str+="<option>iFrame</option>";
+			str+="<option>JSON</option>";
+			str+="<option>Web-page</option>";
+			str+="</select>"; 
+			$("#saveAsDiv").html(str);
+			}
+		$("#tb1").button({text: false, icons: { primary: "ui-icon-arrowthick-1-n"}}).css("width","25");
+		$("#tb2").button({text: false, icons: { primary: "ui-icon-arrowthick-1-s"}}).css("width","25");
+		$("#tb3").button({text: false, icons: { primary: "ui-icon-trash"}}).css("width","25");
+		$("#tb4").button({text: false, icons: { primary: "ui-icon-plus"}}).css("width","25");
+		$("#toolbar").buttonset();
+	
+	});
+
+	function ChangeChart(type)
+	{
+		if (shivaLib.drupalMan)
+			window.parent.postMessage("ChartChanged="+type,"*");
+		SetAttributes(type,false);	
+	}
+
+	function shivaEventHandler(e)
+	{
+		if (e.data.indexOf("GetJSON") == 0) 
+			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
+		else if (e.data.indexOf("GetWebPage") == 0) 
+			e.source.postMessage("GetWebPage="+SaveData("Web-page"),"*");
+		else if (e.data.indexOf("GetWordPress") == 0) 
+			e.source.postMessage("GetWordPress="+SaveData("WordPress"),"*");
+		else if (e.data.indexOf("GetType") == 0) 
+			e.source.postMessage("GetType="+shivaGroup,"*");
+		else if (e.data.indexOf("PutJSON") == 0) 
+			ReEdit($.parseJSON(e.data.substr(8)));
+	}
+
+	function Draw(mode)
+	{	
+		if (shivaLib.drupalMan)
+			window.parent.postMessage("DataChanged=true","*");
+		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
+	}
+
+	function SaveData(mode)
+	{
+	}	
+
+	function ReEdit(jsonData)
+	{
+		if (jsonData) {
+			if (jsonData.chartType)
+				chartType=jsonData.chartType;
+			}
+		else{
+			var s,e;
+			var query=window.location.search.substring(1);
+			if ((s=query.indexOf("&chartType=")) != -1)
+				if ((e=query.indexOf("&",s+1)) != -1)
+					chartType=query.substring(s+11,e);
+			}
+		SetAttributes(chartType,false);	
+		var it=shivaLib.ReEdit(jsonData,props[chartType],false);
+		if (it)
+			items=it;
+		SetAttributes(chartType,true);
+		$("#chartType").val(chartType);
+		Draw();
+	}
+
+	function ShowHelp(att)
+	{
+		if (att == "startup") 
+			$("#helpDiv").html("<br/><p class='pb'>Built by SHANTI<br/>The University of Virginia</p>");
+		else
+			shivaLib.ShowHelp(att,helpText);
+	}	
+
+	function SetAttributes(type,keep)
+	{
+		chartType=type;
+		shivaLib.SetAttributes(props[chartType],items,keep);
+	}	
+
+///////// ITEMS  /////////////
+	
+	function AddNewItem()
+	{
+		var o=new Object;
+		var s=0,i=0;
+		shivaLib.Sound("ding");
+		for (var key in props[chartType]) {
+			if (key == "item")
+				s=i;
+			++i;
+			if (!s)
+				continue;
+			o[key]=props[chartType][key].def;
+			}
+		items.push(o);
+		for (var i=0;i<items.length;++i)
+			items[i].name="Pane-"+(i+1);
+	  	shivaLib.SetAttributes(props[chartType],items,true);
+		Draw();
+		$("#accord").accordion({ active: items.length-1 });
+	}	
+	
+	function RemoveItem()
+	{
+		var active=$("#accord").accordion("option","active");
+		if (active === false)
+			return;
+		shivaLib.Sound("delete");
+		items.splice(active,1);
+		for (var i=0;i<items.length;++i) 
+			items[i].name="Pane-"+(i+1);
+	  	shivaLib.SetAttributes(props[chartType],items,true);
+		Draw();
+	}
+
+	function ShiftItem(dir)
+	{
+		var cur=shivaLib.ShiftItem(dir,items);
+		for (var i=0;i<items.length;++i) 
+			items[i].name="Pane-"+(i+1);
+	  	shivaLib.SetAttributes(props[chartType],items,true);
+		if (cur != -1)
+			$("#accord").accordion({ active: cur });
+	}
+
+	function ShowSample()
+	{
+		var data={
+			}
+		ReEdit(data);
+	}
+
+		
+</script>
+</body></html>

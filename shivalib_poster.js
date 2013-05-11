@@ -25,6 +25,8 @@ SHIVA_Show.prototype.DrawPoster=function(mode) 										//	DRAW POSTER
 	var str="<div id='posterDiv' style='position:absolute;left:0px;top:0px'></div>";	// Make poster div
 	if (!this.posterScale)																// If not already set
 		this.posterScale=2;																// Init scale to start
+	if (this.posterX == undefined)														// If not already set
+		this.posterX=this.posterY="0px";													// Init scale to TLC
 	$(con).html(str);																	// Add div
 	$(con).css({"width":options.width+"px","height":options.height+"px"});				// Resize container	
 	$(con).css({border:"1px solid",overflow:"hidden",margin:"0px",padding:"0px"});		// Put border and hode overflow on container
@@ -37,6 +39,7 @@ SHIVA_Show.prototype.DrawPoster=function(mode) 										//	DRAW POSTER
 	var b=t-0+(options.height-(options.height*this.posterScale));						// Bottom boundary
 	$("#posterDiv").draggable({ containment: [r,b,l,t],									// Containment 
 								drag:function(event,ui) {								// Make it draggable
+								shivaLib.posterX=$("#posterDiv").css("left");			// Save pos
 								shivaLib.DrawPosterOverview();							// Reflect pos in overview
 								}});	 
 	if (options.dataSourceUrl) {														// If a back img spec'd
@@ -45,10 +48,11 @@ SHIVA_Show.prototype.DrawPoster=function(mode) 										//	DRAW POSTER
 		str+="width='"+options.width*this.posterScale+"' >";							// Width
 		$("#posterDiv").append(str);													// Add image to poster
 		}	
-
+	$("#posterDiv").css({"left":this.posterX,"top":this.posterY});						// Position poster	
 	if (typeof(DrawPosterGrid) == "function")											// If not in embedded
 		DrawPosterGrid();																// Draw grid if enabled
 	this.DrawPosterOverview();															// Draw overview, if enabled
+	this.DrawLayerControlBox(this.items,(options.controlbox == "true"));				// Draw control box?
 	this.SendReadyMessage(true);														// Send ready message
 }
 
@@ -98,9 +102,10 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									//	DRAW POSTER OVERV
 								var pw=$("#posterDiv").width();							// Poster width
 								var h=$("#posterOverDiv").height();						// Overview hgt
 								var ph=$("#posterDiv").height();						// Poster hgt
-								var x=Math.max(0,ui.position.left/w*pw);				// Calc left
-								var y=Math.max(0,ui.position.top/h*ph);					// Calc top
-								$("#posterDiv").css({"left":-x+"px","top":-y+"px"});	// Position poster	
+								var x=-Math.max(0,ui.position.left/w*pw);				// Calc left
+								var y=-Math.max(0,ui.position.top/h*ph);				// Calc top
+								shivaLib.posterX=x+"px";	shivaLib.posterY=y+"px";	// Save pos
+								$("#posterDiv").css({"left":x+"px","top":y+"px"});		// Position poster	
 								}
 							 });		
 		}
@@ -110,6 +115,7 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									//	DRAW POSTER OVERV
 									stop:function(event,ui) {							// Om resize stop
 										var w=$("#posterOverDiv").width();				// Overview width
 										shivaLib.posterScale=Math.max(w/ui.size.width,1); // Get new scale, cap at 100%
+										shivaLib.posterX=shivaLib.posterY="0px";		// Kluge
 										shivaLib.DrawPoster();							// Redraw
 										}
 						}); 

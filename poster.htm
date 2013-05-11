@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8" />
 	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
-	<title>SHIVA Image</title>
+	<title>SHIVA Poster</title>
 	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
  	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
@@ -23,12 +23,13 @@
 </head>
 <body>
 	<div style="width:279px;position:absolute;top:0px;left:0px">
- 		<!-----------
  		<p><select id="chartType" onchange="ChangeChart(this.value)">
-			<option>Slideshow</option>
-			<option>Montage</option>
-		</select></p!>
-		---->
+		<option>Setup</option>
+		<option>Connect</option>
+		<option>Test</option>
+		
+	</select></p>
+	
     <table id="propertyTable" class="propTable">
 		<tr style="height:8px"><td> </td></tr>
 	</table> 
@@ -62,12 +63,15 @@
 			left: 						{	def:'0', 			opt:'hidden',			des:'left'}, 
 			height: 					{	def:'600', 			opt:'number',			des:'Height of poster'},
 			width: 						{	def:'800', 			opt:'number',			des:'Width of poster'}, 
-			scale: 						{	def:'2', 			opt:'number',			des:'Poster scale'}, 
 			backCol: 					{	def:'eeeeee', 		opt:'color',			des:'Background color'}, 
+			dataSourceUrl: 				{	def:'http://www.viseyes.org/shiva/map.jpg', opt:'string',	des:'Background image'}, 
 			overview: 					{	def:'true', 		opt:'true|false',		des:'Show overview?'},
-				ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'},
+			grid: 						{	def:'false', 		opt:'true|false',		des:'Show placement grid?'},
+			controlbox: 				{	def:'false', 		opt:'true|false',		des:'Show controlbox?'}, 
+			ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'},
 			item: 						{	def:'None', 		opt:'None|',			des:'<b>Choose pane to edit</b>'}, 
 			url: 						{	def:'', 			opt:'string',			des:'URL of pane'}, 
+			label: 						{	def:'', 			opt:'string',			des:'Control Box label'}, 
 			hgt: 						{	def:'300', 			opt:'hidden',			des:'hgt'},
 			wid: 						{	def:'400', 			opt:'hidden',			des:'wid'}, 
 			top: 						{	def:'0', 			opt:'hidden',			des:'top'}, 
@@ -80,10 +84,13 @@
 	helpText['Width of poster']="The width of the player box where the montage will play in";
 	helpText['Enable user draw?']="Use the drop-down menu to the right to toggle whether or not users can interactively draw on your visualization. Note these drawings are for users only and are not saved with the visualization. In order to draw users will need to click on the pencil icon in the bottom left of your visualization.";
 	helpText['URL of pane']="The URL of the pane to add to the poster.";
-	helpText['Poster scale']="The number of times the post is larger than the frame it can be viewed in.";
+	helpText['Show placement grid?']="Show grid to help align panes.";
 	helpText['Background color']="Use the text box to the right to set the background color for the poster. Either click on the square color chip icon in the text box to launch the color picker and select a color, or enter a hexadecimal color value directly into the text box.";
 	helpText['Show Overview?']="Whether or not to add a small icon at the bottom right of your poster. Clicking this icon will will show or hide a small mini-poser at the bottom right corner of the poster; this mini-poster allows easy navigation through the poster.";
-
+	helpText['Show controlbox?']="Use the drop-down menu to the right to choose whether to show or hide the control box from your poster. The control box allows users to interactively got to specific areas in your poster.";
+	helpText['Background image']="Use the text box to enter the full url of an image file thst completely covers the poster.<br/><br/>Make sure it is the same shape as poster's overall height and width.<br/><br/>The image needs to have enough resolution to handle the degree in which you want to allow zooming in.";
+	helpText['Control Box label']="Short lable that will appear in the control box. If you do not provide a lable, the pane will not appeear in the control box";
+	
 ///// INIT  /////////////
 	
 	$(document).ready(function() {
@@ -91,6 +98,7 @@
 		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
 	  	shivaLib.SetAttributes(props[chartType],items,false);
 		shivaLib.callback=Draw;
+		shivaLib.posterMode="Setup";
 		ReEdit();
 		ShowHelp("startup");
 		if (window.addEventListener) 
@@ -113,14 +121,11 @@
 		$("#tb3").button({text: false, icons: { primary: "ui-icon-trash"}}).css("width","25");
 		$("#tb4").button({text: false, icons: { primary: "ui-icon-plus"}}).css("width","25");
 		$("#toolbar").buttonset();
-	
 	});
 
 	function ChangeChart(type)
 	{
-		if (shivaLib.drupalMan)
-			window.parent.postMessage("ChartChanged="+type,"*");
-		SetAttributes(type,false);	
+		shivaLib.posterMode=type;
 	}
 
 	function shivaEventHandler(e)
@@ -236,6 +241,48 @@
 		var data={
 			}
 		ReEdit(data);
+	}
+
+	function DrawPosterGrid()
+	{
+		if (shivaLib.options.grid != "true")
+			return;
+		var i,inc,str;
+		var w=$("#posterDiv").width();
+		var h=$("#posterDiv").height();
+		var row="position:absolute;left:0px;width:"+w+"px;height:0px;border:1px dashed #333;opacity:.5;";
+		var col="position:absolute;top:0px;height:"+h+"px;width:0px;border :1px dashed #333;opacity:.5;";
+		inc=h/4;
+		for (i=1;i<4;++i) {
+			str="<div style='"+row+"top:"+(inc*i)+"px'></div>"
+			$("#posterDiv").append(str);
+			}
+		inc=w/4;
+		for (i=1;i<4;++i) {
+			str="<div style='"+col+"left:"+(inc*i)+"px'></div>"
+			$("#posterDiv").append(str);
+			}
+	}
+	
+	function DrawPosterOverviewGrid()
+	{
+		if (shivaLib.options.grid != "true")
+			return;
+		var i,inc,str;
+		var w=$("#posterOverDiv").width();
+		var h=$("#posterOverDiv").height();
+		var row="position:absolute;left:0px;width:"+w+"px;height:0px;border:1px dashed;opacity:.3;";
+		var col="position:absolute;top:0px;height:"+h+"px;width:0px;border:1px dashed;opacity:.3;";
+		inc=h/4;
+		for (i=1;i<4;++i) {
+			str="<div style='"+row+"top:"+(inc*i)+"px'></div>"
+			$("#posterOverDiv").append(str);
+			}
+		inc=w/4;
+		for (i=1;i<4;++i) {
+			str="<div style='"+col+"left:"+(inc*i)+"px'></div>"
+			$("#posterOverDiv").append(str);
+			}
 	}
 
 		

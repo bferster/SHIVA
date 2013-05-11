@@ -38,6 +38,7 @@
  		<p><select id="chartType" onchange="ChangeChart(this.value)">
 			<option>Slideshow</option>
 			<option>Montage</option>
+			<option>Zoomable</option>
 		</select></p>
     <table id="propertyTable" class="propTable">
 		<tr style="height:8px"><td> </td></tr>
@@ -89,7 +90,12 @@
 			dur: 						{	def:'4', 			opt:'number',			des:'Duration (seconds)'}, 
 			ease: 						{	def:'both', 		opt:'both|in|out|none',	des:'Motion eases'}, 
 //			fx: 						{	def:'none', 		opt:'none|dissolve|fade-in|fade-out|slide-horiz|slide-vert',		des:'Transition style'},
-			title: 						{	def:'', 			opt:'list',				des:'Title'}}
+			title: 						{	def:'', 			opt:'list',				des:'Title'}},
+	Zoomable: {
+			dataSourceUrl: 				{	def:'http://www.viseyes.org/shiva/map.jpg', opt:'string', des:'URL of image'}, 
+			height: 					{	def:'600', 			opt:'number',			des:'Height of player'},
+			width: 						{	def:'800', 			opt:'number',			des:'Width of player'}, 
+			overview: 					{	def:'true', 		opt:'true|false',		des:'Show overview?'}}
 			}
 	
 	var helpText=new Array();
@@ -116,6 +122,8 @@
 	helpText['Duration (seconds)']="The number of seconds the move will occur in.";
 	helpText['Motion eases']="Motions look more natural if they ease in and out rather than abruptly start and  stop. Possible choices are both, in, out, or none.";
 	helpText['Title']="Type the title you wish to appear atop this image, if any. You can add HTML tags is desired.";
+	helpText['URL of image']="In the text box to the right enter the web URL of that Image source."; 
+
 
 ///// INIT  /////////////
 	
@@ -153,7 +161,9 @@
 	{
 		if (shivaLib.drupalMan)
 			window.parent.postMessage("ChartChanged="+type,"*");
+		$("#containerDiv").html("");
 		SetAttributes(type,false);	
+		Draw();
 	}
 
 	function shivaEventHandler(e)

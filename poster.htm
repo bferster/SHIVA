@@ -70,12 +70,9 @@
 			controlbox: 				{	def:'false', 		opt:'true|false',		des:'Show controlbox?'}, 
 			ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'},
 			item: 						{	def:'None', 		opt:'None|',			des:'<b>Choose pane to edit</b>'}, 
+			data: 						{	def:'', 			opt:'hidden',			des:'data'},
 			url: 						{	def:'', 			opt:'string',			des:'URL of pane'}, 
 			layerTitle: 				{	def:'', 			opt:'string',			des:'Control Box label'}, 
-			hgt: 						{	def:'300', 			opt:'hidden',			des:'hgt'},
-			wid: 						{	def:'400', 			opt:'hidden',			des:'wid'}, 
-			top: 						{	def:'0', 			opt:'hidden',			des:'top'}, 
-			left: 						{	def:'0', 			opt:'hidden',			des:'left'}, 
 			}
 		}
 	
@@ -205,12 +202,21 @@
 				continue;
 			o[key]=props[chartType][key].def;
 			}
+		var scale=shivaLib.posterScale;
+		for (var i=0;i<items.length;++i)
+			items[i].name="Pane-"+(i+1);
+		var size=.25;
+		var cx=-$("#posterDiv").position().left/scale/$("#containerDiv").width()+.5/scale;
+		var cy=-$("#posterDiv").position().top/scale/$("#containerDiv").height()+.5/scale;
+		o.data=size+"|"+cx+"|"+cy;
+		$("#itemInput"+items.length-1+"-1").val(o.data)
 		items.push(o);
 		for (var i=0;i<items.length;++i)
 			items[i].name="Pane-"+(i+1);
 	  	shivaLib.SetAttributes(props[chartType],items,true);
 		Draw();
 		$("#accord").accordion({ active: items.length-1 });
+		trace(cx)
 	}	
 	
 	function RemoveItem()

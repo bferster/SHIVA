@@ -205,10 +205,9 @@
 		var scale=shivaLib.posterScale;
 		for (var i=0;i<items.length;++i)
 			items[i].name="Pane-"+(i+1);
-		var size=.25;
-		var cx=-$("#posterDiv").position().left/scale/$("#containerDiv").width()+.5/scale;
-		var cy=-$("#posterDiv").position().top/scale/$("#containerDiv").height()+.5/scale;
-		o.data=size+"|"+cx+"|"+cy;
+		var cx=Math.round(shivaLib.posterX*1000)
+		var cy=Math.round(shivaLib.posterY*1000)
+		o.data=500/scale+"|"+cx+"|"+cy;
 		$("#itemInput"+items.length-1+"-1").val(o.data)
 		items.push(o);
 		for (var i=0;i<items.length;++i)
@@ -216,7 +215,6 @@
 	  	shivaLib.SetAttributes(props[chartType],items,true);
 		Draw();
 		$("#accord").accordion({ active: items.length-1 });
-		trace(cx)
 	}	
 	
 	function RemoveItem()

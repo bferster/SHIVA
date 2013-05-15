@@ -122,6 +122,7 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 								}
 							 });		
 		}
+	$("#posterOverBox").resizable({ containment:"parent",								// Resizable
 									aspectRatio:true,
 									minHeight:12,
 									stop:function(event,ui) {							// Om resize stop

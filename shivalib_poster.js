@@ -165,13 +165,13 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 		str+="top:"+y+"px;";															// Left
 		str+="height:"+dh+"	px;";														// Height
 		str+="width:"+dw+"px'>";														// Width
-		if (isImg=items[i].url.match(/[[.]jpg|jpeg|gif|png]/i))							// If an image file
-			str+="<img src='"+items[i].url+"' width='"+dw+"'>";							// Image				
+		if (isImg=this.items[i].url.match(/[[.]jpg|jpeg|gif|png]/i))							// If an image file
+			str+="<img src='"+this.items[i].url+"' width='"+dw+"'>";							// Image				
 		else																			// Something else
-			str+="<iframe src='"+items[i].url+"' height='"+dh+"' width='"+dw+"' scrolling='no' frameborder='0' allowtransparency='true'></iframe>";		// Iframe				
+			str+="<iframe src='"+this.items[i].url+"' height='"+dh+"' width='"+dw+"' scrolling='no' frameborder='0' allowtransparency='true'></iframe>";		// Iframe				
 		if (this.posterMode == "Edit") {												// If not viewing
 			str+="<br/><div style='height:18px' class='propTable'>";
-			str+="<span style='vertical-align:middle'><b>&nbsp; "+(i+1)+". "+items[i].layerTitle+"</b></span></div>";	// Label
+			str+="<span style='vertical-align:middle'><b>&nbsp; "+(i+1)+". "+this.items[i].layerTitle+"</b></span></div>";	// Label
 			}
 		if (num == undefined) 															// If doing them all
 			$("#posterDiv").append(str+"</div>");										// Add div to poster
@@ -191,10 +191,10 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 										aspectRatio:isImg,
 										stop:function(event,ui) {						// On resize stop
 											var i=event.target.id.substr(10);			// Extract id
-											var v=items[i].data.split("|");				// Get parts
+											var v=shivaLib.items[i].data.split("|");				// Get parts
 											v[0]=Math.floor(Math.min(ui.size.width/$("#containerDiv").width()/shivaLib.posterScale,1)*1000); // Get new scale, cap at 100%					
-											items[i].data=v[0]+"|"+v[1]+"|"+v[2];		// Calc new size
-											$("#itemInput"+i+"-1").val(items[i].data);	// Put in menu
+											shivaLib.items[i].data=v[0]+"|"+v[1]+"|"+v[2];		// Calc new size
+											$("#itemInput"+i+"-1").val(shivaLib.items[i].data);	// Put in menu
 											Draw();										// Redraw 									
 											}
 										});
@@ -209,8 +209,8 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 												off=15;									// Set offset
 											v[1]=Math.round(($("#posterPane"+i).position().left+$("#posterPane"+i).width()/2)/w*1000);
 											v[2]=Math.round(($("#posterPane"+i).position().top+$("#posterPane"+i).height()/2+off)/h*1000);
-											items[i].data=v[0]+"|"+v[1]+"|"+v[2];		// Calc new size
-											$("#itemInput"+i+"-1").val(items[i].data);	// Put in menu
+											shivaLib.items[i].data=v[0]+"|"+v[1]+"|"+v[2];		// Calc new size
+											$("#itemInput"+i+"-1").val(shivaLib.items[i].data);	// Put in menu
 											shivaLib.DrawPosterPanes(i);				// Redraw this pane in overview									
 											}
 										});

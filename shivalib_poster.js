@@ -153,8 +153,9 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 	var e=this.items.length;															// Assume end is all items
 	var w=$("#posterDiv").width();														// Poster width
 	var h=$("#posterDiv").height();														// Poster height
-	if (num != undefined) s=num,e=num+1;												// Just draw one
+	if (num != undefined) s=num,e=num-0+1;												// Just draw one
 	for (i=0;i<e;++i) {																	// For each pain
+		trace(s,e)
 		v=this.items[i].data.split("|");												// Get specs
 		dw=v[0]/1000*w;																	// Div width
 		dh=v[0]/1000*h;																	// Div height

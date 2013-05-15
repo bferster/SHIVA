@@ -127,7 +127,15 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 									minHeight:12,
 									stop:function(event,ui) {							// Om resize stop
 										var w=$("#posterOverDiv").width();				// Overview width
+										var pw=$("#posterDiv").width();					// Poster width
+										var h=$("#posterOverDiv").height();				// Overview hgt
+										var ph=$("#posterDiv").height();				// Poster hgt
 										shivaLib.posterScale=Math.max(w/ui.size.width,1); // Get new scale, cap at 100%					
+										var s=shivaLib.posterScale;						// Current scale
+										var x=Math.max(0,ui.position.left/w*pw);		// Calc left
+										var y=Math.max(0,ui.position.top/h*ph);			// Calc top
+										shivaLib.posterX=(x+(pw/s/2))/pw; 				// Get center X%
+										shivaLib.posterY=(y+(ph/s/2))/ph;  				// Get center Y%
 										shivaLib.DrawPoster();							// Redraw
 										}
 						}); 
@@ -152,7 +160,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 		dh=v[0]/1000*h;																	// Div height
 		x=w*v[1]/1000-(dw/2);															// Sert centered left
 		y=h*v[2]/1000-(dh/2);															// Set centered top
-			str="<div id='posterPane"+i+"' style='position:absolute;background:none transparent;border-top:1px solid;border-left:0px solid;border-right:0px solid;";	// Base
+			str="<div id='posterPane"+i+"' style='position:absolute;background:none transparent;";	// Base
 		str+="left:"+x+"px;";															// Left
 		str+="top:"+y+"px;";															// Left
 		str+="height:"+dh+"	px;";														// Height
@@ -160,11 +168,25 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 		if (isImg=items[i].url.match(/[[.]jpg|jpeg|gif|png]/i))							// If an image file
 			str+="<img src='"+items[i].url+"' width='"+dw+"'>";							// Image				
 		else																			// Something else
-			str+="<iframe src='"+items[i].url+"' height='"+dh+"' width='"+dw+"' frameborder='0' ALLOWTRANSPARENCY='true'></iframe>";		// Iframe				
-		str+="<br/><div style='height:20px' class='propTable'>";
-		str+="<span style='vertical-align:middle'><b>&nbsp; "+(i+1)+". "+items[i].layerTitle+"</b></span></div>";	// Label
+			str+="<iframe src='"+items[i].url+"' height='"+dh+"' width='"+dw+"' scrolling='no' frameborder='0' allowtransparency='true'></iframe>";		// Iframe				
+		if (this.posterMode == "Edit") {												// If not viewing
+			str+="<br/><div style='height:18px' class='propTable'>";
+			str+="<span style='vertical-align:middle'><b>&nbsp; "+(i+1)+". "+items[i].layerTitle+"</b></span></div>";	// Label
+			}
 		if (num == undefined) 															// If doing them all
 			$("#posterDiv").append(str+"</div>");										// Add div to poster
+		if (this.options.overview == "true")  {											// If showing overview
+			str="<div id='posterOverPane"+i+"' style='position:absolute;opacity:.4;border:1px solid;pointer-events:none;background-color:#666;";	// Base
+			str+="height:"+dh/4/scale+"px;";											// Height
+			str+="width:"+dw/4/scale+"px'></div>";										// Width
+			if (num == undefined) 														// If doing them all
+				$("#posterOverDiv").append(str);										// Add div to overview
+			x=$("#posterPane"+i).position().left;										// Get left
+			y=$("#posterPane"+i).position().top;										// Get top
+			$("#posterOverPane"+i).css({"left":x/4/scale+"px","top":y/4/scale+"px"});	// Set pos			
+			}
+		if (this.posterMode != "Edit")													// If viewing
+			continue;																	// No need for interaction
 		$("#posterPane"+i).resizable({ 	containment:"parent",							// Resizable
 										aspectRatio:isImg,
 										stop:function(event,ui) {						// On resize stop
@@ -182,7 +204,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 											var v=items[i].data.split("|");				// Get parts
 											var w=$("#posterDiv").width();				// Poster wid
 											var h=$("#posterDiv").height();				// Poster hgt
-											var off=-7;									// Iframe offset
+											var off=-11;									// Iframe offset
 											if (shivaLib.items[i].url.match(/[[.]jpg|jpeg|gif|png]/i))	// If an image file
 												off=15;									// Set offset
 											v[1]=Math.round(($("#posterPane"+i).position().left+$("#posterPane"+i).width()/2)/w*1000);
@@ -191,17 +213,6 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 											$("#itemInput"+i+"-1").val(items[i].data);	// Put in menu
 											shivaLib.DrawPosterPanes(i);				// Redraw this pane in overview									
 											}
-
 										});
-		if (this.options.overview == "true")  {											// If showing overview
-			str="<div id='posterOverPane"+i+"' style='position:absolute;opacity:.4;border:1px solid;pointer-events:none;background-color:#666;";	// Base
-			str+="height:"+dh/4/scale+"px;";											// Height
-			str+="width:"+dw/4/scale+"px'></div>";										// Width
-			if (num == undefined) 														// If doing them all
-				$("#posterOverDiv").append(str);										// Add div to overview
-			x=$("#posterPane"+i).position().left;										// Get left
-			y=$("#posterPane"+i).position().top;										// Get top
-			$("#posterOverPane"+i).css({"left":x/4/scale+"px","top":y/4/scale+"px"});	// Set pos			
-			}
 		}	
 }

@@ -98,7 +98,7 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 					height:h/this.posterScale+"px",
 					border:"1px solid #666",
 					"z-index":3,
-					"background-color":"rgba(255,255,255,0.4)"
+					"background-color":"rgba(220,220,220,0.4)"
 					};
 		str+="<div id='posterOverBox'></div>";											// Control box div
 		$("#posterOverDiv").append(str);												// Add control box to overview frame
@@ -151,8 +151,8 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 		dw=v[0]/1000*w;																	// Div width
 		dh=v[0]/1000*h;																	// Div height
 		x=w*v[1]/1000-(dw/2);															// Sert centered left
-		y=h*v[2]/1000-(dh/2);															// Sert centered top
-		str="<div id='posterPane"+i+"' class='propTable' style='position:absolute;padding:4px;";	// Base
+		y=h*v[2]/1000-(dh/2);															// Set centered top
+			str="<div id='posterPane"+i+"' style='position:absolute;background:none transparent;border-top:1px solid;border-left:0px solid;border-right:0px solid;";	// Base
 		str+="left:"+x+"px;";															// Left
 		str+="top:"+y+"px;";															// Left
 		str+="height:"+dh+"	px;";														// Height
@@ -161,8 +161,10 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 			str+="<img src='"+items[i].url+"' width='"+dw+"'>";							// Image				
 		else																			// Something else
 			str+="<iframe src='"+items[i].url+"' height='"+dh+"' width='"+dw+"' frameborder='0' ALLOWTRANSPARENCY='true'></iframe>";		// Iframe				
-		str+="<br/><span><b>"+(i+1)+". "+items[i].layerTitle+"</b></span>"				// Label
-		$("#posterDiv").append(str+"</div>");											// Add div to poster
+		str+="<br/><div style='height:20px' class='propTable'>";
+		str+="<span style='vertical-align:middle'><b>&nbsp; "+(i+1)+". "+items[i].layerTitle+"</b></span></div>";	// Label
+		if (num == undefined) 															// If doing them all
+			$("#posterDiv").append(str+"</div>");										// Add div to poster
 		$("#posterPane"+i).resizable({ 	containment:"parent",							// Resizable
 										aspectRatio:isImg,
 										stop:function(event,ui) {						// On resize stop
@@ -175,7 +177,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 											}
 										});
 		$("#posterPane"+i).draggable({  containment:"parent",							// Draggable
-										stop:function(event,ui) {						// On drag stop
+										drag:function(event,ui) {						// On drag stop
 											var i=event.target.id.substr(10);			// Extract id
 											var v=items[i].data.split("|");				// Get parts
 											var w=$("#posterDiv").width();				// Poster wid
@@ -187,17 +189,19 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 											v[2]=Math.round(($("#posterPane"+i).position().top+$("#posterPane"+i).height()/2+off)/h*1000);
 											items[i].data=v[0]+"|"+v[1]+"|"+v[2];		// Calc new size
 											$("#itemInput"+i+"-1").val(items[i].data);	// Put in menu
-											Draw();										// Redraw 									
+											shivaLib.DrawPosterPanes(i);				// Redraw this pane in overview									
 											}
 
 										});
 		if (this.options.overview == "true")  {											// If showing overview
-			str="<div style='position:absolute;opacity:.4;border:1px solid;pointer-events:none;background-color:#666;";	// Base
-			str+="left:"+x/4/scale+"px;";												// Left
-			str+="top:"+y/scale/4+"px;";												// Left
+			str="<div id='posterOverPane"+i+"' style='position:absolute;opacity:.4;border:1px solid;pointer-events:none;background-color:#666;";	// Base
 			str+="height:"+dh/4/scale+"px;";											// Height
 			str+="width:"+dw/4/scale+"px'></div>";										// Width
-			$("#posterOverDiv").append(str);											// Add div to overview
+			if (num == undefined) 														// If doing them all
+				$("#posterOverDiv").append(str);										// Add div to overview
+			x=$("#posterPane"+i).position().left;										// Get left
+			y=$("#posterPane"+i).position().top;										// Get top
+			$("#posterOverPane"+i).css({"left":x/4/scale+"px","top":y/4/scale+"px"});	// Set pos			
 			}
 		}	
 }

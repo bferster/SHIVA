@@ -21,14 +21,14 @@
 				  	 }
   </style>
 </head>
-<body>
+<body style="'background:none transparent">
 	<div style="width:279px;position:absolute;top:0px;left:0px">
- 		<p><select id="chartType" onchange="ChangeChart(this.value)">
-		<option>Setup</option>
-		<option>Connect</option>
-		<option>Test</option>
-		
-	</select></p>
+ 		<div style="text-align:center">
+ 		<span id="controlbar" style="font-size:xx-small">
+		<input type='radio' id='cb1' onclick='SetMode(0)' name='mainMen' checked='checked' /><label for='cb1'>Setup</label>
+		<input type='radio' id='cb2' onclick='SetMode(1)' name='mainMen'/><label for='cb2'>Link</label>
+		<input type='radio' id='cb3' onclick='SetMode(2)' name='mainMen'/><label for='cb3'>View</label></span>
+		</div><br/><br/>
 	
     <table id="propertyTable" class="propTable">
 		<tr style="height:8px"><td> </td></tr>
@@ -96,6 +96,11 @@
 	  	shivaLib.SetAttributes(props[chartType],items,false);
 		shivaLib.callback=Draw;
 		shivaLib.posterMode="Setup";
+		$("#controlbar").buttonset();
+		$("#cb1").button({text: true, icons: { primary: "ui-icon-gear"}});
+		$("#cb2").button({text: true, icons: { primary: "ui-icon-shuffle"}});
+		$("#cb3").button({text: true, icons: { primary: "ui-icon-image"}});
+
 		ReEdit();
 		ShowHelp("startup");
 		if (window.addEventListener) 
@@ -120,7 +125,7 @@
 		$("#toolbar").buttonset();
 	});
 
-	function ChangeChart(type)
+	function setMode(type)
 	{
 		shivaLib.posterMode=type;
 	}

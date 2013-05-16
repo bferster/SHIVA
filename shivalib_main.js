@@ -987,7 +987,7 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 		});
 	}
 
-SHIVA_Show.prototype.ShowEasyFile=function(files, callback, mode) // GET DATA FROM EASYFILE
+SHIVA_Show.prototype.ShowEasyFile=function(files, callback, mode) 		// GET DATA FROM EASYFILE
 {
 		var i;
 		var str="<br/><div style='overflow:auto;overflow-x:hidden;height:200px;font-size:x-small;padding:8px;border:1px solid #cccccc'>";
@@ -1017,9 +1017,9 @@ SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	/
 	for (i=0;i<files.length;++i) {											// For each file
 		if ((filter) && (files[i].title.toLowerCase().indexOf(filter.toLowerCase()) == -1)) // If  filter not in title
 			continue;														// Skip it
-		str="<tr ><td>"+files[i].created.replace(/ /,"&nbsp")+"</td>";		// Add date
-		str+="<td width='100%'><img id='ezfile-"+files[i].id+"' src='adddot.gif'  height='11'> &nbsp;";
-		str+=files[i].title+"</td></tr>";									// Add title
+		str="<tr id='ezfile-"+files[i].id+"'><td>"+files[i].created.replace(/ /,"&nbsp")+"</td>";		// Add date
+		str+="<td width='100%'><img  src='adddot.gif'  height='11'> &nbsp;";
+		str+=files[i].id+" "+files[i].title+"</td></tr>";					// Add title
 		$(str).appendTo("#ezFilesTable tbody");								// Add file to table
 		$("#ezFilesTable tr:odd").addClass("odd");							// Color
 		}

@@ -61,9 +61,10 @@ SHIVA_Show.prototype.DrawPoster=function(mode) 										//	DRAW POSTER
 	if (typeof(DrawPosterGrid) == "function")											// If not in embedded
 		DrawPosterGrid();																// Draw grid if enabled
 	this.DrawPosterOverview();															// Draw overview, if enabled
-	if (mode != "Image")																// Not for zoomable images
+	if (this.posterMode != "Connect") {													// If editing
 		this.DrawPosterPanes();															// Draw panes
-	this.DrawLayerControlBox(this.items,(options.controlbox == "true"));				// Draw control box?
+		this.DrawLayerControlBox(this.items,(options.controlbox == "true"));			// Draw control box?
+		}
 	this.SendReadyMessage(true);														// Send ready message
 }
 

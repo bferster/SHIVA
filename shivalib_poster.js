@@ -26,7 +26,6 @@ SHIVA_Show.prototype.DrawPoster=function(mode) 										//	DRAW POSTER
 	this.posterScale=v[0]/1000;															// Get scale
 	this.posterX=v[1]/1000;																// Get x
 	this.posterY=v[2]/1000;																// Get y
-	trace(v)
 	var str="<div id='posterDiv' style='position:absolute;left:0px;top:0px'></div>";	// Make poster div
 	$(con).html(str);																	// Add div
 	$(con).css({"width":options.width+"px","height":options.height+"px"});				// Resize container	
@@ -152,7 +151,7 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 
 SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 {
-	var i,v,str,dw,dh,x,y,s=0,isImg=true;
+	var i,v,u,str,dw,dh,x,y,s=0,isImg=true;
 	var scale=this.posterScale;
 	var e=this.items.length;															// Assume end is all items
 	var w=$("#posterDiv").width();														// Poster width
@@ -169,10 +168,13 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 		str+="top:"+y+"px;";															// Left
 		str+="height:"+dh+"	px;";														// Height
 		str+="width:"+dw+"px'>";														// Width
-		if (isImg=this.items[i].url.match(/[[.]jpg|jpeg|gif|png]/i))					// If an image file
+		u=this.items[i].url;															// Point at url
+		if (isImg=u.match(/[[.]jpg|jpeg|gif|png]/i))									// If an image file
 			str+="<img src='"+this.items[i].url+"' width='"+dw+"'>";					// Image				
-		else{																			// Something else
-			str+="<iframe src='"+this.items[i].url+"' height='"+dh+"' width='"+dw+"' ";	// Iframe base
+		else if (u) {																	// Something else
+			if (!isNaN(u))																// If a number
+				u="http://www.viseyes.org/shiva/go.htm?e="+u;							// Add file base
+			str+="<iframe src='"+u+"' height='"+dh+"' width='"+dw+"' ";					// Iframe base
 			if (this.items[i].scrollbars == "false")									// If not scrolling
 				str+="scrolling='no' ";													// Inhibit it
 			str+="frameborder='0' allowtransparency='true'></iframe>";					// Finish iframe				

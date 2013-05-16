@@ -197,7 +197,7 @@ this.contentWindow.document.body.innerHTML=content;});$("#CL-"+id).bind("load",f
 SHIVA_Show.prototype.ShowLightBox=function(width,top,title,content)
 {var str;str="<div id='shivaLightBoxDiv' style='position:fixed;width:100%;height:100%;";str+="background:url(overlay.png) repeat;top:0px;left:0px';</div>";$("body").append(str);str="<div id='shivaLightBoxIntDiv' style='position:absolute;padding:10px;width:";if(width!="auto")
 str+=Math.abs(width)+"px";else
-width=400;var x=($("#shivaLightBoxDiv").width()-width)/2;if(width<0){x=$("#"+this.container).css("left").replace(/px/,"");x=x-0+$("#"+this.container).width()-0+20;}
+width=400;var x=($("#shivaLightBoxDiv").width()-width)/2;if(width<0){x=$("#"+this.container).css("left").replace(/px/,"");x=x-0+$("#"+this.container).width()-0+20;x=0;}
 str+=";border-radius:12px;moz-border-radius:12px;z-index:2003;"
 str+="border:1px solid; left:"+x+"px;top:"+top+"%;background-color:#f8f8f8'>";str+="<img src='shivalogo32.png' style='vertical-align:-30%'/>&nbsp;&nbsp;";str+="<span style='font-size:large;text-shadow:1px 1px #ccc'><b>"+title+"</b></span>";str+="<div id='shivaLightContentDiv'>"+content+"</div>";$("#shivaLightBoxDiv").append(str);$("#shivaLightBoxDiv").css("z-index",2500);}
 SHIVA_Show.prototype.Prompt=function(title,message,def,id)
@@ -235,12 +235,12 @@ SHIVA_Show.prototype.EasyFile=function(_data,callback,type)
 {var i,email="",w=350;var v=document.cookie.split(';');for(var i=0;i<v.length;i++)
 if(v[i].indexOf("ez-email=")!=-1)
 email=v[i].substr(9);var str="<br/>Use <b>eStore</b> to save and load projects under your email address. When saving, type a title when asked and when loading, choose a project from a list of your saved projects.<br/>"
-str+="<br/><table id='ez-maintbl' cellspacing=0 cellpadding=0 style='font-size:small'>";str+="<tr><td width='25%'>Type email</td><td><input type='text' size='40' id='email' value='"+email+"'/></td></tr>";str+="</table><div align='right' style='font-size:x-small'><br/>";if(type!="all")
+str+="<br/><table id='ez-maintbl' cellspacing=0 cellpadding=0 style='font-size:small'>";str+="<tr><td width='25%'>Email</td><td><input type='text' id='email' size='30' value='"+email+"'/></td></tr>";str+="</table><div align='right' style='font-size:x-small'><br/>";if(type!="all")
 str+=" <button id='saveBut'>Save</button>";str+=" <button id='loadBut'>Load</button>";if(type!="all")
-str+=" <button id='linkBut'>Link</button>";str+=" <button id='cancelBut'>Cancel</button></div>";if((type=="KML")||(this.group=="Earth"))w=-350;this.ShowLightBox(w,20,"SHIVA eStore",str)
+str+=" <button id='linkBut'>Link</button>";str+=" <button id='cancelBut'>Cancel</button></div>";if((type=="KML")||(this.group=="Earth"))w=-276;this.ShowLightBox(w,20,"SHIVA eStore",str)
 $("#cancelBut").button().click(function(){$("#shivaLightBoxDiv").remove();});$("#saveBut").button().click(function(){var _email=$("#email").val();var _title=$("#ez-title").val();var _type=type;if(!_email){alert("Please type your email");return;}
 if(((_email.toLowerCase()=="samples")&&(_email!="SaMpLeS"))||((_email.toLowerCase()=="canvas")&&(_email!="CaNvAs"))){alert("Sorry, but you can't save using this name");return;}
-if(!$("#ez-title").length){str="<tr><td>Type title</td><td><input type='text' size='40' id='ez-title'/></td></tr>";$(str).appendTo("#ez-maintbl tbody");$("#ez-title").focus();return;}
+if(!$("#ez-title").length){str="<tr><td>Title</td><td><input type='text' size='30' id='ez-title'/></td></tr>";$(str).appendTo("#ez-maintbl tbody");$("#ez-title").focus();return;}
 if(!_title){alert("Please type title to save under");return;}
 document.cookie="ez-email="+_email;$("#shivaLightBoxDiv").remove();str="\",\n\t\"shivaTitle\": \""+_title+"\"\n}";if((type!="Canvas")&&(type!="KML"))
 _data=_data.substr(0,_data.lastIndexOf("\""))+str;$.post("http://www.primaryaccess.org/REST/addeasyfile.php",{email:_email,type:_type,title:_title,data:_data.replace(/'/g,"\\'")});});$("#loadBut").button().click(function(){email=$("#email").val();if(!email){alert("Please type your email");return;}
@@ -966,9 +966,13 @@ ops.mapTypeId=google.maps.MapTypeId[mapType];var ll=ops.mapcenter.split(",")
 latlng=new google.maps.LatLng(ll[0],ll[1]);ops.center=latlng;ops.zoom=Number(ll[2]);this.mapsInfoWindow=new google.maps.InfoWindow({maxWidth:300});this.items=[];for(var key in ops){if(ops[key]=="true")ops[key]=true;if(ops[key]=="false")ops[key]=false;if(key.indexOf("item-")!=-1){var o=new Object;v=ops[key].split(';');for(i=0;i<v.length;++i){vv=v[i].split(':');if(vv[1].indexOf("http")==-1)
 vv[1]=vv[1].replace(/~/g,"=");o[vv[0]]=vv[1].replace(/\^/g,"&").replace(/\`/g,":");}
 this.items.push(o);}}
-if(ops.width)
-document.getElementById(container).style.width=ops.width+"px";if(ops.height)
-document.getElementById(container).style.height=ops.height+"px";ops["mapTypeControlOptions"]={"mapTypeIds":[google.maps.MapTypeId.ROADMAP,google.maps.MapTypeId.TERRAIN,google.maps.MapTypeId.SATELLITE,google.maps.MapTypeId.HYBRID,"LAND"],style:google.maps.MapTypeControlStyle.DROPDOWN_MENU};this.map=new google.maps.Map(document.getElementById(container),ops);this.AddClearMapStyle(this.map);this.AddBlankMapStyle(this.map);this.DrawMapOverlays();this.DrawLayerControlBox(this.items,this.options.controlbox);this.SendReadyMessage(true);google.maps.event.addListener(this.map,'click',function(e){var l=e.latLng.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");var p=e.pixel.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");shivaLib.SendShivaMessage("ShivaMap=click|"+l+"|"+p);});google.maps.event.addListener(this.map,'center_changed',function(e){var map=shivaLib.map;var lat=map.getCenter();shivaLib.SendShivaMessage("ShivaMap=move|"+lat.lat()+"|"+lat.lng()+"|"+map.getZoom());});}
+if(ops.width){if(""+ops.width.match(/%/))
+document.getElementById(container).style.width=ops.width;else
+document.getElementById(container).style.width=ops.width+"px";}
+if(ops.height){if(""+ops.height.match(/%/))
+document.getElementById(container).style.height=ops.height;else
+document.getElementById(container).style.height=ops.height+"px";}
+ops["mapTypeControlOptions"]={"mapTypeIds":[google.maps.MapTypeId.ROADMAP,google.maps.MapTypeId.TERRAIN,google.maps.MapTypeId.SATELLITE,google.maps.MapTypeId.HYBRID,"LAND"],style:google.maps.MapTypeControlStyle.DROPDOWN_MENU};this.map=new google.maps.Map(document.getElementById(container),ops);this.AddClearMapStyle(this.map);this.AddBlankMapStyle(this.map);this.DrawMapOverlays();this.DrawLayerControlBox(this.items,this.options.controlbox);this.SendReadyMessage(true);google.maps.event.addListener(this.map,'click',function(e){var l=e.latLng.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");var p=e.pixel.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");shivaLib.SendShivaMessage("ShivaMap=click|"+l+"|"+p);});google.maps.event.addListener(this.map,'center_changed',function(e){var map=shivaLib.map;var lat=map.getCenter();shivaLib.SendShivaMessage("ShivaMap=move|"+lat.lat()+"|"+lat.lng()+"|"+map.getZoom());});}
 SHIVA_Show.prototype.AddInternalOptions=function(options,newOps)
 {var i,vv;if(newOps){var v=newOps.split(',');for(i=0;i<v.length;++i){vv=v[i].split("=");if(vv[1]=='true')vv[1]=true;if(vv[1]=='false')vv[1]=false;options[vv[0]]=vv[1];}}}
 SHIVA_Show.prototype.DrawMapOverlays=function()

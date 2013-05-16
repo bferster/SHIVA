@@ -55,26 +55,23 @@
 	var items=new Array();
 	var shivaLib=null;
 	var shivaGroup="Poster"
-	var chartType="Canvas";
 	
 	var props={
-		Canvas: {
-			pos: 						{	def:'2000|250|250', opt:'hidden',			des:'data'},
-			height: 					{	def:'600', 			opt:'number',			des:'Height of poster'},
-			width: 						{	def:'800', 			opt:'number',			des:'Width of poster'}, 
-			backCol: 					{	def:'eeeeee', 		opt:'color',			des:'Background color'}, 
-			dataSourceUrl: 				{	def:'http://www.viseyes.org/shiva/map.jpg', opt:'string',	des:'Background image'}, 
-			overview: 					{	def:'true', 		opt:'true|false',		des:'Show overview?'},
-			grid: 						{	def:'false', 		opt:'true|false',		des:'Show placement grid?'},
-			controlbox: 				{	def:'false', 		opt:'true|false',		des:'Show controlbox?'}, 
-			ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'},
-			item: 						{	def:'None', 		opt:'None|',			des:'<b>Choose pane to edit</b>'}, 
-			data: 						{	def:'', 			opt:'hidden',			des:'data'},
-			url: 						{	def:'', 			opt:'string',			des:'URL of pane'}, 
-			layerTitle: 				{	def:'', 			opt:'string',			des:'Control box label'}, 
-			scrollbars: 				{	def:'false', 		opt:'true|false',		des:'Show scroll bars?'}, 
-			}
-		}
+		pos: 						{	def:'2000|250|250', opt:'hidden',			des:'data'},
+		height: 					{	def:'600', 			opt:'number',			des:'Height of poster'},
+		width: 						{	def:'800', 			opt:'number',			des:'Width of poster'}, 
+		backCol: 					{	def:'eeeeee', 		opt:'color',			des:'Background color'}, 
+		dataSourceUrl: 				{	def:'http://www.viseyes.org/shiva/map.jpg', opt:'string',	des:'Background image'}, 
+		overview: 					{	def:'true', 		opt:'true|false',		des:'Show overview?'},
+		grid: 						{	def:'false', 		opt:'true|false',		des:'Show placement grid?'},
+		controlbox: 				{	def:'false', 		opt:'true|false',		des:'Show controlbox?'}, 
+		ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'},
+		item: 						{	def:'None', 		opt:'None|',			des:'<b>Choose pane to edit</b>'}, 
+		data: 						{	def:'', 			opt:'hidden',			des:'data'},
+		url: 						{	def:'', 			opt:'string',			des:'URL of pane'}, 
+		layerTitle: 				{	def:'', 			opt:'string',			des:'Control box label'}, 
+		scrollbars: 				{	def:'false', 		opt:'true|false',		des:'Show scroll bars?'}, 
+	}
 	
 	var helpText=new Array();
 	helpText['Height of poster']="The height of the player box where the montage will play in";
@@ -94,7 +91,7 @@
 	$(document).ready(function() {
   		shivaLib=new SHIVA_Show("containerDiv");
 		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
-	  	shivaLib.SetAttributes(props[chartType],items,false);
+	  	shivaLib.SetAttributes(props,items,false);
 		shivaLib.callback=Draw;
 		shivaLib.posterMode="Edit";
 		$("#controlbar").buttonset();
@@ -158,28 +155,16 @@
 
 	function SaveData(mode)
 	{
-		return shivaLib.SaveData(mode,shivaGroup,items,props[chartType],chartType);
+		return shivaLib.SaveData(mode,shivaGroup,items,props);
 	}	
 
 	function ReEdit(jsonData)
 	{
-		if (jsonData) {
-			if (jsonData.chartType)
-				chartType=jsonData.chartType;
-			}
-		else{
-			var s,e;
-			var query=window.location.search.substring(1);
-			if ((s=query.indexOf("&chartType=")) != -1)
-				if ((e=query.indexOf("&",s+1)) != -1)
-					chartType=query.substring(s+11,e);
-			}
-		SetAttributes(chartType,false);	
-		var it=shivaLib.ReEdit(jsonData,props[chartType],false);
+		SetAttributes(false);	
+		var it=shivaLib.ReEdit(jsonData,props,false);
 		if (it)
 			items=it;
-		SetAttributes(chartType,true);
-		$("#chartType").val(chartType);
+		SetAttributes(true);
 		Draw();
 	}
 
@@ -191,10 +176,9 @@
 			shivaLib.ShowHelp(att,helpText);
 	}	
 
-	function SetAttributes(type,keep)
+	function SetAttributes(keep)
 	{
-		chartType=type;
-		shivaLib.SetAttributes(props[chartType],items,keep);
+		shivaLib.SetAttributes(props,items,keep);
 	}	
 
 ///////// ITEMS  /////////////
@@ -204,13 +188,13 @@
 		var o=new Object;
 		var s=0,i=0;
 		shivaLib.Sound("ding");
-		for (var key in props[chartType]) {
+		for (var key in props) {
 			if (key == "item")
 				s=i;
 			++i;
 			if (!s)
 				continue;
-			o[key]=props[chartType][key].def;
+			o[key]=props[key].def;
 			}
 		var scale=shivaLib.posterScale;
 		for (var i=0;i<items.length;++i)
@@ -222,7 +206,7 @@
 		items.push(o);
 		for (var i=0;i<items.length;++i)
 			items[i].name="Pane-"+(i+1);
-	  	shivaLib.SetAttributes(props[chartType],items,true);
+	  	shivaLib.SetAttributes(props,items,true);
 		Draw();
 		$("#accord").accordion({ active: items.length-1 });
 	}	
@@ -236,7 +220,7 @@
 		items.splice(active,1);
 		for (var i=0;i<items.length;++i) 
 			items[i].name="Pane-"+(i+1);
-	  	shivaLib.SetAttributes(props[chartType],items,true);
+	  	shivaLib.SetAttributes(props,items,true);
 		Draw();
 	}
 
@@ -245,7 +229,7 @@
 		var cur=shivaLib.ShiftItem(dir,items);
 		for (var i=0;i<items.length;++i) 
 			items[i].name="Pane-"+(i+1);
-	  	shivaLib.SetAttributes(props[chartType],items,true);
+	  	shivaLib.SetAttributes(props,items,true);
 		if (cur != -1)
 			$("#accord").accordion({ active: cur });
 	}

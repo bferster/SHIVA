@@ -22,11 +22,12 @@ SHIVA_Show.prototype.DrawPoster=function(mode) 										//	DRAW POSTER
 			items.push(o);
 			}
 		}
+	var v=options.pos.split("|");														// Get start pos
+	this.posterScale=v[0]/1000;															// Get scale
+	this.posterX=v[1]/1000;																// Get x
+	this.posterY=v[2]/1000;																// Get y
+	trace(v)
 	var str="<div id='posterDiv' style='position:absolute;left:0px;top:0px'></div>";	// Make poster div
-	if (!this.posterScale)																// If not already set
-		this.posterScale=2;																// Init scale to start
-	if (this.posterX == undefined)														// If not already set
-		this.posterX=this.posterY=1/this.posterScale/2;									// Init pos to TLC
 	$(con).html(str);																	// Add div
 	$(con).css({"width":options.width+"px","height":options.height+"px"});				// Resize container	
 	$(con).css({border:"1px solid",overflow:"hidden",margin:"0px",padding:"0px"});		// Put border and hode overflow on container
@@ -44,7 +45,6 @@ SHIVA_Show.prototype.DrawPoster=function(mode) 										//	DRAW POSTER
 								var h=$("#posterDiv").height();							// Get image height
 								var s=shivaLib.posterScale;								// Current scale
 								shivaLib.posterX=(-$("#posterDiv").css("left").replace(/px/,"")+(w/s/2))/w; // Get centerX %
-								shivaLib.posterY=(-$("#posterDiv").css("top").replace(/px/,"")+(h/s/2))/h;  // Get centerY %
 								shivaLib.DrawPosterOverview();							// Reflect pos in overview
 								}});	 
 	if (options.dataSourceUrl) {														// If a back img spec'd
@@ -121,6 +121,7 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 								shivaLib.posterX=(x+(pw/s/2))/pw; 						// Get center X%
 								shivaLib.posterY=(y+(ph/s/2))/ph;  						// Get center Y%
 								$("#posterDiv").css({"left":-x+"px","top":-y+"px"});	// Position poster	
+								$("#propInput0").val(shivaLib.options.pos=Math.round(shivaLib.posterScale*1000)+"|"+Math.round(shivaLib.posterX*1000)+"|"+Math.round(shivaLib.posterY*1000));  // Set cur pos
 								}
 							 });		
 		}
@@ -138,9 +139,10 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 										var y=Math.max(0,ui.position.top/h*ph);			// Calc top
 										shivaLib.posterX=(x+(pw/s/2))/pw; 				// Get center X%
 										shivaLib.posterY=(y+(ph/s/2))/ph;  				// Get center Y%
+										$("#propInput0").val(shivaLib.options.pos=Math.round(shivaLib.posterScale*1000)+"|"+Math.round(shivaLib.posterX*1000)+"|"+Math.round(shivaLib.posterY*1000));  // Set cur pos
 										shivaLib.DrawPoster();							// Redraw
 										}
-						}); 
+									}); 
 	var x=options.left=$("#posterDiv").css("left").replace(/px/,"");					// Get x pos
 	x=-x/options.width*w/this.posterScale;												// Scale to fit
 	var y=options.top=$("#posterDiv").css("top").replace(/px/,"");						// Get y pos

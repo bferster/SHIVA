@@ -33,10 +33,11 @@ SHIVA_Show.prototype.DrawPoster=function(mode) 										//	DRAW POSTER
 	$("#posterDiv").width(options.width*this.posterScale);								// Set poster width
 	$("#posterDiv").height(options.height*this.posterScale);							// Set poster height
 	$("#posterDiv").css("background-color","#"+options.backCol);						// Back color
-	var l=$(con).css("left").replace(/px/,"")-0;										// Left boundary
+	var l=$(con).position().left;														// Left boundary
 	var r=l-0+(options.width-(options.width*this.posterScale));							// Right boundary
-	var t=$(con).css("top").replace(/px/,"")-0;											// Top boundary
+	var t=$(con).position().top;														// Top boundary
 	var b=t-0+(options.height-(options.height*this.posterScale));						// Bottom boundary
+
 	$("#posterDiv").draggable({ containment: [r,b,l,t],									// Containment 
 								drag:function(event,ui) {								// Make it draggable
 								var w=$("#posterDiv").width();							// Get image width
@@ -155,27 +156,34 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 	var h=$("#posterDiv").height();														// Poster height
 	if (num != undefined) s=num,e=num-0+1;												// Just draw one
 	for (i=0;i<e;++i) {																	// For each pain
-		trace(s,e)
 		v=this.items[i].data.split("|");												// Get specs
 		dw=v[0]/1000*w;																	// Div width
 		dh=v[0]/1000*h;																	// Div height
 		x=w*v[1]/1000-(dw/2);															// Sert centered left
 		y=h*v[2]/1000-(dh/2);															// Set centered top
-			str="<div id='posterPane"+i+"' style='position:absolute;background:none transparent;";	// Base
+		str="<div id='posterPane"+i+"' style='position:absolute;background:none transparent;";	// Base
 		str+="left:"+x+"px;";															// Left
 		str+="top:"+y+"px;";															// Left
 		str+="height:"+dh+"	px;";														// Height
 		str+="width:"+dw+"px'>";														// Width
-		if (isImg=this.items[i].url.match(/[[.]jpg|jpeg|gif|png]/i))							// If an image file
-			str+="<img src='"+this.items[i].url+"' width='"+dw+"'>";							// Image				
-		else																			// Something else
-			str+="<iframe src='"+this.items[i].url+"' height='"+dh+"' width='"+dw+"' scrolling='no' frameborder='0' allowtransparency='true'></iframe>";		// Iframe				
-		if (this.posterMode == "Edit") {												// If not viewing
-			str+="<br/><div style='height:18px' class='propTable'>";
-			str+="<span style='vertical-align:middle'><b>&nbsp; "+(i+1)+". "+this.items[i].layerTitle+"</b></span></div>";	// Label
+		if (isImg=this.items[i].url.match(/[[.]jpg|jpeg|gif|png]/i))					// If an image file
+			str+="<img src='"+this.items[i].url+"' width='"+dw+"'>";					// Image				
+		else{																			// Something else
+			str+="<iframe src='"+this.items[i].url+"' height='"+dh+"' width='"+dw+"' ";	// Iframe base
+			if (this.items[i].scrollbars == "false")									// If not scrolling
+				str+="scrolling='no' ";													// Inhibit it
+			str+="frameborder='0' allowtransparency='true'></iframe>";					// Finish iframe				
 			}
-		if (num == undefined) 															// If doing them all
+		if (num == undefined) {															// If doing them all
 			$("#posterDiv").append(str+"</div>");										// Add div to poster
+			if (this.posterMode == "Edit") {											// If editing
+				y=$("#posterPane"+i).height();											// Get height
+				var str="<div style='position:absolute;left:0px;top:0px;width:100%;height:100%;border:1px dashed'>";	// Make overlay div for dragging
+				str+="<div style='position:absolute;left:0px;top:"+(y+3)+"px;text-shadow:1px 1px #eee'>";
+				str+="<b> "+(i+1)+". "+this.items[i].layerTitle+"</b></div>";	// Label
+				$("#posterPane"+i).append(str+"</div>");								// Add div
+				}
+			}
 		if (this.options.overview == "true")  {											// If showing overview
 			str="<div id='posterOverPane"+i+"' style='position:absolute;opacity:.4;border:1px solid;pointer-events:none;background-color:#666;";	// Base
 			str+="height:"+dh/4/scale+"px;";											// Height
@@ -192,7 +200,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 										aspectRatio:isImg,
 										stop:function(event,ui) {						// On resize stop
 											var i=event.target.id.substr(10);			// Extract id
-											var v=shivaLib.items[i].data.split("|");				// Get parts
+											var v=shivaLib.items[i].data.split("|");	// Get parts
 											v[0]=Math.floor(Math.min(ui.size.width/$("#containerDiv").width()/shivaLib.posterScale,1)*1000); // Get new scale, cap at 100%					
 											shivaLib.items[i].data=v[0]+"|"+v[1]+"|"+v[2];		// Calc new size
 											$("#itemInput"+i+"-1").val(shivaLib.items[i].data);	// Put in menu
@@ -205,9 +213,9 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num) 									// DRAW POSTER PANES
 											var v=items[i].data.split("|");				// Get parts
 											var w=$("#posterDiv").width();				// Poster wid
 											var h=$("#posterDiv").height();				// Poster hgt
-											var off=-11;									// Iframe offset
+											var off=0;									// Iframe offset
 											if (shivaLib.items[i].url.match(/[[.]jpg|jpeg|gif|png]/i))	// If an image file
-												off=15;									// Set offset
+												off=12*shivaLib.posterScale;			// Set offset
 											v[1]=Math.round(($("#posterPane"+i).position().left+$("#posterPane"+i).width()/2)/w*1000);
 											v[2]=Math.round(($("#posterPane"+i).position().top+$("#posterPane"+i).height()/2+off)/h*1000);
 											shivaLib.items[i].data=v[0]+"|"+v[1]+"|"+v[2];		// Calc new size

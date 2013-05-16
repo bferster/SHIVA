@@ -47,8 +47,7 @@
 	<div id="outputDiv" style="width:460px"> </div>
 	</div>
 	<div id="containerDiv" style="position:absolute;top:0px;left:308px;height:600px;width:800px;"> </div>
- 	<div id="containerDiv" style="position:absolute;"> </div>
-
+ 
 <script>
 
 ///////// GLOBALS   //////////
@@ -73,7 +72,8 @@
 			item: 						{	def:'None', 		opt:'None|',			des:'<b>Choose pane to edit</b>'}, 
 			data: 						{	def:'', 			opt:'hidden',			des:'data'},
 			url: 						{	def:'', 			opt:'string',			des:'URL of pane'}, 
-			layerTitle: 				{	def:'', 			opt:'string',			des:'Control Box label'}, 
+			layerTitle: 				{	def:'', 			opt:'string',			des:'Control box label'}, 
+			scrollbars: 				{	def:'false', 		opt:'true|false',		des:'Show scroll bars?'}, 
 			}
 		}
 	
@@ -87,7 +87,8 @@
 	helpText['Show Overview?']="Whether or not to add a small icon at the bottom right of your poster. Clicking this icon will will show or hide a small mini-poser at the bottom right corner of the poster; this mini-poster allows easy navigation through the poster.";
 	helpText['Show controlbox?']="Use the drop-down menu to the right to choose whether to show or hide the control box from your poster. The control box allows users to interactively got to specific areas in your poster.";
 	helpText['Background image']="Use the text box to enter the full url of an image file thst completely covers the poster.<br/><br/>Make sure it is the same shape as poster's overall height and width.<br/><br/>The image needs to have enough resolution to handle the degree in which you want to allow zooming in.";
-	helpText['Control Box label']="Short lable that will appear in the control box. If you do not provide a lable, the pane will not appeear in the control box";
+	helpText['Control box label']="Short lable that will appear in the control box. If you do not provide a label, the pane will not appeear in the control box";
+	helpText['Show scroll bars?']="Show controls bars on website and SHIVA viz's the are larger than the space provided for.";
 	
 ///// INIT  /////////////
 	
@@ -308,10 +309,10 @@ var g=new SHIVA_Graphics();
 
 function DrawConnections()												// DRAW PROXIES/LINES
 {
-	$("#containerDiv").empty();												// Clear canvas of elements
-	g.CreateCanvas("links","containerDiv");									// Make HTML5 graphical canvas
+//	$("#containerDiv").empty();												// Clear canvas of elements
+//	g.CreateCanvas("links","containerDiv");									// Make HTML5 graphical canvas
 //	DrawLinks();															// Draw link lines first
-	DrawItems();															// Draw items
+//	DrawItems();															// Draw items
 }
 
 function DrawLinks()													// DRAW LINK LINES

@@ -2,7 +2,7 @@
 //  SHIVALIB POSTER  
 //  ///////////////////////////////////////////////////////////////////////////////////////////////////// 
 
-SHIVA_Show.prototype.DrawPoster=function(mode) 										//	DRAW POSTER
+SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 {
 	var str;
 	var options=this.options;
@@ -65,6 +65,20 @@ SHIVA_Show.prototype.DrawPoster=function(mode) 										//	DRAW POSTER
 		this.DrawLayerControlBox(this.items,(options.controlbox == "true"));			// Draw control box?
 		}
 	this.SendReadyMessage(true);														// Send ready message
+}
+
+SHIVA_Show.prototype.GoToPosterPane=function(num) 									// DRAW POSTER OVERVIEW
+{
+	if (num < this.items.length) {														// If a pane													
+		var v=this.items[num].data.split("|");											// Get pane pos
+		v[0]=Math.round(1000/v[0]*1000);												// Rescale
+		this.options.pos=v[0]+"|"+v[1]+"|"+v[2];										// Set pos
+		}
+	else																				// If start
+		this.options.pos="1000|500|500";												// Centered full screen
+	this.DrawPoster();																	// Redraw
+	trace($("#shcr0").length)
+	$("#shcr"+num).attr("checked","checked");											// Reset radio button
 }
 
 SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERVIEW

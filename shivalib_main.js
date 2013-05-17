@@ -501,7 +501,7 @@ SHIVA_Show.prototype.SetLayer=function(num, mode, type) 				// SET LAYER
 			this.items[num].visible=mode.toString();						// Set visibility to mode as string
 		}
 
-	if (group == "Map")
+	if (group == "Map")														// Route on type
 		this.DrawMapOverlays();												
 	else if (group == "Earth") 
 		this.DrawEarthOverlays();												
@@ -509,6 +509,8 @@ SHIVA_Show.prototype.SetLayer=function(num, mode, type) 				// SET LAYER
 		this.DrawSubway();
 	else if (group == "Timeline") 
 		this.DrawTimeline();
+	else if (group == "Poster") 
+		this.GoToPosterPane(num);
 }
 
 SHIVA_Show.prototype.FillElement=function(table, query) 								// FILL ELEMENT WITH DATA TABLE

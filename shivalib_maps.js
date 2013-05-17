@@ -495,8 +495,10 @@ SHIVA_Show.prototype.DrawLayerControlBox=function(items, show)			// DRAW LAYER C
 		else if ((items[i].layerTitle) && (items[i].layerType == "GoTo")) 	// If titled and a GoTo
 			hasGotos=true;													// Draw gotos header
 		}
-	if (this.options.shivaGroup == "Poster")								// If a poster
-			hasLayers=false;													// Draw layers header
+	if (this.options.shivaGroup == "Poster") {								// If a poster
+			hasLayers=false;												// Draw layers header
+			hasGotos=true;													// Draw gotos header
+			}
 	if (hasLayers) {														// If has layers, put up this header
 		str="<p style='text-shadow:1px 1px white'><b>&nbsp;&nbsp;Show layer&nbsp;&nbsp;</b><br/>";
 		for (i=0;i<items.length;++i) 
@@ -513,24 +515,24 @@ SHIVA_Show.prototype.DrawLayerControlBox=function(items, show)			// DRAW LAYER C
 		str+="<p style='text-shadow:1px 1px white'><b>&nbsp;&nbsp;Go to:&nbsp;&nbsp;</b><br/>";
 		str+="&nbsp;<input type='radio' name='gotos' id='shcr"+items.length+"' checked=checked>Start&nbsp;&nbsp;&nbsp;<br/>";		// Add home button
 		for (i=0;i<items.length;++i) 										// For each item
-			if ((items[i].layerTitle) && ((items[i].layerType == "GoTo") ||(this.options.shivaGroup == "Poster"))) {	// If a GoTo
+			if ((items[i].layerTitle) && ((items[i].layerType == "GoTo") || (this.options.shivaGroup == "Poster"))) {	// If a GoTo
 				str+="&nbsp;<input type='radio' name='gotos' id='shcr"+i+"'";	// Add check
 				if (items[i].visible == "true")								// If initially visible
 					str+=" checked=checked ";								// Set checked
-				str+=">"+items[i].layerTitle+"&nbsp;&nbsp;&nbsp;<br/>";	// Add label
+				str+=">"+items[i].layerTitle+"&nbsp;&nbsp;&nbsp;<br/>";		// Add label
 				}
 		str+="</p>";														// Close p	
 		}
 	$("#shivaMapControlDiv").html(str+"<br/>");								// Add content	
 	var _this=this;															// Local copy of this
 	for (i=0;i<items.length;++i) {											// For each item
-		if (items[i].layerType == "GoTo")									// If a goto
+		if ((items[i].layerType == "GoTo") || (this.options.shivaGroup == "Poster"))	// If a goto
 			$("#shcr"+i).click( function() { $.proxy(_this.SetLayer(this.id.substr(4),this.checked.toString(),"GoTo"),_this); } );  // Add handler
 		else																// A regular layer
 			$("#shcb"+i).click( function() { $.proxy(_this.SetLayer(this.id.substr(4),this.checked.toString(),"?"),_this); } );  	// Add handler
 		}
 	if (hasGotos)															// If has gotos
-		$("#shcr"+items.length).change( function() { $.proxy(_this.SetLayer(this.id.substr(4),this.checked.toString(),"GoTo"),_this); } );  // Add handler
+		$("#shcr"+items.length).click( function() { $.proxy(_this.SetLayer(this.id.substr(4),this.checked.toString(),"GoTo"),_this); } );  // Add handler
 }
 
 ////////////// CUSTOM OVERLAY //////////////

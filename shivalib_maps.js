@@ -219,18 +219,8 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 			this.items.push(o);
 			}
 		}
-	if (ops.width) {
-		if (""+ops.width.match(/%/))
-			document.getElementById(container).style.width=ops.width;
-		else
-			document.getElementById(container).style.width=ops.width+"px";
-		}
-	if (ops.height) {
-		if (""+ops.height.match(/%/))
-			document.getElementById(container).style.height=ops.height;
-		else
-			document.getElementById(container).style.height=ops.height+"px";
-		}
+	$("#"+this.container).height(ops.height);							// Height
+	$("#"+this.container).width(ops.width);								// Width
 	ops["mapTypeControlOptions"]={ "mapTypeIds":[	
 		google.maps.MapTypeId.ROADMAP,
      	google.maps.MapTypeId.TERRAIN,

@@ -966,13 +966,7 @@ ops.mapTypeId=google.maps.MapTypeId[mapType];var ll=ops.mapcenter.split(",")
 latlng=new google.maps.LatLng(ll[0],ll[1]);ops.center=latlng;ops.zoom=Number(ll[2]);this.mapsInfoWindow=new google.maps.InfoWindow({maxWidth:300});this.items=[];for(var key in ops){if(ops[key]=="true")ops[key]=true;if(ops[key]=="false")ops[key]=false;if(key.indexOf("item-")!=-1){var o=new Object;v=ops[key].split(';');for(i=0;i<v.length;++i){vv=v[i].split(':');if(vv[1].indexOf("http")==-1)
 vv[1]=vv[1].replace(/~/g,"=");o[vv[0]]=vv[1].replace(/\^/g,"&").replace(/\`/g,":");}
 this.items.push(o);}}
-if(ops.width){if(""+ops.width.match(/%/))
-document.getElementById(container).style.width=ops.width;else
-document.getElementById(container).style.width=ops.width+"px";}
-if(ops.height){if(""+ops.height.match(/%/))
-document.getElementById(container).style.height=ops.height;else
-document.getElementById(container).style.height=ops.height+"px";}
-ops["mapTypeControlOptions"]={"mapTypeIds":[google.maps.MapTypeId.ROADMAP,google.maps.MapTypeId.TERRAIN,google.maps.MapTypeId.SATELLITE,google.maps.MapTypeId.HYBRID,"LAND"],style:google.maps.MapTypeControlStyle.DROPDOWN_MENU};this.map=new google.maps.Map(document.getElementById(container),ops);this.AddClearMapStyle(this.map);this.AddBlankMapStyle(this.map);this.DrawMapOverlays();this.DrawLayerControlBox(this.items,this.options.controlbox);this.SendReadyMessage(true);google.maps.event.addListener(this.map,'click',function(e){var l=e.latLng.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");var p=e.pixel.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");shivaLib.SendShivaMessage("ShivaMap=click|"+l+"|"+p);});google.maps.event.addListener(this.map,'center_changed',function(e){var map=shivaLib.map;var lat=map.getCenter();shivaLib.SendShivaMessage("ShivaMap=move|"+lat.lat()+"|"+lat.lng()+"|"+map.getZoom());});}
+$("#"+this.container).height(ops.height);$("#"+this.container).width(ops.width);ops["mapTypeControlOptions"]={"mapTypeIds":[google.maps.MapTypeId.ROADMAP,google.maps.MapTypeId.TERRAIN,google.maps.MapTypeId.SATELLITE,google.maps.MapTypeId.HYBRID,"LAND"],style:google.maps.MapTypeControlStyle.DROPDOWN_MENU};this.map=new google.maps.Map(document.getElementById(container),ops);this.AddClearMapStyle(this.map);this.AddBlankMapStyle(this.map);this.DrawMapOverlays();this.DrawLayerControlBox(this.items,this.options.controlbox);this.SendReadyMessage(true);google.maps.event.addListener(this.map,'click',function(e){var l=e.latLng.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");var p=e.pixel.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");shivaLib.SendShivaMessage("ShivaMap=click|"+l+"|"+p);});google.maps.event.addListener(this.map,'center_changed',function(e){var map=shivaLib.map;var lat=map.getCenter();shivaLib.SendShivaMessage("ShivaMap=move|"+lat.lat()+"|"+lat.lng()+"|"+map.getZoom());});}
 SHIVA_Show.prototype.AddInternalOptions=function(options,newOps)
 {var i,vv;if(newOps){var v=newOps.split(',');for(i=0;i<v.length;++i){vv=v[i].split("=");if(vv[1]=='true')vv[1]=true;if(vv[1]=='false')vv[1]=false;options[vv[0]]=vv[1];}}}
 SHIVA_Show.prototype.DrawMapOverlays=function()
@@ -1068,7 +1062,7 @@ SHIVA_Show.prototype.AddBlankMapStyle=function(map)
 SHIVA_Show.prototype.DrawVideo=function()
 {var v,t,type="YouTube";var options=this.options;var container=this.container;var con="#"+container;var id=options.dataSourceUrl;if(typeof(Popcorn)!="function")
 return;if(typeof(Popcorn.smart)!="function")
-return;var base="http://www.youtube.com/watch?autoplay=1&v=";$(con).css("width",options.width+"px");$(con).css("height",options.height+"px");if((options.dataSourceUrl.match(/vimeo/))||(!isNaN(options.dataSourceUrl)))
+return;var base="http://www.youtube.com/watch?autoplay=1&v=";$(con).width(options.width);$(con).height(options.height);if((options.dataSourceUrl.match(/vimeo/))||(!isNaN(options.dataSourceUrl)))
 base="http://vimeo.com/",type="Vimeo";else if(options.dataSourceUrl.match(/kaltura/)){var s=options.dataSourceUrl.indexOf("kaltura_player_");id=options.dataSourceUrl.substring(s+15);id="https://www.kaltura.com/p/2003471/sp/0/playManifest/entryId/"+id+"/format/url/flavorParamId/301951/protocol/https/video.mp4"
 base="";type="Kaltura";}
 else if((options.dataSourceUrl.match(/http/g))&&(!options.dataSourceUrl.match(/youtube/g)))
@@ -1170,7 +1164,7 @@ tip.style.color='black';tip.style.fontFamily=config.Label.family;tip.style.backg
 SHIVA_Show.prototype.DrawTimeGlider=function()
 {if($('#cp_colorbar').is(":visible")==true||$('#cp_colormap').is(":visible")==true){return;}
 var i;var stimeline=new Object();if($('link[href*=timeglider]').length==0){$('head').append('<link rel="stylesheet" href="css/timeglider/Timeglider.css" type="text/css" media="screen" title="no title" charset="utf-8">');}
-stimeline.events=null;stimeline.options=this.options;stimeline.container=this.container;stimeline.con="#"+stimeline.container;$(stimeline.con).css('width',stimeline.options['width']+"px");$(stimeline.con).css('height',stimeline.options['height']+"px");$(stimeline.con).timeline('resize');GetSpreadsheetData(stimeline.options.dataSourceUrl);function GetSpreadsheetData(file,conditions)
+stimeline.events=null;stimeline.options=this.options;stimeline.container=this.container;stimeline.con="#"+stimeline.container;$(stimeline.con).width(stimeline.options['width']);$(stimeline.con).height(stimeline.options['height']);$(stimeline.con).timeline('resize');GetSpreadsheetData(stimeline.options.dataSourceUrl);function GetSpreadsheetData(file,conditions)
 {lastDataUrl=file.replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");var query=new google.visualization.Query(lastDataUrl);if(conditions)
 query.setQuery(conditions);query.send(handleQueryResponse);function handleQueryResponse(response){if(response.isError()){alert("Either your internet connection is down or the Google spreadsheet that  \n"+"holds the data for this visualization has not been properly shared.\n"+"The owner of the spreadsheet should set permissions to 'Anyone with Link' or 'Public'.");return;}
 var i,j,key,s=0;var data=new google.visualization.DataView(response.getDataTable());var rows=data.getNumberOfRows();var cols=data.getNumberOfColumns();eventData={events:new Array()};if(!$.trim(data.getColumnLabel(0)))
@@ -1392,7 +1386,7 @@ this.SendReadyMessage(true);}
 else if((options.chartType=="Zoomable")&&(options.dataSourceUrl))
 this.DrawPoster("Image");else if(options.chartType=="Montage"){var items=new Array();for(var key in options){if(key.indexOf("item-")!=-1){o={};v=options[key].split(';');for(i=0;i<v.length;++i)
 o[v[i].split(':')[0]]=v[i].split(':')[1].replace(/\^/g,"&").replace(/~/g,"=").replace(/\`/g,":");items.push(o);}}
-this.items=items;$(con).css('height',options.height+"px");$(con).css('width',options.width+"px");var act=$("#accord").accordion("option","active");if((act===false)||(isNaN(act))||(!$("#accord").length))
+this.items=items;$(con).height(options.height);$(con).width(options.width);var act=$("#accord").accordion("option","active");if((act===false)||(isNaN(act))||(!$("#accord").length))
 act=0;if(!this.imageMob)
 this.imageMob={div:this.container+"Img"};this.imageMob.start=0;this.imageMob.curMob=act;this.imageMob.audioStart=0;for(i=0;i<act;++i)
 this.imageMob.audioStart+=items[i].dur-0;this.imageMob.numMobs=items.length;clearInterval(shivaLib.imageMob.interval);$(con).html("<img id='"+this.container+"Img' "+"' src='"+items[act].url+"' onclick='shivaLib.DrawImage()'/>");if(act<items.length-1)

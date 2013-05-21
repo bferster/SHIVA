@@ -72,6 +72,7 @@
 		url: 						{	def:'', 			opt:'string',			des:'URL or ID of pane'}, 
 		layerTitle: 				{	def:'', 			opt:'string',			des:'Control box label'}, 
 		scrollbars: 				{	def:'false', 		opt:'true|false',		des:'Show scroll bars?'}, 
+		style: 						{	def:'', 			opt:'string',			des:'CSS styling'}, 
 	}
 	
 	var helpText=new Array();
@@ -86,6 +87,8 @@
 	helpText['Background image']="Use the text box to enter the full url of an image file thst completely covers the poster.<br/><br/>Make sure it is the same shape as poster's overall height and width.<br/><br/>The image needs to have enough resolution to handle the degree in which you want to allow zooming in.";
 	helpText['Control box label']="Short label that will appear in the control box. If you do not provide a label, the pane will not appeear in the control box";
 	helpText['Show scroll bars?']="Show controls bars on website and SHIVA viz's the are larger than the space provided for.";
+	helpText['CSS styling']="CSS formatted styling for pane box. i.e. <i>border:1px solid black</i>";
+
 	
 ///// INIT  /////////////
 	

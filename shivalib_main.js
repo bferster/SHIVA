@@ -180,20 +180,24 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 			window.attachEvent("message",shivaLib.ShivaEventHandler);	
 		return;
 		}
+	if (!e.data)															// No data
+		return;																// Quit
 	for (var i=0;i<shivaLib.msgAction.length;++i)							// For each possible event								
 		if (e.data.indexOf(shivaLib.msgAction[i].id) != -1)					// The one						
 			shivaLib.msgAction[i].Do(i);									// Run callback
 	if (e.data.indexOf("ShivaAct") != -1) {									// If an action
-		if (e.data.indexOf("ShivaActMap=") != -1)							// If a map action
+		if (shivaLib.options.shivaGroup == "Map")							// If a map action
 			shivaLib.MapActions(e.data);									// Route to map actions
-		else if (e.data.indexOf("ShivaActEarth=") != -1)					// If an earth action
+		else if (shivaLib.options.shivaGroup == "Earth")					// If a earth action
 			shivaLib.EarthActions(e.data);									// Route to earth actions
-		else if (e.data.indexOf("ShivaActVideo=") != -1)					// If a video action
+		else if (shivaLib.options.shivaGroup == "Video")					// If a video action
 			shivaLib.VideoActions(e.data);									// Route to earth actions
-		else if (e.data.indexOf("ShivaActTime=") != -1)						// If a timeline action
+		else if (shivaLib.options.shivaGroup == "Time")						// If a timeline action
 			shivaLib.TimeActions(e.data);									// Route to earth actions
-		else if (e.data.indexOf("ShivaActChart=") != -1)					// If a chart action
+		else if (shivaLib.options.shivaGroup == "Visualization")			// If a chart action
 			shivaLib.ChartActions(e.data);									// Route to chart actions
+		else if (shivaLib.options.shivaGroup == "Image")					// If an image action
+			shivaLib.ImageActions(e.data);									// Route to earth actions
 		}
 }
 
@@ -624,14 +628,14 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
    		if (ops[o] == 'true') 	ops[o]=true;
   		if (ops[o] == 'false') 	ops[o]=false;
    		}
-	var innerChartDiv=this.container+"indiv";
 	if (options['width'])		$(con).width(options['width']);
 	if (options['height'])		$(con).height(options['height']);
-	$(con).remove("#innerChartDiv");
-	$(con).append("<div id="+innerChartDiv+"/>")
-	$("#"+innerChartDiv).width($(con).width());
-	$("#"+innerChartDiv).height($(con).height());
-	ops.containerId=innerChartDiv;
+//	var innerChartDiv=this.container+"indiv";
+//	$(con).remove("#innerChartDiv");
+//	$(con).append("<div id="+innerChartDiv+"/>")
+//	$("#"+innerChartDiv).width($(con).width());
+//	$("#"+innerChartDiv).height($(con).height());
+	ops.containerId=this.container;
 	if (!ops.colors)	delete ops.colors;
  	if (ops.dataSourceUrl) {	
  		ops.dataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");
@@ -683,14 +687,16 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 SHIVA_Show.prototype.ChartActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
 {
 	var v=msg.split("|");												// Split msg into parts
-	if (v[0] == "ShivaActChart=data") {									// DATA
+	if (v[0] == "ShivaAct=resize")  									// RESIZE
+		shivaLib.map.draw();											// Redraw chart
+	else if (v[0] == "ShivaAct=data") {									// DATA
 		var data=google.visualization.arrayToDataTable($.parseJSON(v[1]));	// Convert to table format
-		this.map.setDataTable(data);									// Set data
-		this.map.draw();												// Redraw chart
+		shivaLib.map.setDataTable(data);								// Set data
+		shivaLib.map.draw();											// Redraw chart
 		}
 }
 
-SHIVA_Show.prototype.Sound=function(sound, mode)									// PLAY SOUND
+SHIVA_Show.prototype.Sound=function(sound, mode)				// PLAY SOUND
 {	
 	var snd=new Audio();
 	if (!snd.canPlayType("audio/mpeg"))

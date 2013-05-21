@@ -203,4 +203,14 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 	$("#"+mob.div).css(o);															// Set css 
 }
 
+ 
+SHIVA_Show.prototype.ImageActions=function(msg)								// REACT TO SHIVA ACTION MESSAGE
+{
+	var v=msg.split("|");														// Split msg into parts
+	if (v[0] == "ShivaAct=resize") {  											// RESIZE
+		shivaLib.AnimateDiv("start");											// Draw image at start pos
+	}
+
+}
+ 
                       

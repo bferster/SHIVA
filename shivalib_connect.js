@@ -1,16 +1,16 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//   SEAMIXER METHODS 
+//   shivaConnect METHODS 
 //   Documentation: https://docs.google.com/document/d/1Q42_K0Li7ZDtXfY27neZuo7aENZ-yGybKAYMFNBTGqg/edit
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function seaMixer() 												// CONSTRUCTOR
+function shivaConnect() 											// CONSTRUCTOR
 {
 	this.ondos=new Array();												// Hold ondo statements
 	this.preload=0;														// No preload
 	this.data=new Object();												// Holds table data
 }
 
-seaMixer.prototype.Run=function(ondoList) 							// RUN
+shivaConnect.prototype.Run=function(ondoList) 						// RUN
 {
 	this.ondos=[];														// Clear queue
 	var _this=this;														// Point at mixer obj
@@ -26,14 +26,14 @@ seaMixer.prototype.Run=function(ondoList) 							// RUN
 		}
 }
 
-seaMixer.prototype.AddOnDo=function(ondo) 							// ADD NEW ONDO
+shivaConnect.prototype.AddOnDo=function(ondo) 						// ADD NEW ONDO
 {
 	this.ondos.push(ondo);												// Add to array
 	if (ondo.on == "init")												// If an init
 		this.RunOnDo(ondo);												// Run it
 }
 
-seaMixer.prototype.RunOnDo=function(ondo) 							// RUN AN INIT ONDO
+shivaConnect.prototype.RunOnDo=function(ondo) 						// RUN AN INIT ONDO
 {
 	var str,o,i;
 	switch(ondo.Do) {													// Route on type
@@ -86,7 +86,7 @@ trace(this.data[ondo.id])
 //   MESSAGING  
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-seaMixer.prototype.Start=function() 								// START
+shivaConnect.prototype.Start=function() 								// START
 {
 	if (window.addEventListener) 
 		window.addEventListener("message",$.proxy(this.ShivaEventHandler,this),false); // Add event listener
@@ -94,12 +94,12 @@ seaMixer.prototype.Start=function() 								// START
 		window.attachEvent("message",$.proxy(this.ShivaEventHandler,this),false); // Add event listener
 }
 
-seaMixer.prototype.Stop=function() 									// STOP
+shivaConnect.prototype.Stop=function() 									// STOP
 {
 	window.removeEventListener("message",$.proxy(this.ShivaEventHandler,this));	 // Remove event listener
 }
 
-seaMixer.prototype.ShivaEventHandler=function(e) 					// CATCH SHIVA EVENTS
+shivaConnect.prototype.ShivaEventHandler=function(e) 				// CATCH SHIVA EVENTS
 {
 	var i,o,n=this.ondos.length;
 	trace(e.data)
@@ -110,7 +110,7 @@ seaMixer.prototype.ShivaEventHandler=function(e) 					// CATCH SHIVA EVENTS
 		}
 }
 
-seaMixer.prototype.HandleOnEvent=function(ondo, data) 				// HANDLE INCOMING EVENT
+shivaConnect.prototype.HandleOnEvent=function(ondo, data) 			// HANDLE INCOMING EVENT
 {
 	var run=new Object();												// New run obj
 	for (o in ondo)														// For each field in on field
@@ -129,7 +129,7 @@ seaMixer.prototype.HandleOnEvent=function(ondo, data) 				// HANDLE INCOMING EVE
 	this.RunOnDo(run);													// Run it
 }
 
-seaMixer.prototype.SendMessage=function(con, msg) 					// SEND HTML5 MESSAGE TO IFRAME
+shivaConnect.prototype.SendMessage=function(con, msg) 					// SEND HTML5 MESSAGE TO IFRAME
 {
 	var win=document.getElementById(con).contentWindow;					// Point at iframe	
 	win.postMessage(msg,"*");											// Send message to container
@@ -139,7 +139,7 @@ seaMixer.prototype.SendMessage=function(con, msg) 					// SEND HTML5 MESSAGE TO 
 //   DATA TABLES  
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-seaMixer.prototype.LoadSpreadsheet=function(ondo) 					// GET GOOGLE DOCS SPREADSHEET
+shivaConnect.prototype.LoadSpreadsheet=function(ondo) 				// GET GOOGLE DOCS SPREADSHEET
 {
 	var base="https://docs.google.com/spreadsheet/ccc?key=";			// Base url
 	var query=new google.visualization.Query(base+ondo.src);			// Setup load					
@@ -173,7 +173,7 @@ seaMixer.prototype.LoadSpreadsheet=function(ondo) 					// GET GOOGLE DOCS SPREAD
        }
 }
 
-seaMixer.prototype.TableToString=function(table) 					// SAVE TABLE AS STRING
+shivaConnect.prototype.TableToString=function(table) 					// SAVE TABLE AS STRING
 {
 	var i,j,val,str="[";
 	var cols=table[0].length-1;											// Number of fields
@@ -197,7 +197,7 @@ seaMixer.prototype.TableToString=function(table) 					// SAVE TABLE AS STRING
 	return str+"]";														// Return stringified array
 }
 
-seaMixer.prototype.Query=function(src, dst, query, fields, sort) 	// RUN QUERY
+shivaConnect.prototype.Query=function(src, dst, query, fields, sort) // RUN QUERY
 {
 	var v,j,i=0;
 	var allFields=false;												// Assume selected fields

@@ -77,7 +77,6 @@ SHIVA_Show.prototype.GoToPosterPane=function(num) 									// DRAW POSTER OVERVI
 	else																				// If start
 		this.options.pos="1000|500|500";												// Centered full screen
 	this.DrawPoster();																	// Redraw
-	trace($("#shcr0").length)
 	$("#shcr"+num).attr("checked","checked");											// Reset radio button
 }
 

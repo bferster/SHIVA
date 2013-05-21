@@ -1367,7 +1367,7 @@ var s=shivaLib.posterScale;$("#posterDiv").width(shivaLib.options.width*s);$("#p
 SHIVA_Show.prototype.GoToPosterPane=function(num)
 {if(num<this.items.length){var v=this.items[num].data.split("|");v[0]=Math.round(1000/v[0]*1000);this.options.pos=v[0]+"|"+v[1]+"|"+v[2];}
 else
-this.options.pos="1000|500|500";this.DrawPoster();$("#shcr"+num).attr("checked","checked");}
+this.options.pos="1000|500|500";v=this.options.pos.split("|");this.PositionPoster(v[0],v[1],v[2]);$("#shcr"+num).attr("checked","checked");}
 SHIVA_Show.prototype.DrawPosterOverview=function()
 {var str;var options=this.options;var w=options.width/4;var h=w*options.height/options.width;if(($("#posterOverDiv").length==0)&&(options.overview=="true")){var css={position:"absolute",left:options.width-w+"px",width:w+"px",height:h+"px",top:options.height-h+"px",border:"1px solid","background-color":"#"+options.backCol};str="<div id='posterOverDiv'></div>";$("#"+this.container).append(str);$("#posterOverDiv").css(css);if(options.dataSourceUrl){str="<img src='"+options.dataSourceUrl+"' ";str+="height='"+h+"' ";str+="width='"+w+"' >";$("#posterOverDiv").append(str);}
 if(typeof(DrawPosterOverviewGrid)=="function")

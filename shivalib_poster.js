@@ -1,5 +1,5 @@
 //  ///////////////////////////////////////////////////////////////////////////////////////////////////// 
-//  SHIVALIB POSTER  
+//  SHIVALIB POSTER  (USED IN IMAGE:ZOOMABLE too)
 //  ///////////////////////////////////////////////////////////////////////////////////////////////////// 
 
 SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
@@ -25,7 +25,7 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 	str+="background-color"+options.backCol+"'></div>";									// Back color
 	$(con).html(str);																	// Add div
 	$(con).css({border:"1px solid",overflow:"hidden",margin:"0px",padding:"0px"});		// Put border and hode overflow on container
-
+	$(con).width(options.width);	$(con).height(options.height);						// Set size
 	$("#posterDiv").draggable({ drag:function(event,ui) {								// Make it draggable
 								var w=$("#posterDiv").width();							// Get image width
 								var h=$("#posterDiv").height();							// Get image height
@@ -48,6 +48,7 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 	if (typeof(DrawPosterGrid) == "function")											// If not in embedded
 		DrawPosterGrid();																// Draw grid if enabled
 	this.DrawPosterOverview();															// Draw overview, if enabled
+	this.DrawPosterPanes(-1,"resize");													// Resize panes
 	this.SendReadyMessage(true);														// Send ready message
 }
 
@@ -59,10 +60,12 @@ SHIVA_Show.prototype.PositionPoster=function(size, left, top) 						// POSITION 
 		shivaLib.posterY=top/1000;  													// Get center Y%
 		}
 	var s=shivaLib.posterScale;															// Point at scale
-	$("#posterDiv").width(shivaLib.options.width*s);									// Set poster width
-	$("#posterDiv").height(shivaLib.options.height*s);									// Set poster height
-	var w=$("#posterDiv").width();														// Get image width
-	var h=$("#posterDiv").height();														// Get image height
+	$("#posterDiv").width(shivaLib.options.width);										// Set poster width
+	$("#posterDiv").height(shivaLib.options.height);									// Set poster height
+	var w=$("#posterDiv").width()*s;													// Get image width scaled
+	var h=$("#posterDiv").height()*s;													// Get image height
+	$("#posterDiv").width(w);															// Size it
+	$("#posterDiv").height(h);															// Size it
 	var l=w*shivaLib.posterX-(w/s/2);													// Get left
 	var t=h*shivaLib.posterY-(h/s/2);													// Get top
 	$("#posterDiv").css({"left":-l+"px","top":-t+"px"});								// Position poster	
@@ -71,9 +74,9 @@ SHIVA_Show.prototype.PositionPoster=function(size, left, top) 						// POSITION 
 
 	var options=this.options;
 	var l=$("#"+shivaLib.container).position().left;									// Left boundary
-	var r=l-0+(shivaLib.options.width-(shivaLib.options.width*shivaLib.posterScale));	// Right boundary
+	var r=l-0+(w/s-w);																	// Right boundary
 	var t=$("#"+shivaLib.container).position().top;										// Top boundary
-	var b=t-0+(shivaLib.options.height-(shivaLib.options.height*shivaLib.posterScale));	// Bottom boundary
+	var b=t-0+(h/s-h);																	// Bottom boundary
 	$("#posterDiv").draggable("option",{ containment: [r,b,l,t] } );					// Reset containment
 }
 
@@ -91,19 +94,20 @@ SHIVA_Show.prototype.GoToPosterPane=function(num) 									// GO TO PANE
 	$("#shcr"+num).attr("checked","checked");											// Reset radio button
 }
 
-
 SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERVIEW
 {
 	var str;
 	var options=this.options;
-	var w=options.width/4;																// Width of frame
-	var h=w*options.height/options.width;												// Height based on aspect
+	var s=this.posterScale;																// Scale
+	var w=$("#containerDiv").width()/4;													// Width of frame
+	var h=$("#containerDiv").height()/4;												// Height of frame
+	var h=w*h/w;																		// Height based on aspect
 	if (($("#posterOverDiv").length == 0) && (options.overview == "true"))  {			// If not initted yet and showing
 		var css = { position:"absolute",												// Frame factors
-					left:options.width-w+"px",
+					left:w*4-w+"px",
 					width:w+"px",
 					height:h+"px",
-					top:options.height-h+"px",
+					top:h*4-h+"px",
 					border:"1px solid",
 					"background-color":"#"+options.backCol
 					};
@@ -163,10 +167,10 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 									shivaLib.PositionPoster();							// Redraw
 									}
 								}); 
-	var x=options.left=$("#posterDiv").css("left").replace(/px/,"");					// Get x pos
-	x=-x/options.width*w/this.posterScale;												// Scale to fit
-	var y=options.top=$("#posterDiv").css("top").replace(/px/,"");						// Get y pos
-	y=-y/options.height*h/this.posterScale;												// Scale to fit
+	var x=$("#posterDiv").css("left").replace(/px/,"");									// Get x pos
+	x=-x/w/4*w/this.posterScale;														// Scale to fit
+	var y=$("#posterDiv").css("top").replace(/px/,"");									// Get y pos
+	y=-y/h/4*h/this.posterScale;														// Scale to fit
 	$("#posterOverBox").css({"left":x+"px","top":y+"px"});								// Position control box		
 }
 

@@ -86,7 +86,8 @@ SHIVA_Show.prototype.GoToPosterPane=function(num) 									// GO TO PANE
 		}
 	else																				// If start
 		this.options.pos="1000|500|500";												// Centered full screen
-	this.DrawPoster();																	// Redraw
+	v=this.options.pos.split("|");														// Split put
+	this.PositionPoster(v[0],v[1],v[2]);												// Redraw
 	$("#shcr"+num).attr("checked","checked");											// Reset radio button
 }
 

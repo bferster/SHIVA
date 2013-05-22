@@ -687,8 +687,13 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 SHIVA_Show.prototype.ChartActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
 {
 	var v=msg.split("|");												// Split msg into parts
-	if (v[0] == "ShivaAct=resize")  									// RESIZE
+	if (v[0] == "ShivaAct=resize") { 									// RESIZE
+		if (v[1] == "100") {											// If forcing 100%
+			$("#containerDiv").width("100%");							// Set container 100%
+			$("#containerDiv").height("100%");							// Set container 100%
+			}
 		shivaLib.map.draw();											// Redraw chart
+		}
 	else if (v[0] == "ShivaAct=data") {									// DATA
 		var data=google.visualization.arrayToDataTable($.parseJSON(v[1]));	// Convert to table format
 		shivaLib.map.setDataTable(data);								// Set data

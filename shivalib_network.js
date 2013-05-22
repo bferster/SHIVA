@@ -78,8 +78,8 @@ VIZ.prototype.Draw=function(json)
 		}
 	new google.visualization.Query(json.dataSourceUrl).send($.proxy(this.Google2Jit,this));
 	this.config=this.Config[this.chartType]; 
-	$jit.id(this.container).style.height=this.config.height+"px";
-	$jit.id(this.container).style.width=this.config.width+"px";	
+	$("#"+this.container).height(this.config.height);
+	$("#"+this.container).width(this.config.width);
 	$jit.id(this.container).style.backgroundColor=this.config.background.CanvasStyles.fillStyle;
 }
 

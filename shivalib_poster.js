@@ -231,7 +231,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 			}
 		if ((mode == "resize") && (u)) {												// If resizing a filled iframe
 			var win=document.getElementById("posterFrame-"+i).contentWindow;			// Point at iframe	
-			win.postMessage("ShivaAct=resize","*");										// Send message to container
+			win.postMessage("ShivaAct=resize|100","*");									// Send message to container
 			}
 		if (this.posterMode != "Edit")													// If viewing
 			continue;																	// No need for interaction

@@ -135,6 +135,7 @@
 
 	function shivaEventHandler(e)
 	{
+		trace(e)
 		if (e.data.indexOf("GetJSON") == 0) 
 			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
 		else if (e.data.indexOf("GetWebPage") == 0) 
@@ -241,6 +242,21 @@
 	function ShowSample()
 	{
 		var data={
+			"item-1": "name:Pane-1;data:239|245|180;url:375;layerTitle:;scrollbars:false;style:Pie",
+			"item-2": "name:Pane-2;data:148|843|191;url:401;layerTitle:MLK;scrollbars:false;style:",
+			"item-3": "name:Pane-3;data:200|195|825;url:393;layerTitle:Movie;scrollbars:false;style:",
+			"item-4": "name:Pane-4;data:220|594|513;url:394;layerTitle:Video;scrollbars:false;style:",
+			"pos": "5000|195|825",
+			"height": "600",
+			"width": "800",
+			"backCol": "eeeeee",
+			"dataSourceUrl": "http://www.viseyes.org/shiva/map.jpg",
+			"overview": "true",
+			"grid": "false",
+			"controlbox": "true",
+			"ud": "true",
+			"shivaMod": "Wed, 22 May 2013",
+			"shivaGroup": "Poster"
 			}
 		ReEdit(data);
 	}

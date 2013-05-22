@@ -48,7 +48,7 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 	if (typeof(DrawPosterGrid) == "function")											// If not in embedded
 		DrawPosterGrid();																// Draw grid if enabled
 	this.DrawPosterOverview();															// Draw overview, if enabled
-	this.DrawPosterPanes(-1,"resize");													// Resize panes
+	this.DrawPosterPanes(-1,"drag");													// Resize panes
 	this.SendReadyMessage(true);														// Send ready message
 }
 
@@ -86,9 +86,12 @@ SHIVA_Show.prototype.GoToPosterPane=function(num) 									// GO TO PANE
 		var v=this.items[num].data.split("|");											// Get pane pos
 		v[0]=Math.round(1000/v[0]*1000);												// Rescale
 		this.options.pos=v[0]+"|"+v[1]+"|"+v[2];										// Set pos
+		$("#posterOverDiv").hide();
 		}
-	else																				// If start
+	else{																				// If start
+		$("#posterOverDiv").show();
 		this.options.pos="1000|500|500";												// Centered full screen
+		}
 	v=this.options.pos.split("|");														// Split put
 	this.PositionPoster(v[0],v[1],v[2]);												// Redraw
 	$("#shcr"+num).attr("checked","checked");											// Reset radio button

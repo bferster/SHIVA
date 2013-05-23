@@ -31,7 +31,11 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 								var h=$("#posterDiv").height();							// Get image height
 								var s=shivaLib.posterScale;								// Current scale
 								shivaLib.posterX=(-$("#posterDiv").css("left").replace(/px/,"")+(w/s/2))/w; // Get centerX %
+								shivaLib.posterY=(-$("#posterDiv").css("top").replace(/px/,"")+(h/s/2))/h;  // Get centerY %
 								shivaLib.DrawPosterOverview();							// Reflect pos in overview
+								$("#propInput0").val(shivaLib.options.pos=Math.round(shivaLib.posterScale*1000)+"|"+Math.round(shivaLib.posterX*1000)+"|"+Math.round(shivaLib.posterY*1000));  // Set cur pos
+								if (shivaLib.options.chartType == "Zoomable")			// If a zoomable
+								  	shivaLib.SendShivaMessage("ShivaImage=move|"+shivaLib.options.pos); // Send message
 								}});	 
 	
 	var v=options.pos.split("|");														// Get start pos
@@ -45,8 +49,6 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 		this.DrawPosterPanes(-1,"draw");												// Draw panes
 		this.DrawLayerControlBox(this.items,(options.controlbox == "true"));			// Draw control box?
 		}
-	if (typeof(DrawPosterGrid) == "function")											// If not in embedded
-		DrawPosterGrid();																// Draw grid if enabled
 	this.DrawPosterOverview();															// Draw overview, if enabled
 	this.DrawPosterPanes(-1,"drag");													// Resize panes
 	this.SendReadyMessage(true);														// Send ready message
@@ -71,8 +73,9 @@ SHIVA_Show.prototype.PositionPoster=function(size, left, top) 						// POSITION 
 	$("#posterDiv").css({"left":-l+"px","top":-t+"px"});								// Position poster	
 	$("#propInput0").val(shivaLib.options.pos=Math.round(shivaLib.posterScale*1000)+"|"+Math.round(shivaLib.posterX*1000)+"|"+Math.round(shivaLib.posterY*1000));  // Set cur pos
 	this.DrawPosterPanes(-1,"resize");													// Resize panes
+	if (typeof(DrawPosterGrid) == "function")											// If not in embedded
+		DrawPosterGrid();																// Draw grid if enabled
 
-	var options=this.options;
 	var l=$("#"+shivaLib.container).position().left;									// Left boundary
 	var r=l-0+(w/s-w);																	// Right boundary
 	var t=$("#"+shivaLib.container).position().top;										// Top boundary
@@ -149,6 +152,8 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 								shivaLib.posterY=(y+(ph/s/2))/ph;  						// Get center Y%
 								$("#posterDiv").css({"left":-x+"px","top":-y+"px"});	// Position poster	
 								$("#propInput0").val(shivaLib.options.pos=Math.round(shivaLib.posterScale*1000)+"|"+Math.round(shivaLib.posterX*1000)+"|"+Math.round(shivaLib.posterY*1000));  // Set cur pos
+								if (shivaLib.options.chartType == "Zoomable")		// If a zoomable
+								  	shivaLib.SendShivaMessage("ShivaImage=move|"+shivaLib.options.pos); // Send message
 								}
 							 });		
 			}
@@ -168,6 +173,8 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 									shivaLib.posterY=(y+(ph/s/2))/ph;  					// Get center Y%
 									$("#propInput0").val(shivaLib.options.pos=Math.round(shivaLib.posterScale*1000)+"|"+Math.round(shivaLib.posterX*1000)+"|"+Math.round(shivaLib.posterY*1000));  // Set cur pos
 									shivaLib.PositionPoster();							// Redraw
+									if (shivaLib.options.chartType == "Zoomable")		// If a zoomable
+								  		shivaLib.SendShivaMessage("ShivaImage=move|"+shivaLib.options.pos); // Send message
 									}
 								}); 
 	var x=$("#posterDiv").css("left").replace(/px/,"");									// Get x pos
@@ -192,8 +199,8 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 		x=w*v[1]/1000-(dw/2);															// Set centered left
 		y=h*v[2]/1000-(dh/2);															// Set centered top
 		str="<div id='posterPane"+i+"' style='position:absolute;background:none transparent;";	// Base
-		if (this.items[i].style)														// If a style spec'd
-			str+=this.items[i].style;													// Add it
+		if (this.items[i].style) 														// If a style spec'd
+			str+=this.items[i].style.replace(/\|/g,";");								// Add it
 		str+="'>"
 		u=this.items[i].url;															// Point at url
 		if (isImg=u.match(/[[.]jpg|jpeg|gif|png]/i))									// If an image file
@@ -262,7 +269,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 											v[2]=Math.round(($("#posterPane"+i).position().top+$("#posterPane"+i).height()/2+off)/h*1000);
 											shivaLib.items[i].data=v[0]+"|"+v[1]+"|"+v[2];		// Set new pos
 											$("#itemInput"+i+"-1").val(shivaLib.items[i].data);	// Put in menu									
-												shivaLib.DrawPosterPanes(i,"drag");			// Redraw this pane in overview									
+											shivaLib.DrawPosterPanes(i,"drag");			// Redraw this pane in overview									
 											}
 										});
 		}	

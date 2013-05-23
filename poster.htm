@@ -72,7 +72,7 @@
 		url: 						{	def:'', 			opt:'string',			des:'URL or ID of pane'}, 
 		layerTitle: 				{	def:'', 			opt:'string',			des:'Control box label'}, 
 		scrollbars: 				{	def:'false', 		opt:'true|false',		des:'Show scroll bars?'}, 
-		style: 						{	def:'', 			opt:'string',			des:'CSS styling'}, 
+		style: 						{	def:'border:3px solid white', 	opt:'string',	des:'CSS styling'}, 
 	}
 	
 	var helpText=new Array();
@@ -87,7 +87,7 @@
 	helpText['Background image']="Use the text box to enter the full url of an image file thst completely covers the poster.<br/><br/>Make sure it is the same shape as poster's overall height and width.<br/><br/>The image needs to have enough resolution to handle the degree in which you want to allow zooming in.";
 	helpText['Control box label']="Short label that will appear in the control box. If you do not provide a label, the pane will not appeear in the control box";
 	helpText['Show scroll bars?']="Show controls bars on website and SHIVA viz's the are larger than the space provided for.";
-	helpText['CSS styling']="CSS formatted styling for pane box. i.e. <i>border:1px solid black</i>";
+	helpText['CSS styling']="CSS formatted styling for pane box, with multiple styles separated by |'s. i.e. <i>border:2px solid white|background:black</i>";
 
 	
 ///// INIT  /////////////
@@ -135,7 +135,7 @@
 
 	function shivaEventHandler(e)
 	{
-		trace(e)
+		trace(e.data)
 		if (e.data.indexOf("GetJSON") == 0) 
 			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
 		else if (e.data.indexOf("GetWebPage") == 0) 
@@ -268,17 +268,20 @@
 		var i,inc,str;
 		var w=$("#posterDiv").width();
 		var h=$("#posterDiv").height();
+		if ($("#posterGridDiv").length == 0)
+			$("#posterDiv").append("<div id='posterGridDiv'></div>");	
+		$("#posterGridDiv").empty();
 		var row="position:absolute;left:0px;width:"+w+"px;height:0px;border:1px dashed #333;opacity:.5;";
 		var col="position:absolute;top:0px;height:"+h+"px;width:0px;border :1px dashed #333;opacity:.5;";
 		inc=h/4;
 		for (i=1;i<4;++i) {
 			str="<div style='"+row+"top:"+(inc*i)+"px'></div>"
-			$("#posterDiv").append(str);
+			$("#posterGridDiv").append(str);
 			}
 		inc=w/4;
 		for (i=1;i<4;++i) {
 			str="<div style='"+col+"left:"+(inc*i)+"px'></div>"
-			$("#posterDiv").append(str);
+			$("#posterGridDiv").append(str);
 			}
 	}
 	

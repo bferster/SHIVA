@@ -136,7 +136,7 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
  			mob.curMob++;															// Inc
 			shivaLib.imageMob.start=new Date().getTime();							// Set start
 			shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);			// Set timer ~24fps
- 			}
+			}
  		else{																		// All done
 			if (shivaLib.imageMob.snd)												// If a sound object
 				shivaLib.imageMob.snd.pause();										// Stop playing
@@ -156,15 +156,16 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 	if (($("#"+shivaLib.container+"PlyBut").length == 0) && mob.dur) {				// If no playbut yet, but animated
 		$("#"+shivaLib.container).append("<img id='"+this.container+"PlyBut' src='playbut.gif' style='position:absolute;top:48%;left:47%;padding:2px;padding-left:18px;padding-right:18px' class='propTable' width='18'>");
 		$("#"+shivaLib.container+"PlyBut").click( function(){						// Play button click handler
-			 $(this).hide();														// Hide it 
+			$(this).hide();															// Hide it 
 			if (shivaLib.imageMob.snd) {											// If a sound object
 				shivaLib.imageMob.snd.currentTime=shivaLib.imageMob.audioStart;		// Cue audio
 				shivaLib.imageMob.snd.play();										// Start playing
 				}
-			 clearInterval(shivaLib.imageMob.interval);								// Clear timer
-			 shivaLib.imageMob.start=new Date().getTime();							// Set start
-			 shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);		// Set timer ~24fps
-			 });	
+			clearInterval(shivaLib.imageMob.interval);								// Clear timer
+			shivaLib.imageMob.start=new Date().getTime();							// Set start
+			shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);			// Set timer ~24fps
+		  	shivaLib.SendShivaMessage("ShivaImage=play");							// Playing
+			});	
 		}
  	if (mob.url != $("#"+mob.div).attr('src'))	{									// If not same url
  	 	$("#"+mob.div).attr('src',shivaLib.items[mob.curMob].url);					// Set src
@@ -175,6 +176,7 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 	if (mob.start == 0)																// If first time
 		pct=0;																		// Start at beginning
 	if (pct >= .99) { 																// If done
+	  	shivaLib.SendShivaMessage("ShivaImage=pause");								// Pause
 		clearInterval(shivaLib.imageMob.interval);									// Clear timer
 		mob.start=0;																// Stop recursing for some reason
 		shivaLib.AnimateDiv("next");												// Get next pic

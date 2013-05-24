@@ -97,6 +97,7 @@ SHIVA_Show.prototype.GoToPosterPane=function(num) 									// GO TO PANE
 		}
 	v=this.options.pos.split("|");														// Split put
 	this.PositionPoster(v[0],v[1],v[2]);												// Redraw
+	this.DrawPosterOverview();															// Redraw overview
 	$("#shcr"+num).attr("checked","checked");											// Reset radio button
 }
 
@@ -200,7 +201,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 		y=h*v[2]/1000-(dh/2);															// Set centered top
 		str="<div id='posterPane"+i+"' style='position:absolute;background:none transparent;";	// Base
 		if (this.items[i].style) 														// If a style spec'd
-			str+=this.items[i].style.replace(/\|/g,";");								// Add it
+			str+=this.items[i].style.replace(/\|/g,";").replace(/=/g,":");				// Add it
 		str+="'>"
 		u=this.items[i].url;															// Point at url
 		if (isImg=u.match(/[[.]jpg|jpeg|gif|png]/i))									// If an image file

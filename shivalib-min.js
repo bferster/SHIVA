@@ -1369,7 +1369,7 @@ DrawPosterGrid();var l=$("#"+shivaLib.container).position().left;var r=l-0+(w/s-
 SHIVA_Show.prototype.GoToPosterPane=function(num)
 {if(num<this.items.length){var v=this.items[num].data.split("|");v[0]=Math.round(1000/v[0]*1000);this.options.pos=v[0]+"|"+v[1]+"|"+v[2];$("#posterOverDiv").hide();}
 else{$("#posterOverDiv").show();this.options.pos="1000|500|500";}
-v=this.options.pos.split("|");this.PositionPoster(v[0],v[1],v[2]);$("#shcr"+num).attr("checked","checked");}
+v=this.options.pos.split("|");this.PositionPoster(v[0],v[1],v[2]);this.DrawPosterOverview();$("#shcr"+num).attr("checked","checked");}
 SHIVA_Show.prototype.DrawPosterOverview=function()
 {var str;var options=this.options;var s=this.posterScale;var w=$("#containerDiv").width()/4;var h=$("#containerDiv").height()/4;var h=w*h/w;if(($("#posterOverDiv").length==0)&&(options.overview=="true")){var css={position:"absolute",left:w*4-w+"px",width:w+"px",height:h+"px",top:h*4-h+"px",border:"1px solid","background-color":"#"+options.backCol};str="<div id='posterOverDiv'></div>";$("#"+this.container).append(str);$("#posterOverDiv").css(css);if(options.dataSourceUrl){str="<img src='"+options.dataSourceUrl+"' ";str+="height='"+h+"' ";str+="width='"+w+"' >";$("#posterOverDiv").append(str);}
 if(typeof(DrawPosterOverviewGrid)=="function")
@@ -1379,7 +1379,7 @@ $("#posterOverBox").resizable({containment:"parent",aspectRatio:true,minHeight:1
 shivaLib.SendShivaMessage("ShivaImage=move|"+shivaLib.options.pos);}});var x=$("#posterDiv").css("left").replace(/px/,"");x=-x/w/4*w/this.posterScale;var y=$("#posterDiv").css("top").replace(/px/,"");y=-y/h/4*h/this.posterScale;$("#posterOverBox").css({"left":x+"px","top":y+"px"});}
 SHIVA_Show.prototype.DrawPosterPanes=function(num,mode)
 {var i,v,u,str,dw,dh,x,y,s=0,isImg=true;var scale=this.posterScale;var e=this.items.length;var w=$("#posterDiv").width();var h=$("#posterDiv").height();if(num!=-1)s=num,e=num-0+1;for(i=0;i<e;++i){v=this.items[i].data.split("|");dw=v[0]/1000*w;dh=v[0]/1000*h;x=w*v[1]/1000-(dw/2);y=h*v[2]/1000-(dh/2);str="<div id='posterPane"+i+"' style='position:absolute;background:none transparent;";if(this.items[i].style)
-str+=this.items[i].style.replace(/\|/g,";");str+="'>"
+str+=this.items[i].style.replace(/\|/g,";").replace(/=/g,":");str+="'>"
 u=this.items[i].url;if(isImg=u.match(/[[.]jpg|jpeg|gif|png]/i))
 str+="<img src='"+this.items[i].url+"' width='"+dw+"'>";else if(u){if(!isNaN(u))
 u="http://www.viseyes.org/shiva/go.htm?e="+u;str+="<iframe id='posterFrame-"+i+"' src='"+u+"'";if(this.items[i].scrollbars=="false")

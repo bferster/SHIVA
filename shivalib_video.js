@@ -79,7 +79,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
     	else
      		shivaLib.player.pause();
 		$("#shivaEventDiv").height(Math.max(shivaLib.player.media.clientHeight-40,0));
- 		shivaLib.SendShivaMessage("ShivaVideo=ready");
+ 		shivaLib.SendShivaMessage("ShivaVideo=ready|"+window.name);
    	}
 
   	function drawOverlay()	{
@@ -104,7 +104,6 @@ SHIVA_Show.prototype.VideoActions=function(msg)						// REACT TO SHIVA ACTION ME
 		}
 }
   
-
 SHIVA_Show.prototype.TimecodeToSeconds=function(timecode) 				// CONVERT TIMECODE TO SECONDS
 {
 	var h=0,m=0;

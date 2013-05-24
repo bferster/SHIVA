@@ -680,7 +680,7 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
    			row=o.row;
    		if ((o) && (o.column != undefined))
    			col=o.column;
-  		_this.SendShivaMessage("ShivaChart=data"+row+"|"+col); 
+  		_this.SendShivaMessage("ShivaChart=data|"+window.name+"|"+row+"|"+col); 
    		});
 }
 

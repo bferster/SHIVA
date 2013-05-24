@@ -47,14 +47,14 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 			v[1]=v[0],v[0]=0;
     	this.player.cue(Number(v[0]*60)+Number(v[1]),function() { 
      		this.pause()
-			shivaLib.SendShivaMessage("ShivaVideo=done");
+			shivaLib.SendShivaMessage("ShivaVideo=done|"+window.name);
     		});
     	}
 	this.player.on("timeupdate",drawOverlay);
 	this.player.on("loadeddata",onVidLoaded);
-	this.player.on("ended",function(){ shivaLib.SendShivaMessage("ShivaVideo=done")});
-	this.player.on("playing",function(){ shivaLib.SendShivaMessage("ShivaVideo=play")});
-	this.player.on("pause",function(){ shivaLib.SendShivaMessage("ShivaVideo=pause")});
+	this.player.on("ended",function(){ shivaLib.SendShivaMessage("ShivaVideo=done|"+window.name)});
+	this.player.on("playing",function(){ shivaLib.SendShivaMessage("ShivaVideo=play|"+window.name)});
+	this.player.on("pause",function(){ shivaLib.SendShivaMessage("ShivaVideo=pause|"+window.name)});
 
 	if (this.ev) 
 		t=this.ev.events;

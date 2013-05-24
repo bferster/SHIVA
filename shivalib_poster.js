@@ -21,10 +21,12 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 			this.items.push(o);
 			}
 		}
+
 	var str="<div id='posterDiv' style='position:absolute;border:1px solid;";			// Make poster div
 	str+="background-color"+options.backCol+"'></div>";									// Back color
 	$(con).html(str);																	// Add div
-	$(con).css({border:"1px solid",overflow:"hidden",margin:"0px",padding:"0px"});		// Put border and hode overflow on container
+
+ 	$(con).css({border:"1px solid",overflow:"hidden",margin:"0px",padding:"0px"});		// Put border and hode overflow on container
 	$(con).width(options.width);	$(con).height(options.height);						// Set size
 	$("#posterDiv").draggable({ drag:function(event,ui) {								// Make it draggable
 								var w=$("#posterDiv").width();							// Get image width
@@ -35,11 +37,20 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 								shivaLib.DrawPosterOverview();							// Reflect pos in overview
 								$("#propInput0").val(shivaLib.options.pos=Math.round(shivaLib.posterScale*1000)+"|"+Math.round(shivaLib.posterX*1000)+"|"+Math.round(shivaLib.posterY*1000));  // Set cur pos
 								if (shivaLib.options.chartType == "Zoomable")			// If a zoomable
-								  	shivaLib.SendShivaMessage("ShivaImage=move|"+shivaLib.options.pos); // Send message
+								  	shivaLib.SendShivaMessage("ShivaImage=move|"+window.name+"|"+shivaLib.options.pos); // Send message
 								}});	 
 	
 	var v=options.pos.split("|");														// Get start pos
 	this.PositionPoster(v[0],v[1],v[2]);												// Set position
+/*	
+	if (!this.g)																		// If no graphics lib
+		this.g=new SHIVA_Graphics();													// Allocate it
+	this.g.CreateCanvas("posterCanvas","posterDiv");									// Create canvas
+	$("#posterCanvas").css({ position:"absolute" });
+	$("#posterCanvas").attr("width",$("#posterDiv").css("width")).attr("height",$("#posterDiv").css("height"));						// Scale canvas to fit poster
+	var ctx=$("#posterCanvas")[0].getContext('2d');										// Get context
+	this.g.DrawBar(ctx, 0, 1, 0, 0, 100, 200)
+*/	
 	if (options.dataSourceUrl) {														// If a back img spec'd
 		str="<img src='"+options.dataSourceUrl+"' ";									// Name
 		str+="height='100%' width='100%'>";												// Size
@@ -81,6 +92,7 @@ SHIVA_Show.prototype.PositionPoster=function(size, left, top) 						// POSITION 
 	var t=$("#"+shivaLib.container).position().top;										// Top boundary
 	var b=t-0+(h/s-h);																	// Bottom boundary
 	$("#posterDiv").draggable("option",{ containment: [r,b,l,t] } );					// Reset containment
+//	$("#posterCanvas").attr("width",1600+"px").attr("height",1200+"px");						// Scale canvas to fit poster
 }
 
 SHIVA_Show.prototype.GoToPosterPane=function(num) 									// GO TO PANE
@@ -154,7 +166,7 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 								$("#posterDiv").css({"left":-x+"px","top":-y+"px"});	// Position poster	
 								$("#propInput0").val(shivaLib.options.pos=Math.round(shivaLib.posterScale*1000)+"|"+Math.round(shivaLib.posterX*1000)+"|"+Math.round(shivaLib.posterY*1000));  // Set cur pos
 								if (shivaLib.options.chartType == "Zoomable")		// If a zoomable
-								  	shivaLib.SendShivaMessage("ShivaImage=move|"+shivaLib.options.pos); // Send message
+								  	shivaLib.SendShivaMessage("ShivaImage=move|"+window.name+"|"+shivaLib.options.pos); // Send message
 								}
 							 });		
 			}
@@ -175,7 +187,7 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 									$("#propInput0").val(shivaLib.options.pos=Math.round(shivaLib.posterScale*1000)+"|"+Math.round(shivaLib.posterX*1000)+"|"+Math.round(shivaLib.posterY*1000));  // Set cur pos
 									shivaLib.PositionPoster();							// Redraw
 									if (shivaLib.options.chartType == "Zoomable")		// If a zoomable
-								  		shivaLib.SendShivaMessage("ShivaImage=move|"+shivaLib.options.pos); // Send message
+								  		shivaLib.SendShivaMessage("ShivaImage=move|"+window.name+"|"+shivaLib.options.pos); // Send message
 									}
 								}); 
 	var x=$("#posterDiv").css("left").replace(/px/,"");									// Get x pos

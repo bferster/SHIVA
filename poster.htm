@@ -152,7 +152,7 @@
 	{	
 		if (shivaLib.drupalMan)
 			window.parent.postMessage("DataChanged=true","*");
-		if (shivaLib.posterMode == "Connect")
+		if (shivaLib.posterMode == "Connect") 
 			DrawConnections();
 		else
 			shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
@@ -315,7 +315,11 @@ var g=new SHIVA_Graphics();
 
 function DrawConnections()												// DRAW PROXIES/LINES
 {
-	shivaLib.DrawPoster();													// Redraw background
+		var win=document.getElementById("posterFrame-0").contentWindow;			// Point at iframe	
+		win.postMessage("ShivaAct=id|posterFrame-0","*");						// Send message to container
+	
+
+//	shivaLib.DrawPoster();													// Redraw background
 //	g.CreateCanvas("links","containerDiv");									// Make HTML5 graphical canvas
 //	DrawLinks();															// Draw link lines first
 //	DrawItems();															// Draw items

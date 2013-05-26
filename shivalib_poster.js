@@ -23,9 +23,8 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 		}
 
 	var str="<div id='posterDiv' style='position:absolute;border:1px solid;";			// Make poster div
-	str+="background-color"+options.backCol+"'></div>";									// Back color
+	str+="background-color:#"+options.backCol+"'></div>";								// Back color
 	$(con).html(str);																	// Add div
-
  	$(con).css({border:"1px solid",overflow:"hidden",margin:"0px",padding:"0px"});		// Put border and hode overflow on container
 	$(con).width(options.width);	$(con).height(options.height);						// Set size
 	$("#posterDiv").draggable({ drag:function(event,ui) {								// Make it draggable
@@ -243,7 +242,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 		$("#posterPane"+i).css({"left":x+"px","top":y+"px"});							// Set pos			
 		$("#posterPaneLab"+i).css("top",$("#posterPane"+i).height()+3+"px");			// Set label pos			
 		if (this.options.overview == "true")  {											// If showing overview
-			str="<div id='posterOverPane"+i+"' style='position:absolute;opacity:.4;border:1px solid;pointer-events:none;background-color:#666'/>";	// Base
+			str="<div id='posterOverPane"+i+"' style='position:absolute;opacity:.4;border:1px solid white;pointer-events:none;background-color:#666'/>";	// Base
 			if (num == -1) 																// If doing them all
 				$("#posterOverDiv").append(str);										// Add div to overview
 			x=$("#posterPane"+i).position().left;										// Get left

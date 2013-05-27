@@ -149,7 +149,6 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 					"z-index":3,
 					"background-color":"rgba(220,220,220,0.4)"
 					};
-		this.posterScale
 		str="<div id='posterOverBox'></div>";											// Control box div
 		$("#posterOverDiv").append(str);												// Add control box to overview frame
 		$("#posterOverBox").css(css);													// Set overview frame

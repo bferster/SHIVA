@@ -187,17 +187,19 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 			shivaLib.msgAction[i].Do(i);									// Run callback
 	if (e.data.indexOf("ShivaAct") != -1) {									// If an action
 		if (shivaLib.options.shivaGroup == "Map")							// If a map action
-			shivaLib.MapActions(e.data);									// Route to map actions
+			shivaLib.MapActions(e.data);									// Route
 		else if (shivaLib.options.shivaGroup == "Earth")					// If a earth action
-			shivaLib.EarthActions(e.data);									// Route to earth actions
+			shivaLib.EarthActions(e.data);									// Route 
 		else if (shivaLib.options.shivaGroup == "Video")					// If a video action
-			shivaLib.VideoActions(e.data);									// Route to earth actions
+			shivaLib.VideoActions(e.data);									// Route 
 		else if (shivaLib.options.shivaGroup == "Time")						// If a timeline action
-			shivaLib.TimeActions(e.data);									// Route to earth actions
+			shivaLib.TimeActions(e.data);									// Route 
 		else if (shivaLib.options.shivaGroup == "Visualization")			// If a chart action
 			shivaLib.ChartActions(e.data);									// Route to chart actions
 		else if (shivaLib.options.shivaGroup == "Image")					// If an image action
-			shivaLib.ImageActions(e.data);									// Route to earth actions
+			shivaLib.ImageActions(e.data);									// Route
+		else if (shivaLib.options.shivaGroup == "Network")					// If an network action
+			shivaLib.NetworkActions(e.data);								// Route
 		}
 }
 
@@ -630,11 +632,6 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
    		}
 	if (options['width'])		$(con).width(options['width']);
 	if (options['height'])		$(con).height(options['height']);
-//	var innerChartDiv=this.container+"indiv";
-//	$(con).remove("#innerChartDiv");
-//	$(con).append("<div id="+innerChartDiv+"/>")
-//	$("#"+innerChartDiv).width($(con).width());
-//	$("#"+innerChartDiv).height($(con).height());
 	ops.containerId=this.container;
 	if (!ops.colors)	delete ops.colors;
  	if (ops.dataSourceUrl) {	
@@ -691,6 +688,8 @@ SHIVA_Show.prototype.ChartActions=function(msg)						// REACT TO SHIVA ACTION ME
 		if (v[1] == "100") {											// If forcing 100%
 			$("#containerDiv").width("100%");							// Set container 100%
 			$("#containerDiv").height("100%");							// Set container 100%
+			shivaLib.map.setOption("width","100%");						// Set chart wid 100%
+			shivaLib.map.setOption("height","100%");					// Set chart hgt 100%
 			}
 		shivaLib.map.draw();											// Redraw chart
 		}

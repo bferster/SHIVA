@@ -131,6 +131,8 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 {
 	var o,v;
 	var mob=shivaLib.imageMob;														// Point at mob
+ 	if (!mob)																		// Nothing there
+ 		return;																		// Q!uit
  	if (mode == "next") {															// Advance to next pic
  		if (mob.curMob < shivaLib.items.length-1)	{								// If not last pic
  			mob.curMob++;															// Inc
@@ -205,14 +207,14 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 	$("#"+mob.div).css(o);															// Set css 
 }
 
- 
-SHIVA_Show.prototype.ImageActions=function(msg)								// REACT TO SHIVA ACTION MESSAGE
+SHIVA_Show.prototype.ImageActions=function(msg)									// REACT TO SHIVA ACTION MESSAGE
 {
-	var v=msg.split("|");														// Split msg into parts
-	if (v[0] == "ShivaAct=resize") {  											// RESIZE
-		shivaLib.AnimateDiv("start");											// Draw image at start pos
+	var v=msg.split("|");															// Split msg into parts
+	if (v[0] == "ShivaAct=resize") {  												// RESIZE
+		if (v[1] == "100") 															// If forcing 100%
+			shivaLib.options.width=shivaLib.options.height="100%";					// Set values
+		shivaLib.DrawImage();														// Redraw image
 	}
-
 }
- 
+
                       

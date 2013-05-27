@@ -164,7 +164,7 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 								shivaLib.posterY=(y+(ph/s/2))/ph;  						// Get center Y%
 								$("#posterDiv").css({"left":-x+"px","top":-y+"px"});	// Position poster	
 								$("#propInput0").val(shivaLib.options.pos=Math.round(shivaLib.posterScale*1000)+"|"+Math.round(shivaLib.posterX*1000)+"|"+Math.round(shivaLib.posterY*1000));  // Set cur pos
-								if (shivaLib.options.chartType == "Zoomable")		// If a zoomable
+								if (shivaLib.options.chartType == "Zoomable")			// If a zoomable
 								  	shivaLib.SendShivaMessage("ShivaImage=move|"+window.name+"|"+shivaLib.options.pos); // Send message
 								}
 							 });		
@@ -265,7 +265,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 											v[0]=Math.floor(Math.min(ui.size.width/$("#containerDiv").width()/shivaLib.posterScale,1)*1000); // Get new scale, cap at 100%					
 											shivaLib.items[i].data=v[0]+"|"+v[1]+"|"+v[2];		// Set new size
 											$("#itemInput"+i+"-1").val(shivaLib.items[i].data);	// Put in menu
-											shivaLib.DrawPosterPanes(i,"draw");			// Redraw this pane, and resize 								
+											shivaLib.DrawPosterPanes(i,"resize");			// Redraw this pane, and resize 								
 											}
 										});
 		$("#posterPane"+i).draggable({  containment:"parent",							// Draggable

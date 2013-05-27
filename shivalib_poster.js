@@ -10,7 +10,7 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 	var con="#"+container;
  	var _this=this;
 	this.items=new Array();
-    for (var key in options) {
+   	for (var key in options) {
 		if (key.indexOf("item-") != -1) {
 			var o=new Object;
 			var v=options[key].split(';');
@@ -21,7 +21,8 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 			this.items.push(o);
 			}
 		}
-
+	if (!this.posterScale)																// If first time
+   		this.posterScale=2;																// Init
 	var str="<div id='posterDiv' style='position:absolute;border:1px solid;";			// Make poster div
 	str+="background-color:#"+options.backCol+"'></div>";								// Back color
 	$(con).html(str);																	// Add div
@@ -39,8 +40,6 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 								  	shivaLib.SendShivaMessage("ShivaImage=move|"+window.name+"|"+shivaLib.options.pos); // Send message
 								}});	 
 	
-	var v=options.pos.split("|");														// Get start pos
-	this.PositionPoster(v[0],v[1],v[2]);												// Set position
 /*	
 	if (!this.g)																		// If no graphics lib
 		this.g=new SHIVA_Graphics();													// Allocate it
@@ -55,12 +54,14 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 		str+="height='100%' width='100%'>";												// Size
 		$("#posterDiv").append(str);													// Add image to poster
 		}	
+	this.DrawPosterOverview();															// Draw overview, if enabled
 	if (this.posterMode != "Connect") {													// If editing
 		this.DrawPosterPanes(-1,"draw");												// Draw panes
 		this.DrawLayerControlBox(this.items,(options.controlbox == "true"));			// Draw control box?
 		}
+	var v=options.pos.split("|");														// Get start pos
+	this.PositionPoster(v[0],v[1],v[2]);												// Set position
 	this.DrawPosterOverview();															// Draw overview, if enabled
-	this.DrawPosterPanes(-1,"drag");													// Resize panes
 	this.SendReadyMessage(true);														// Send ready message
 }
 
@@ -148,6 +149,7 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 					"z-index":3,
 					"background-color":"rgba(220,220,220,0.4)"
 					};
+		this.posterScale
 		str="<div id='posterOverBox'></div>";											// Control box div
 		$("#posterOverDiv").append(str);												// Add control box to overview frame
 		$("#posterOverBox").css(css);													// Set overview frame
@@ -225,7 +227,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 				str+="scrolling='no' ";													// Inhibit it
 			str+="frameborder='0' allowtransparency='true'></iframe>";					// Finish iframe				
 			}
-		if ((num == -1) || (mode == "draw")) {											// If doing them all, or redrawing one
+		if (mode == "draw") {															// If doing them all, or redrawing one
 			$("#posterPane"+i).remove();												// Remove old one, if there
 			$("#posterDiv").append(str+"</div>");										// Add div to poster
 			if (this.posterMode == "Edit") {											// If editing
@@ -243,7 +245,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 		$("#posterPaneLab"+i).css("top",$("#posterPane"+i).height()+3+"px");			// Set label pos			
 		if (this.options.overview == "true")  {											// If showing overview
 			str="<div id='posterOverPane"+i+"' style='position:absolute;opacity:.4;border:1px solid white;pointer-events:none;background-color:#666'/>";	// Base
-			if (num == -1) 																// If doing them all
+			if (mode == "draw") 														// If adding to dom
 				$("#posterOverDiv").append(str);										// Add div to overview
 			x=$("#posterPane"+i).position().left;										// Get left
 			y=$("#posterPane"+i).position().top;										// Get top

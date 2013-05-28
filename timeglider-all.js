@@ -10044,7 +10044,7 @@ tg.validateOptions = function (widget_settings) {
         // binds opening event modals to messaging ndg added for SHIVA
         $('.timeglider-timeline-event').live('click', function() {
            var teid = ($(this).attr('id').split('-')).pop();
-           shivaLib.SendShivaMessage("ShivaTime=event|"+teid + "|" + window.name);
+           shivaLib.SendShivaMessage("ShivaTime=event|"+ window.name + "|" + teid);
          });
       } else {
         alert("Rats. There's a problem with your widget settings:" + optionsCheck);

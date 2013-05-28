@@ -192,7 +192,7 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 			shivaLib.EarthActions(e.data);									// Route 
 		else if (shivaLib.options.shivaGroup == "Video")					// If a video action
 			shivaLib.VideoActions(e.data);									// Route 
-		else if (shivaLib.options.shivaGroup == "Time")						// If a timeline action
+		else if (shivaLib.options.shivaGroup == "Timeglider")				// If a timeline action
 			shivaLib.TimeActions(e.data);									// Route 
 		else if (shivaLib.options.shivaGroup == "Visualization")			// If a chart action
 			shivaLib.ChartActions(e.data);									// Route to chart actions

@@ -55,7 +55,7 @@ if(e.data.indexOf(shivaLib.msgAction[i].id)!=-1)
 shivaLib.msgAction[i].Do(i);if(e.data.indexOf("ShivaAct")!=-1){if(shivaLib.options.shivaGroup=="Map")
 shivaLib.MapActions(e.data);else if(shivaLib.options.shivaGroup=="Earth")
 shivaLib.EarthActions(e.data);else if(shivaLib.options.shivaGroup=="Video")
-shivaLib.VideoActions(e.data);else if(shivaLib.options.shivaGroup=="Time")
+shivaLib.VideoActions(e.data);else if(shivaLib.options.shivaGroup=="Timeglider")
 shivaLib.TimeActions(e.data);else if(shivaLib.options.shivaGroup=="Visualization")
 shivaLib.ChartActions(e.data);else if(shivaLib.options.shivaGroup=="Image")
 shivaLib.ImageActions(e.data);else if(shivaLib.options.shivaGroup=="Network")
@@ -1226,6 +1226,9 @@ else
 o[key]=data.getValue(i,j);}
 eventData.events.push(o);}
 eventSource.loadJSON(eventData,'');shivaLib.SendReadyMessage(true);}}}
+SHIVA_Show.prototype.TimeActions=function(msg)
+{var v=msg.split("|");if(v[0]=="ShivaAct=resize"){if(v[1]=="100"){$("#"+shivaLib.container).width("100%");$("#"+shivaLib.container).height("100%");}
+$("#"+shivaLib.container).timeline('resize');}}
 SHIVA_Show.prototype.ColorPicker=function(mode,attr){$("#shiva_dialogDiv").remove();var self=this;var sel="";console.log(isNaN(attr));if(isNaN(attr))
 sel="#"+attr.replace(/___/g,"");else if(attr<0)
 sel="#colordiv";else if(attr>100)

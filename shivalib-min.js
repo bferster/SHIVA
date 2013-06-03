@@ -202,7 +202,7 @@ this.contentWindow.document.body.innerHTML=content;});$("#CL-"+id).bind("load",f
 SHIVA_Show.prototype.ShowLightBox=function(width,top,title,content)
 {var str;str="<div id='shivaLightBoxDiv' style='position:fixed;width:100%;height:100%;";str+="background:url(overlay.png) repeat;top:0px;left:0px';</div>";$("body").append(str);str="<div id='shivaLightBoxIntDiv' style='position:absolute;padding:10px;width:";if(width!="auto")
 str+=Math.abs(width)+"px";else
-width=400;var x=($("#shivaLightBoxDiv").width()-width)/2;if(width<0){x=$("#"+this.container).css("left").replace(/px/,"");x=x-0+$("#"+this.container).width()-0+20;x=0;}
+width=400;var x=($("#shivaLightBoxDiv").width()-width)/2;if(width<0){x=$("#"+this.container).css("left").replace(/px/,"");x=x-0+$("#"+this.container).width()/2+(width/2);}
 str+=";border-radius:12px;moz-border-radius:12px;z-index:2003;"
 str+="border:1px solid; left:"+x+"px;top:"+top+"%;background-color:#f8f8f8'>";str+="<img src='shivalogo32.png' style='vertical-align:-30%'/>&nbsp;&nbsp;";str+="<span style='font-size:large;text-shadow:1px 1px #ccc'><b>"+title+"</b></span>";str+="<div id='shivaLightContentDiv'>"+content+"</div>";$("#shivaLightBoxDiv").append(str);$("#shivaLightBoxDiv").css("z-index",2500);}
 SHIVA_Show.prototype.Prompt=function(title,message,def,id)
@@ -240,28 +240,33 @@ SHIVA_Show.prototype.EasyFile=function(_data,callback,type)
 {var i,email="",w=350;var v=document.cookie.split(';');for(var i=0;i<v.length;i++)
 if(v[i].indexOf("ez-email=")!=-1)
 email=v[i].substr(9);var str="<br/>Use <b>eStore</b> to save and load projects under your email address. When saving, type a title when asked and when loading, choose a project from a list of your saved projects.<br/>"
-str+="<br/><table id='ez-maintbl' cellspacing=0 cellpadding=0 style='font-size:small'>";str+="<tr><td width='25%'>Email</td><td><input type='text' id='email' size='30' value='"+email+"'/></td></tr>";str+="</table><div align='right' style='font-size:x-small'><br/>";if(type!="all")
+str+="<br/><table id='ez-maintbl' cellspacing=0 cellpadding=0 style='font-size:small'>";str+="<tr><td width='25%'>Email</td><td><input type='text' id='email' size='40' value='"+email+"'/></td></tr>";str+="</table><div align='right' style='font-size:x-small'><br/>";if(type!="all")
 str+=" <button id='saveBut'>Save</button>";str+=" <button id='loadBut'>Load</button>";if(type!="all")
-str+=" <button id='linkBut'>Link</button>";str+=" <button id='cancelBut'>Cancel</button></div>";if((type=="KML")||(this.group=="Earth"))w=-276;this.ShowLightBox(w,20,"SHIVA eStore",str)
-$("#cancelBut").button().click(function(){$("#shivaLightBoxDiv").remove();});$("#saveBut").button().click(function(){var _email=$("#email").val();var _title=$("#ez-title").val();var _type=type;if(!_email){alert("Please type your email");return;}
+str+=" <button id='linkBut'>Link</button>";str+=" <button id='cancelBut'>Cancel</button></div>";if((type=="KML")||(this.group=="Earth")){w=-400;$("#containerDiv").height($("#containerDiv").height()/100);}
+this.ShowLightBox(w,20,"SHIVA eStore",str)
+$("#cancelBut").button().click(function(){$("#shivaLightBoxDiv").remove();if($("#containerDiv").height()<10)
+$("#containerDiv").height($("#containerDiv").height()*100);});$("#saveBut").button().click(function(){var _email=$("#email").val();var _title=$("#ez-title").val();var _type=type;if(!_email){alert("Please type your email");return;}
 if(((_email.toLowerCase()=="samples")&&(_email!="SaMpLeS"))||((_email.toLowerCase()=="canvas")&&(_email!="CaNvAs"))){alert("Sorry, but you can't save using this name");return;}
-if(!$("#ez-title").length){str="<tr><td>Title</td><td><input type='text' size='30' id='ez-title'/></td></tr>";$(str).appendTo("#ez-maintbl tbody");$("#ez-title").focus();return;}
+if(!$("#ez-title").length){str="<tr><td>Title</td><td><input type='text' size='40' id='ez-title'/></td></tr>";$(str).appendTo("#ez-maintbl tbody");$("#ez-title").focus();return;}
 if(!_title){alert("Please type title to save under");return;}
-document.cookie="ez-email="+_email;$("#shivaLightBoxDiv").remove();str="\",\n\t\"shivaTitle\": \""+_title+"\"\n}";if((type!="Canvas")&&(type!="KML"))
+document.cookie="ez-email="+_email;$("#shivaLightBoxDiv").remove();if($("#containerDiv").height()<10)
+$("#containerDiv").height($("#containerDiv").height()*100);str="\",\n\t\"shivaTitle\": \""+_title+"\"\n}";if((type!="Canvas")&&(type!="KML"))
 _data=_data.substr(0,_data.lastIndexOf("\""))+str;$.post("http://www.primaryaccess.org/REST/addeasyfile.php",{email:_email,type:_type,title:_title,data:_data.replace(/'/g,"\\'")});});$("#loadBut").button().click(function(){email=$("#email").val();if(!email){alert("Please type your email");return;}
 document.cookie="ez-email="+email;var dat={email:email};if(type!="all")
 dat["type"]=type;str="http://www.primaryaccess.org/REST/listeasyfile.php";shivaLib.ezcb=callback;shivaLib.ezmode="load";$.ajax({url:str,data:dat,dataType:'jsonp'});});$("#linkBut").button().click(function(){email=$("#email").val();if(!email){alert("Please type your email");return;}
 document.cookie="ez-email="+email;var dat={email:email};if(type!="all")
 dat["type"]=type;str="http://www.primaryaccess.org/REST/listeasyfile.php";shivaLib.ezcb="";shivaLib.ezmode="link";$.ajax({url:str,data:dat,dataType:'jsonp'});});}
 SHIVA_Show.prototype.ShowEasyFile=function(files,callback,mode)
-{var i;var str="<br/><div style='overflow:auto;overflow-x:hidden;height:200px;font-size:x-small;padding:8px;border:1px solid #cccccc'>";str+="<table id='ezFilesTable' cellspacing=0 cellpadding=4><tr><td></td></tr></table></div>";$("#shivaLightContentDiv").html(str);str="<div align='right' style='font-size:x-small'><br>Show only with this in title: <input type='text' size='10' id='ezFileFilter'/>";str+=" <button id='cancelBut'>Cancel</button></div>";$("#shivaLightContentDiv").append(str);$("#cancelBut").button().click(function(){$("#shivaLightBoxDiv").remove();});this.MakeEasyFileList(files,"",callback,mode);$("#ezFileFilter").keyup($.proxy(function(){var filter=$("#ezFileFilter").val();$("#ezFilesTable tbody").empty();this.MakeEasyFileList(files,filter,callback,mode);},this));}
+{var i;var str="<br/><div style='overflow:auto;overflow-x:hidden;height:200px;font-size:x-small;padding:8px;border:1px solid #cccccc'>";str+="<table id='ezFilesTable' cellspacing=0 cellpadding=4><tr><td></td></tr></table></div>";$("#shivaLightContentDiv").html(str);str="<div align='right' style='font-size:x-small'><br>Show only with this in title: <input type='text' size='10' id='ezFileFilter'/>";str+=" <button id='cancelBut'>Cancel</button></div>";$("#shivaLightContentDiv").append(str);$("#cancelBut").button().click(function(){$("#shivaLightBoxDiv").remove();if($("#containerDiv").height()<10)
+$("#containerDiv").height($("#containerDiv").height()*100);});this.MakeEasyFileList(files,"",callback,mode);$("#ezFileFilter").keyup($.proxy(function(){var filter=$("#ezFileFilter").val();$("#ezFilesTable tbody").empty();this.MakeEasyFileList(files,filter,callback,mode);},this));}
 SHIVA_Show.prototype.MakeEasyFileList=function(files,filter,callback,mode)
 {var i,str,type;files.sort(function(a,b){var A=new Date(a.created.substr(0,5)+"/2012 "+a.created.substr(6));var B=new Date(b.created.substr(0,5)+"/2012 "+b.created.substr(6));return B-A;});for(i=0;i<files.length;++i){if((filter)&&(files[i].title.toLowerCase().indexOf(filter.toLowerCase())==-1))
 continue;str="<tr id='ezfile-"+files[i].id+"'><td>"+files[i].created.replace(/ /,"&nbsp")+"</td>";str+="<td width='100%'><img  src='adddot.gif'  height='11'> &nbsp;";str+=files[i].id+" "+files[i].title+"</td></tr>";$(str).appendTo("#ezFilesTable tbody");$("#ezFilesTable tr:odd").addClass("odd");}
 for(i=0;i<files.length;++i){type=files[i].type;$("#ezfile-"+files[i].id).click(function(){if((mode=="link")&&(type=="KML"))
 alert("http://www.primaryaccess.org/REST/getkml.php?id="+this.id.substr(7));if((mode=="link")&&(type!="KML"))
 alert("www.viseyes.org/shiva/go.htm?e="+this.id.substr(7));else{var dat={id:this.id.substr(7)};str="http://www.primaryaccess.org/REST/geteasyfile.php";shivaLib.ezcb=callback;shivaLib.ezmode=this.id.substr(7);$.ajax({url:str,data:dat,dataType:'jsonp'});}
-$("#shivaLightBoxDiv").remove();});}}
+$("#shivaLightBoxDiv").remove();if($("#containerDiv").height()<10)
+$("#containerDiv").height($("#containerDiv").height()*100);});}}
 function easyFileListWrapper(data)
 {shivaLib.ShowEasyFile(data,shivaLib.ezcb,shivaLib.ezmode);}
 function easyFileDataWrapper(data)

@@ -111,7 +111,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
             "show_footer":Boolean(stimeline.options.show_footer),
             "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
             "constrain_to_data":false,
-            "image_lane_height":60,
+            "image_lane_height": stimeline.options.imglane_height * 1,
             "loaded":function (args, data) {
               $(stimeline.con).timeline('setOptions', stimeline.options, true);
               $(stimeline.con).timeline('registerEvents', stimeline.events);
@@ -139,7 +139,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
             "show_footer":Boolean(stimeline.options.show_footer),
             "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
             "constrain_to_data":false,
-            "image_lane_height":60
+            "image_lane_height": stimeline.options.imglane_height * 1,
           },
           display : true
         };

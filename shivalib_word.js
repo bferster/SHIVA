@@ -302,7 +302,7 @@ SHIVA_Show.prototype.WordActions = function(msg) {
                 this.wcloud.options.width =  cmd[1];
                 this.wcloud.options.height = cmd[1];
             }
-            this.wcloud.buildLayout(cloud.d);
+            this.wcloud.buildLayout(wcloud.d);
         break;
     }
 }

@@ -41,6 +41,10 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
                     cloud.load(cloud.options['dataSourceUrl']);
                     break;
                 } else if (prop == "width" || prop == "height" || prop == "low_threshold" || prop == "high_threshold" || prop == 'tiltRange' || prop == "scale") {
+                    if(prop == "height"){
+                        if(this.options.height.indexOf('%') != -1)
+                            this.options.height = $('#containerDiv').height()*(this.options.height.slice(0,-1)/100);
+                    }
                     cloud.options = this.options;
                     cloud.buildLayout(cloud.d);
                 } else {
@@ -135,26 +139,15 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
                 return d.text + " (" + d.freq + ")";
             }).on('click', function(d){
                 //More SEA events
-                console.log(d.text + " : " +  Math.ceil(d.size / ((cloud.options.height / 3) / cloud.max)));
-                shivaLib.SendShivaMessage("ShivaWord=click|" + d.text + "|" +  Math.ceil(d.size / ((cloud.options.height / 3) / cloud.max)));
+                console.log(d.text + " : " +  d.freq);
+                shivaLib.SendShivaMessage("ShivaWord=click|" +window.name+"|"+ d.text + "|" + d.freq);
                 $('.listEntry').css('backgroundColor','white');
                 $(this).css('backgroundColor', 'rgba(255,255,105,0.5)');
             });
-            $('.listEntry').append($('<span>',{
-                css: {
-                    float: 'right'
-                }
-            }).addClass('listEntryFilter ui-icon ui-icon-close').on('click', function(e){
-                var pass; 
-                if(typeof e.data =="undefined")
+            
+            var listClickHandler = function(e, pass){
+                if(typeof pass =="undefined")
                     pass = false;
-                else{
-                    if(typeof e.data.pass=="undefined")
-                        pass = false;
-                    else{
-                        pass = e.data.pass;
-                    }
-                }
                 e.stopPropagation();
                 if($(this).hasClass('ui-icon-close')){
                     $(this).removeClass('ui-icon-close').addClass('ui-icon-arrowreturnthick-1-w');
@@ -167,11 +160,17 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
                 var word = $(this).parent().text().split(' ')[0];
                 if(!pass)
                     cloud.filter();                
-            }));
+            };
+            
+            $('.listEntry').append($('<span>',{
+                css: {
+                    float: 'right'
+                }
+            }).addClass('listEntryFilter ui-icon ui-icon-close').on('click', listClickHandler));
             
             $('.listEntry').each(function(){
                 if(!data.find($(this).text().split(' ')[0], "text"))
-                    $(this).find('span').click({pass: true})
+                    $(this).find('span').trigger('click',[true]);
             });
             
             if (cloud.options.wordlist == "true") {
@@ -184,11 +183,11 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             
             //Bind Events for SHIVA Messages
             d3.selectAll('.word').on("click", function(d) {
-                console.log(d.text + " : " +  Math.ceil(d.size / ((cloud.options.height / 3) / cloud.max)));
-                shivaLib.SendShivaMessage("ShivaWord=click|" + d.text + "|" +  Math.ceil(d.size / ((cloud.options.height / 3) / cloud.max)));
+                console.log(d.text + " : " +  d.freq);
+                shivaLib.SendShivaMessage("ShivaWord=click|" +window.name+"|"+ d.text + "|" + d.freq);
             });
             //ready
-            shivaLib.SendShivaMessage("ShivaWord=ready");
+            shivaLib.SendShivaMessage("ShivaWord=ready|"+window.name);
         };
         this.buildLayout = function(data) {
             var fs;
@@ -213,7 +212,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             }).on("end", cloud.draw).start();
         };
         this.load = function(src, algo) {
-            if ( typeof algo == "undefined")
+            if (typeof algo == "undefined")
                 algo = "raw";
             d3.select('svg').remove();
             var qs = 'parser.php?' + encodeURIComponent('url') + '=' + encodeURIComponent(src) + "&" + encodeURIComponent('a') + '=' + encodeURIComponent(algo);
@@ -234,6 +233,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
         };
         this.filter = function(){
             var words = [];
+            cloud.filterSet.length = 0;
             $('.listEntry').filter(function(){
                 return $(this).children('span').hasClass('ui-icon-close');
             }).each(function(){
@@ -290,6 +290,19 @@ SHIVA_Show.prototype.WordActions = function(msg) {
                     this.wcloud.load(cmd[1]);
                 }
             }
-            break;
+        break;
+        case 'resize':
+            if (cmd[1] == "100") {                                            // If forcing 100%
+                $("#"+shivaLib.container).width("100%");                    // Set container 100%
+                $("#"+shivaLib.container).height("100%");                   // Set container 100%
+                this.wcloud.options.width =  $("#"+shivaLib.container).width();
+                this.wcloud.options.height =  $("#"+shivaLib.container).height();
+            }
+            else{
+                this.wcloud.options.width =  cmd[1];
+                this.wcloud.options.height = cmd[1];
+            }
+            this.wcloud.buildLayout(cloud.d);
+        break;
     }
 }

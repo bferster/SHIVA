@@ -200,6 +200,8 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 			shivaLib.ImageActions(e.data);									// Route
 		else if (shivaLib.options.shivaGroup == "Network")					// If an network action
 			shivaLib.NetworkActions(e.data);								// Route
+		else if (shivaLib.options.shivaGroup == "WordCloud")				// If an wordcloud action
+			shivaLib.WordActions(e.data);								// Route
 		}
 }
 

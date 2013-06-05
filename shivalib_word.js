@@ -88,14 +88,17 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
         this.draw = function(data) {
             var word = data;
             $('svg').remove();
-            $('#cloudLoad').remove();
-            d3.select("#" + cloud.container).append("svg").attr("id", "wordCloud").attr("width", cloud.options.width).attr("height", cloud.options.height).append("g").attr("transform", "translate(" + ((cloud.options.width/2)) + "," + ((cloud.options.height/2)) + ")").append('rect').attr("transform", "translate(-" + ((cloud.options.width/2)) + ",-" + ((cloud.options.height/2)*0.8) + ")").attr('x', 0).attr('y', 0).attr('width', '100%').attr('height', '80%').style('fill', (cloud.options.backgroundColor == "") ? 'white' : cloud.options.backgroundColor);
+            $('#cloudLoad').remove(); //.attr("transform", "translate(" + ((cloud.options.width/2.2)) + "," + ((cloud.options.height/2)) + ")")
+            var svg = d3.select("#" + cloud.container).append("svg").attr("id", "wordCloud").attr("width", cloud.options.width).attr("height", cloud.options.height)//.attr('viewbox', '0 0 '+[cloud.options.width, cloud.options.height].join(' '));
+            // /.attr("transform", "translate(-" + ((cloud.options.width/2)) + ",-" + ((cloud.options.height/2)*0.8) + ")")
+            svg.append("g").attr('scale', '(1,-1)').append('rect').attr('x', 0).attr('y', 0).attr('width', '100%').attr('height', '90%').style('fill', (cloud.options.backgroundColor == "") ? 'white' : cloud.options.backgroundColor);
             d3.select('g').selectAll("text").data(data).enter().append("text").attr('class', 'word').style("font-size", function(d) {
                 return d.size + "px";
             }).style("font-family", cloud.options.font_name).style("fill", function(d, i) {
                 return fill(i);
             }).attr("text-anchor", "middle").attr("transform", function(d) {
-                return "translate(" + [d.x + 30, d.y] + ")rotate(" + d.rotate + ")";
+                //
+                return "translate(" + [d.x+cloud.options.width/2, d.y+cloud.options.height/2] + ")rotate(" + d.rotate + ")";
             }).text(function(d) {
                 return d.text;
             });
@@ -146,9 +149,10 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             });
             
             var listClickHandler = function(e, pass){
+                e.preventDefault();
+                e.stopPropagation();
                 if(typeof pass =="undefined")
                     pass = false;
-                e.stopPropagation();
                 if($(this).hasClass('ui-icon-close')){
                     $(this).removeClass('ui-icon-close').addClass('ui-icon-arrowreturnthick-1-w');
                     $(this).parent().css('opacity',0.5);
@@ -168,10 +172,9 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
                 }
             }).addClass('listEntryFilter ui-icon ui-icon-close').on('click', listClickHandler));
             
-            $('.listEntry').each(function(){
-                if(!data.find($(this).text().split(' ')[0], "text"))
-                    $(this).find('span').trigger('click',[true]);
-            });
+            $('.listEntry').filter(function(i){
+                    return cloud.filterSet.indexOf($(this).text().split(' ')[0]) != -1;
+            }).find('span').trigger('click',[true]);
             
             if (cloud.options.wordlist == "true") {
                 $('#cloudShowListButton').show();
@@ -284,7 +287,7 @@ SHIVA_Show.prototype.WordActions = function(msg) {
                     json.sort(function(a, b) {
                         return a.size - b.size;
                     });
-                    this.wcloud.buildLayout(json.slice(0, this.wcloud.options.wordcount));
+                    this.wcloud.buildLayout(json);
                 } catch(e) {
                     //parse raw
                     this.wcloud.load(cmd[1]);
@@ -297,10 +300,6 @@ SHIVA_Show.prototype.WordActions = function(msg) {
                 $("#"+shivaLib.container).height("100%");                   // Set container 100%
                 this.wcloud.options.width =  $("#"+shivaLib.container).width();
                 this.wcloud.options.height =  $("#"+shivaLib.container).height();
-            }
-            else{
-                this.wcloud.options.width =  cmd[1];
-                this.wcloud.options.height = cmd[1];
             }
             this.wcloud.buildLayout(this.wcloud.d);
         break;

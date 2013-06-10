@@ -280,9 +280,9 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
   		else if (props[o].opt.indexOf('|') != -1) {
    			var v=props[o].opt.split("|");
 			if (o == 'item') {
-				str="<tr><td width='12'></td><td colspan='3'><div id='accord' style='overflow-x:hidden'>";
+				str="<tr><td width='12'></td><td colspan='3'><div id='accord'>";
 				for (j=0;j<items.length;++j) {
-					str+="<h3><a href='#'><b>"+items[j].name+"</b></a></h3><div id='accord-"+j+"'>";
+					str+="<h3><a href='#'><b>"+items[j].name+"</b></a></h3><div id='accord-"+j+"'style='overflow-x:hidden'>";
 					for (k=i+1;k<atts.length;++k) {
 						id2="itemInput"+j+"-"+(k-i);
 						oo=atts[k];

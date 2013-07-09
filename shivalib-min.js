@@ -40,7 +40,7 @@ callback();else
 setTimeout(function(){shivaJSLoaded(obj,callback);},50);}
 SHIVA_Show.prototype.SendReadyMessage=function(mode)
 {if(shivaLib.drupalMan)
-window.parent.postMessage("ShivaReady="+mode.toString(),"*");}
+window.parent.postMessage("ShivaReady="+mode.toString(),"*");shivaLib.SendShivaMessage("ShivaChart=ready|"+window.name);}
 SHIVA_Show.prototype.SendShivaMessage=function(msg)
 {if(window.parent)
 window.parent.postMessage(msg,"*");else
@@ -276,8 +276,9 @@ data.shivaId=Number(shivaLib.ezmode);shivaLib.ezcb(data);}
 SHIVA_Graphics.prototype.EnumObject=function(obj)
 {trace("------------------------------------------------------------");for(var key in obj)
 trace(key+"="+obj[key])}
-function trace(msg,p1,p2,p3)
-{if(p3)
+function trace(msg,p1,p2,p3,p4)
+{if(p4)
+console.log(msg,p1,p2,p3,p4);else if(p3)
 console.log(msg,p1,p2,p3);else if(p2)
 console.log(msg,p1,p2);else if(p1)
 console.log(msg,p1);else

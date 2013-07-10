@@ -162,7 +162,7 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE 
 	if (shivaLib.drupalMan) 												// If called from Drupal manager
 		window.parent.postMessage("ShivaReady="+mode.toString(),"*");		// Send message to parent wind		
  	shivaLib.SendShivaMessage("ShivaChart=ready|"+window.name); 			// Send ready message to EvA
- }
+  }
 
 SHIVA_Show.prototype.SendShivaMessage=function(msg) 					// SEND SHIVA MESSAGE 
 {

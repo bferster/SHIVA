@@ -53,6 +53,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
                             d3.selectAll('text').style('font-family', this.options.font_name);
                             break;
                         case 'backgroundColor':
+                            console.log(this.options.backgroundColor);
                             d3.select('rect').style('fill', '#' + this.options.backgroundColor);
                             break;
                         case 'spectrum':
@@ -91,13 +92,14 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             $('#cloudLoad').remove(); //.attr("transform", "translate(" + ((cloud.options.width/2.2)) + "," + ((cloud.options.height/2)) + ")")
             var svg = d3.select("#" + cloud.container).append("svg").attr("id", "wordCloud").attr("width", cloud.options.width).attr("height", cloud.options.height)//.attr('viewbox', '0 0 '+[cloud.options.width, cloud.options.height].join(' '));
             // /.attr("transform", "translate(-" + ((cloud.options.width/2)) + ",-" + ((cloud.options.height/2)*0.8) + ")")
-            svg.append("g").attr('scale', '(1,-1)').append('rect').attr('x', 0).attr('y', 0).attr('width', '100%').attr('height', '90%').style('fill', (cloud.options.backgroundColor == "") ? 'white' : cloud.options.backgroundColor);
+            svg.append("g").attr('scale', '(1,-1)').append('rect').attr('x', 0).attr('y', 0).attr('width', '100%').attr('height', '90%').style('fill', (cloud.options.backgroundColor == "") ? 'white' : '#'+cloud.options.backgroundColor);
             d3.select('g').selectAll("text").data(data).enter().append("text").attr('class', 'word').style("font-size", function(d) {
                 return d.size + "px";
             }).style("font-family", cloud.options.font_name).style("fill", function(d, i) {
+                if(typeof d.color != 'undefined')
+                    return (d.color[0]=="#")?d.color:'#'+d.color;
                 return fill(i);
             }).attr("text-anchor", "middle").attr("transform", function(d) {
-                //
                 return "translate(" + [d.x+cloud.options.width/2, d.y+cloud.options.height/2] + ")rotate(" + d.rotate + ")";
             }).text(function(d) {
                 return d.text;
@@ -181,7 +183,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             }
             
             //add colors if necessary
-            if(cloud.options.spectrum!="")
+            if(typeof cloud.options.spectrum != "undefined" && cloud.options.spectrum!="")
                 cloud.colorize(cloud.options.spectrum);
             
             //Bind Events for SHIVA Messages
@@ -193,22 +195,32 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             shivaLib.SendShivaMessage("ShivaWord=ready|"+window.name);
         };
         this.buildLayout = function(data) {
+            var count = 0;
+            var l = data.length;
+            for(var i=0; i<l; i++){
+                count+=data[i].freq;
+            }
+            //how close is the max to the average?
+            var avg = count/l;
+            var distro = data[0].freq/avg;
+            
+                        
             var fs;
             if(cloud.options.scale=="logarithmic")
                 fs = d3.scale.log().range([10,100]);
             else if(cloud.options.scale=="linear")
-                fs = d3.scale.linear().domain([0, data[0].freq]).range([10,100]);
+                fs = d3.scale.linear().domain([0, data[0].freq]).range([10,(distro*(0.025*cloud.options.height))]);
             else if(cloud.options.scale =="binary")
                 fs = d3.scale.quantile().range([0,(cloud.options.height/(data.length/5))]);
                   
             var high,low;      
-            low = (cloud.options.low_threshold=='')?0:parseInt(cloud.options.low_threshold);
-            high = (cloud.options.high_threshold=='')?100000000000:parseInt(cloud.options.high_threshold);
+            low = (typeof cloud.options.low_threshold == 'undefined' || cloud.options.low_threshold=='')?0:parseInt(cloud.options.low_threshold);
+            high = (typeof cloud.options.high_threshold == 'undefined' || cloud.options.high_threshold=='')?100000000000:parseInt(cloud.options.high_threshold);
             data = data.filter(function(el){
                 return el.freq >= low && el.freq <= high;
             });
             
-            d3.layout.cloud().size([cloud.options.width, cloud.options.height * 0.8]).words(data).rotate(function() {
+            d3.layout.cloud().size([cloud.options.width, cloud.options.height * 0.8]).words(JSON.parse(JSON.stringify(data))).rotate(function() {
                 return ~~((Math.random() * 2) * cloud.options.tiltRange)*((Math.random()>0.5)?1:-1);
             }).font(cloud.options.font_name).fontSize(function(d) {
                 return fs(d.freq);
@@ -284,9 +296,17 @@ SHIVA_Show.prototype.WordActions = function(msg) {
                 try {
                     //check if JSON
                     var json = JSON.parse(cmd[1]);
+                    if(json[0] instanceof Array){
+                        json = json.map(function(a){
+                            if (typeof a[2] != "undefined")
+                                return {'text':a[0], 'size':0, 'freq':a[1], 'color':a[2]};
+                            return   {'text':a[0], 'size':0, 'freq':a[1]};
+                         })                        
+                    }
                     json.sort(function(a, b) {
                         return a.size - b.size;
                     });
+                   this.wcloud.d = json;
                     this.wcloud.buildLayout(json);
                 } catch(e) {
                     //parse raw

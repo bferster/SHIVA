@@ -7,6 +7,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
         this.wcloud = wcloud;
         wcloud.options = this.options;
         wcloud.load(this.options.dataSourceUrl);
+        wcloud.ready = false;
     } else {
         wcloud = this.wcloud;
         var props = Object.keys(this.options);
@@ -170,14 +171,18 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
                 shivaLib.SendShivaMessage("ShivaWord=click|" +window.name+"|"+ d.text + "|" + d.freq);
             });
             //ready
-            shivaLib.SendShivaMessage("ShivaWord=ready|"+window.name);
+            if(!wcloud.ready){
+                shivaLib.SendShivaMessage("ShivaWord=ready|"+window.name);
+                wcloud.ready = true;   
+            }
         };
         this.buildLayout = function(words) {
               //fix height and width if %
-            if(wcloud.options.height.indexOf('%') != -1)
+            if(typeof wcloud.options.height == "string" && wcloud.options.height.indexOf('%') != -1)
                 wcloud.options.height = $('#containerDiv').height()*(wcloud.options.height.slice(0,-1)/100);
-            if(wcloud.options.width.indexOf('%') != -1)
+            if(typeof wcloud.options.width == "string" && wcloud.options.width.indexOf('%') != -1)
                 wcloud.options.width = $('#containerDiv').width()*(wcloud.options.width.slice(0,-1)/100);
+                
             
             var count = 0;
             var l = words.length;
@@ -192,7 +197,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             if(wcloud.options.scale=="logarithmic")
                 fs = d3.scale.log().range([5,100]);
             else if(wcloud.options.scale=="linear")
-                fs = d3.scale.linear().domain([0, words[0].freq]).range([5,distro*(0.15*wcloud.options.height)]);
+                fs = d3.scale.linear().domain([0, words[0].freq]).range([10,100]);
             else if(wcloud.options.scale =="binary")
                 fs = d3.scale.quantile().range([0,(wcloud.options.height/(words.length/5))]);
                   

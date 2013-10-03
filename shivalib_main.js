@@ -714,33 +714,6 @@ SHIVA_Show.prototype.Sound=function(sound, mode)				// PLAY SOUND
 		snd.play();
 }
 
-SHIVA_Show.prototype.GetGoogleSpreadsheet=function(file, callback) 					//	GET GOOGLE DOCS SPREADSHEET
-{
-	var query=new google.visualization.Query(file);							
-	query.send(handleQueryResponse);
- 
-    function handleQueryResponse(response) {
-	    var i,j,o;
-		var data=response.getDataTable();
-		var cols=data.getNumberOfColumns();
-		var rows=data.getNumberOfRows();
- 		var keys=new Array();
-		var theData=new Array();
-		for (i=0;i<cols;++i) {
-		 	if (!$.trim(data.getColumnLabel(i)))
-		 		break;
-			keys.push($.trim(data.getColumnLabel(i)));
-			}
-		for (i=0;i<rows;++i) {
-			o={};
-			for (j=0;j<keys.length;++j) 
-				o[keys[j]]=data.getValue(i,j);
-			theData.push(o);
- 			}
-		callback(theData);
-     }
-}
-
 SHIVA_Show.prototype.ShowIframe=function(left, top, wid, hgt, url, id, mode, content)
 {
 	$("#"+id).remove();															

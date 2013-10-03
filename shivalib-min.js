@@ -180,12 +180,6 @@ SHIVA_Show.prototype.Sound=function(sound,mode)
 snd=new Audio(sound+".ogg");else
 snd=new Audio(sound+".mp3");if(mode!="init")
 snd.play();}
-SHIVA_Show.prototype.GetGoogleSpreadsheet=function(file,callback)
-{var query=new google.visualization.Query(file);query.send(handleQueryResponse);function handleQueryResponse(response){var i,j,o;var data=response.getDataTable();var cols=data.getNumberOfColumns();var rows=data.getNumberOfRows();var keys=new Array();var theData=new Array();for(i=0;i<cols;++i){if(!$.trim(data.getColumnLabel(i)))
-break;keys.push($.trim(data.getColumnLabel(i)));}
-for(i=0;i<rows;++i){o={};for(j=0;j<keys.length;++j)
-o[keys[j]]=data.getValue(i,j);theData.push(o);}
-callback(theData);}}
 SHIVA_Show.prototype.ShowIframe=function(left,top,wid,hgt,url,id,mode,content)
 {$("#"+id).remove();$("#CL-"+id).remove();if((hgt==0)||(wid==0))
 return;var str="<iframe id='"+id+"' ";if(url)
@@ -959,7 +953,7 @@ opacity=v[4]/100;}
 if(items[i].layerType=="KML"){var link=this.map.createLink('');link.setHref(items[i].layerSource);if(!obj){obj=this.map.createNetworkLink("Layer-"+(i+1));this.map.getFeatures().appendChild(obj);}
 var fly=(items[i].layerOptions.toLowerCase().indexOf("port")==-1)
 obj.set(link,true,fly);items[i].listener=google.earth.addEventListener(obj,'click',function(e){var str=i+"|"+e.getLatitude()+"|"+e.getLongitude();shivaLib.SendShivaMessage("ShivaEarth=kml|"+window.name+"|"+str);});}
-if(items[i].layerType=="MarkerSet"){this.items[i].obj=[];this.markerData=i;this.GetGoogleSpreadsheet(items[i].layerSource,function(d){_this.EarthAddMarkers(d,_this.items[_this.markerData].obj)});}
+if(items[i].layerType=="MarkerSet"){this.items[i].obj=[];this.markerData=i;this.GetSpreadsheet(items[i].layerSource,true,null,null,function(d){_this.EarthAddMarkers(d,_this.items[_this.markerData].obj)});}
 if(obj){obj.setOpacity(opacity);obj.setVisibility(items[i].visible=="true");}}
 this.map.getView().setAbstractView(lookAt);}
 SHIVA_Show.prototype.EarthActions=function(msg)
@@ -997,7 +991,7 @@ items[i].obj.setOptions(ops);items[i].listener=google.maps.event.addListener(ite
 if(v[2]==this.title)
 break;}
 shivaLib.SendShivaMessage("ShivaMap=marker|"+window.name+"|"+this.title+"|"+e.latLng.lat()+"|"+e.latLng.lng()+"|"+j);});}
-else if(items[i].layerType=="MarkerSet"){if(items[i].visible=="true"){this.items[i].obj=[];this.markerData=i;this.GetGoogleSpreadsheet(items[i].layerSource,function(d){_this.MapAddMarkers(d,_this.items[_this.markerData].obj)});}
+else if(items[i].layerType=="MarkerSet"){if(items[i].visible=="true"){this.items[i].obj=[];this.markerData=i;this.GetSpreadsheet(items[i].layerSource,true,null,null,function(d){_this.MapAddMarkers(d,_this.items[_this.markerData].obj)});}
 continue;}
 else if(items[i].layerType=="Overlay"){v=items[i].layerOptions.split(",");var imageBounds=new google.maps.LatLngBounds(new google.maps.LatLng(v[2],v[1]),new google.maps.LatLng(v[0],v[3]));if(v.length==5)
 ops["opacity"]=v[4]/100;if(items[i].layerSource)
@@ -1423,11 +1417,7 @@ str="<div id='"+this.container+"Title'";if(options.etitle=="true")str+=" content
 this.AnimateDiv("full");else
 this.AnimateDiv("start");if((options.autoplay=="true")&&(!$("#accord").length))
 $("#"+this.container+"PlyBut").trigger("click");}
-function GetSpreadsheetData(file,imgHgt,showImage,showSlide,trans,wid){var query=new google.visualization.Query(file);query.send(handleQueryResponse);function handleQueryResponse(response){var a,i,j;var data=response.getDataTable();var cols=data.getNumberOfColumns();var rows=data.getNumberOfRows();var rowData=new Array()
-for(i=0;i<rows;++i){a=new Array()
-for(j=0;j<cols;++j)
-a.push(data.getValue(i,j));rowData.push(a);}
-AddImages(rowData,imgHgt,showImage,showSlide,trans,wid);shivaLib.SendReadyMessage(true);}}
+function GetSpreadsheetData(url,imgHgt,showImage,showSlide,trans,wid){shivaLib.GetSpreadsheet(url,false,null,null,function(data){AddImages(data,imgHgt,showImage,showSlide,trans,wid);shivaLib.SendReadyMessage(true);});}
 function AddImages(data,imgHgt,showImage,showSlide,transition,wid)
 {var str="<div id='gallery' class='ad-gallery'>"
 if(showImage=="true")
@@ -1460,3 +1450,12 @@ $("#"+mob.div).css(o);}
 SHIVA_Show.prototype.ImageActions=function(msg)
 {var v=msg.split("|");if(v[0]=="ShivaAct=resize"){if(v[1]=="100")
 shivaLib.options.width=shivaLib.options.height="100%";shivaLib.DrawImage();}}
+SHIVA_Show.prototype.GetSpreadsheet=function(url,fields,query,ops,callback)
+{var query=new google.visualization.Query(url);query.send(handleQueryResponse);function handleQueryResponse(response){var i,j,o;var data=response.getDataTable();var cols=data.getNumberOfColumns();var rows=data.getNumberOfRows();var keys=new Array();var theData=new Array();if(fields){for(i=0;i<cols;++i){if(!$.trim(data.getColumnLabel(i)))
+break;keys.push($.trim(data.getColumnLabel(i)));}
+for(i=0;i<rows;++i){o={};for(j=0;j<keys.length;++j)
+o[keys[j]]=data.getValue(i,j);theData.push(o);}}
+else{for(i=0;i<rows;++i){o=new Array()
+for(j=0;j<cols;++j)
+o.push(data.getValue(i,j));theData.push(o);}}
+callback(theData);}}

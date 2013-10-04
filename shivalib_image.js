@@ -80,15 +80,15 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 			$("#"+this.container+"PlyBut").trigger("click");								// Trigger play								
 		}
 		
- 	  function GetSpreadsheetData(url, imgHgt, showImage, showSlide, trans, wid) {
+ 	  function GetSpreadsheetData(url, imgHgt, showImage, showSlide, trans, wid) {			// GET DATA FROM SPREADSHEET
 
-		shivaLib.GetSpreadsheet(url,false,null,null,function(data) {						// Get spreadsheet data
-  	     	AddImages(data,imgHgt,showImage,showSlide,trans,wid);
-		 	shivaLib.SendReadyMessage(true);											
+		shivaLib.GetSpreadsheet(url,false,null,function(data) {								// Get spreadsheet data
+  	     	AddImages(data,imgHgt,showImage,showSlide,trans,wid);							// Add images to gallery
+		 	shivaLib.SendReadyMessage(true);												// Sedn ready message
   	    	});
  		}
 
-   	function AddImages(data, imgHgt, showImage, showSlide, transition, wid)
+   	function AddImages(data, imgHgt, showImage, showSlide, transition, wid)				// ADD IMAGES TO GALLERY
  	{
 		var str="<div id='gallery' class='ad-gallery'>"
 		if (showImage == "true")

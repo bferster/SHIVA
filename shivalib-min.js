@@ -159,8 +159,7 @@ ops[v[0]]=v[1].replace(/ /g,"");else if(v[0].indexOf(".")!=-1){ops[o][v[0].split
 else
 ops[o][v[0]]=v[1];}}}}
 if(ops[o]=='true')ops[o]=true;if(ops[o]=='false')ops[o]=false;}
-if(options['width'])$(con).width(options['width']);if(options['height'])$(con).height(options['height']);ops.containerId=this.container;if(!ops.colors)delete ops.colors;if(ops.dataSourceUrl){ops.dataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");if(ops.dataSourceUrl.toLowerCase().indexOf(".csv")!=-1){ops.dataTable=CSV(ops.dataSourceUrl,"hide","JSON");ops.dataDataSourceUrl="";}}
-if(ops.query){var v=ops.query.split(" ");for(i=0;i<v.length;++i){if(v[i]=="has"){v[i++]="LIKE";v[i]="'%"+v[i]+"%'";}}
+if(options['width'])$(con).width(options['width']);if(options['height'])$(con).height(options['height']);ops.containerId=this.container;if(!ops.colors)delete ops.colors;if(ops.query){var v=ops.query.split(" ");for(i=0;i<v.length;++i){if(v[i]=="has"){v[i++]="LIKE";v[i]="'%"+v[i]+"%'";}}
 ops.query="";for(i=0;i<v.length;++i)
 ops.query+=v[i]+" ";}
 if(options.series){var v=options.series.split(",")
@@ -168,7 +167,10 @@ ops.series=new Array();var o={};for(i=1;i<v.length;++i){if(!isNaN(v[i]))
 ops.series.push(o),o={};else
 o[v[i].split("=")[0]]=v[i].split("=")[1];}
 ops.series.push(o);}
-var wrap=new google.visualization.ChartWrapper(ops);this.map=wrap;wrap.setOptions(ops);wrap.draw();google.visualization.events.addListener(wrap,"ready",function(){_this.SendReadyMessage(true);});google.visualization.events.addListener(wrap,"select",function(r){var o=wrap.getChart().getSelection()[0];var row="-",col="-";if((o)&&(o.row!=undefined))
+var wrap=new google.visualization.ChartWrapper(ops);this.map=wrap;if(ops.dataSourceUrl)
+ops.dataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");wrap.setOptions(ops);if(ops.dataSourceUrl.indexOf("google.com")==-1){shivaLib.GetSpreadsheet(ops.dataSourceUrl,false,ops.query,function(data){ops.dataSourceUrl=ops.query="";wrap.setOptions(ops);wrap.setDataTable(data);wrap.draw();});}
+else
+wrap.draw();google.visualization.events.addListener(wrap,"ready",function(){_this.SendReadyMessage(true);});google.visualization.events.addListener(wrap,"select",function(r){var o=wrap.getChart().getSelection()[0];var row="-",col="-";if((o)&&(o.row!=undefined))
 row=o.row;if((o)&&(o.column!=undefined))
 col=o.column;_this.SendShivaMessage("ShivaChart=data|"+window.name+"|"+row+"|"+col);});}
 SHIVA_Show.prototype.ChartActions=function(msg)
@@ -953,7 +955,7 @@ opacity=v[4]/100;}
 if(items[i].layerType=="KML"){var link=this.map.createLink('');link.setHref(items[i].layerSource);if(!obj){obj=this.map.createNetworkLink("Layer-"+(i+1));this.map.getFeatures().appendChild(obj);}
 var fly=(items[i].layerOptions.toLowerCase().indexOf("port")==-1)
 obj.set(link,true,fly);items[i].listener=google.earth.addEventListener(obj,'click',function(e){var str=i+"|"+e.getLatitude()+"|"+e.getLongitude();shivaLib.SendShivaMessage("ShivaEarth=kml|"+window.name+"|"+str);});}
-if(items[i].layerType=="MarkerSet"){this.items[i].obj=[];this.markerData=i;this.GetSpreadsheet(items[i].layerSource,true,null,null,function(d){_this.EarthAddMarkers(d,_this.items[_this.markerData].obj)});}
+if(items[i].layerType=="MarkerSet"){this.items[i].obj=[];this.markerData=i;this.GetSpreadsheet(items[i].layerSource,true,null,function(d){_this.EarthAddMarkers(d,_this.items[_this.markerData].obj)});}
 if(obj){obj.setOpacity(opacity);obj.setVisibility(items[i].visible=="true");}}
 this.map.getView().setAbstractView(lookAt);}
 SHIVA_Show.prototype.EarthActions=function(msg)
@@ -991,7 +993,7 @@ items[i].obj.setOptions(ops);items[i].listener=google.maps.event.addListener(ite
 if(v[2]==this.title)
 break;}
 shivaLib.SendShivaMessage("ShivaMap=marker|"+window.name+"|"+this.title+"|"+e.latLng.lat()+"|"+e.latLng.lng()+"|"+j);});}
-else if(items[i].layerType=="MarkerSet"){if(items[i].visible=="true"){this.items[i].obj=[];this.markerData=i;this.GetSpreadsheet(items[i].layerSource,true,null,null,function(d){_this.MapAddMarkers(d,_this.items[_this.markerData].obj)});}
+else if(items[i].layerType=="MarkerSet"){if(items[i].visible=="true"){this.items[i].obj=[];this.markerData=i;this.GetSpreadsheet(items[i].layerSource,true,null,function(d){_this.MapAddMarkers(d,_this.items[_this.markerData].obj)});}
 continue;}
 else if(items[i].layerType=="Overlay"){v=items[i].layerOptions.split(",");var imageBounds=new google.maps.LatLngBounds(new google.maps.LatLng(v[2],v[1]),new google.maps.LatLng(v[0],v[3]));if(v.length==5)
 ops["opacity"]=v[4]/100;if(items[i].layerSource)
@@ -1417,7 +1419,7 @@ str="<div id='"+this.container+"Title'";if(options.etitle=="true")str+=" content
 this.AnimateDiv("full");else
 this.AnimateDiv("start");if((options.autoplay=="true")&&(!$("#accord").length))
 $("#"+this.container+"PlyBut").trigger("click");}
-function GetSpreadsheetData(url,imgHgt,showImage,showSlide,trans,wid){shivaLib.GetSpreadsheet(url,false,null,null,function(data){AddImages(data,imgHgt,showImage,showSlide,trans,wid);shivaLib.SendReadyMessage(true);});}
+function GetSpreadsheetData(url,imgHgt,showImage,showSlide,trans,wid){shivaLib.GetSpreadsheet(url,false,null,function(data){AddImages(data,imgHgt,showImage,showSlide,trans,wid);shivaLib.SendReadyMessage(true);});}
 function AddImages(data,imgHgt,showImage,showSlide,transition,wid)
 {var str="<div id='gallery' class='ad-gallery'>"
 if(showImage=="true")
@@ -1450,8 +1452,10 @@ $("#"+mob.div).css(o);}
 SHIVA_Show.prototype.ImageActions=function(msg)
 {var v=msg.split("|");if(v[0]=="ShivaAct=resize"){if(v[1]=="100")
 shivaLib.options.width=shivaLib.options.height="100%";shivaLib.DrawImage();}}
-SHIVA_Show.prototype.GetSpreadsheet=function(url,fields,query,ops,callback)
-{var query=new google.visualization.Query(url);query.send(handleQueryResponse);function handleQueryResponse(response){var i,j,o;var data=response.getDataTable();var cols=data.getNumberOfColumns();var rows=data.getNumberOfRows();var keys=new Array();var theData=new Array();if(fields){for(i=0;i<cols;++i){if(!$.trim(data.getColumnLabel(i)))
+SHIVA_Show.prototype.GetSpreadsheet=function(url,fields,query,callback)
+{if(url.indexOf("google.com")!=-1){var query=new google.visualization.Query(url);query.send(handleQueryResponse);}
+else{}
+function handleQueryResponse(response){var i,j,o;var data=response.getDataTable();var cols=data.getNumberOfColumns();var rows=data.getNumberOfRows();var keys=new Array();var theData=new Array();if(fields){for(i=0;i<cols;++i){if(!$.trim(data.getColumnLabel(i)))
 break;keys.push($.trim(data.getColumnLabel(i)));}
 for(i=0;i<rows;++i){o={};for(j=0;j<keys.length;++j)
 o[keys[j]]=data.getValue(i,j);theData.push(o);}}

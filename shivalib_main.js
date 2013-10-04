@@ -637,14 +637,7 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 	if (options['height'])		$(con).height(options['height']);
 	ops.containerId=this.container;
 	if (!ops.colors)	delete ops.colors;
- 	if (ops.dataSourceUrl) {	
- 		ops.dataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");
-	 	if (ops.dataSourceUrl.toLowerCase().indexOf(".csv") != -1) {	
-  			ops.dataTable=CSV(ops.dataSourceUrl,"hide","JSON");
-   			ops.dataDataSourceUrl="";
-  		}	
-  	}
-  	if (ops.query) {
+   	if (ops.query) {
   		var v=ops.query.split(" ");
   		for (i=0;i<v.length;++i) {
   			if (v[i] == "has") {
@@ -668,11 +661,22 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
         }
         ops.series.push(o);
         }
- 	var wrap=new google.visualization.ChartWrapper(ops);
-	this.map=wrap;
- 	wrap.setOptions(ops);
-    wrap.draw();
-  	google.visualization.events.addListener(wrap,"ready", function() { _this.SendReadyMessage(true); });
+ 	var wrap=new google.visualization.ChartWrapper(ops);				// Get google chart obj
+	this.map=wrap;														// Save prt in map
+ 	if (ops.dataSourceUrl) 												// If a data source spec'd
+ 		ops.dataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");		// Restore special chars
+ 	wrap.setOptions(ops);												// Set options
+ 	if (ops.dataSourceUrl.indexOf("google.com") == -1) {				// Not a google doc
+    	shivaLib.GetSpreadsheet(ops.dataSourceUrl,false,ops.query,function(data) {	// Get spreadsheet data
+			ops.dataSourceUrl=ops.query="";								// Null source/query out
+		  	wrap.setOptions(ops);										// Re-set options
+			wrap.setDataTable(data);									// Add the data
+		    wrap.draw();												// Draw chart
+  			});
+		}
+	else  																// Google doc
+	    wrap.draw();													// Draw chart
+ 	google.visualization.events.addListener(wrap,"ready", function() { _this.SendReadyMessage(true); });
   	google.visualization.events.addListener(wrap,"select", function(r) { 
   		var o=wrap.getChart().getSelection()[0];
    		var row="-", col="-";

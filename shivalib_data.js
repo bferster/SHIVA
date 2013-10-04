@@ -2,10 +2,15 @@
 //  SHIVALIB DATA
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, ops, callback) 		//	GET GOOGLE DOCS SPREADSHEET
+SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback) 		//	GET GOOGLE DOCS SPREADSHEET
 {
-	var query=new google.visualization.Query(url);							
-	query.send(handleQueryResponse);
+	if (url.indexOf("google.com") != -1) {
+		var query=new google.visualization.Query(url);							
+		query.send(handleQueryResponse);
+		}
+	else{
+		// Route to CSV code
+		}
  
     function handleQueryResponse(response) {
 	    var i,j,o;

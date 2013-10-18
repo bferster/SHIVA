@@ -660,9 +660,6 @@ SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback) 		//	
    				theData.push(o);
 			}
 		}
- trace(theData)		
- callback(theData);
-
- 
+		callback(theData);
    	}
 };

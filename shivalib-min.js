@@ -168,7 +168,10 @@ ops.series.push(o),o={};else
 o[v[i].split("=")[0]]=v[i].split("=")[1];}
 ops.series.push(o);}
 var wrap=new google.visualization.ChartWrapper(ops);this.map=wrap;if(ops.dataSourceUrl)
-ops.dataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");wrap.setOptions(ops);if(ops.dataSourceUrl.indexOf("google.com")==-1){shivaLib.GetSpreadsheet(ops.dataSourceUrl,false,ops.query,function(data){ops.dataSourceUrl=ops.query="";wrap.setOptions(ops);wrap.setDataTable(data);wrap.draw();});}
+ops.dataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");wrap.setOptions(ops);if(ops.dataSourceUrl.indexOf("google.com")==-1){shivaLib.GetSpreadsheet(ops.dataSourceUrl,false,ops.query,function(data){ops.dataSourceUrl=ops.query="";wrap.setOptions(ops);var d={cols:[],rows:[]};var keys=Object.keys(data[0]);for(var i=0;i<keys.length;i++)
+d.cols.push({label:keys[i],type:(typeof data[0][keys[i]])});d.rows=[];for(var i=0;i<data.length;i++){var cell=[];for(var j=0;j<keys.length;j++){cell.push({v:data[i][keys[j]]});}
+d.rows.push({c:cell});}
+wrap.setDataTable(d);wrap.draw();});}
 else
 wrap.draw();google.visualization.events.addListener(wrap,"ready",function(){_this.SendReadyMessage(true);});google.visualization.events.addListener(wrap,"select",function(r){var o=wrap.getChart().getSelection()[0];var row="-",col="-";if((o)&&(o.row!=undefined))
 row=o.row;if((o)&&(o.column!=undefined))
@@ -1549,5 +1552,4 @@ for(i=0;i<rows;++i){o={};for(j=0;j<keys.length;++j)
 o[keys[j]]=data.getValue(i,j);theData.push(o);}}
 else{for(i=0;i<rows;++i){o=new Array();for(j=0;j<cols;++j)
 o.push(data.getValue(i,j));theData.push(o);}}
-trace(theData)
 callback(theData);}};

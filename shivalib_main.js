@@ -666,11 +666,24 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
  	if (ops.dataSourceUrl) 												// If a data source spec'd
  		ops.dataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");		// Restore special chars
  	wrap.setOptions(ops);												// Set options
+ 
  	if (ops.dataSourceUrl.indexOf("google.com") == -1) {				// Not a google doc
     	shivaLib.GetSpreadsheet(ops.dataSourceUrl,false,ops.query,function(data) {	// Get spreadsheet data
 			ops.dataSourceUrl=ops.query="";								// Null source/query out
 		  	wrap.setOptions(ops);										// Re-set options
-			wrap.setDataTable(data);									// Add the data
+			var d = {cols: [], rows: []};
+			var keys = Object.keys(data[0]);
+			for (var i=0;i<keys.length;i++)
+			    d.cols.push({label:keys[i], type:(typeof data[0][keys[i]])});
+			d.rows = [];
+			for (var i=0; i<data.length; i++){
+			    var cell = [];
+			    for (var j=0; j<keys.length; j++){
+			        cell.push({v:data[i][keys[j]]});
+			    }
+			    d.rows.push({c:cell});
+			} 
+			wrap.setDataTable(d);									// Add the data
 		    wrap.draw();												// Draw chart
   			});
 		}

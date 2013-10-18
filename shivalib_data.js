@@ -1,60 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //  SHIVALIB DATA
 ///////////////////////////////////////////////////////////////////////////////////////////////
-
-SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback) 		//	GET GOOGLE DOCS SPREADSHEET
-{
-	if (url.indexOf("google.com") != -1) {
-		var query=new google.visualization.Query(url);							
-		query.send(handleQueryResponse);
-		}
-	else{
-	    var DAL = new dal();
-	    var dst = new Array();
-        dal.loadDelimited(url, dst, true, function(data){
-            var out = new Array();
-            if(query){
-                g_query(data, out, query);    
-            }
-            qr = new queryResponse(out);
-            handleQueryResponse(qr);
-			});
-		}
- 
-    function handleQueryResponse(response) {
-	    var i,j,o;
-		var data=response.getDataTable();
-		var cols=data.getNumberOfColumns();
-		var rows=data.getNumberOfRows();
- 		var keys=new Array();
-		var theData=new Array();
-		if (fields) {
-			for (i=0;i<cols;++i) {
-			 	if (!$.trim(data.getColumnLabel(i)))
-			 		break;
-				keys.push($.trim(data.getColumnLabel(i)));
-				}
-			for (i=0;i<rows;++i) {
-				o={};
-				for (j=0;j<keys.length;++j) 
-					o[keys[j]]=data.getValue(i,j);
-				theData.push(o);
-	 			}
-			}
-		else{
-			for (i=0;i<rows;++i) {
- 				o=new Array()
-				for (j=0;j<cols;++j) 
-					o.push(data.getValue(i,j));
-   				theData.push(o);
-				}
-			}
-		callback(theData);
-    	}
-  }
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-function dal(){
+var dal = function(){
     //private helper functions
     function clone(o) {
         //thank you stackoverflow
@@ -229,7 +176,8 @@ function dal(){
         for(var i=0; i<cols; i++)
             types[i] = {};
         var rows = src.length-2;
-        for(var i=1; i<(rows/10); i++){
+        var sample = (rows.length<10)?10:Math.ceil(rows*0.1);
+        for(var i=1; i<=sample; i++){
             var r = Math.floor(Math.random()*rows)+1;
             var row = src[r];
             for(var j=0; j<cols; j++){
@@ -249,7 +197,7 @@ function dal(){
            var type  = opts[vals.indexOf(Math.max.apply(Math, vals))]; 
            types[i] = type;   
         }
-        rows++;
+        rows = rows+2;
         for(var i=1; i<rows; i++){
             for(var j=0; j<cols; j++){
                 var type = types[j];
@@ -280,98 +228,8 @@ function dal(){
             src = alt.concat(src);
         cb(src);
     };
-    function loadDelimited(datasource, dst, remote, cb) {
-        //empty source without losing reference
-        dst.length = 0;
-        var thisObj = this;
-        if ( typeof remote == "undefined")
-            remote = true;
-        var cellDelim = ',';
-        var quote = '\'';
-        var data;
-        if (remote) {
-            //fetch data through proxy
-            $.ajax({
-                type : 'GET',
-                url : 'proxy.php',
-                data : {
-                    url : datasource,
-                },
-                async : false
-            }).complete(function(d) {
-                parse(d.responseText);
-            });
-        } else
-            parse(datasource);
-        function parse(data) {
-            if (data == -1) {
-                error("Not found");
-                alert("Please check your source URL...we didn't find anything at the other end.");
-                return ;
-            } else {
-                //normalize newlines
-                data = data.replace(/(\n\r)|(\r\n)|(\r)|(\n\n+)/g, '\n');
-                //find cell delim
-                var c = data.split(',').length;
-                var t = data.split('\t').length;
-                var cn = data.split(';').length;
-                var pi = data.split('|').length;
-                var cl = data.split(':').length;
-                //0=comma,1=tab,2=semicolon,3=pipe,4=colon
-                switch([c,t,cn,pi,cl].indexOf(Math.max(c,t,cn,pi,cl))) {
-                    case 0:
-                        cellDelim = ',';
-                        break;
-                    case 1:
-                        cellDelim = '\\t';
-                        break;
-                    case 2:
-                        cellDelim = ';';
-                        break;
-                    case 3:
-                        cellDelim = '|';
-                        break;
-                    case 4:
-                        cellDelim = ':';
-                        break;
-                }
-                //try to autodetect escape delimiter
-                quote = (data.split("\"").length >= data.split("\'").length) ? "\\\"" : "\\\'";
-                //parse
-                var space = "\\s*";
-                var cells = data.replace(RegExp(space + quote + "?" + space + cellDelim + space + quote + "?", 'g'), function(capture) {
-                    return capture.replace(RegExp(cellDelim), "___DELIM___");
-                });
-                cells = cells.split("___DELIM___");
-                var row = 0;
-                dst[0] = [];
-                var len = cells.length;
-                var in_quote = quote.slice(1);
-                for (var i = 0; i < len; i++) {
-                    var cell = cells[i];
-                    if (/\n/g.test(cell)) {
-                        if (cell.split(RegExp(quote + ".*?[^" + quote + "]\n[^" + quote + "].*?" + quote)).length % 2 == 1) {
-                            if (cell.slice(-1) == "\n") {
-                                cell = cell.slice(0, -1);
-                                dst[row].push(cell);
-                            } else {
-                                var parts = cell.split('\n');
-                                dst[row].push(parts[0]);
-                                row++;
-                                dst[row] = [parts[1]];
-                            }
-                        } else {
-                            dst[row].push(cell);
-                        }
-                    } else
-                        dst[row].push(cell);
-                }
-            }
-            normalize(dst, cb);
-        }
-    };
     //CSVQUERY
-    function g_query(src, dst, query, typed){
+   this.g_query = function(src, dst, query, typed){
         dst.length = 0;
         if(typeof typed == "undefined")
             typed = true;
@@ -568,6 +426,96 @@ function dal(){
         }
         return cols;
     };
+    this.loadDelimited = function(datasource, dst, remote, cb) {
+        //empty source without losing reference
+        dst.length = 0;
+        var thisObj = this;
+        if ( typeof remote == "undefined")
+            remote = true;
+        var cellDelim = ',';
+        var quote = '\'';
+        var data;
+        if (remote) {
+            //fetch data through proxy
+            $.ajax({
+                type : 'GET',
+                url : 'proxy.php',
+                data : {
+                    url : datasource,
+                },
+                async : false
+            }).complete(function(d) {
+                parse(d.responseText);
+            });
+        } else
+            parse(datasource);
+        function parse(data) {
+            if (data == -1) {
+                error("Not found");
+                alert("Please check your source URL...we didn't find anything at the other end.");
+                return ;
+            } else {
+                //normalize newlines
+                data = data.replace(/(\n\r)|(\r\n)|(\r)|(\n\n+)/g, '\n');
+                //find cell delim
+                var c = data.split(',').length;
+                var t = data.split('\t').length;
+                var cn = data.split(';').length;
+                var pi = data.split('|').length;
+                var cl = data.split(':').length;
+                //0=comma,1=tab,2=semicolon,3=pipe,4=colon
+                switch([c,t,cn,pi,cl].indexOf(Math.max(c,t,cn,pi,cl))) {
+                    case 0:
+                        cellDelim = ',';
+                        break;
+                    case 1:
+                        cellDelim = '\\t';
+                        break;
+                    case 2:
+                        cellDelim = ';';
+                        break;
+                    case 3:
+                        cellDelim = '|';
+                        break;
+                    case 4:
+                        cellDelim = ':';
+                        break;
+                }
+                //try to autodetect escape delimiter
+                quote = (data.split("\"").length >= data.split("\'").length) ? "\\\"" : "\\\'";
+                //parse
+                var space = "\\s*";
+                var cells = data.replace(RegExp(space + quote + "?" + space + cellDelim + space + quote + "?", 'g'), function(capture) {
+                    return capture.replace(RegExp(cellDelim), "___DELIM___");
+                });
+                cells = cells.split("___DELIM___");
+                var row = 0;
+                dst[0] = [];
+                var len = cells.length;
+                var in_quote = quote.slice(1);
+                for (var i = 0; i < len; i++) {
+                    var cell = cells[i];
+                    if (/\n/g.test(cell)) {
+                        if (cell.split(RegExp(quote + ".*?[^" + quote + "]\n[^" + quote + "].*?" + quote)).length % 2 == 1) {
+                            if (cell.slice(-1) == "\n") {
+                                cell = cell.slice(0, -1);
+                                dst[row].push(cell);
+                            } else {
+                                var parts = cell.split('\n');
+                                dst[row].push(parts[0]);
+                                row++;
+                                dst[row] = [parts[1]];
+                            }
+                        } else {
+                            dst[row].push(cell);
+                        }
+                    } else
+                        dst[row].push(cell);
+                }
+            }
+            normalize(dst, cb);
+        }
+    };
     //public methods
     this.load = function(ops, callback) {
         if(!ops.dataSourceUrl){
@@ -636,7 +584,7 @@ function dal(){
                 });
             }
             else{
-                loadDelimited(ops.dataSourceUrl, ops.dataTable, true, function(){
+                this.loadDelimited(ops.dataSourceUrl, ops.dataTable, true, function(){
                     if(ops.query){
                         var data = clone(ops.dataTable);
                         ops.ogTable = data;
@@ -647,21 +595,74 @@ function dal(){
             }
         }
     };
-    return this;
-}
-
-function queryResponse(data){
-    this.getDataTable = new dataTable(data);
-}
-
-function dataTable(data){
-    var table = {
-        head : data[0],
-        data : data.slice(1)
+    this.queryResponse = function(data){
+        this.getDataTable = function(){return new dataTable(data);};
     };
-    this.getNumberOfColumns = function(){return table.head.length;};
-    this.getNumberOfRows = function(){return table.data.length;};
-    this.getColumnLabel = function(col){return table.head[col];};
-    this.getValue = function(i,j){return table.data[i][j];};
+    var dataTable = function(data){
+        var table = {
+            head : data[0],
+            data : data.slice(1)
+        };
+        this.getNumberOfColumns = function(){return table.head.length;};
+        this.getNumberOfRows = function(){return table.data.length;};
+        this.getColumnLabel = function(col){return table.head[col];};
+        this.getValue = function(i,j){return table.data[i][j];};
+        return this;
+    };
     return this;
-}
+};
+
+SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback) 		//	GET GOOGLE DOCS SPREADSHEET
+{
+	if (url.indexOf("google.com") != -1) {
+		var query=new google.visualization.Query(url);							
+		query.send(handleQueryResponse);
+	}
+	else{
+	    var DAL = new dal();
+	    var dst = new Array();
+        DAL.loadDelimited(url, dst, true, function(data){
+            var out = new Array();
+            if(query){
+                DAL.g_query(data, out, query);    
+            }
+            out = (out.length == 0)?data:out;
+            qr = new DAL.queryResponse(out);
+            fields = data[0];
+            handleQueryResponse(qr);
+        });
+	}
+    function handleQueryResponse(response) {
+	    var i,j,o;
+		var data=response.getDataTable();
+		var cols=data.getNumberOfColumns();
+		var rows=data.getNumberOfRows();
+ 		var keys=new Array();
+		var theData=new Array();
+		if (fields) {
+			for (i=0;i<cols;++i) {
+			 	if (!$.trim(data.getColumnLabel(i)))
+			 		break;
+				keys.push($.trim(data.getColumnLabel(i)));
+			}
+			for (i=0;i<rows;++i) {
+				o={};
+				for (j=0;j<keys.length;++j) 
+					o[keys[j]]=data.getValue(i,j);
+				theData.push(o);
+	 		}
+		}
+		else{
+			for (i=0;i<rows;++i) {
+ 				o=new Array();
+				for (j=0;j<cols;++j) 
+					o.push(data.getValue(i,j));
+   				theData.push(o);
+			}
+		}
+ trace(theData)		
+ callback(theData);
+
+ 
+   	}
+};

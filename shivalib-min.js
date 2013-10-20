@@ -1552,4 +1552,4 @@ for(i=0;i<rows;++i){o={};for(j=0;j<keys.length;++j)
 o[keys[j]]=data.getValue(i,j);theData.push(o);}}
 else{for(i=0;i<rows;++i){o=new Array();for(j=0;j<cols;++j)
 o.push(data.getValue(i,j));theData.push(o);}}
-callback(theData);}};
+callback(theData,url);}};

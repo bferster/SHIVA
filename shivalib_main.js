@@ -683,7 +683,7 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
 			    }
 			    d.rows.push({c:cell});
 			} 
-			wrap.setDataTable(d);									// Add the data
+			wrap.setDataTable(d);										// Add the data
 		    wrap.draw();												// Draw chart
   			});
 		}

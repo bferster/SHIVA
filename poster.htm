@@ -62,6 +62,7 @@
 	
 	var props={
 		pos: 						{	def:'2000|250|250', opt:'hidden',			des:'data'},
+		eva: 						{	def:'', 			opt:'hidden',			des:'data'},
 		height: 					{	def:'600', 			opt:'number',			des:'Height of poster'},
 		width: 						{	def:'800', 			opt:'number',			des:'Width of poster'}, 
 		backCol: 					{	def:'eeeeee', 		opt:'color',			des:'Background color'}, 
@@ -75,7 +76,7 @@
 		url: 						{	def:'', 			opt:'string',			des:'URL or ID of pane'}, 
 		layerTitle: 				{	def:'', 			opt:'string',			des:'Control box label'}, 
 		scrollbars: 				{	def:'false', 		opt:'true|false',		des:'Show scroll bars?'}, 
-		style: 						{	def:'border:3px solid white', 	opt:'string',	des:'CSS styling'}, 
+		style: 						{	def:'border:3px solid white', opt:'string',	des:'CSS styling'}, 
 	}
 	
 	var helpText=new Array();
@@ -138,7 +139,7 @@
 
 	function shivaEventHandler(e)
 	{
-		trace(e.data)
+//		trace(e.data)
 		if (e.data.indexOf("GetJSON") == 0) 
 			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
 		else if (e.data.indexOf("GetWebPage") == 0) 
@@ -316,10 +317,27 @@
 		
 function DrawConnections()												// DRAW PROXIES/LINES
 {
-	$("#posterDiv").html("<br>&nbsp;&nbsp;&nbsp; Coming soon...");			// Remove poster
 	$("#posterOverDiv").remove();											// Remove overview
 	shivaLib.DrawLayerControlBox(null,false);								// Hide control box
+	var str="<br>&nbsp;&nbsp;&nbsp;Type EvA scripts here:<br>";
+	str+="&nbsp;&nbsp;<textarea id='tevaDat' rows='8' cols='80' >";
+	if (!$("#propInput"+1).val())											// If nothing there
+		str+="on:data|what:posterFrame-0|Do:load|src:e=390|id:posterFrame-1"; // Put sample in
+	else																	// Use from options
+		str+=$("#propInput"+1).val();										// Add it
+	str+="</textarea>";
+	str+="<br/>&nbsp;&nbsp;<button type='button' onclick='onChangeEva()'>Set and test</button>";
+	str+="<br><br><br><br>&nbsp;&nbsp;&nbsp;Click <a href='https://docs.google.com/document/d/1Q42_K0Li7ZDtXfY27neZuo7aENZ-yGybKAYMFNBTGqg/edit?usp=sharing' target='blank'>here </a> for preliminary documentation for Eva scripts."; 
+	$("#posterDiv").html(str);												// Show menu
 }
 	
+function onChangeEva()
+{
+	var data=$("#tevaDat").val();
+	$("#propInput"+1).val(data);
+	shivaLib.options.eva=data;
+	$("#cb3").trigger("click");
+}
+		
 </script>
 </body></html>

@@ -23,6 +23,8 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 		}
 	if (!this.posterScale)																// If first time
    		this.posterScale=2;																// Init
+	if ((options.shivaGroup == "Poster") && (!this.eva))								// If poster and no eva
+		this.eva=new EvA();																// Alloc it															
 	var str="<div id='posterDiv' style='position:absolute;border:1px solid;";			// Make poster div
 	str+="background-color:#"+options.backCol+"'></div>";								// Back color
 	$(con).html(str);																	// Add div
@@ -46,9 +48,11 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 		$("#posterDiv").append(str);													// Add image to poster
 		}	
 	this.DrawPosterOverview();															// Draw overview, if enabled
-	if (this.posterMode != "Connect") {													// If editing
+	if (this.posterMode != "Connect") {													// If editing or viewing
 		this.DrawPosterPanes(-1,"draw");												// Draw panes
 		this.DrawLayerControlBox(this.items,(options.controlbox == "true"));			// Draw control box?
+		if ((this.posterMode != "Edit") && (this.options.eva))							// If not editing
+			this.eva.Run(this.options.eva);												// Run Eva
 		}
 	var v=options.pos.split("|");														// Get start pos
 	this.PositionPoster(v[0],v[1],v[2]);												// Set position
@@ -297,10 +301,27 @@ function EvA() 														// CONSTRUCTOR
 EvA.prototype.Run=function(ondoList) 								// RUN
 {
 	this.ondos=[];														// Clear queue
+	var i,j,k,v,vv,o;
 	var _this=this;														// Point at mixer obj
- 	for (var i=0;i<ondoList.length;++i)									// For each one
-		this.AddOnDo(ondoList[i]);										// Add to list and run if an init
+ 	var ud=ondoList.split("||");										// Split into rows
+  	for (i=0;i<ud.length;++i) {											// For each row
+ 		v=ud[i].split("|");												// Split by value pair
+		if (v.length < 2)												// If not enough elements
+			continue;													// Skip
+		o={};															// New obj
+		for (j=0;j<v.length;++j) {										// For each pair
+			vv=v[j].split(":");											// Split pair
+			o[vv[0]]="";												// Start with nothing
+			for (k=1;k<vv.length;++k) {									// For each sub
+				o[vv[0]]+=vv[k];										// Add it in
+				if (k < vv.length-1)									// If not last one
+					o[vv[0]]+=":";										// Add : back in
+				}
+			}
+		this.AddOnDo(o);												// Add to list and run if an init
+		}	
 }
+ 
 
 EvA.prototype.AddOnDo=function(ondo) 								// ADD NEW ONDO
 {
@@ -316,7 +337,7 @@ EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 	switch(ondo.Do) {													// Route on type
 		case "load": 													// Load an iframe
 			str=ondo.src;												// Set url
-			if (ondo.src.indexOf("e=") == 0)							// An eStore
+				if (ondo.src.indexOf("e=") == 0)							// An eStore
 				str="//www.viseyes.org/shiva/go.htm?"+ondo.src;			// Make url
 			else if (ondo.src.indexOf("m=") == 0)						// A Drupal manager
 				str="//shiva.shanti.virginia.edu/go.htm?m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);	// Make url
@@ -325,7 +346,7 @@ EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 			else if (ondo.src.indexOf("M=") == 0)						// Drupal test
 				str="//127.0.0.1:8020/SHIVA/go.htm?m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);	// Make url
 			$("#"+ondo.id).attr("src",str);								// Set src
-			break;
+				break;
 		case "data": 													// Load data
 			this.LoadSpreadsheet(ondo);									// Load file
 			break;

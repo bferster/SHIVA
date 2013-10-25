@@ -40,15 +40,6 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 								  	shivaLib.SendShivaMessage("ShivaImage=move|"+window.name+"|"+shivaLib.options.pos); // Send message
 								}});	 
 	
-/*	
-	if (!this.g)																		// If no graphics lib
-		this.g=new SHIVA_Graphics();													// Allocate it
-	this.g.CreateCanvas("posterCanvas","posterDiv");									// Create canvas
-	$("#posterCanvas").css({ position:"absolute" });
-	$("#posterCanvas").attr("width",$("#posterDiv").css("width")).attr("height",$("#posterDiv").css("height"));						// Scale canvas to fit poster
-	var ctx=$("#posterCanvas")[0].getContext('2d');										// Get context
-	this.g.DrawBar(ctx, 0, 1, 0, 0, 100, 200)
-*/	
 	if (options.dataSourceUrl) {														// If a back img spec'd
 		str="<img src='"+options.dataSourceUrl+"' ";									// Name
 		str+="height='100%' width='100%'>";												// Size

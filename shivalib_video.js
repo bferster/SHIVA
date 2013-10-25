@@ -156,7 +156,7 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 	var ns="font-size:x-small;border:none;background:none;width:100%;padding:0px;margin:0px"; // Note style	
 	str+="<div style='text-align:center;font-size:medium;text-shadow:1px 1px #ccc'><b>SHIVA Notes</b></div><hr>";
 	str+="<img src='savedot.gif'style='position:absolute;top:8px;left:494px' id='shivaNotesSave'>";
-	str+="<tr><td width='36' id='ntc-0' style='"+ts+"'>Type:</td><td><input id='ntx-0' type='input' style='"+ns+"'/></td></tr>"
+	str+="<tr><td width='36' id='ntc-0' style='"+ts+"'>Type:</td><td><input id='ntx-0' type='input' style='"+ns+"'/></td></tr>";
 	str+="</table></div>";													// End
 	$('body').append(str);													// Add to dom								
 	$("#shivaNotesDiv").draggable();										// Make draggable
@@ -176,7 +176,7 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 			var ts="color:#009900;cursor:crosshair";						// Timecode style
 			var ns="font-size:x-small;border:none;background:none;width:100%;padding:0px;margin:0px";	// Note style	
 			var id=$("#shivaNotesTbl tr").length+1;							// If of next row
-			var str="<tr><td id='ntc-"+id+"' style='"+ts+"'>Type:</td><td><input id='ntx-"+id+"' type='input' style='"+ns+"'/></td></tr>"
+			var str="<tr><td id='ntc-"+id+"' style='"+ts+"'>Type:</td><td><input id='ntx-"+id+"' type='input' style='"+ns+"'/></td></tr>";
 			$("#shivaNotesTbl").append(str);								// Add row
 			$("#ntx-"+id).focus();											// Focus on new one
 			}
@@ -188,7 +188,7 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 			}
 		else if (!$("#"+e.target.id).val()) {								// A key and nothing in the field yet
 			var id="#ntc-"+e.target.id.split("-")[1];						// Make id for tc field
-			$(id).text(shivaLib.SecondsToTimecode(shivaLib.player.currentTime()))	// Set new time
+			$(id).text(shivaLib.SecondsToTimecode(shivaLib.player.currentTime()));	// Set new time
 			$(id).click(function(e){										// Add click handler
 				   	var time=$("#"+e.target.id).text();						// Get time
 				   	if (shivaLib.player.smartPlayerType != "Vimeo") {		// If vimeo

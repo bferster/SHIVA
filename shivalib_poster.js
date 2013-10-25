@@ -318,6 +318,8 @@ EvA.prototype.Run=function(ondoList) 								// RUN
 					o[vv[0]]+=":";										// Add : back in
 				}
 			}
+		if (!isNaN(o.id))   o.id="posterFrame-"+(o.id-1);				// True iframe ids
+		if (!isNaN(o.what)) o.what="posterFrame-"+(o.what-1);			// True iframe ids
 		this.AddOnDo(o);												// Add to list and run if an init
 		}	
 }

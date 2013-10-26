@@ -813,7 +813,7 @@ SHIVA_Show.prototype.Prompt=function(title, message, def, id)
 	$("#shiva_dialogDiv").html(str);
 }
 
-SHIVA_Show.prototype.MakeSelect=function(id, multi, items, sel, extra)
+SHIVA_Show.prototype.MakeSelect=function(id, multi, items, sel, extra, values)
 {
 	var	str="<select id='"+id+"'";
 	if (multi)
@@ -825,6 +825,8 @@ SHIVA_Show.prototype.MakeSelect=function(id, multi, items, sel, extra)
 		str+="<option";
 		if (sel == items[i])
 			str+=" selected='selected'"
+		if (values)
+			str+=" value='"+values[i]+"'";
 		str+=">"+items[i]+"</option>";
 		}	
 	return str+"</select>"

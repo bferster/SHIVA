@@ -208,12 +208,13 @@ str+="border:1px solid; left:"+x+"px;top:"+top+"%;background-color:#f8f8f8'>";st
 SHIVA_Show.prototype.Prompt=function(title,message,def,id)
 {var ops={width:'auto',height:'auto',modal:true,autoOpen:true,title:title,buttons:{OK:function(){$("#"+id).val($("#shiva_dialogInput").val());$(this).remove();},CANCEL:function(){$(this).remove();}}}
 var str="<br/><b>"+message+"</b><br/><br/>";str+="<input type='input' size='23' id='shiva_dialogInput' value='"+def+"'/>";$("body").append("<div id='shiva_dialogDiv'/>");$("#shiva_dialogDiv").dialog(ops);$("#shiva_dialogDiv").html(str);}
-SHIVA_Show.prototype.MakeSelect=function(id,multi,items,sel,extra)
+SHIVA_Show.prototype.MakeSelect=function(id,multi,items,sel,extra,values)
 {var str="<select id='"+id+"'";if(multi)
 str+="multiple='multiple' size='"+multi+"'";if(extra)
 str+=extra;str+=">";for(i=0;i<items.length;++i){str+="<option";if(sel==items[i])
 str+=" selected='selected'"
-str+=">"+items[i]+"</option>";}
+if(values)
+str+=" value='"+values[i]+"'";str+=">"+items[i]+"</option>";}
 return str+"</select>"}
 SHIVA_Show.prototype.GetTextFile=function(file,callback)
 {var syncMode=false;if(file.charAt(0)=="@")
@@ -1418,27 +1419,21 @@ function EvA()
 window.addEventListener("message",$.proxy(this.ShivaEventHandler,this),false);else
 window.attachEvent("message",$.proxy(this.ShivaEventHandler,this),false);}
 EvA.prototype.Run=function(ondoList)
-{this.ondos=[];var i,j,k,v,vv,o;var _this=this;var ud=ondoList.split("||");for(i=0;i<ud.length;++i){v=ud[i].split("|");if(v.length<2)
-continue;o={};for(j=0;j<v.length;++j){vv=v[j].split(":");o[vv[0]]="";for(k=1;k<vv.length;++k){o[vv[0]]+=vv[k];if(k<vv.length-1)
-o[vv[0]]+=":";}}
-if(!isNaN(o.id))o.id="posterFrame-"+(o.id-1);if(!isNaN(o.what))o.what="posterFrame-"+(o.what-1);this.AddOnDo(o);}}
-EvA.prototype.AddOnDo=function(ondo)
-{ondo.done=0;this.ondos.push(ondo);if(ondo.on=="init")
-this.RunOnDo(ondo);}
+{var i,o;for(i=0;i<this.ondos.length;++i){o=this.ondos[i];o.done=0;if(o.on=="init")
+this.RunOnDo(o);}}
 EvA.prototype.RunOnDo=function(ondo)
-{var str,o,i;switch(ondo.Do){case"load":str=ondo.src;if(ondo.src.indexOf("e=")==0)
+{var str,o,i;var to=ondo.to;var from=ondo.from;if(!isNaN(to))to="posterFrame-"+(to-1);if(!isNaN(from))from="posterFrame-"+(from-1);switch(ondo.Do){case"load":str=ondo.src;if(ondo.src.indexOf("e=")==0)
 str="//www.viseyes.org/shiva/go.htm?"+ondo.src;else if(ondo.src.indexOf("m=")==0)
 str="//shiva.shanti.virginia.edu/go.htm?m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);else if(ondo.src.indexOf("E=")==0)
 str="//127.0.0.1:8020/SHIVA/go.htm?e="+ondo.src.substr(2);else if(ondo.src.indexOf("M=")==0)
-str="//127.0.0.1:8020/SHIVA/go.htm?m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);$("#"+ondo.id).attr("src",str);break;case"data":this.LoadSpreadsheet(ondo);break;case"fill":if((!ondo.src)||(!this.data[ondo.src]))
+str="//127.0.0.1:8020/SHIVA/go.htm?m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);$("#"+to).attr("src",str);break;case"data":this.LoadSpreadsheet(ondo);break;case"fill":if((!ondo.src)||(!this.data[ondo.src]))
 break;str="ShivaAct=data|";str+=this.TableToString(this.data[ondo.src])
-this.SendMessage(ondo.id,str);trace(str)
-break;case"action":str=ondo.type;for(i=1;i<7;++i){if(ondo["p"+i])
+this.SendMessage(to,str);break;case"tell":str=ondo.type;for(i=1;i<7;++i){if(ondo["p"+i])
 str+="|"+ondo["p"+i];}
-this.SendMessage(ondo.id,str);break;case"call":window[ondo.id](ondo.p1,ondo.p2,ondo.p3,ondo.p4,ondo.p5,ondo.p6);break;case"query":this.data[ondo.id]=[];str=ondo.query;str=str.replace(/\$p2/g,ondo.p2);str=str.replace(/\$p3/g,ondo.p3);str=str.replace(/\$p4/g,ondo.p4);str=str.replace(/\$p5/g,ondo.p5);str=str.replace(/\$p6/g,ondo.p6);this.Query(this.data[ondo.src],this.data[ondo.id],str,ondo.fields,ondo.sort);break;}}
+this.SendMessage(to,str);break;case"call":window[to](ondo.p1,ondo.p2,ondo.p3,ondo.p4,ondo.p5,ondo.p6);break;case"query":this.data[ondo.to]=[];str=ondo.query;str=str.replace(/\$p2/g,ondo.p2);str=str.replace(/\$p3/g,ondo.p3);str=str.replace(/\$p4/g,ondo.p4);str=str.replace(/\$p5/g,ondo.p5);str=str.replace(/\$p6/g,ondo.p6);this.Query(this.data[ondo.from],this.data[ondo.to],str,ondo.fields,ondo.sort);break;}}
 EvA.prototype.ShivaEventHandler=function(e)
-{var i,o,n=this.ondos.length;var v=e.data.split("|");v[0]=v[0].split("=")[1];for(i=0;i<n;++i){o=this.ondos[i];if(o.on=="ready"){if((!o.done)&&(v[1]==o.what)&&(v[0]=="ready")){o.done++;this.RunOnDo(o);}}
-else if((v[1]==o.what)&&(v[0]!="ready"))
+{var from;var i,o,n=this.ondos.length;var v=e.data.split("|");v[0]=v[0].split("=")[1];for(i=0;i<n;++i){o=this.ondos[i];from=o.from;if(!isNaN(o.from))from="posterFrame-"+(o.from-1);if(o.on=="ready"){if((!o.done)&&(v[1]==from)&&(v[0]=="ready")){o.done++;this.RunOnDo(o);}}
+else if((v[1]==from)&&(v[0]!="ready"))
 this.HandleOnEvent(o,e.data);}}
 EvA.prototype.HandleOnEvent=function(ondo,data)
 {var run=new Object();for(o in ondo)

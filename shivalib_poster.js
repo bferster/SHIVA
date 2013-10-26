@@ -300,8 +300,16 @@ function EvA() 														// CONSTRUCTOR
 
 EvA.prototype.Run=function(ondoList) 								// RUN
 {
-	this.ondos=[];														// Clear queue
-	var i,j,k,v,vv,o;
+	var i,o;
+	for (i=0;i<this.ondos.length;++i) {									// For each ondo
+		o=this.ondos[i];												// Point at ondo
+		o.done=0;														// Not done yet
+		if (o.on == "init")												// If an init
+			this.RunOnDo(o);											// Run it
+		}
+	}
+
+/*	var i,j,k,v,vv,o;
 	var _this=this;														// Point at mixer obj
  	var ud=ondoList.split("||");										// Split into rows
   	for (i=0;i<ud.length;++i) {											// For each row
@@ -310,7 +318,7 @@ EvA.prototype.Run=function(ondoList) 								// RUN
 			continue;													// Skip
 		o={};															// New obj
 		for (j=0;j<v.length;++j) {										// For each pair
-			vv=v[j].split(":");											// Split pair
+			vv=v[j].split("~");											// Split pair
 			o[vv[0]]="";												// Start with nothing
 			for (k=1;k<vv.length;++k) {									// For each sub
 				o[vv[0]]+=vv[k];										// Add it in
@@ -318,28 +326,22 @@ EvA.prototype.Run=function(ondoList) 								// RUN
 					o[vv[0]]+=":";										// Add : back in
 				}
 			}
-		if (!isNaN(o.id))   o.id="posterFrame-"+(o.id-1);				// True iframe ids
-		if (!isNaN(o.what)) o.what="posterFrame-"+(o.what-1);			// True iframe ids
 		this.AddOnDo(o);												// Add to list and run if an init
 		}	
-}
- 
+*/
 
-EvA.prototype.AddOnDo=function(ondo) 								// ADD NEW ONDO
-{
-	ondo.done=0;														// Not done yet
-	this.ondos.push(ondo);												// Add to array
-	if (ondo.on == "init")												// If an init
-		this.RunOnDo(ondo);												// Run it
-}
 
 EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 {
 	var str,o,i;
+	var to=ondo.to;														// Save to
+	var from=ondo.from;													// Save to
+	if (!isNaN(to))    	to="posterFrame-"+(to-1);						// True iframe ids
+	if (!isNaN(from)) 	from="posterFrame-"+(from-1);					// True iframe ids
 	switch(ondo.Do) {													// Route on type
 		case "load": 													// Load an iframe
 			str=ondo.src;												// Set url
-				if (ondo.src.indexOf("e=") == 0)							// An eStore
+			if (ondo.src.indexOf("e=") == 0)							// An eStore
 				str="//www.viseyes.org/shiva/go.htm?"+ondo.src;			// Make url
 			else if (ondo.src.indexOf("m=") == 0)						// A Drupal manager
 				str="//shiva.shanti.virginia.edu/go.htm?m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);	// Make url
@@ -347,7 +349,7 @@ EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 				str="//127.0.0.1:8020/SHIVA/go.htm?e="+ondo.src.substr(2);	// Make url
 			else if (ondo.src.indexOf("M=") == 0)						// Drupal test
 				str="//127.0.0.1:8020/SHIVA/go.htm?m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);	// Make url
-			$("#"+ondo.id).attr("src",str);								// Set src
+			$("#"+to).attr("src",str);									// Set src
 				break;
 		case "data": 													// Load data
 			this.LoadSpreadsheet(ondo);									// Load file
@@ -357,29 +359,28 @@ EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 				break;													// Quit
 			str="ShivaAct=data|";										// Base			
 			str+=this.TableToString(this.data[ondo.src])				// Add table data
-			this.SendMessage(ondo.id,str);								// Send message to iframe
-			trace(str)
+			this.SendMessage(to,str);									// Send message to iframe
 			break;
-		case "action": 													// Run an action
+		case "tell": 													// Run an action
 			str=ondo.type;												// Add base
 			for (i=1;i<7;++i) {											// For each possible param
 				if (ondo["p"+i]) 										// If it is set
 					str+="|"+ondo["p"+i];								// Add it
 				}
-			this.SendMessage(ondo.id,str);								// Send message to iframe
+			this.SendMessage(to,str);									// Send message to iframe
 			break;
 		case "call": 													// Run a callback
-			window[ondo.id](ondo.p1,ondo.p2,ondo.p3,ondo.p4,ondo.p5,ondo.p6);	// Callback
+			window[to](ondo.p1,ondo.p2,ondo.p3,ondo.p4,ondo.p5,ondo.p6);// Callback
 			break;
 		case "query": 													// Run a query
-			this.data[ondo.id]=[];										// New array
+			this.data[ondo.to]=[];										// New array
 			str=ondo.query;												// Copy query
 			str=str.replace(/\$p2/g,ondo.p2);							// Replace with var
 			str=str.replace(/\$p3/g,ondo.p3);							// Replace with var
 			str=str.replace(/\$p4/g,ondo.p4);							// Replace with var
 			str=str.replace(/\$p5/g,ondo.p5);							// Replace with var
 			str=str.replace(/\$p6/g,ondo.p6);							// Replace with var
-			this.Query(this.data[ondo.src],this.data[ondo.id],str,ondo.fields,ondo.sort);	// Run query on table
+			this.Query(this.data[ondo.from],this.data[ondo.to],str,ondo.fields,ondo.sort);	// Run query on table
 			break;
 		}
 }
@@ -390,6 +391,7 @@ EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 
 EvA.prototype.ShivaEventHandler=function(e) 						// CATCH SHIVA EVENTS
 {
+	var from;
 	var i,o,n=this.ondos.length;
 //	trace(e.data)
 	var v=e.data.split("|");											// Get parts
@@ -397,13 +399,15 @@ EvA.prototype.ShivaEventHandler=function(e) 						// CATCH SHIVA EVENTS
 
 	for (i=0;i<n;++i) {													// For each ondo
 		o=this.ondos[i];												// Point at it
+		from=o.from;													// Copy
+			if (!isNaN(o.from)) from="posterFrame-"+(o.from-1);			// True iframe ids
 		if (o.on == "ready") { 											// A ready message
-			if ((!o.done) && (v[1] == o.what) && (v[0] == "ready")) {	// If it matches source and not done yet
+			if ((!o.done) && (v[1] == from) && (v[0] == "ready")) {	// If it matches source and not done yet
 				o.done++;												// Mark it done
 				this.RunOnDo(o);										// Do it
 				}
 			}
-		else if ((v[1] == o.what) && (v[0] != "ready"))					// If it matches source
+		else if ((v[1] == from) && (v[0] != "ready"))					// If it matches source
 			this.HandleOnEvent(o,e.data);								// Handle it
 		}
 }

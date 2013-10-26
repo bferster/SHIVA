@@ -56,9 +56,6 @@
 	var items=new Array();
 	var shivaLib=null;
 	var shivaGroup="Poster"
-	var curDragElement=-1;
-	var curDragItem=-1;
-	var curDataDrag=-1;
 	
 	var props={
 		pos: 						{	def:'2000|250|250', opt:'hidden',			des:'data'},
@@ -314,30 +311,160 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	CONNECT
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function onChangeEva()
+{
+	$("#propInput"+1).val(data);
+	shivaLib.options.eva=data;
+	$("#cb3").trigger("click");
+}
 		
 function DrawConnections()												// DRAW PROXIES/LINES
 {
 	$("#posterOverDiv").remove();											// Remove overview
 	shivaLib.DrawLayerControlBox(null,false);								// Hide control box
-	var str="<br>&nbsp;&nbsp;&nbsp;Type EvA scripts here:<br>";
-	str+="&nbsp;&nbsp;<textarea id='tevaDat' rows='8' cols='80' >";
-	if (!$("#propInput"+1).val())											// If nothing there
-		str+="on:data|what:1|Do:load|src:e=390|id:2"; 						// Put sample in
-	else																	// Use from options
-		str+=$("#propInput"+1).val();										// Add it
-	str+="</textarea>";
-	str+="<br/>&nbsp;&nbsp;<button type='button' onclick='onChangeEva()'>Set and test</button>";
-	str+="<br><br><br><br>&nbsp;&nbsp;&nbsp;Click <a href='https://docs.google.com/document/d/1Q42_K0Li7ZDtXfY27neZuo7aENZ-yGybKAYMFNBTGqg/edit?usp=sharing' target='blank'>here </a> for preliminary documentation for Eva scripts."; 
+	$("#posterDiv").draggable("destroy");									// Diable dragging
+	$("#posterDiv").css({"left:0px","top:0px"});							// Position poster	
+	AddEntryLine("init");													// Put up button
+}	
+
+function AddEntryLine(mode)												// ADD NEW EVA LINE
+{
+	if (mode != "init")	{													// If not initting
+		shivaLib.Sound("ding");												// Click
+		shivaLib.eva.ondos.push( {on:"init",from:"",Do:"load",src:"",to:"",query:""} );	// Put dummy data
+		}
+	var str="<br/><div style='font-size:medium;text-shadow:1px 1px #ccc'><b>&nbsp;&nbsp;SHIVA Poster connections:</b></div><br/>";
+	for (var i=0;i<shivaLib.eva.ondos.length;++i)							// For each ondo
+		str+=CreateEntryLine(i);												// Draw line
+	str+="<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp<button onclick='AddEntryLine()'>Add new connection</button>";
 	$("#posterDiv").html(str);												// Show menu
 }
-	
-function onChangeEva()
+
+function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
 {
-	var data=$("#tevaDat").val();
-	$("#propInput"+1).val(data);
-	shivaLib.options.eva=data;
-	$("#cb3").trigger("click");
+	var i,o,str,sel;
+	var panes=["Poster"];													// Holds list of pane names
+	var tables=["testTable"];												// Holds list of table names
+	var scripts=["testScript"];												// Holds list of script names
+	for (i=1;i<=shivaLib.items.length;++i)									// For each pane
+		panes.push("Pane-"+i)												// Add to list
+	for (i=0;i<shivaLib.eva.ondos.length;++i) {								// For each ondo
+		o=shivaLib.eva.ondos[i];											// Point at ondo
+		if (((o.Do == "load") && (!o.src.match(/^[em]=/i))) || (o.Do == "filter")) // If loading data
+			tables.push(o.to);												// Add to list
+		}
+	o=shivaLib.eva.ondos[num];												// Point at undo
+	var str="<div id='evaLine"+num+"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;When ";	// Div start								
+	str+=shivaLib.MakeSelect("fromSel"+num+"",false,panes,panes[o.from]," onchange='onEvaEntryChange(this.id)'",[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
+	str+=" is ";	
+	if (o.on == "init")		sel="starting";
+	if (o.on == "click")	sel="clicked";
+	if (o.on == "ready")	sel="ready";
+	str+=shivaLib.MakeSelect("onSel"+num+"",false,["starting","clicked","ready"],sel," onchange='onEvaEntryChange(this.id)'",["init","click","ready"]);
+	str+=" then ";	
+	str+=shivaLib.MakeSelect("DoSel"+num+"'",false,["load","fill","filter","tell","script","call"],o.Do," onchange='onEvaEntryChange(this.id)'");
+	panes.shift();															// Remove poster from panes list
+	if (o.Do == "load") {
+		str+=" this ";	
+		str+="<input id='srcSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='4' style='text-align:center' value='"+o.src+"'>";
+		if (o.src) {														// If a src
+			str+=" into ";	
+			if (o.src.match(/^[em]=/i)) 									// If a pane src
+				str+=shivaLib.MakeSelect("toSel"+num+"",false,panes,panes[o.to-1]," onchange='onEvaEntryChange(this.id)'",[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
+			else															// Must be a data source
+				str+=" table named <input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.to+"'>";
+			}
+		}
+	else if (o.Do == "fill") {
+		str+=" this ";	
+		str+=shivaLib.MakeSelect("toSel"+num+"",false,panes,panes[o.to-1]," onchange='onEvaEntryChange(this.id)'",[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
+		str+=" from ";	
+		str+=shivaLib.MakeSelect("srcSel"+num+"",false,tables,o.src," onchange='onEvaEntryChange(this.id)'");
+		str+=" if ";	
+		str+="<input id='querySel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.query+"'>";
+		}
+	else if (o.Do == "filter") {
+		str+=" this ";	
+		str+=shivaLib.MakeSelect("srcSel"+num+"",false,tables,o.src," onchange='onEvaEntryChange(this.id)'");
+		str+=" to a table named ";	
+		str+="<input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.to+"'>";
+		str+=" if ";	
+		str+="<input id='querySel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.query+"'>";
+		}
+	else if (o.Do == "tell") {												// Send event to pane
+		str+=" this ";	
+		str+=shivaLib.MakeSelect("toSel"+num+"",false,panes,panes[o.to-1]," onchange='onEvaEntryChange(this.id)'",[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
+		str+=" using ";														// Using
+		sel="";																// Null it
+		for (i=1;i<8;++i)													// For each possible p param
+			if (o["p"+i])													// If exists
+				sel+=o["p"+i]+",";											// Add to string
+		if (sel)															// If something there
+			sel=sel.substr(0,sel.length-1);									// Lop off last ,
+		str+="<input id='pSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='20' value='"+sel+"'>";
+		}
+	else if (o.Do == "script") {											// Create script
+		str+=" named ";	
+		str+="<input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.to+"'>";
+		str+=" using ";	
+		str+="<textarea id='srcSel"+num+"' onchange='onEvaEntryChange(this.id)' rows='1' cols='20' style='vertical-align:top'>"+o.src+"</textarea>";
+		}
+	else if (o.Do == "call") {											// call script
+		str+=" this ";	
+		str+=shivaLib.MakeSelect("toSel"+num+"",false,scripts,panes[o.to-1]," onchange='onEvaEntryChange(this.id)'",[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
+		str+=" with params ";												// Using params
+		sel="";																// Null it
+		for (i=1;i<8;++i)													// For each possible p param
+			if (o["p"+i])													// If exists
+				sel+=o["p"+i]+",";											// Add to string
+		if (sel)															// If something there
+			sel=sel.substr(0,sel.length-1);									// Lop off last ,
+		str+="<input id='pSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='20' value='"+sel+"'>";
+		}
+	str+="&nbsp;&nbsp;&nbsp;<img id='"+num+"' src='trashdot.gif' title='Remove this connection' onclick='onEvaDelete(this.id)'></div>";
+	return str;																// Return string
 }
+	
+function onEvaDelete(id)											// ON EVA DELETE
+{
+	$("#evaLine"+id).remove();											// Kill it
+	shivaLib.eva.ondos.splice(id,1);									// Remove from array
+	shivaLib.Sound("delete");											// Click
+}
+	
+function onEvaEntryChange(id)										// ON EVA LINE OPTION CHANGE
+{
+	var i,j,str="";
+	var num=$("#"+id).parent()[0].id.substr(7);							// Get row num
+	var o=shivaLib.eva.ondos[num];										// Point at ondo
+	if (id.match(/fromSel/))		o.from=$("#"+id).val();				// Set value
+	else if (id.match(/toSel/))		o.to=$("#"+id).val();				// Set value
+	else if (id.match(/DoSel/))		o.Do=$("#"+id).val();				// Set value
+	else if (id.match(/onSel/))		o.on=$("#"+id).val();				// Set value
+	else if (id.match(/srcSel/))	o.src=$("#"+id).val();				// Set value
+	else if (id.match(/querySel/))	o.query=$("#"+id).val();			// Set value
+	else if (id.match(/pSel/)) {										// P params
+		v=$("#"+id).val().split(",");									// Split by bar
+		for (i=0;i<v.length;++i)										// For each part
+			o["p"+(i+1)]=v[i];											// Set value
+		}
+	$("#"+id).parent().html(CreateEntryLine(num));						// Redraw Eva line
+	for (i=0;i<shivaLib.eva.ondos.length;++i)	{						// For each line
+		o=shivaLib.eva.ondos[i];										// Point at ondo
+		str+="on~"+o.on+"`";		str+="Do~"+o.Do+"`";	str+="to~"+o.to+"`";		// Concat string
+		str+="from~"+o.from+"`";	str+="query~"+o.query+"`";			// Concat string
+		str+="src~"+o.src+"`";
+		for (j=1;j<8;++j)												// For each param
+			if (o["p"+j] != undefined)									// If something there
+				str+="p"+j+"~"+o["p"+j]+"`";							// Add param
+		str+="`";														// Line end
+		}
+	$("#propInput"+1).val(str);											// Set control
+	shivaLib.options.eva=str;											// Set value
+}
+
+	
 		
 </script>
 </body></html>

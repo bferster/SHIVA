@@ -290,22 +290,22 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 function EvA() 														// CONSTRUCTOR
 {
 	this.ondos=new Array();												// Hold ondo statements
-	this.data=new Object();												// Holds table data
+	this.data=new Array();												// Holds table data
 	if (window.addEventListener) 
 		window.addEventListener("message",$.proxy(this.ShivaEventHandler,this),false); // Add event listener
 	else
 		window.attachEvent("message",$.proxy(this.ShivaEventHandler,this),false); // Add event listener
 }
 
-
 EvA.prototype.Run=function(ondoList) 								// RUN
 {
 	var i,o;
+	this.data=[];														// Clear table data
 	for (i=0;i<this.ondos.length;++i) {									// For each ondo
 		o=this.ondos[i];												// Point at ondo
 		o.done=0;														// Not done yet
 		if (o.on == "init")												// If an init
-			this.RunOnDo(o);											// Run it
+			this.RunOnDo(o);									// Run it
 		}
 	}
 
@@ -330,7 +330,6 @@ EvA.prototype.Run=function(ondoList) 								// RUN
 		}	
 */
 
-
 EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 {
 	var str,o,i;
@@ -341,6 +340,13 @@ EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 	switch(ondo.Do) {													// Route on type
 		case "load": 													// Load an iframe
 			str=ondo.src;												// Set url
+			if (!to.match(/posterFrame-/)) {							// If loading a data file							
+	   			shivaLib.GetSpreadsheet(str,false,null,function(data){	// Get spreadsheet data
+					ondo.ready=true;									// Done
+					shivaLib.eva.data[ondo.to]=data;					// Save data in table def'd by 'to'
+					},true);											// Add fields too
+				break;
+				}
 			if (ondo.src.indexOf("e=") == 0)							// An eStore
 				str="//www.viseyes.org/shiva/go.htm?"+ondo.src;			// Make url
 			else if (ondo.src.indexOf("m=") == 0)						// A Drupal manager
@@ -351,9 +357,6 @@ EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 				str="//127.0.0.1:8020/SHIVA/go.htm?m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);	// Make url
 			$("#"+to).attr("src",str);									// Set src
 				break;
-		case "data": 													// Load data
-			this.LoadSpreadsheet(ondo);									// Load file
-			break;
 		case "fill": 													// Fill an iframe
 			if ((!ondo.src) || (!this.data[ondo.src]))					// No src
 				break;													// Quit
@@ -362,17 +365,19 @@ EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 			this.SendMessage(to,str);									// Send message to iframe
 			break;
 		case "tell": 													// Run an action
-			str=ondo.type;												// Add base
+			str="ShivaAct="+ondo.src;									// Add base
 			for (i=1;i<7;++i) {											// For each possible param
 				if (ondo["p"+i]) 										// If it is set
 					str+="|"+ondo["p"+i];								// Add it
 				}
+
+	trace(str)
 			this.SendMessage(to,str);									// Send message to iframe
 			break;
 		case "call": 													// Run a callback
 			window[to](ondo.p1,ondo.p2,ondo.p3,ondo.p4,ondo.p5,ondo.p6);// Callback
 			break;
-		case "query": 													// Run a query
+		case "filter": 													// Run a query
 			this.data[ondo.to]=[];										// New array
 			str=ondo.query;												// Copy query
 			str=str.replace(/\$p2/g,ondo.p2);							// Replace with var
@@ -393,7 +398,7 @@ EvA.prototype.ShivaEventHandler=function(e) 						// CATCH SHIVA EVENTS
 {
 	var from;
 	var i,o,n=this.ondos.length;
-	trace(e.data)
+//	trace(e.data)
 	var v=e.data.split("|");											// Get parts
 	v[0]=v[0].split("=")[1];											// Strip prefix
 
@@ -417,7 +422,7 @@ EvA.prototype.HandleOnEvent=function(ondo, data) 					// HANDLE INCOMING EVENT
 	var run=new Object();												// New run obj
 	for (o in ondo)														// For each field in on field
 		run[o]=ondo[o];													// Add to run obj
-	if (!run.p1) {														// If params not define
+	if ((!run.p1) && (run.Do == "call")) {								// If params not defined for a callback
 		var v=data.split("|");											// Get on params
 		if (v[1] != undefined)	run.p1=v[1];							// Add param from on
 		if (v[2] != undefined)	run.p2=v[2];							// Add 
@@ -426,8 +431,6 @@ EvA.prototype.HandleOnEvent=function(ondo, data) 					// HANDLE INCOMING EVENT
 		if (v[5] != undefined)	run.p5=v[5];							// Add 
 		if (v[6] != undefined)	run.p6=v[6];							// Add 
 		}	
-	if (ondo.script) 													// If a script
-		run=window[ondo.script](run);									// Callback
 	this.RunOnDo(run);													// Run it
 }
 
@@ -441,37 +444,6 @@ EvA.prototype.SendMessage=function(con, msg) 						// SEND HTML5 MESSAGE TO IFRA
 //   DATA TABLES  
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-EvA.prototype.LoadSpreadsheet=function(ondo) 						// GET GOOGLE DOCS SPREADSHEET
-{
-	var base="https://docs.google.com/spreadsheet/ccc?key=";			// Base url
-	var query=new google.visualization.Query(base+ondo.src);			// Setup load					
-	query.send(handleQueryResponse);									// Load
- 	var _this=this;														// Point at mixer obj
-  
-    function handleQueryResponse(response) {							// HANDLE LOAD CALLBACK
- 	    var i,j,lab,n;
-		var o=[],oo=[];
-		var data=response.getDataTable();								// Point at table
-		var cols=data.getNumberOfColumns();								// Get num cols
-		var rows=data.getNumberOfRows();								// Get num rows
- 		
- 		for (i=0;i<cols;++i) {											// For each field
-		 	lab=$.trim(data.getColumnLabel(i));							// Get trimmed label
-		 	if (!lab)													// If nothing there					
-		 		break;													// Quit 
-			o.push($.trim(lab));										// Add field to table
-			}
-		n=o.length;														// Get num fields
-		oo.push(o);														// Add header
-		for (i=0;i<rows;++i) {											// For each row
-			o=[];														// Null obj
-			for (j=0;j<n;++j) 											// For every field
-				o.push(data.getValue(i,j));								// Add to array
-			oo.push(o);													// Add obj to array
- 			}
- 		_this.data[ondo.id]=oo;											// Alloc data array
-       }
-}
 
 EvA.prototype.TableToString=function(table) 						// SAVE TABLE AS STRING
 {

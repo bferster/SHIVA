@@ -9,6 +9,7 @@
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
   	<script type="text/javascript" src="shivalib-min.js"></script>
   	<script type="text/javascript" src="shivalib_poster.js"></script>
+	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
 	<style type="text/css">
 		body { font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
 		p.pb { text-align:right; color:#999999; }
@@ -345,8 +346,10 @@ function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
 {
 	var i,o,str,sel;
 	var panes=["Poster"];													// Holds list of pane names
-	var tables=["testTable"];												// Holds list of table names
-	var scripts=["testScript"];												// Holds list of script names
+	var tables=[];															// Holds list of table names
+	var scripts=[];															// Holds list of script names
+	var actions=["data","goto","hide","load","marker","pause","play","resize","show","time"];	// Holds list of action names
+
 	for (i=1;i<=shivaLib.items.length;++i)									// For each pane
 		panes.push("Pane-"+i)												// Add to list
 	for (i=0;i<shivaLib.eva.ondos.length;++i) {								// For each ondo
@@ -370,22 +373,27 @@ function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
 		str+="<input id='srcSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='4' style='text-align:center' value='"+o.src+"'>";
 		if (o.src) {														// If a src
 			str+=" into ";	
-			if (o.src.match(/^[em]=/i)) 									// If a pane src
+			if (o.src.match(/^[em]=/i)) {									// If a pane src
+				if (!o.to)	o.to=1;
 				str+=shivaLib.MakeSelect("toSel"+num+"",false,panes,panes[o.to-1]," onchange='onEvaEntryChange(this.id)'",[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
+				}
 			else															// Must be a data source
 				str+=" table named <input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.to+"'>";
 			}
 		}
 	else if (o.Do == "fill") {
 		str+=" this ";	
+		if (!o.to)	o.to=1;
 		str+=shivaLib.MakeSelect("toSel"+num+"",false,panes,panes[o.to-1]," onchange='onEvaEntryChange(this.id)'",[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
 		str+=" from ";	
+		if (!o.src && tables.length)	o.src=tables[0];
 		str+=shivaLib.MakeSelect("srcSel"+num+"",false,tables,o.src," onchange='onEvaEntryChange(this.id)'");
 		str+=" if ";	
 		str+="<input id='querySel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.query+"'>";
 		}
 	else if (o.Do == "filter") {
 		str+=" this ";	
+		if (!o.src && tables.length)	o.src=tables[0];
 		str+=shivaLib.MakeSelect("srcSel"+num+"",false,tables,o.src," onchange='onEvaEntryChange(this.id)'");
 		str+=" to a table named ";	
 		str+="<input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.to+"'>";
@@ -394,7 +402,10 @@ function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
 		}
 	else if (o.Do == "tell") {												// Send event to pane
 		str+=" this ";	
+		if (!o.to)	o.to=1;
 		str+=shivaLib.MakeSelect("toSel"+num+"",false,panes,panes[o.to-1]," onchange='onEvaEntryChange(this.id)'",[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
+		if (!o.src && actions.length)	o.src=actions[0];
+		str+=shivaLib.MakeSelect("srcSel"+num+"",false,actions,o.src," onchange='onEvaEntryChange(this.id)'");
 		str+=" using ";														// Using
 		sel="";																// Null it
 		for (i=1;i<8;++i)													// For each possible p param
@@ -412,7 +423,8 @@ function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
 		}
 	else if (o.Do == "call") {											// call script
 		str+=" this ";	
-		str+=shivaLib.MakeSelect("toSel"+num+"",false,scripts,panes[o.to-1]," onchange='onEvaEntryChange(this.id)'",[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
+		if (!o.to)	o.to=1;
+		str+=shivaLib.MakeSelect("toSel"+num+"",false,scripts,s[o.to-1]," onchange='onEvaEntryChange(this.id)'",[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
 		str+=" with params ";												// Using params
 		sel="";																// Null it
 		for (i=1;i<8;++i)													// For each possible p param

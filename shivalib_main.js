@@ -167,9 +167,9 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE 
 SHIVA_Show.prototype.SendShivaMessage=function(src, msg) 				// SEND SHIVA MESSAGE 
 {
 	var id;
-	if (window.frameElement)												// If framed
-		id=window.frameElement.id;											// Get id there
-	else																	// else
+//	if (window.frameElement)												// If framed
+//		id=window.frameElement.id;											// Get id there
+//	else																	// else
 		id=window.name;														// Get from name
 	var str=src+"|"+id;														// Add src and window						
 	if (msg)																// If more to it

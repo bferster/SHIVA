@@ -99,14 +99,14 @@ SHIVA_Show.prototype.VideoActions=function(msg)						// REACT TO SHIVA ACTION ME
 			$("#containerDiv").height("100%");							// Set container 100%
 			}
 		}
-	else if (v[0] == "ShivaActVideo=play") {							// PLAY
+	else if (v[0] == "ShivaAct=play") {									// PLAY
 		this.player.play();												// Play from current spot
 		if (v[1] != undefined)											// If a time set
 				this.player.play(v[1]);									// Play from then
 			}
-	else if (v[0] == "ShivaActVideo=pause")								// PAUSE
+	else if (v[0] == "ShivaAct=pause")									// PAUSE
 		this.player.pause();											// Pause
-	else if (v[0] == "ShivaActVideo=load") {							// LOAD
+	else if (v[0] == "ShivaAct=load") {									// LOAD
 		this.player.media.src=v[1];										// Set new source
 		this.player.load(); 											// Load
 		}

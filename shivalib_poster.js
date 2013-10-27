@@ -25,7 +25,7 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
    		this.posterScale=2;																// Init
 	if ((options.shivaGroup == "Poster") && (!this.eva))								// If poster and no eva
 		this.eva=new EvA();																// Alloc it															
-	var str="<div id='posterDiv' style='position:absolute;border:1px solid;";			// Make poster div
+	var str="<div id='posterDiv' style='position:absolute;";							// Make poster div
 	str+="background-color:#"+options.backCol+"'></div>";								// Back color
 	$(con).html(str);																	// Add div
  	$(con).css({border:"1px solid",overflow:"hidden",margin:"0px",padding:"0px"});		// Put border and hode overflow on container
@@ -39,7 +39,7 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 								shivaLib.DrawPosterOverview();							// Reflect pos in overview
 								$("#propInput0").val(shivaLib.options.pos=Math.round(shivaLib.posterScale*1000)+"|"+Math.round(shivaLib.posterX*1000)+"|"+Math.round(shivaLib.posterY*1000));  // Set cur pos
 								if (shivaLib.options.chartType == "Zoomable")			// If a zoomable
-								  	shivaLib.SendShivaMessage("ShivaImage=move|"+window.name+"|"+shivaLib.options.pos); // Send message
+								  	shivaLib.SendShivaMessage("ShivaImage=move",shivaLib.options.pos); // Send message
 								}});	 
 	
 	if (options.dataSourceUrl) {														// If a back img spec'd
@@ -159,7 +159,7 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 								$("#posterDiv").css({"left":-x+"px","top":-y+"px"});	// Position poster	
 								$("#propInput0").val(shivaLib.options.pos=Math.round(shivaLib.posterScale*1000)+"|"+Math.round(shivaLib.posterX*1000)+"|"+Math.round(shivaLib.posterY*1000));  // Set cur pos
 								if (shivaLib.options.chartType == "Zoomable")			// If a zoomable
-								  	shivaLib.SendShivaMessage("ShivaImage=move|"+window.name+"|"+shivaLib.options.pos); // Send message
+								  	shivaLib.SendShivaMessage("ShivaImage=move",shivaLib.options.pos); // Send message
 								}
 							 });		
 		$("#posterOverBox").resizable({ containment:"parent",						// Resizable
@@ -179,7 +179,7 @@ SHIVA_Show.prototype.DrawPosterOverview=function() 									// DRAW POSTER OVERV
 									$("#propInput0").val(shivaLib.options.pos=Math.round(shivaLib.posterScale*1000)+"|"+Math.round(shivaLib.posterX*1000)+"|"+Math.round(shivaLib.posterY*1000));  // Set cur pos
 									shivaLib.PositionPoster();							// Redraw
 									if (shivaLib.options.chartType == "Zoomable")		// If a zoomable
-								  		shivaLib.SendShivaMessage("ShivaImage=move|"+window.name+"|"+shivaLib.options.pos); // Send message
+								  		shivaLib.SendShivaMessage("ShivaImage=move",shivaLib.options.pos); // Send message
 									}
 								}); 
 			}
@@ -393,14 +393,14 @@ EvA.prototype.ShivaEventHandler=function(e) 						// CATCH SHIVA EVENTS
 {
 	var from;
 	var i,o,n=this.ondos.length;
-//	trace(e.data)
+	trace(e.data)
 	var v=e.data.split("|");											// Get parts
 	v[0]=v[0].split("=")[1];											// Strip prefix
 
 	for (i=0;i<n;++i) {													// For each ondo
 		o=this.ondos[i];												// Point at it
 		from=o.from;													// Copy
-			if (!isNaN(o.from)) from="posterFrame-"+(o.from-1);			// True iframe ids
+		if (!isNaN(o.from)) from="posterFrame-"+(o.from-1);				// True iframe ids
 		if (o.on == "ready") { 											// A ready message
 			if ((!o.done) && (v[1] == from) && (v[0] == "ready")) {	// If it matches source and not done yet
 				o.done++;												// Mark it done

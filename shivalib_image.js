@@ -154,7 +154,7 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 			clearInterval(shivaLib.imageMob.interval);								// Clear timer
 			shivaLib.imageMob.start=new Date().getTime();							// Set start
 			shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);			// Set timer ~24fps
-		  	shivaLib.SendShivaMessage("ShivaImage=play|"+window.name);				// Playing
+		  	shivaLib.SendShivaMessage("ShivaImage=play");							// Playing
 			});	
 		}
  	if (mob.url != $("#"+mob.div).attr('src'))	{									// If not same url
@@ -166,7 +166,7 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)									// ANIMATE/POSITION DIV
 	if (mob.start == 0)																// If first time
 		pct=0;																		// Start at beginning
 	if (pct >= .99) { 																// If done
-	  	shivaLib.SendShivaMessage("ShivaImage=pause|"+window.name);					// Pause
+	  	shivaLib.SendShivaMessage("ShivaImage=pause");								// Pause
 		clearInterval(shivaLib.imageMob.interval);									// Clear timer
 		mob.start=0;																// Stop recursing for some reason
 		shivaLib.AnimateDiv("next");												// Get next pic

@@ -370,12 +370,21 @@ EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 				if (ondo["p"+i]) 										// If it is set
 					str+="|"+ondo["p"+i];								// Add it
 				}
-
-	trace(str)
 			this.SendMessage(to,str);									// Send message to iframe
 			break;
+		case "script": 													// Add a script
+			if (!ondo.src)												// If no source
+				break;													// Quit
+			var s=document.createElement("script");						// Create new element
+			$("#scr-"+ondo.to).remove();								// Remove old one
+			s.id="scr-"+ondo.to;										// Set id same a fname
+			s.setAttribute('type','text/javascript');					// JS
+			str="function "+ondo.to+"(p1,p2,p3,p4,p5,p6,p7){";			// Function header
+			s.appendChild(document.createTextNode(str+ondo.src+"}"));	// Add text node
+			document.getElementsByTagName('head').item(0).appendChild(s);	// Add to DOM
+	 		break;
 		case "call": 													// Run a callback
-			window[to](ondo.p1,ondo.p2,ondo.p3,ondo.p4,ondo.p5,ondo.p6);// Callback
+			window[ondo.to](ondo.p1,ondo.p2,ondo.p3,ondo.p4,ondo.p5,ondo.p6);// Callback
 			break;
 		case "filter": 													// Run a query
 			this.data[ondo.to]=[];										// New array

@@ -325,7 +325,7 @@ function DrawConnections()												// DRAW PROXIES/LINES
 	$("#posterOverDiv").remove();											// Remove overview
 	shivaLib.DrawLayerControlBox(null,false);								// Hide control box
 	$("#posterDiv").draggable("destroy");									// Diable dragging
-	$("#posterDiv").css({"left":"0px","top":"0px","overflow-y":"scroll"});	// Position poster	
+	$("#posterDiv").css({"left":"0px","top":"0px"});						// Position poster	
 	AddEntryLine("init");													// Put up button
 }	
 
@@ -407,18 +407,28 @@ function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
 		str+=" this ";	
 		if (!o.src && tables.length)	o.src=tables[0];
 		str+=shivaLib.MakeSelect("srcSel"+num+"",false,tables,o.src," onchange='onEvaEntryChange(this.id)'");
-		str+=" to a table named ";	
-		str+="<input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.to+"'>";
+		str+=" to ";	
+		str+="<input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='6' style='text-align:center' value='"+o.to+"'>";
 		str+=" if ";	
 		str+="<input id='querySel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.query+"'>";
+		str+=" params ";	
+		sel="";																// Null it
+		for (i=1;i<8;++i)													// For each possible p param
+			if (o["p"+i])													// If exists
+				sel+=o["p"+i]+",";											// Add to string
+		if (sel)															// If something there
+			sel=sel.substr(0,sel.length-1);									// Lop off last ,
+		str+="<input id='pSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' value='"+sel+"'>";
 		}
 	else if (o.Do == "tell") {												// Send event to pane
 		str+=" this ";	
 		if (!o.to)	o.to=1;
 		str+=shivaLib.MakeSelect("toSel"+num+"",false,panes,panes[o.to-1]," onchange='onEvaEntryChange(this.id)'",[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
+		str+=" send ";														// Send
+
 		if (!o.src && actions.length)	o.src=actions[0];
 		str+=shivaLib.MakeSelect("srcSel"+num+"",false,actions,o.src," onchange='onEvaEntryChange(this.id)'");
-		str+=" using ";														// Using
+		str+=" params ";													// Using
 		sel="";																// Null it
 		for (i=1;i<8;++i)													// For each possible p param
 			if (o["p"+i])													// If exists

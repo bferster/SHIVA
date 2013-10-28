@@ -387,14 +387,10 @@ EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 			window[ondo.to](ondo.p1,ondo.p2,ondo.p3,ondo.p4,ondo.p5,ondo.p6);// Callback
 			break;
 		case "filter": 													// Run a query
+			if (!ondo.src || !ondo.to)									// If no source/dest
+				break;													// Quit
 			this.data[ondo.to]=[];										// New array
-			str=ondo.query;												// Copy query
-			str=str.replace(/\$p2/g,ondo.p2);							// Replace with var
-			str=str.replace(/\$p3/g,ondo.p3);							// Replace with var
-			str=str.replace(/\$p4/g,ondo.p4);							// Replace with var
-			str=str.replace(/\$p5/g,ondo.p5);							// Replace with var
-			str=str.replace(/\$p6/g,ondo.p6);							// Replace with var
-			this.Query(this.data[ondo.from],this.data[ondo.to],str,ondo.fields,ondo.sort);	// Run query on table
+			this.Query(this.data[ondo.src],this.data[ondo.to],ondo.query,ondo.p1,ondo.p2);	// Run query on table
 			break;
 		}
 }
@@ -622,9 +618,9 @@ EvA.prototype.Query=function(src, dst, query, fields, sort) 		// RUN QUERY
 		}
 	
 	if (sort) {															// If sorting
-		var dir=-1;														// Assume ascending
+		var dir=1;														// Assume ascending
 		if (sort.charAt(0) == "-") {									// If neg	
-			dir=1;														// Sort descending
+			dir=-1;														// Sort descending
 			sort=sort.substr(1);										// Eemove '-'
 			}
 		for (j=0;j<n;++j) 												// For each field

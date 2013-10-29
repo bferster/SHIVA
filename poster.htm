@@ -90,14 +90,14 @@
 	helpText['Control box label']="Short label that will appear in the control box. If you do not provide a label, the pane will not appeear in the control box";
 	helpText['Show scroll bars?']="Show controls bars on website and SHIVA viz's the are larger than the space provided for.";
 	helpText['CSS styling']="CSS formatted styling for pane box, with multiple styles separated by |'s. i.e. <i>border=2px solid white|background=black</i>";
-
+	helpText['OVERVIEW']="Samples:<br><br>375-Pie chart<br>390=Map<br>392-Earth<br>393-Montage<br>394-Video<br>395-Timeline<br>404-Sample poster<br>405-Word<br>406-Network<br><br>https://docs.google.com/spreadsheet/ccc?key=0AsMQEd_YoBWldFBoYjZfWkdSLVBkRTY2QTNDS2lWVWc&usp=drive_web#gid=0";
 	
 ///// INIT  /////////////
 	
 	$(document).ready(function() {
   		shivaLib=new SHIVA_Show("containerDiv");
 		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
-	  	shivaLib.SetAttributes(props,items,false);
+	  	SetAttributes(false);
 		shivaLib.callback=Draw;
 		shivaLib.posterMode="Edit";
 		$("#controlbar").buttonset();
@@ -111,7 +111,7 @@
 		$("#tb4").button({text: false, icons: { primary: "ui-icon-plus"}}).css("width","25");
 
 		ReEdit();
-		ShowHelp("startup");
+		ShowHelp("startup");77
 		if (window.addEventListener) 
 			window.addEventListener("message",shivaEventHandler,false);
 		else
@@ -158,6 +158,9 @@
 			DrawConnections();
 		else
 			shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
+		for (var i=0;i<items.length;++i)
+	  		if (items[i].layerTitle[i])
+	  			$("#acctitle"+i).html("<b>Pane-"+(i+1)+"</b>&nbsp;<i> "+items[i].layerTitle+"</i>");
 	}
 
 	function SaveData(mode)
@@ -213,7 +216,7 @@
 		items.push(o);
 		for (var i=0;i<items.length;++i)
 			items[i].name="Pane-"+(i+1);
-	  	shivaLib.SetAttributes(props,items,true);
+	  	SetAttributes(true);
 		Draw();
 		$("#accord").accordion({ active: items.length-1 });
 	}	
@@ -227,7 +230,7 @@
 		items.splice(active,1);
 		for (var i=0;i<items.length;++i) 
 			items[i].name="Pane-"+(i+1);
-	  	shivaLib.SetAttributes(props,items,true);
+	  	SetAttributes(true);
 		Draw();
 	}
 
@@ -236,7 +239,7 @@
 		var cur=shivaLib.ShiftItem(dir,items);
 		for (var i=0;i<items.length;++i) 
 			items[i].name="Pane-"+(i+1);
-	  	shivaLib.SetAttributes(props,items,true);
+	  	SetAttributes(true);
 		if (cur != -1)
 			$("#accord").accordion({ active: cur });
 	}

@@ -160,7 +160,7 @@ SHIVA_Show.prototype.DrawWordCloud = function() {
             if (wcloud.options.wordlist == "true") {
                 $('#cloudShowListButton').show();
             }
-            
+ 			shivaLib.SendReadyMessage(true);           
             //add colors if necessary
             if(typeof wcloud.options.spectrum != "undefined" && wcloud.options.spectrum!="")
                 wcloud.colorize(wcloud.options.spectrum);

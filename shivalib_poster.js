@@ -215,6 +215,8 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 		else if (u) {																	// Something else
 			if (!isNaN(u))																// If a number
 				u="http://www.viseyes.org/shiva/go.htm?e="+u;							// Add file base
+			else if (u.match(/e=/))
+				u="http://www.viseyes.org/shiva/go.htm?"+u;								// Add file base
 			str+="<iframe id='posterFrame-"+i+"' src='"+u+"'";							// Iframe base
 			if (this.items[i].scrollbars == "false")									// If not scrolling
 				str+="scrolling='no' ";													// Inhibit it

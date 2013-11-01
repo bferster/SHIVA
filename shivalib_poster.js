@@ -4,7 +4,7 @@
 
 SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 {
-	var str;
+	var str,i,j,k,o,v,vv;
 	var options=this.options;
 	var container=this.container;
 	var con="#"+container;
@@ -23,8 +23,27 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 		}
 	if (!this.posterScale)																// If first time
    		this.posterScale=2;																// Init
-	if ((options.shivaGroup == "Poster") && (!this.eva))								// If poster and no eva
-		this.eva=new EvA();																// Alloc it															
+	if (options.shivaGroup == "Poster") {												// If poster
+		if (!this.eva)																	// If no eva
+			this.eva=new EvA();															// Alloc it															
+	  	this.eva.ondos=new Array();														// Clear ondos
+		if (options.eva) {																// If some options
+			var ud=options.eva.split("``");												// Split into rows
+		  	for (i=0;i<ud.length;++i) {													// For each row
+		 		v=ud[i].split("`");														// Split by value pair
+				if (v.length < 2)														// If not enough elements
+					continue;															// Skip
+				o={};																	// New obj
+				for (j=0;j<v.length;++j) {												// For each pair
+					vv=v[j].split("~");													// Split pair
+					o[vv[0]]=vv[1];														// Add it in
+
+					}
+				this.eva.ondos.push(o);													// Add to list and run if an init
+				}
+			}
+		}
+	
 	var str="<div id='posterDiv' style='position:absolute;";							// Make poster div
 	str+="background-color:#"+options.backCol+"'></div>";								// Back color
 	$(con).html(str);																	// Add div
@@ -310,27 +329,6 @@ EvA.prototype.Run=function(ondoList) 								// RUN
 			this.RunOnDo(o);									// Run it
 		}
 	}
-
-/*	var i,j,k,v,vv,o;
-	var _this=this;														// Point at mixer obj
- 	var ud=ondoList.split("||");										// Split into rows
-  	for (i=0;i<ud.length;++i) {											// For each row
- 		v=ud[i].split("|");												// Split by value pair
-		if (v.length < 2)												// If not enough elements
-			continue;													// Skip
-		o={};															// New obj
-		for (j=0;j<v.length;++j) {										// For each pair
-			vv=v[j].split("~");											// Split pair
-			o[vv[0]]="";												// Start with nothing
-			for (k=1;k<vv.length;++k) {									// For each sub
-				o[vv[0]]+=vv[k];										// Add it in
-				if (k < vv.length-1)									// If not last one
-					o[vv[0]]+=":";										// Add : back in
-				}
-			}
-		this.AddOnDo(o);												// Add to list and run if an init
-		}	
-*/
 
 EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 {

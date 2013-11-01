@@ -37,7 +37,6 @@ SHIVA_Show.prototype.DrawPoster=function() 											//	DRAW POSTER
 				for (j=0;j<v.length;++j) {												// For each pair
 					vv=v[j].split("~");													// Split pair
 					o[vv[0]]=vv[1];														// Add it in
-
 					}
 				this.eva.ondos.push(o);													// Add to list and run if an init
 				}

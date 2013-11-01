@@ -438,11 +438,12 @@ function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
 		}
 	else if (o.Do == "script") {											// Create script
 		if (!o.src)	o.src="";
+		sel=o.src.replace(/'/g,"&apos;").replace(/"/g,"&quot;");			// Escape ' and "
 		str+="<input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.to+"'>";
-		str+=" using ";	
-		str+="<input id='srcSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='20' value='"+o.src+"'>";
+		str+=" using ";														// Using
+		str+="<input id='srcSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='20' value='"+sel+"'>";
 		}
-	else if (o.Do == "call") {											// call script
+	else if (o.Do == "call") {												// call script
 		if (!o.to && scripts.length)	o.to=scripts[0];
 		str+=shivaLib.MakeSelect("toSel"+num+"",false,scripts,o.to," onchange='onEvaEntryChange(this.id)'");
 		str+=" with params ";												// Using params
@@ -492,6 +493,7 @@ function onEvaEntryChange(id)										// ON EVA LINE OPTION CHANGE
 				str+="p"+j+"~"+o["p"+j]+"`";							// Add param
 		str+="`";														// Line end
 		}
+	str=str.replace(/'/g,"&apos;").replace(/"/g,"&quot;");				// Escape ' and "
 	$("#propInput"+1).val(str);											// Set control
 	shivaLib.options.eva=str;											// Set value
 }

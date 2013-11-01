@@ -379,7 +379,8 @@ EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 			s.id="scr-"+ondo.to;										// Set id same a fname
 			s.setAttribute('type','text/javascript');					// JS
 			str="function "+ondo.to+"(p1,p2,p3,p4,p5,p6,p7){";			// Function header
-			s.appendChild(document.createTextNode(str+ondo.src+"}"));	// Add text node
+			str+=ondo.src.replace(/&apos;/g,"\'").replace(/&quot;/g,"\"");	// Unescape ' and "
+			s.appendChild(document.createTextNode(str+"}"));			// Add text node
 			document.getElementsByTagName('head').item(0).appendChild(s);	// Add to DOM
 	 		break;
 		case "call": 													// Run a callback

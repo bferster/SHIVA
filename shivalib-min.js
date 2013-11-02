@@ -42,7 +42,8 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode)
 {if(shivaLib.drupalMan)
 window.parent.postMessage("ShivaReady="+mode.toString(),"*");shivaLib.SendShivaMessage("ShivaChart=ready");}
 SHIVA_Show.prototype.SendShivaMessage=function(src,msg)
-{var id;id=window.name;var str=src+"|"+id;if(msg)
+{var id=window.name;if(!id)
+id="posterFrame-"+(""+window.location.search.match(/&if=[0-9A-z]+/)).substr(4);var str=src+"|"+id;if(msg)
 str+="|"+msg;if(window.parent)
 window.parent.postMessage(str,"*");else
 window.postMessage(str,"*");}
@@ -1416,8 +1417,8 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num,mode)
 str+=this.items[i].style.replace(/\|/g,";").replace(/=/g,":");str+="'>"
 u=this.items[i].url;if(isImg=u.match(/[[.]jpg|jpeg|gif|png]/i))
 str+="<img src='"+this.items[i].url+"' width='"+dw+"'>";else if(u){if(!isNaN(u))
-u="http://www.viseyes.org/shiva/go.htm?e="+u;else if(u.match(/e=/))
-u="http://www.viseyes.org/shiva/go.htm?"+u;str+="<iframe id='posterFrame-"+i+"' src='"+u+"'";if(this.items[i].scrollbars=="false")
+u="go.htm?e="+u;else if(u.match(/e=/))
+u="http://www.viseyes.org/shiva/go.htm?"+u;u+="&if="+i;str+="<iframe id='posterFrame-"+i+"' src='"+u+"'";if(this.items[i].scrollbars=="false")
 str+="scrolling='no' ";str+="frameborder='0' allowtransparency='true'></iframe>";}
 if(mode=="draw"){$("#posterPane"+i).remove();$("#posterDiv").append(str+"</div>");if(this.posterMode=="Edit"){var str="<div style='position:absolute;left:0px;top:0px;width:100%;height:100%;border:1px dashed'>";str+="<div id='posterPaneLab"+i+"' style='position:absolute;left:0px;text-shadow:1px 1px #eee'>";str+="<b> "+(i+1)+". "+this.items[i].layerTitle+"</b></div>";$("#posterPane"+i).append(str+"</div>");}}
 $("#posterFrame-"+i).height(dh);$("#posterFrame-"+i).width(dw);$("#posterPane"+i).height(dh);$("#posterPane"+i).width(dw);$("#posterPane"+i).css({"left":x+"px","top":y+"px"});$("#posterPaneLab"+i).css("top",$("#posterPane"+i).height()+3+"px");if(this.options.overview=="true"){str="<div id='posterOverPane"+i+"' style='position:absolute;opacity:.4;border:1px solid white;pointer-events:none;background-color:#666'/>";if(mode=="draw")

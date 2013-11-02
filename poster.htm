@@ -96,7 +96,7 @@
 	
 	$(document).ready(function() {
   		shivaLib=new SHIVA_Show("containerDiv");
-		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
+		shivaLib.drupalMan=((""+window.location.search).match(/pr=d/) == "pr=d");
 	  	SetAttributes(false);
 		shivaLib.callback=Draw;
 		shivaLib.posterMode="Edit";
@@ -104,6 +104,7 @@
 		$("#cb1").button({text: true, icons: { primary: "ui-icon-pencil"}});
 		$("#cb2").button({text: true, icons: { primary: "ui-icon-shuffle"}});
 		$("#cb3").button({text: true, icons: { primary: "ui-icon-image"}});
+		$("#cb1").prop("checked","checked");
 		$("#toolbar").buttonset();
 		$("#tb1").button({text: false, icons: { primary: "ui-icon-arrowthick-1-n"}}).css("width","25");
 		$("#tb2").button({text: false, icons: { primary: "ui-icon-arrowthick-1-s"}}).css("width","25");
@@ -111,7 +112,7 @@
 		$("#tb4").button({text: false, icons: { primary: "ui-icon-plus"}}).css("width","25");
 
 		ReEdit();
-		ShowHelp("startup");77
+		ShowHelp("startup");
 		if (window.addEventListener) 
 			window.addEventListener("message",shivaEventHandler,false);
 		else
@@ -385,7 +386,7 @@ function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
 	str+=" this ";	
 	panes.shift();															// Remove poster from panes list
 	if (o.Do == "load") {
-		str+="<input id='srcSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='4' style='text-align:center' value='"+o.src+"'>";
+		str+="<input id='srcSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='5' style='text-align:center' value='"+o.src+"'>";
 		if (o.src) {														// If a src
 			str+=" into ";	
 			if (o.src.match(/^[em]=/i)) {									// If a pane src
@@ -393,7 +394,7 @@ function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
 				str+=shivaLib.MakeSelect("toSel"+num+"",false,panes,panes[o.to-1]," onchange='onEvaEntryChange(this.id)'",[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
 				}
 			else															// Must be a data source
-				str+=" table named <input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.to+"'>";
+				str+=" table named <input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='5' style='text-align:center' value='"+o.to+"'>";
 			}
 		}
 	else if (o.Do == "fill") {
@@ -409,7 +410,7 @@ function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
 		if (!o.src && tables.length)	o.src=tables[0];
 		str+=shivaLib.MakeSelect("srcSel"+num+"",false,tables,o.src," onchange='onEvaEntryChange(this.id)'");
 		str+=" to ";	
-		str+="<input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='6' style='text-align:center' value='"+o.to+"'>";
+		str+="<input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='5' style='text-align:center' value='"+o.to+"'>";
 		str+=" if ";	
 		str+="<input id='querySel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.query+"'>";
 		str+=" params ";	
@@ -439,7 +440,7 @@ function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
 	else if (o.Do == "script") {											// Create script
 		if (!o.src)	o.src="";
 		sel=o.src.replace(/'/g,"&apos;").replace(/"/g,"&quot;");			// Escape ' and "
-		str+="<input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='10' style='text-align:center' value='"+o.to+"'>";
+		str+="<input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='5' style='text-align:center' value='"+o.to+"'>";
 		str+=" using ";														// Using
 		str+="<input id='srcSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='20' value='"+sel+"'>";
 		}

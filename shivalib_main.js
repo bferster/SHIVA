@@ -166,11 +166,9 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE 
 
 SHIVA_Show.prototype.SendShivaMessage=function(src, msg) 				// SEND SHIVA MESSAGE 
 {
-	var id;
-//	if (window.frameElement)												// If framed
-//		id=window.frameElement.id;											// Get id there
-//	else																	// else
-		id=window.name;														// Get from name
+	var id=window.name;														// Get from name
+	if (!id) 																// Firefox/IE issue
+		id="posterFrame-"+(""+window.location.search.match(/&if=[0-9A-z]+/)).substr(4);	// Extract id
 	var str=src+"|"+id;														// Add src and window						
 	if (msg)																// If more to it
 		str+="|"+msg;														// Add it

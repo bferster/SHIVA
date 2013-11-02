@@ -105,7 +105,6 @@ SHIVA_Show.prototype.PositionPoster=function(size, left, top) 						// POSITION 
 	var t=$("#"+shivaLib.container).position().top;										// Top boundary
 	var b=t-0+(h/s-h);																	// Bottom boundary
 	$("#posterDiv").draggable("option",{ containment: [r,b,l,t] } );					// Reset containment
-//	$("#posterCanvas").attr("width",1600+"px").attr("height",1200+"px");						// Scale canvas to fit poster
 }
 
 SHIVA_Show.prototype.GoToPosterPane=function(num) 									// GO TO PANE
@@ -232,9 +231,12 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 			str+="<img src='"+this.items[i].url+"' width='"+dw+"'>";					// Image				
 		else if (u) {																	// Something else
 			if (!isNaN(u))																// If a number
-				u="http://www.viseyes.org/shiva/go.htm?e="+u;							// Add file base
+//				u="http://www.viseyes.org/shiva/go.htm?e="+u;							// Add file base
+u="go.htm?e="+u;							// Add file base
+
 			else if (u.match(/e=/))
 				u="http://www.viseyes.org/shiva/go.htm?"+u;								// Add file base
+			u+="&if="+i;																// Add id
 			str+="<iframe id='posterFrame-"+i+"' src='"+u+"'";							// Iframe base
 			if (this.items[i].scrollbars == "false")									// If not scrolling
 				str+="scrolling='no' ";													// Inhibit it

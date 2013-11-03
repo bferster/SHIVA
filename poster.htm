@@ -138,7 +138,6 @@
 
 	function shivaEventHandler(e)
 	{
-//		trace(e.data)
 		if (e.data.indexOf("GetJSON") == 0) 
 			e.source.postMessage("GetJSON="+SaveData("GetJSON"),"*");
 		else if (e.data.indexOf("GetWebPage") == 0) 
@@ -439,10 +438,10 @@ function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
 		}
 	else if (o.Do == "script") {											// Create script
 		if (!o.src)	o.src="";
-		sel=o.src.replace(/'/g,"&apos;").replace(/"/g,"&quot;");			// Escape ' and "
+		sel=o.src.replace(/'/g,"&apos;").replace(/"/g,"&quot;").replace(/&br;/g,"\n");	// Escape ' and "
 		str+="<input id='toSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='5' style='text-align:center' value='"+o.to+"'>";
 		str+=" using ";														// Using
-		str+="<input id='srcSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='20' value='"+sel+"'>";
+		str+="<textarea id='srcSel"+num+"' style='vertical-align:bottom;height:16px' rows='1' onchange='onEvaEntryChange(this.id)'>"+sel+"</textarea>";
 		}
 	else if (o.Do == "call") {												// call script
 		if (!o.to && scripts.length)	o.to=scripts[0];
@@ -494,7 +493,7 @@ function onEvaEntryChange(id)										// ON EVA LINE OPTION CHANGE
 				str+="p"+j+"~"+o["p"+j]+"`";							// Add param
 		str+="`";														// Line end
 		}
-	str=str.replace(/'/g,"&apos;").replace(/"/g,"&quot;");				// Escape ' and "
+	str=str.replace(/'/g,"&apos;").replace(/"/g,"&quot;").replace(/\n/g,"&br;").replace(/\r;/g,"");	// Escape ',",\n,\r
 	$("#propInput"+1).val(str);											// Set control
 	shivaLib.options.eva=str;											// Set value
 }

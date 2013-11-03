@@ -726,6 +726,8 @@ SHIVA_Event.prototype.SaveResponse=function(num, val) 					// SAVE RESPONSE TO A
 {
 	var name;
 	var o=this.events[num];													// Point at event
+	if (!o.response)														// Not response set
+		return;																// Quit
 	var res=o.response;														// Get response
 	var s=res.indexOf("(");													// Param start
 	var e=res.indexOf(")");													// Param end
@@ -896,6 +898,7 @@ SHIVA_Event.prototype.SpecialEvent=function(id) 						// RUN SPECIAL EVENT
 		$("#shivaPopupDiv").css("-moz-border-radius","8px");				// Mozilla
 		$("#shivaPopupDiv").css("background-color","#eee").css('border',"1px solid #ccc");
 		$("#shivaPopupDiv").draggable();									// Draggable
+		$("#shivaPopupDiv").delay(6000).fadeOut(400);						// Close after 6 seconds
 		}
 	else return false;														// Not a special event
 	return true;															// Got one

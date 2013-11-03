@@ -231,11 +231,9 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 			str+="<img src='"+this.items[i].url+"' width='"+dw+"'>";					// Image				
 		else if (u) {																	// Something else
 			if (!isNaN(u))																// If a number
-//				u="http://www.viseyes.org/shiva/go.htm?e="+u;							// Add file base
-u="go.htm?e="+u;							// Add file base
-
-			else if (u.match(/e=/))
-				u="http://www.viseyes.org/shiva/go.htm?"+u;								// Add file base
+				u="go.htm?e="+u;														// Add file base
+			else if (u.match(/e=/))														// An eStore	
+				u="go.htm?"+u;															// Add file base
 			u+="&if="+i;																// Add id
 			str+="<iframe id='posterFrame-"+i+"' src='"+u+"'";							// Iframe base
 			if (this.items[i].scrollbars == "false")									// If not scrolling
@@ -381,7 +379,7 @@ EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 			s.id="scr-"+ondo.to;										// Set id same a fname
 			s.setAttribute('type','text/javascript');					// JS
 			str="function "+ondo.to+"(p1,p2,p3,p4,p5,p6,p7){";			// Function header
-			str+=ondo.src.replace(/&apos;/g,"\'").replace(/&quot;/g,"\"");	// Unescape ' and "
+			str+=ondo.src.replace(/&apos;/g,"\'").replace(/&quot;/g,"\"").replace(/&br;/g,"\n");	// Unescape ', ", & \n
 			s.appendChild(document.createTextNode(str+"}"));			// Add text node
 			document.getElementsByTagName('head').item(0).appendChild(s);	// Add to DOM
 	 		break;

@@ -192,6 +192,8 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 	for (var i=0;i<shivaLib.msgAction.length;++i)							// For each possible event								
 		if (e.data.indexOf(shivaLib.msgAction[i].id) != -1)					// The one						
 			shivaLib.msgAction[i].Do(i);									// Run callback
+	if (!shivaLib.options)													// If no options
+		return;																// Quit
 	if (e.data.indexOf("ShivaAct") != -1) {									// If an action
 		if (shivaLib.options.shivaGroup == "Map")							// If a map action
 			shivaLib.MapActions(e.data);									// Route

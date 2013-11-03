@@ -82,8 +82,29 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		$("#shivaEventDiv").height(Math.max(shivaLib.player.media.clientHeight-40,0));
 		shivaLib.VideoNotes();
  		shivaLib.SendShivaMessage("ShivaVideo=ready");
+   		setInterval(onVideoTimer,400);	
    	}
 
+  	function onVideoTimer(e) {												// VIDEO TIMER HANDLER
+		if ($("#shivaNotesDiv").length) {									// If open
+			var t,i,next;
+			var now=shivaLib.player.currentTime();							// Get current time
+			for (i=0;i<500;++i) {											// Loop
+				if (!$("#ntc-"+i).length)									// If no more                                  
+					break;													// Quit
+	        	t=shivaLib.TimecodeToSeconds($("#ntc-"+i).text());			// Convert to seconds      
+				if (now > t) {												// Post start
+	        		next=shivaLib.TimecodeToSeconds($("#ntc-"+(i+1)).text()); // Next tc in secs    
+					if (now < next) {										// If before next
+						$("#ntx-"+i).focus();								// Set focus
+		            	break;                                              // Quit	            		}
+	            		}
+       				}
+       			}
+       		}
+	}
+	
+  
   	function drawOverlay()	{
    		shivaLib.DrawOverlay();
    		}		
@@ -182,7 +203,7 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 		if ((e.keyCode == 13) || (cap)) {									// Enter on capping a line
 			var ts="color:#009900;cursor:crosshair";						// Timecode style
 			var ns="font-size:x-small;border:none;background:none;width:100%;padding:0px;margin:0px";	// Note style	
-			var id=$("#shivaNotesTbl tr").length+1;							// If of next row
+			var id=$("#shivaNotesTbl tr").length;							// If of next row
 			var str="<tr><td id='ntc-"+id+"' style='"+ts+"'>Type:</td><td><input id='ntx-"+id+"' type='input' style='"+ns+"'/></td></tr>";
 			$("#shivaNotesTbl").append(str);								// Add row
 			$("#ntx-"+id).focus();											// Focus on new one
@@ -194,14 +215,17 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 		else if ((e.keyCode == 8) || (e.keyCode == 46)) {					// Delete
 			var id="#"+e.target.id;											// Get id
 			if ((!$(id).val()) && (id != "#ntx-0")) {						// No more chars left sand not 1st row
-				$("#"+e.target.id).parent().parent().remove();				// Delete row
+				id="ntx-"+(id.substr(5)-1);									// Last row										
+				$("#"+id).focus();											// Focus there to prevent page back action
+				$("#"+e.target.id).parent().parent().remove();				// Delete
 				}			
 			}
 		else if (!$("#ntx-"+rowNum).val()) {								// A key and nothing in the field yet
 			$("#ntc-"+rowNum).text(shivaLib.SecondsToTimecode(shivaLib.player.currentTime()));	// Set new time
 			if ($("#notesPause").prop('checked')) 							// If checked
 				shivaLib.player.pause();									// Pause player
-			$("#ntc-"+rowNum).click(function(e){								// Add click handler
+			
+			$("#ntc-"+rowNum).click(function(e){							// Add click handler
 				   	var time=$("#"+e.target.id).text();						// Get time
 				   	if (shivaLib.player.smartPlayerType != "Vimeo") {		// If vimeo
  						var v=time.split(":");								// Reconstruct from parts into seconds
@@ -209,11 +233,20 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 							v[1]=v[0],v[0]=0;								// Pad it
 						time=Math.max(Number(v[0]*60)+Number(v[1]),.25);	// Make into seconds
 						}
-					trace(e)
 					if (e.shiftKey)											// If shift key pressed
 						$("#"+e.target.id).text(shivaLib.SecondsToTimecode(shivaLib.player.currentTime()));	// Set new time
 					else
 						shivaLib.player.currentTime(time);						// Cue player
+					});
+			$("#ntc-"+rowNum).dblclick(function(e){							// Add  d-click handler
+				   	var time=$("#"+e.target.id).text();						// Get time
+				   	if (shivaLib.player.smartPlayerType != "Vimeo") {		// If vimeo
+ 						var v=time.split(":");								// Reconstruct from parts into seconds
+						if (v.length == 1)									// Only seconds
+							v[1]=v[0],v[0]=0;								// Pad it
+						time=Math.max(Number(v[0]*60)+Number(v[1]),.25);	// Make into seconds
+						}
+					shivaLib.player.play(time);								// Play
 					});
 			}
 		});

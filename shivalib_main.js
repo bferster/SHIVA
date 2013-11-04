@@ -706,7 +706,7 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
    			row=o.row;													// Set it
    		if ((o) && (o.column != undefined))								// If a col
    			col=o.column;												// Set it
-  		_this.SendShivaMessage("ShivaChart=data",row+"|"+col); 			// Send EVA message
+  		_this.SendShivaMessage("ShivaChart=click",row+"|"+col); 		// Send EVA message
    		});
 }
 
@@ -834,7 +834,7 @@ SHIVA_Show.prototype.MakeSelect=function(id, multi, items, sel, extra, values)
 		str+="<option";
 		if (sel == items[i])
 			str+=" selected='selected'"
-		if (values)
+		if (values && values[i])
 			str+=" value='"+values[i]+"'";
 		str+=">"+items[i]+"</option>";
 		}	

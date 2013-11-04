@@ -353,6 +353,7 @@ function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
 	var panes=["Poster"];													// Holds list of pane names
 	var tables=[];															// Holds list of table names
 	var scripts=[];															// Holds list of script names
+	var ons=["starting","clicked","moved","ready","at time","played","paused","other"];			// List of possible ons
 	var actions=["data","goto","hide","load","marker","pause","play","resize","show","time"];	// Holds list of action names
 
 	for (i=1;i<=shivaLib.items.length;++i)									// For each pane
@@ -371,11 +372,24 @@ function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
 	var str="<div id='evaLine"+num+"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;When ";	// Div start								
 	str+=shivaLib.MakeSelect("fromSel"+num+"",false,panes,panes[o.from]," onchange='onEvaEntryChange(this.id)'",[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]);
 	str+=" is ";	
-	if (o.on == "init")		sel="starting";
-	if (o.on == "click")	sel="clicked";
-	if (o.on == "ready")	sel="ready";
-	if (o.on == "time")		sel="at time";
-	str+=shivaLib.MakeSelect("onSel"+num+"",false,["starting","clicked","ready","at time"],sel," onchange='onEvaEntryChange(this.id)'",["init","click","ready","time"]);
+	if (o.on == "init")				sel="starting";
+	else if (o.on == "click")		sel="clicked";
+	else if (o.on == "time")		sel="at time";
+	else if (o.on == "move")		sel="moved";
+	else if (o.on == "play")		sel="played";
+	else if (o.on == "pause")		sel="paused";
+	else if (o.on == "other") 												// If other
+		o.on=prompt("Type SHIVA event to trigger on");						// Get new option
+	else																	// Anything else						
+		sel=o.on;															// Just select directly
+	for (i=0;i<4;++i)														// Look through ons		
+		if (sel == ons[i])													// If a match
+			break;															// Quit looking
+	if (i == 4) {															// No match
+		ons.splice(7,0,o.on);												// Add to pulldown
+		sel=o.on;															// Select directly
+		}
+	str+=shivaLib.MakeSelect("onSel"+num+"",false,ons,sel," onchange='onEvaEntryChange(this.id)'",["init","click","move","ready","time","play","pause"]);
 	if (o.on == "time") {
 		if (!o.p1)	o.p1="00:00";
 		str+=" near <input id='pSel"+num+"' onchange='onEvaEntryChange(this.id)' type='input'size='4' style='text-align:center' value='"+o.p1+"'>";

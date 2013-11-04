@@ -406,18 +406,17 @@ EvA.prototype.ShivaEventHandler=function(e) 						// CATCH SHIVA EVENTS
 //	trace(e.data)
 	var v=e.data.split("|");											// Get parts
 	v[0]=v[0].split("=")[1];											// Strip prefix
-
 	for (i=0;i<n;++i) {													// For each ondo
 		o=this.ondos[i];												// Point at it
 		from=o.from;													// Copy
 		if (!isNaN(o.from)) from="posterFrame-"+(o.from-1);				// True iframe ids
 		if (o.on == "ready") { 											// A ready message
-			if ((!o.done) && (v[1] == from) && (v[0] == "ready")) {	// If it matches source and not done yet
+			if ((!o.done) && (v[1] == from) && (v[0] == "ready")) {		// If it matches source and not done yet
 				o.done++;												// Mark it done
 				this.RunOnDo(o);										// Do it
 				}
 			}
-		else if ((v[1] == from) && (v[0] != "ready"))					// If it matches source
+		else if ((v[1] == from) && (v[0] == o.on))						// If it matches source and type
 			this.HandleOnEvent(o,e.data);								// Handle it
 		}
 }

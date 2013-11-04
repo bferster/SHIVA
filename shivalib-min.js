@@ -1549,14 +1549,14 @@ SHIVA_Show.prototype.AnimateDiv=function(mode)
 return;if(mode=="next"){if(mob.curMob<shivaLib.items.length-1){mob.curMob++;shivaLib.imageMob.start=new Date().getTime();shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);}
 else{if(shivaLib.imageMob.snd)
 shivaLib.imageMob.snd.pause();if(!$("#accord").length)
-mob.curMob=0;$("#"+shivaLib.container+"PlyBut").show();return;}}
+mob.curMob=0;$("#"+shivaLib.container+"PlyBut").show();shivaLib.SendShivaMessage("ShivaImage=done");return;}}
 var o=shivaLib.items[mob.curMob];v=o.sp.split(",");mob.sx=v[0]-0;mob.sy=v[1]-0;mob.sw=v[2]-0;v=o.ep.split(",");mob.ex=v[0]-0;mob.ey=v[1]-0;mob.ew=v[2]-0;mob.dur=o.dur-0;mob.fx=o.fx;mob.url=o.url;mob.ease=o.ease;mob.title=o.title;$("#"+shivaLib.container+"Title").html(mob.title);$("#"+shivaLib.container).css("overflow","hidden");if(($("#"+shivaLib.container+"PlyBut").length==0)&&mob.dur){$("#"+shivaLib.container).append("<img id='"+this.container+"PlyBut' src='playbut.gif' style='position:absolute;top:48%;left:47%;padding:2px;padding-left:18px;padding-right:18px' class='propTable' width='18'>");$("#"+shivaLib.container+"PlyBut").click(function(){$(this).hide();if(shivaLib.imageMob.snd){if(shivaLib.imageMob.snd.readyState)
 shivaLib.imageMob.snd.currentTime=shivaLib.imageMob.audioStart;shivaLib.imageMob.snd.play();}
 clearInterval(shivaLib.imageMob.interval);shivaLib.imageMob.start=new Date().getTime();shivaLib.imageMob.interval=setInterval(shivaLib.AnimateDiv,42);shivaLib.SendShivaMessage("ShivaImage=play");});}
 if(mob.url!=$("#"+mob.div).attr('src')){$("#"+mob.div).attr('src',shivaLib.items[mob.curMob].url);if(mob.curMob<mob.numMobs-1)
 $("#"+mob.div+"2").attr('src',shivaLib.items[mob.curMob+1].url);}
 var pct=(new Date().getTime()-mob.start)/(mob.dur*1000);if(mob.start==0)
-pct=0;if(pct>=.99){shivaLib.SendShivaMessage("ShivaImage=pause");clearInterval(shivaLib.imageMob.interval);shivaLib.imageMob.interval=0;mob.start=0;shivaLib.AnimateDiv("next");return;}
+pct=0;if(pct>=.99){clearInterval(shivaLib.imageMob.interval);shivaLib.imageMob.interval=0;mob.start=0;shivaLib.AnimateDiv("next");return;}
 if(mob.start==0)
 pct=0;if(mob.ease=="both")
 pct=1.0-((Math.cos(3.1414*pct)+1)/2.0);else if(mob.ease=="in")

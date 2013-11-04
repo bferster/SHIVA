@@ -353,7 +353,7 @@ function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
 	var panes=["Poster"];													// Holds list of pane names
 	var tables=[];															// Holds list of table names
 	var scripts=[];															// Holds list of script names
-	var ons=["starting","clicked","moved","ready","at time","played","paused","other"];			// List of possible ons
+	var ons=["starting","clicked","moved","ready","at time","played","paused","done","other"];	// List of possible ons
 	var actions=["data","goto","hide","load","marker","pause","play","resize","show","time"];	// Holds list of action names
 
 	for (i=1;i<=shivaLib.items.length;++i)									// For each pane
@@ -382,11 +382,11 @@ function CreateEntryLine(num)												// CREATE EBA ENTRY LINE
 		o.on=prompt("Type SHIVA event to trigger on");						// Get new option
 	else																	// Anything else						
 		sel=o.on;															// Just select directly
-	for (i=0;i<4;++i)														// Look through ons		
+	for (i=0;i<ons.length;++i)												// Look through ons		
 		if (sel == ons[i])													// If a match
 			break;															// Quit looking
-	if (i == 4) {															// No match
-		ons.splice(7,0,o.on);												// Add to pulldown
+	if (i == ons.length) {													// No match
+		ons.splice(ons.length-1,0,o.on);									// Add to pulldown
 		sel=o.on;															// Select directly
 		}
 	str+=shivaLib.MakeSelect("onSel"+num+"",false,ons,sel," onchange='onEvaEntryChange(this.id)'",["init","click","move","ready","time","play","pause"]);

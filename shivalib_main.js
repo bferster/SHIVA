@@ -211,6 +211,8 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 			shivaLib.NetworkActions(e.data);								// Route
 		else if (shivaLib.options.shivaGroup == "WordCloud")				// If an wordcloud action
 			shivaLib.WordActions(e.data);									// Route
+		else if (shivaLib.options.shivaGroup == "Control")					// If an control action
+			shivaLib.ControlActions(e.data);								// Route
 		}
 }
 

@@ -63,7 +63,8 @@ shivaLib.TimeActions(e.data);else if(shivaLib.options.shivaGroup=="Visualization
 shivaLib.ChartActions(e.data);else if(shivaLib.options.shivaGroup=="Image")
 shivaLib.ImageActions(e.data);else if(shivaLib.options.shivaGroup=="Network")
 shivaLib.NetworkActions(e.data);else if(shivaLib.options.shivaGroup=="WordCloud")
-shivaLib.WordActions(e.data);}}
+shivaLib.WordActions(e.data);else if(shivaLib.options.shivaGroup=="Control")
+shivaLib.ControlActions(e.data);}}
 SHIVA_Show.prototype.AddOverlay=function()
 {var key;this.overlay=new Array();this.DrawOverlay();for(key in this.options){if(key.match(/draw-/g))
 this.AddOverlaySeg(this.options[key],false);}
@@ -524,9 +525,9 @@ $.proxy(DrawInfoBox(items),this);this.SendReadyMessage(true);function DrawTimeSt
 str+=" checked=checked";str+="/><label for='stp"+i+"'>"+(i+1)+"</label>";items[i].ans=items[i].def;}
 str+="<input type='radio' id='stp"+i+"' name='stepper'";str+="/><label for='stp"+i+"'>NEXT</label>";str+="</span>";$(con).html(str);$(con).css("text-align","left");$(con).css("width",((items.length*25)+80)+"px");$("#"+dd).buttonset().change(function(e){shiva_Step(e.target.id.substr(3),_this)});$("#stp"+i).button({text:true,icons:{primary:"ui-icon-triangle-1-e"}});}
 function DrawTimeSlider(items)
-{var str="";var dd=con+"Int";$(dd).remove();$(con).append("<div id='"+dd.substr(1)+"'/>");$(con).css("height","30px");$(con).css("width","30px");options.orientation=options.orientation.toLowerCase();options.step=Number(options.step);if(options.orientation=="vertical"){$(dd).css("height",options.size+"px");$(con).css("height",options.size+"px");}
-else{$(dd).css("width",options.size+"px");$(con).css("width",options.size+"px");}
-if(options.type=="Bar")
+{var dd=con+"Int";$(dd).remove();$(con).append("<div id='"+dd.substr(1)+"'/>");$(con).css({height:null,width:null});options.orientation=options.orientation.toLowerCase();options.step-=0;options.max-=0;options.min-=0;if(options.orientation=="vertical")
+$(dd).css("height",options.size+"px");else
+$(dd).css("width",options.size+"px");if(options.type=="Bar")
 options.range="min";else if(options.type=="Range")
 options.range=true;if((!options.def)&&(options.type=="Range"))
 options.def="25,75";if(options.def.indexOf(",")==-1)
@@ -535,7 +536,7 @@ if(!$('#sliderBack').length){var mc=document.createElement('canvas');mc.setAttri
 sliderContext=mc.getContext('2d');}
 $(dd).slider("destroy");$(dd).slider(options);$(dd).bind("slidestop",function(e,ui){var which=-1;var val=ui.value;if(ui.values)
 val=ui.values[0];if(ui.value!=val){which=0;val=ui.values[1];}
-shivaLib.SendShivaMessage("ShivaSlider="+(which+1)+"|"+val);});DrawSliderTicks();}
+shivaLib.SendShivaMessage("ShivaSlider=click",(which+1)+"|"+val);});DrawSliderTicks();}
 function DrawSliderTicks()
 {var g=_this.g;if(!g)
 g=_this.g=new SHIVA_Graphics();var hgt=40,wid=40,pos,val;var n=Number(options.ticks);var showValues=(options.showValues=="true")
@@ -563,12 +564,12 @@ str+="/><label for='sel"+i+"'>"+o.label+"</label>";}}
 str+="</span>";$(con).html(str);for(i=0;i<items.length;++i){if(options.style=="Toggle")
 $("#sel"+i).click(function(){var ch=this.checked?"checked":"unchecked"
 var id=this.id.substr(3)
-shivaLib.SendShivaMessage("ShivaSelect="+id+"|"+ch)});else
-$("#sel"+i).click(function(){shivaLib.SendShivaMessage("ShivaSelect="+this.id.substr(3)+"|checked")});}
+shivaLib.SendShivaMessage("ShivaSelect=click",id+"|"+ch)});else
+$("#sel"+i).click(function(){shivaLib.SendShivaMessage("ShivaSelect=click",this.id.substr(3)+"|checked")});}
 $(con).css("text-align","left");$("#"+dd).buttonset();$(con).css("width",(nChars*6)+"px");for(i=0;i<items.length;++i)
 if(items[i].type!="Button"){items[i].type=items[i].type.replace(/\./g,"");items[i].type=items[i].type.replace(/ui-icon-/g,"");$("#sel"+i).button({text:true,icons:{primary:"ui-icon-"+items[i].type}});}}
 function DrawDialog(items)
-{var o,i,v,sty,str="";var dd="#"+container+"Dlg";$(dd).remove();$(con).append("<div id='"+container+"Dlg' style='border:1px solid #999;padding:8px;background-color:#f8f8f8;text-align:left' class='rounded-corners'/>");for(o in options){v=options[o];if(v=="true")v=true;if(v=="false")v=false;options[o]=v;}
+{var o,i,v,sty,str="";var dd="#"+container+"Dlg";$(dd).remove();$(con).append("<div id='"+container+"Dlg' style='width:auto;border:1px solid #999;padding:8px;background-color:#f8f8f8;text-align:left' class='rounded-corners'/>");for(o in options){v=options[o];if(v=="true")v=true;if(v=="false")v=false;options[o]=v;}
 if((options.draggable)&&(!_this.editMode))
 $(dd).draggable();if(options.title)
 str+="<div align='center'><b>"+options.title+"</b></div><br>";for(i=0;i<items.length;++i){o=items[i];if(o.type)
@@ -592,13 +593,13 @@ str+="<br/> ";}
 $(dd).html(str);for(i=0;i<items.length;++i){o=items[i];if(o.type)
 sty=o.type.toLowerCase();if((sty=="radio")||(sty=="image")||(sty=="button"))
 $("#"+o.name).click(function(){var id=this.id.substr(5)
-shivaLib.SendShivaMessage("ShivaDialog="+id+"|checked")});else if(sty=="checkbox")
+shivaLib.SendShivaMessage("ShivaDialog=click",id+"|checked")});else if(sty=="checkbox")
 $("#"+o.name).click(function(){var id=this.id.substr(5)
 var ch=this.checked?"checked":"unchecked"
-shivaLib.SendShivaMessage("ShivaDialog="+id+"|"+ch)});else if((sty=="input")||(sty=="combo"))
+shivaLib.SendShivaMessage("ShivaDialog=click",id+"|"+ch)});else if((sty=="input")||(sty=="combo"))
 $("#"+o.name).change(function(){var id=this.id.substr(5)
-var ch=this.value;shivaLib.SendShivaMessage("ShivaDialog="+id+"|"+ch)});else if(sty=="range"){var ops={min:0,max:100,value:o.def,slide:function(event,ui){var id=this.id.substr(5)
-shivaLib.SendShivaMessage("ShivaDialog="+id+"|"+ui.value)}};$("#"+o.name).slider(ops);}}}
+var ch=this.value;shivaLib.SendShivaMessage("ShivaDialog=click",id+"|"+ch)});else if(sty=="range"){if(o.def=="false")o.def=0;var ops={min:0,max:100,value:o.def-0,stop:function(event,ui){var id=this.id.substr(5)
+shivaLib.SendShivaMessage("ShivaDialog=click",id+"|"+ui.value)}};$("#"+o.name).slider(ops);}}}
 function DrawInfoBox(items)
 {var str="";var min=0;var dd="#"+container+"Inf";$(dd).remove();$(con).append("<div id='"+container+"Inf' style='border:1px solid #999;padding:8px;text-align:left' class='rounded-corners'/>");for(o in options){v=options[o];if(v=="true")v=true;if(v=="false")v=false;options[o]=v;}
 if(options.title)
@@ -612,11 +613,11 @@ if(options.width!="auto")$(dd).css("width",options.width+"px");if(options.height
 if((options.draggable)&&(!_this.editMode))
 $(dd).draggable();if((options.text)&&(options.style=="Text"))
 $(content).html(options.text);if(options.scroller)$(content).css("overflow","scroll").css("overflow-x","hidden");else $(content).css("overflow","hidden");if(options.closer){var x=$(dd).width()-2;str="<img id='Clo"+dd.substr(1)+"' src='closedot.gif' style='position:absolute;left:"+x+"px;top:5px'/>"
-$(dd).append(str);$("#Clo"+dd.substr(1)).click(function(){var id=this.id.substr(3);$("#"+id).hide();shivaLib.SendShivaMessage("ShivaDialog="+options.title+"|closed");});}}}
+$(dd).append(str);$("#Clo"+dd.substr(1)).click(function(){var id=this.id.substr(3);$("#"+id).hide();shivaLib.SendShivaMessage("ShivaDialog=close",options.title);});}}}
 function shiva_Step(num,obj)
 {if(num<0)
 num=obj.lastStep-0+1;num=Math.min(num,obj.items.length-1);obj.lastStep=num;for(var i=0;i<obj.items.length;++i)
-$("#stp"+i).removeAttr("checked");$("#stp"+num).attr("checked",true);$("#shiva_stepq").remove();var str="<div id='shiva_stepq'><br/><b>"+obj.items[num].label+"</b><br/>";shivaLib.SendShivaMessage("ShivaStep="+num+"|"+obj.items[num].ques+"|"+obj.items[num].ans);if(obj.items[num].ques.indexOf("|")!=-1){str+="<select name='shiva_stepa' id='shiva_stepa' onChange='shiva_onStepAnswer("+num+","+this+")'>";var v=obj.items[num].ques.split("|");for(var j=0;j<v.length;++j){str+="<option";if(obj.items[num].ans==v[j])
+$("#stp"+i).removeAttr("checked");$("#stp"+num).attr("checked",true);$("#shiva_stepq").remove();var str="<div id='shiva_stepq'><br/><b>"+obj.items[num].label+"</b><br/>";shivaLib.SendShivaMessage("ShivaStep=click",num+"|"+obj.items[num].ques+"|"+obj.items[num].ans);if(obj.items[num].ques.indexOf("|")!=-1){str+="<select name='shiva_stepa' id='shiva_stepa' onChange='shiva_onStepAnswer("+num+","+this+")'>";var v=obj.items[num].ques.split("|");for(var j=0;j<v.length;++j){str+="<option";if(obj.items[num].ans==v[j])
 str+=" selected='selected'";str+=">"+v[j]+"</option>";}
 str+="</select></div>";$("#"+obj.container).append(str);}
 else if(obj.items[num].ques){var e="onblur";if(obj.items[num].ques=="color")
@@ -626,6 +627,8 @@ $("#accord").accordion({active:num});}
 function shiva_onStepAnswer(num,obj)
 {if(obj.items[num].ques=="color")
 obj.ColorPicker(-1,"shiva_stepa");obj.items[num].ans=$("#shiva_stepa").val();}
+SHIVA_Show.prototype.ControlActions=function(msg)
+{}
 function SHIVA_Draw(container,hidePalette)
 {this.container=container;this.color="-1";this.clipboard=new Array();this.edgeColor="#0000ff";this.textColor="#000000";this.boxColor="-1";this.edgeWidth="30";this.arrow=false;this.alpha=100;this.curTool=0;this.imageURL="";this.imageWid=400;this.textAlign="Left";this.textStyle="";this.textSize=0;this.ideaShape="Round box";this.ideaGradient=true;this.ideaBold=false;this.ideaBackCol="#FFF2CC";this.ideaEdgeCol="#999999";this.ideaTextCol="#000000";this.selectedItems=new Array();this.selectedDot=-1;this.segs=new Array();this.startTime="0:0";this.endTime="end";if(shivaLib.overlay)
 this.segs=shivaLib.overlay;this.closeOnMouseUp=false;this.curSeg=-1;this.lastDotTime=0;this.snap=false;this.curve=false;this.snapSpan=20;this.leftClick=false;this.lastX=0;this.lastY=0;shivaLib.dr=this;if(!hidePalette)

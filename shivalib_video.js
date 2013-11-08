@@ -190,10 +190,9 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 	$("#shivaNotesSearch").on("change", function(e) {						// Handle fileter
 				var n=$("#shivaNotesTbl tr").length;						// Number of rows
 				var patt=new RegExp($("#shivaNotesSearch").val());			// Pattern to find
-				trace(patt)
 				for (var i=0;i<n;++i) {										// For each row
 					$("#ntx-"+i).css("color","black");						// Clear it
-						if ($("#ntx-"+i).val().match(patt))					// If in there
+						if (($("#ntx-"+i).val() && ($("#ntx-"+i).val().match(patt))) // If in there
 						$("#ntx-"+i).css("color","red");					// Highlight it
 					}
 				});			

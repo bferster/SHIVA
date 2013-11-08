@@ -40,7 +40,8 @@ callback();else
 setTimeout(function(){shivaJSLoaded(obj,callback);},50);}
 SHIVA_Show.prototype.SendReadyMessage=function(mode)
 {if(shivaLib.drupalMan)
-window.parent.postMessage("ShivaReady="+mode.toString(),"*");shivaLib.SendShivaMessage("ShivaChart=ready");}
+window.parent.postMessage("ShivaReady="+mode.toString(),"*");var asp=1.0;if(this.options.height)
+asp=this.options.height/this.options.width;shivaLib.SendShivaMessage("ShivaChart=ready",Math.round(asp*1000));}
 SHIVA_Show.prototype.SendShivaMessage=function(src,msg)
 {var id=window.name;if(!id)
 id="posterFrame-"+(""+window.location.search.match(/&if=[0-9A-z]+/)).substr(4);var str=src+"|"+id;if(msg)

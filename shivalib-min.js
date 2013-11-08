@@ -40,8 +40,7 @@ callback();else
 setTimeout(function(){shivaJSLoaded(obj,callback);},50);}
 SHIVA_Show.prototype.SendReadyMessage=function(mode)
 {if(shivaLib.drupalMan)
-window.parent.postMessage("ShivaReady="+mode.toString(),"*");var asp=1.0;if(this.options.height)
-asp=this.options.height/this.options.width;shivaLib.SendShivaMessage("ShivaChart=ready",Math.round(asp*1000));}
+window.parent.postMessage("ShivaReady="+mode.toString(),"*");var asp=$("#"+shivaLib.container).height()/$("#"+shivaLib.container).width();shivaLib.SendShivaMessage("ShivaChart=ready",Math.round(asp*1000));}
 SHIVA_Show.prototype.SendShivaMessage=function(src,msg)
 {var id=window.name;if(!id)
 id="posterFrame-"+(""+window.location.search.match(/&if=[0-9A-z]+/)).substr(4);var str=src+"|"+id;if(msg)
@@ -1455,7 +1454,8 @@ this.SendMessage(to,str);break;case"script":if(!ondo.src)
 break;var s=document.createElement("script");$("#scr-"+ondo.to).remove();s.id="scr-"+ondo.to;s.setAttribute('type','text/javascript');str="function "+ondo.to+"(p1,p2,p3,p4,p5,p6,p7){";str+=ondo.src.replace(/&apos;/g,"\'").replace(/&quot;/g,"\"").replace(/&br;/g,"\n");s.appendChild(document.createTextNode(str+"}"));document.getElementsByTagName('head').item(0).appendChild(s);break;case"call":window[ondo.to](ondo.p1,ondo.p2,ondo.p3,ondo.p4,ondo.p5,ondo.p6);break;case"filter":if(!ondo.src||!ondo.to)
 break;this.data[ondo.to]=[];this.Query(this.data[ondo.src],this.data[ondo.to],ondo.query,ondo.p1,ondo.p2);break;}}
 EvA.prototype.ShivaEventHandler=function(e)
-{var from;var i,o,n=this.ondos.length;var v=e.data.split("|");v[0]=v[0].split("=")[1];for(i=0;i<n;++i){o=this.ondos[i];from=o.from;if(!isNaN(o.from))from="posterFrame-"+(o.from-1);if(o.on=="ready"){if((!o.done)&&(v[1]==from)&&(v[0]=="ready")){o.done++;this.RunOnDo(o);}}
+{var from;var i,o,n=this.ondos.length;trace(e.data)
+var v=e.data.split("|");v[0]=v[0].split("=")[1];for(i=0;i<n;++i){o=this.ondos[i];from=o.from;if(!isNaN(o.from))from="posterFrame-"+(o.from-1);if(o.on=="ready"){if((!o.done)&&(v[1]==from)&&(v[0]=="ready")){o.done++;this.RunOnDo(o);}}
 else if((v[1]==from)&&(v[0]==o.on))
 this.HandleOnEvent(o,e.data);}}
 EvA.prototype.HandleOnEvent=function(ondo,data)

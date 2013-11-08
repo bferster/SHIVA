@@ -161,10 +161,8 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE 
 {
 	if (shivaLib.drupalMan) 												// If called from Drupal manager
 		window.parent.postMessage("ShivaReady="+mode.toString(),"*");		// Send message to parent wind		
-	var asp=1.0;															// Assume 1:1
-	if (this.options.height)												// If a height set
-		asp=this.options.height/this.options.width;							// Get aspect
- 	shivaLib.SendShivaMessage("ShivaChart=ready",Math.round(asp*1000)); 	// Send ready message to EvA with aspect ratio
+	var asp=$("#"+shivaLib.container).height()/$("#"+shivaLib.container).width();	// Get asp of container															// Assume 1:1
+	shivaLib.SendShivaMessage("ShivaChart=ready",Math.round(asp*1000)); 	// Send ready message to EvA with aspect ratio
 }
 
 SHIVA_Show.prototype.SendShivaMessage=function(src, msg) 				// SEND SHIVA MESSAGE 

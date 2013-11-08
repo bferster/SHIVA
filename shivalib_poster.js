@@ -403,7 +403,7 @@ EvA.prototype.ShivaEventHandler=function(e) 						// CATCH SHIVA EVENTS
 {
 	var from;
 	var i,o,n=this.ondos.length;
-//	trace(e.data)
+	trace(e.data)
 	var v=e.data.split("|");											// Get parts
 	v[0]=v[0].split("=")[1];											// Strip prefix
 	for (i=0;i<n;++i) {													// For each ondo

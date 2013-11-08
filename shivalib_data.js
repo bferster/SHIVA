@@ -4,19 +4,18 @@
 
 SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback, addHeader) 		//	GET GOOGLE DOCS SPREADSHEET
 {
-	if (url.indexOf("google.com") != -1) {
-		var query=new google.visualization.Query(url);							
-		query.send(handleGoogleResponse);
+	if (url.indexOf("google.com") != -1) {									// If Google doc
+		var query=new google.visualization.Query(url);						// Make query object	
+		query.send(handleGoogleResponse);									// Fetch data
 		}
-	else{
-		$.ajax({
-			type : 'GET',
-			url : 'proxy.php',
-			data : { url : url },
-			async : false
-			}).complete(handleCSVResponse); 
+	else{																	// A CSV
+		$.ajax({															// Fetch file
+			type:  'GET',													// a GET
+			url:   'proxy.php',												// Use proxy for cross-domain issue
+			data:  { url : url },											// Add url
+			async: false }													// Async									
+		).complete(handleCSVResponse); 										// Callback
 		}
-
 
    function handleCSVResponse(response) {									// HANDLE INCOMING DATA
 	    var i,j,o,lab;

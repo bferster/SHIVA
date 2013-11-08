@@ -818,16 +818,17 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 		var e=o.player.indexOf(")");										// Param end
 		if ((s != -1) && (e != -1))											// If well-formed
 			param=o.player.substring(s+1,e).replace(/%/g,"");				// Extract param			
-		if (o.player.toLowerCase().indexOf("play") != -1) {					// Play
+		if (o.player.match(/^play/i)) {										// Play
 			if (param)														// If a time set
 				this.player.play(param);									// Play from that
 			else															// No time set
 				this.player.play();											// Play from current spot
 			}
-		else if (o.player.toLowerCase() == "pause")	this.player.pause();	// Pause
-		else if (o.player.toLowerCase().indexOf("volume") != -1)			// Volume
+		else if (o.player.match(/^pause/i))	
+			this.player.pause();											// Pause
+		else if (o.player.match(/^volume/i))								// Volume
 			this.player.volume(param/100);									// Set volume
-		else if (o.player.toLowerCase().indexOf("load") != -1) {			// Load new clip
+		else if (o.player.match(/^load/i)) {									// Load new clip
 			this.player.media.src=param;									// Set new source
 			this.player.load(); 											// Load
 			}
@@ -875,19 +876,21 @@ SHIVA_Event.prototype.SpecialEvent=function(id) 						// RUN SPECIAL EVENT
 	var e=id.indexOf(")");													// Param end
 	if ((s != -1) && (e != -1))												// If well-formed
 		param=id.substring(s+1,e).replace(/%/g,"");							// Extract param			
-	if (id == "pause()")					this.player.pause();			// Pause
-	else if (id.indexOf("play") != -1) {									// Play
+	if (id.match(/^pause/i))												// If pause				
+		this.player.pause();												// Pause
+	else if (id.match(/^play/i)) {											// Play
 		if (param)															// If a time set
 			this.player.play(param);										// Play from that
 		else																// No time set
 			this.player.play();												// Play from current spot
 		}
-	else if (id.indexOf("load(") != -1)	{									// Load new clip	
+	else if (id.match(/^load/i))	{										// Load new clip	
 		this.player.media.src=param;										// Set url			
 		this.player.load();													// Load
 		}
-	else if (id.indexOf("volume(") != -1)	this.player.volume(param/100);	// Volume
-	else if (id.indexOf("popup(") != -1) {									// Popup	
+	else if (id.match(/^volume/i)) 											// If volume
+		this.player.volume(param/100);										// Volume
+	else if (id.match(/^popup/i)) {											// Popup	
 		$("#shivaPopupDiv").remove();										// Remove existing one
 		str="<div id='shivaPopupDiv' style='position:absolute;width:200px;padding:8px;";	// Div
 		str+="border:1px solid; left:200px;top:100px'>";					// End style
@@ -898,7 +901,7 @@ SHIVA_Event.prototype.SpecialEvent=function(id) 						// RUN SPECIAL EVENT
 		$("#shivaPopupDiv").css("-moz-border-radius","8px");				// Mozilla
 		$("#shivaPopupDiv").css("background-color","#eee").css('border',"1px solid #ccc");
 		$("#shivaPopupDiv").draggable();									// Draggable
-		$("#shivaPopupDiv").delay(6000).fadeOut(400);						// Close after 6 seconds
+		$("#shivaPopupDiv").delay(5000).fadeOut(400);						// Close after 6 seconds
 		}
 	else return false;														// Not a special event
 	return true;															// Got one

@@ -87,17 +87,18 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 
   	function onVideoTimer(e) {												// VIDEO TIMER HANDLER
 		if ($("#shivaNotesDiv").length) {									// If open
-			var t,i,next;
+			var t,i,j,next;
 			var now=shivaLib.player.currentTime();							// Get current time
 			for (i=0;i<500;++i) {											// Loop
 				if (!$("#ntc-"+i).length)									// If no more                                  
 					break;													// Quit
+				$("#ntc-"+i).css("color","#009900");						// Clear it
 	        	t=shivaLib.TimecodeToSeconds($("#ntc-"+i).text());			// Convert to seconds      
-				if (now > t) {												// Post start
+				if (now >= t) {												// Post start
 	        		next=shivaLib.TimecodeToSeconds($("#ntc-"+(i+1)).text()); // Next tc in secs    
 					if (now < next) {										// If before next
-						$("#ntx-"+i).focus();								// Set focus
-		            	break;                                              // Quit	            		}
+						$("#ntc-"+i).css("color","#ff0000");				// Highlight it
+			            break;                                             	// Quit
 	            		}
        				}
        			}
@@ -174,18 +175,29 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 	str+="top:"+top+"px;left:"+left+"px;'>";								// Set position
 	str+="<table id='shivaNotesTbl' width='100%'>";							// Table
 	var ts="color:#009900;cursor:crosshair";								// Timecode style
-	var ns="font-size:x-small;border:none;background:none;width:100%;padding:0px;margin:0px"; // Note style	
-	str+="<div style='text-align:center;font-size:medium;><img src='shivalogo16.png' style='vertical-align:middle'><b> SHIVA Notes</b></div><hr>";
-	str+="<div style='position:absolute;top:0px;left:0px;width:100%;text-align:right'><br/><img src='savedot.gif' id='shivaNotesSave' title='Save notes'>&nbsp; &nbsp;</div>";
-	str+="<tr><td width='36' id='ntc-0' style='"+ts+"'>Type:</td><td><input id='ntx-0' type='input' style='"+ns+"'/></td></tr>";
+	var ns="font-size:small;border:none;background:none;width:100%;padding:0px;margin:0px"; // Note style	
+	str+="<div style='text-align:center;font-size:large;'><img src='shivalogo16.png' style='vertical-align:-2px'><b> SHIVA Notes</b></div><hr>";
+	str+="<div style='position:absolute;top:-2px;left:0px;width:100%;text-align:right'><br/>Find: <input type='input' id='shivaNotesSearch' style='height:12px;width:60px;font-size:x-small;padding:0px;margin:0px'/>&nbsp; &nbsp;</div>"
+	str+="<tr><td width='38' id='ntc-0' style='"+ts+"'>Type:</td><td><input id='ntx-0' type='input' style='"+ns+"'/></td></tr>";
 	str+="</table>";														// End
-	str+="<div style='text-align:right'><br/><br/><input type='checkbox' id='notesPause'/>Pause video while typing?";
-//	str+="<br/>Filter by: <input type='input' id='notesFilter' size='10'/></div>";
+	str+="<div style='text-align:right'><br/>________________________________<br/><br/>Pause video while typing?<input type='checkbox' id='notesPause' style='height:11px'>";
+	str+="<br/>Save notes: <img src='savedot.gif' id='shivaNotesSave' title='Save notes' width='15' style='vertical-align:bottom'>";
 	
-	$('body').append(str+"</div>");													// Add to dom								
+	$('body').append(str+"</div>");											// Add to dom								
 	$("#shivaNotesDiv").draggable();										// Make draggable
 	$("#ntx-0").focus();													// Focus on first one
 	
+	$("#shivaNotesSearch").on("change", function(e) {						// Handle fileter
+				var n=$("#shivaNotesTbl tr").length;						// Number of rows
+				var patt=new RegExp($("#shivaNotesSearch").val());			// Pattern to find
+				trace(patt)
+				for (var i=0;i<n;++i) {										// For each row
+					$("#ntx-"+i).css("color","black");						// Clear it
+						if ($("#ntx-"+i).val().match(patt))					// If in there
+						$("#ntx-"+i).css("color","red");					// Highlight it
+					}
+				});			
+		
 	$("#shivaNotesSave").on("click", function(e) {							// Handle save
 				var str="";
 				var n=$("#shivaNotesTbl tr").length;						// Number of rows
@@ -193,8 +205,9 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 					if ($("#ntx-"+i).val())									// If something there
 						str+=$("#ntc-"+i).text()+"\t"+$("#ntx-"+i).val()+"\n";	// Add row
 	 			 	window.prompt ("To copy your Notes to the clipboard:\nType Ctrl+C or Cmd+C and click  OK button.",str);	// Copy to clipboard
-					});			
-		
+				});			
+
+
 	$("#shivaNotesTbl").on("keydown", function(e) {							// Handle key down
 		var cap=false;														// Don't cap
 		var rowNum=e.target.id.split("-")[1];								// Get rownum
@@ -202,7 +215,7 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 			cap=true;														// Let's cap line
 		if ((e.keyCode == 13) || (cap)) {									// Enter on capping a line
 			var ts="color:#009900;cursor:crosshair";						// Timecode style
-			var ns="font-size:x-small;border:none;background:none;width:100%;padding:0px;margin:0px";	// Note style	
+			var ns="font-size:small;border:none;background:none;width:100%;padding:0px;margin:0px";	// Note style	
 			var id=$("#shivaNotesTbl tr").length;							// If of next row
 			var str="<tr><td id='ntc-"+id+"' style='"+ts+"'>Type:</td><td><input id='ntx-"+id+"' type='input' style='"+ns+"'/></td></tr>";
 			$("#shivaNotesTbl").append(str);								// Add row
@@ -210,7 +223,7 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 			if ($("#notesPause").prop('checked') && !cap) 					// If checked and not capped
 				shivaLib.player.play();										// Resume player
 			if (cap)														// If line is capped
-				$("#ntc-"+id).text(shivaLib.SecondsToTimecode(shivaLib.player.currentTime()));	// Set new time
+				$("#ntc-"+id).text($("#ntc-"+rowNum).text());				// Set to same time
 			}
 		else if ((e.keyCode == 8) || (e.keyCode == 46)) {					// Delete
 			var id="#"+e.target.id;											// Get id
@@ -236,8 +249,9 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 					if (e.shiftKey)											// If shift key pressed
 						$("#"+e.target.id).text(shivaLib.SecondsToTimecode(shivaLib.player.currentTime()));	// Set new time
 					else
-						shivaLib.player.currentTime(time);						// Cue player
+						shivaLib.player.currentTime(time);					// Cue player
 					});
+			
 			$("#ntc-"+rowNum).dblclick(function(e){							// Add  d-click handler
 				   	var time=$("#"+e.target.id).text();						// Get time
 				   	if (shivaLib.player.smartPlayerType != "Vimeo") {		// If vimeo

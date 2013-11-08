@@ -672,7 +672,7 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
         ops.series.push(o);
         }
  	var wrap=new google.visualization.ChartWrapper(ops);				// Get google chart obj
-	this.map=wrap;														// Save prt in map
+	this.map=wrap;														// Save ptr in map
  	if (ops.dataSourceUrl) 												// If a data source spec'd
  		ops.dataSourceUrl=""+ops.dataSourceUrl.replace(/\^/g,"&");		// Restore special chars
  	wrap.setOptions(ops);												// Set options
@@ -681,19 +681,7 @@ SHIVA_Show.prototype.DrawChart=function() 												//	DRAW CHART
     	shivaLib.GetSpreadsheet(ops.dataSourceUrl,false,ops.query,function(data) {	// Get spreadsheet data
 			ops.dataSourceUrl=ops.query="";								// Null source/query out
 		  	wrap.setOptions(ops);										// Re-set options
-			var d = {cols: [], rows: []};
-			var keys = Object.keys(data[0]);
-			for (var i=0;i<keys.length;i++)
-			    d.cols.push({label:keys[i], type:(typeof data[0][keys[i]])});
-			d.rows = [];
-			for (var i=0; i<data.length; i++){
-			    var cell = [];
-			    for (var j=0; j<keys.length; j++){
-			        cell.push({v:data[i][keys[j]]});
-			    }
-			    d.rows.push({c:cell});
-			} 
-			wrap.setDataTable(d);										// Add the data
+			wrap.setDataTable(data);									// Add the data
 		    wrap.draw();												// Draw chart
   			});
 		}

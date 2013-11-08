@@ -187,12 +187,12 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 	$("#shivaNotesDiv").draggable();										// Make draggable
 	$("#ntx-0").focus();													// Focus on first one
 	
-	$("#shivaNotesSearch").on("change", function(e) {						// Handle fileter
+	$("#shivaNotesSearch").on("keydown", function(e) {						// Handle filter
 				var n=$("#shivaNotesTbl tr").length;						// Number of rows
 				var patt=new RegExp($("#shivaNotesSearch").val());			// Pattern to find
 				for (var i=0;i<n;++i) {										// For each row
 					$("#ntx-"+i).css("color","black");						// Clear it
-						if (($("#ntx-"+i).val() && ($("#ntx-"+i).val().match(patt))) // If in there
+					if (($("#ntx-"+i).val()) && ($("#ntx-"+i).val().match(patt))) // If in there
 						$("#ntx-"+i).css("color","red");					// Highlight it
 					}
 				});			

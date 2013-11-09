@@ -219,7 +219,10 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 	for (i=0;i<e;++i) {																	// For each pane
 		v=this.items[i].data.split("|");												// Get specs
 		dw=v[0]/1000*w;																	// Div width
-		dh=v[0]/1000*h;																	// Div height
+		if (this.eva.aspects[i] != undefined)											// If loaded
+			dh=dw*this.eva.aspects[i];													// Div height based on aspect
+		else																			// Not loaded yet
+			dh=v[0]/1000*h;																// Div height based on poster frame
 		x=w*v[1]/1000-(dw/2);															// Set centered left
 		y=h*v[2]/1000-(dh/2);															// Set centered top
 		str="<div id='posterPane"+i+"' style='position:absolute;background:none transparent;";	// Base
@@ -230,10 +233,14 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 		if (isImg=u.match(/[[.]jpg|jpeg|gif|png]/i))									// If an image file
 			str+="<img src='"+this.items[i].url+"' width='"+dw+"'>";					// Image				
 		else if (u) {																	// Something else
+			if (this.eva.aspects[i] != undefined)										// If loaded
+				srs="go.htm?srs=100&";													// Resize to 100%
+			else																		// First time
+				srs="go.htm?";															// Get in original aspect ratio
 			if (!isNaN(u))																// If a number
-				u="go.htm?e="+u;														// Add file base
-			else if (u.match(/e=/))														// An eStore	
-				u="go.htm?"+u;															// Add file base
+				u=srs+"e="+u;															// Add file base
+			else if ((u.match(/e=/)) || (u.match(/m=/)))								// An eStore or drupal
+				u=srs+u;																// Add file base
 			u+="&if="+i;																// Add id
 			str+="<iframe id='posterFrame-"+i+"' src='"+u+"'";							// Iframe base
 			if (this.items[i].scrollbars == "false")									// If not scrolling
@@ -280,7 +287,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 											v[0]=Math.floor(Math.min(ui.size.width/$("#containerDiv").width()/shivaLib.posterScale,1)*1000); // Get new scale, cap at 100%					
 											shivaLib.items[i].data=v[0]+"|"+v[1]+"|"+v[2];		// Set new size
 											$("#itemInput"+i+"-1").val(shivaLib.items[i].data);	// Put in menu
-											shivaLib.DrawPosterPanes(i,"resize");			// Redraw this pane, and resize 								
+											shivaLib.DrawPosterPanes(i,"resize");		// Redraw this pane, and resize 								
 											}
 										});
 		$("#posterPane"+i).draggable({  containment:"parent",							// Draggable
@@ -311,6 +318,7 @@ function EvA() 														// CONSTRUCTOR
 {
 	this.ondos=new Array();												// Hold ondo statements
 	this.data=new Array();												// Holds table data
+	this.aspects=new Array();											// Holds aspect ratios
 	if (window.addEventListener) 
 		window.addEventListener("message",$.proxy(this.ShivaEventHandler,this),false); // Add event listener
 	else
@@ -325,7 +333,7 @@ EvA.prototype.Run=function(ondoList) 								// RUN
 		o=this.ondos[i];												// Point at ondo
 		o.done=0;														// Not done yet
 		if (o.on == "init")												// If an init
-			this.RunOnDo(o);									// Run it
+			this.RunOnDo(o);											// Run it
 		}
 	}
 
@@ -347,13 +355,13 @@ EvA.prototype.RunOnDo=function(ondo) 								// RUN AN INIT ONDO
 				break;
 				}
 			if (ondo.src.indexOf("e=") == 0)							// An eStore
-				str="//www.viseyes.org/shiva/go.htm?"+ondo.src;			// Make url
+				str="//www.viseyes.org/shiva/go.htm?srs=100&"+ondo.src;	// Make url
 			else if (ondo.src.indexOf("m=") == 0)						// A Drupal manager
-				str="//shiva.shanti.virginia.edu/go.htm?m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);	// Make url
+				str="//shiva.shanti.virginia.edu/go.htm?srs=100&m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);	// Make url
 			else if (ondo.src.indexOf("E=") == 0)						// eStore test
-				str="//127.0.0.1:8020/SHIVA/go.htm?e="+ondo.src.substr(2);	// Make url
+				str="//127.0.0.1:8020/SHIVA/go.htm?srs=100&e="+ondo.src.substr(2);	// Make url
 			else if (ondo.src.indexOf("M=") == 0)						// Drupal test
-				str="//127.0.0.1:8020/SHIVA/go.htm?m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);	// Make url
+				str="//127.0.0.1:8020/SHIVA/go.htm?srs=100&m=//shiva.virginia.edu/data/json/"+ondo.src.substr(2);	// Make url
 			$("#"+to).attr("src",str);									// Set src
 				break;
 		case "fill": 													// Fill an iframe
@@ -405,6 +413,13 @@ EvA.prototype.ShivaEventHandler=function(e) 						// CATCH SHIVA EVENTS
 	var i,o,n=this.ondos.length;
 	trace(e.data)
 	var v=e.data.split("|");											// Get parts
+	if (v[0].match(/ShivaChart=ready/)) {								// A ready message
+		if (v[1].match(/posterFrame-/)) 								// A frame ready
+			if (i=v[1].substr(12)) 										// Get id
+				if (!this.aspects[i]) {									// If not set
+					this.aspects[i]=v[2]/1000;							// Set it
+					}
+		}
 	v[0]=v[0].split("=")[1];											// Strip prefix
 	for (i=0;i<n;++i) {													// For each ondo
 		o=this.ondos[i];												// Point at it

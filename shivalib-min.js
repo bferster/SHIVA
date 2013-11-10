@@ -1086,25 +1086,32 @@ if(!this.player)
 this.player=Popcorn.smart(con,base+id);this.player.smartPlayerType=type;this.player.media.src=base+id;if(options.end){v=options.end.split(":");if(v.length==1)
 v[1]=v[0],v[0]=0;this.player.cue(Number(v[0]*60)+Number(v[1]),function(){this.pause()
 shivaLib.SendShivaMessage("ShivaVideo=done");});}
-this.player.on("timeupdate",drawOverlay);this.player.on("loadeddata",onVidLoaded);this.player.on("ended",function(){shivaLib.SendShivaMessage("ShivaVideo=done")});this.player.on("playing",function(){shivaLib.SendShivaMessage("ShivaVideo=play")});this.player.on("pause",function(){shivaLib.SendShivaMessage("ShivaVideo=pause")});if(this.ev)
+this.player.on("timeupdate",drawOverlay);this.player.on("loadeddata",onVidLoaded);this.player.on("ended",function(){shivaLib.SendShivaMessage("ShivaVideo=done")});this.player.on("playing",function(){shivaLib.SendShivaMessage("ShivaVideo=play")});this.player.on("pause",function(){shivaLib.SendShivaMessage("ShivaVideo=pause")});this.VideoPlay=function(time){if(time!=undefined)
+shivaLib.player.play();shivaLib.player.play(time);}
+this.VideoPause=function(){shivaLib.player.pause();}
+this.VideoPaused=function(){return(shivaLib.player.paused());}
+this.VideoDuration=function(){return(shivaLib.player.duration());}
+this.VideoVolume=function(vol){shivaLib.player.volume(vol);}
+this.VideoLoad=function(clip){shivaLib.player.load();}
+this.VideoTime=function(time){if(time!=undefined)
+shivaLib.player.currentTime(time);else
+time=shivaLib.player.currentTime();return(time);}
+if(this.ev)
 t=this.ev.events;else
 t=options["shivaEvents"];this.ev=new SHIVA_Event(this);if((t)&&(t.length))
-this.ev.AddEvents(t);function onVidLoaded(){var v=shivaLib.options.start.split(":");if(v.length==1)
-v[1]=v[0],v[0]=0;var time=Math.max(Number(v[0]*60)+Number(v[1]),.25);if(this.smartPlayerType=="Vimeo")
-shivaLib.player.currentTime(shivaLib.options.start);else
-shivaLib.player.currentTime(time);shivaLib.player.volume(shivaLib.options.volume/100);if(shivaLib.options.autoplay=="true")
-shivaLib.player.play();else
-shivaLib.player.pause();$("#shivaEventDiv").height(Math.max(shivaLib.player.media.clientHeight-40,0));shivaLib.VideoNotes();shivaLib.SendShivaMessage("ShivaVideo=ready");setInterval(onVideoTimer,400);}
-function onVideoTimer(e){if($("#shivaNotesDiv").length){var t,i,j,next;var now=shivaLib.player.currentTime();for(i=0;i<500;++i){if(!$("#ntc-"+i).length)
+this.ev.AddEvents(t);this.SendReadyMessage(true);function onVidLoaded(){var v=shivaLib.options.start.split(":");if(v.length==1)
+v[1]=v[0],v[0]=0;var time=Math.max(Number(v[0]*60)+Number(v[1]),.25);shivaLib.VideoTime(time);shivaLib.VideoVolume(shivaLib.options.volume/100);if(shivaLib.options.autoplay=="true")
+shivaLib.VideoPlay();else
+shivaLib.VideoPause();$("#shivaEventDiv").height(Math.max(shivaLib.player.media.clientHeight-40,0));shivaLib.VideoNotes();shivaLib.SendShivaMessage("ShivaVideo=ready");setInterval(onVideoTimer,400);}
+function onVideoTimer(e){if($("#shivaNotesDiv").length){var t,i,j,next;var now=shivaLib.VideoTime();for(i=0;i<500;++i){if(!$("#ntc-"+i).length)
 break;$("#ntc-"+i).css("color","#009900");t=shivaLib.TimecodeToSeconds($("#ntc-"+i).text());if(now>=t){next=shivaLib.TimecodeToSeconds($("#ntc-"+(i+1)).text());if(now<next){$("#ntc-"+i).css("color","#ff0000");break;}}}}}
-function drawOverlay(){shivaLib.DrawOverlay();}
-this.SendReadyMessage(true);}
+function drawOverlay(){shivaLib.DrawOverlay();}}
 SHIVA_Show.prototype.VideoActions=function(msg)
 {var v=msg.split("|");if(v[0]=="ShivaAct=resize"){if(v[1]=="100"){$("#containerDiv").width("100%");$("#containerDiv").height("100%");}}
-else if(v[0]=="ShivaAct=play"){this.player.play();if(v[1]!=undefined)
-this.player.play(v[1]);}
+else if(v[0]=="ShivaAct=play"){this.VideoPlay();if(v[1]!=undefined)
+this.Videoplay(v[1]);}
 else if(v[0]=="ShivaAct=pause")
-this.player.pause();else if(v[0]=="ShivaAct=load"){this.player.media.src=v[1];this.player.load();}}
+this.VideoPause();else if(v[0]=="ShivaAct=load"){this.VideoLoad(v[1]);}}
 SHIVA_Show.prototype.TimecodeToSeconds=function(timecode)
 {var h=0,m=0;var v=(""+timecode).split(":");var s=v[0]
 if(v.length==2)
@@ -1114,23 +1121,19 @@ SHIVA_Show.prototype.SecondsToTimecode=function(secs)
 {var str="",n;n=Math.floor(secs/3600);if(n)str+=n+":";n=Math.floor(secs/60);if(n<10)str+="0";str+=n+":";n=Math.floor(secs%60);if(n<10)str+="0";str+=n;return str;}
 SHIVA_Show.prototype.VideoNotes=function()
 {var str;$("#shivaNotesDiv").remove();if(this.options.notes!="true")
-return;var con=$("#"+this.container);str="<div id='shivaNotesDiv' style='position:absolute;padding:8px;overflow-y:auto;";str+="width:500px;height:"+(con.height()-16)+"px;";str+="background-color:#f8f8f8;border:1px solid #ccc;box-shadow:4px 4px 8px #ccc;";var top=con.offset().top;var left=con.offset().left+con.width()+16;str+="top:"+top+"px;left:"+left+"px;'>";str+="<table id='shivaNotesTbl' width='100%'>";var ts="color:#009900;cursor:crosshair";var ns="font-size:small;border:none;background:none;width:100%;padding:0px;margin:0px";str+="<div style='text-align:center;font-size:large;'><img src='shivalogo16.png' style='vertical-align:-2px'><b> SHIVA Notes</b></div><hr>";str+="<div style='position:absolute;top:-2px;left:0px;width:100%;text-align:right'><br/>Find: <input type='input' id='shivaNotesSearch' style='height:12px;width:60px;font-size:x-small;padding:0px;margin:0px'/>&nbsp; &nbsp;</div>"
+return;var con=$("#"+this.container);str="<div id='shivaNotesDiv' style='position:absolute;padding:8px;overflow-y:auto;";str+="width:500px;height:"+(con.height()-16)+"px;";str+="background-color:#f8f8f8;border:1px solid #ccc;box-shadow:4px 4px 8px #ccc;";var top=con.offset().top;var left=con.offset().left+con.width()+16;str+="top:"+top+"px;left:"+left+"px;'>";str+="<table id='shivaNotesTbl' width='100%'>";var ts="color:#009900;cursor:pointer";var ns="font-size:small;border:none;background:none;width:100%;padding:0px;margin:0px";str+="<div style='text-align:center;font-size:large;'><img src='shivalogo16.png' style='vertical-align:-2px'><b> SHIVA Notes</b></div><hr>";str+="<div style='position:absolute;top:-2px;left:0px;width:100%;text-align:right'><br/>Find: <input type='input' id='shivaNotesSearch' style='height:12px;width:60px;font-size:x-small;padding:0px;margin:0px'/>&nbsp; &nbsp;</div>"
 str+="<tr><td width='38' id='ntc-0' style='"+ts+"'>Type:</td><td><input id='ntx-0' type='input' style='"+ns+"'/></td></tr>";str+="</table>";str+="<div style='text-align:right'><br/>________________________________<br/><br/>Pause video while typing?<input type='checkbox' id='notesPause' style='height:11px'>";str+="<br/>Save notes: <img src='savedot.gif' id='shivaNotesSave' title='Save notes' width='15' style='vertical-align:bottom'>";$('body').append(str+"</div>");$("#shivaNotesDiv").draggable();$("#ntx-0").focus();$("#shivaNotesSearch").on("keydown",function(e){var n=$("#shivaNotesTbl tr").length;var patt=new RegExp($("#shivaNotesSearch").val());for(var i=0;i<n;++i){$("#ntx-"+i).css("color","black");if(($("#ntx-"+i).val())&&($("#ntx-"+i).val().match(patt)))
 $("#ntx-"+i).css("color","red");}});$("#shivaNotesSave").on("click",function(e){var str="";var n=$("#shivaNotesTbl tr").length;for(var i=0;i<n;++i)
 if($("#ntx-"+i).val())
 str+=$("#ntc-"+i).text()+"\t"+$("#ntx-"+i).val()+"\n";window.prompt("To copy your Notes to the clipboard:\nType Ctrl+C or Cmd+C and click  OK button.",str);});$("#shivaNotesTbl").on("keydown",function(e){var cap=false;var rowNum=e.target.id.split("-")[1];if($("#"+e.target.id).val().length>80)
-cap=true;if((e.keyCode==13)||(cap)){var ts="color:#009900;cursor:crosshair";var ns="font-size:small;border:none;background:none;width:100%;padding:0px;margin:0px";var id=$("#shivaNotesTbl tr").length;var str="<tr><td id='ntc-"+id+"' style='"+ts+"'>Type:</td><td><input id='ntx-"+id+"' type='input' style='"+ns+"'/></td></tr>";$("#shivaNotesTbl").append(str);$("#ntx-"+id).focus();if($("#notesPause").prop('checked')&&!cap)
-shivaLib.player.play();if(cap)
+cap=true;if((e.keyCode==13)||(cap)){var ts="color:#009900;cursor:pointer";var ns="font-size:small;border:none;background:none;width:100%;padding:0px;margin:0px";var id=$("#shivaNotesTbl tr").length;var str="<tr><td id='ntc-"+id+"' style='"+ts+"'>Type:</td><td><input id='ntx-"+id+"' type='input' style='"+ns+"'/></td></tr>";$("#shivaNotesTbl").append(str);$("#ntx-"+id).focus();if($("#notesPause").prop('checked')&&!cap)
+shivaLib.VideoPlay();if(cap)
 $("#ntc-"+id).text($("#ntc-"+rowNum).text());}
 else if((e.keyCode==8)||(e.keyCode==46)){var id="#"+e.target.id;if((!$(id).val())&&(id!="#ntx-0")){id="ntx-"+(id.substr(5)-1);$("#"+id).focus();$("#"+e.target.id).parent().parent().remove();}}
-else if(!$("#ntx-"+rowNum).val()){$("#ntc-"+rowNum).text(shivaLib.SecondsToTimecode(shivaLib.player.currentTime()));if($("#notesPause").prop('checked'))
-shivaLib.player.pause();$("#ntc-"+rowNum).click(function(e){var time=$("#"+e.target.id).text();if(shivaLib.player.smartPlayerType!="Vimeo"){var v=time.split(":");if(v.length==1)
-v[1]=v[0],v[0]=0;time=Math.max(Number(v[0]*60)+Number(v[1]),.25);}
-if(e.shiftKey)
-$("#"+e.target.id).text(shivaLib.SecondsToTimecode(shivaLib.player.currentTime()));else
-shivaLib.player.currentTime(time);});$("#ntc-"+rowNum).dblclick(function(e){var time=$("#"+e.target.id).text();if(shivaLib.player.smartPlayerType!="Vimeo"){var v=time.split(":");if(v.length==1)
-v[1]=v[0],v[0]=0;time=Math.max(Number(v[0]*60)+Number(v[1]),.25);}
-shivaLib.player.play(time);});}});};SHIVA_Show.prototype.DrawSubway=function(oldItems)
+else if(!$("#ntx-"+rowNum).val()){$("#ntc-"+rowNum).text(shivaLib.SecondsToTimecode(shivaLib.VideoTime()));if($("#notesPause").prop('checked'))
+shivaLib.VideoPause();$("#ntc-"+rowNum).click(function(e){var time=$("#"+e.target.id).text();if(e.shiftKey)
+$("#"+e.target.id).text(shivaLib.SecondsToTimecode(shivaLib.VideoTime()));else
+shivaLib.VideoTime(shivaLib.TimecodeToSeconds(time));});$("#ntc-"+rowNum).dblclick(function(e){var time=$("#"+e.target.id).text();shivaLib.VideoPlay(time);});}});};SHIVA_Show.prototype.DrawSubway=function(oldItems)
 {var options=this.options;var container=this.container;var con="#"+container;var g=this.g=new SHIVA_Graphics();var items=new Array();if(oldItems)
 items=oldItems;else
 for(var key in options){if(key.indexOf("item-")!=-1){var o=new Object;var v=options[key].split(';');for(i=0;i<v.length;++i)

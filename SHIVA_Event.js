@@ -812,9 +812,13 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
  			var _this=this;													// Point at this
  			$("#shivaEventDiv").append("<div style='width:100%;height:100%;cursor:crosshair' id='shivaEventDivFinder-"+num+"'></div>");
 			$("#shivaEventDivFinder-"+num).click(function(e) {
- 							 				_this.CloseEvent(this.id,e.offsetX,e.offsetY); 
- 											this.remove();
- 											 });
+				if (e.offsetX == undefined) { 								//  Firefox doesn't support offsetX
+					e.offsetX=e.clientX-$("#containerDiv").position().left;	// Use clientX
+					e.offsetY=e.clientY-$("#containerDiv").position().top;	// and sub pos 
+					}
+ 				_this.CloseEvent(this.id,e.offsetX,e.offsetY); 				// Close event
+				this.remove();												// Remove event capture div
+				});
 			}
  		}
 	else if (o.type == "iframe") {											// An iframe

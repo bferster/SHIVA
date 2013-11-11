@@ -40,23 +40,16 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
   	if (!this.player)
 		this.player=Popcorn.smart(con,base+id);
 	this.player.smartPlayerType=type;
-
 	this.player.media.src=base+id;
 	if (options.end) {
 		v=options.end.split(":");
 		if (v.length == 1)
 			v[1]=v[0],v[0]=0;
-    	this.player.cue(Number(v[0]*60)+Number(v[1]),function() { 
+    	this.VideoCue("add",Number(v[0]*60)+Number(v[1]),function() { 
      		this.pause()
 			shivaLib.SendShivaMessage("ShivaVideo=done");
     		});
     	}
-	this.player.on("timeupdate",drawOverlay);
-	this.player.on("loadeddata",onVidLoaded);
-	this.player.on("ended",function(){ shivaLib.SendShivaMessage("ShivaVideo=done")});
-	this.player.on("playing",function(){ shivaLib.SendShivaMessage("ShivaVideo=play")});
-	this.player.on("pause",function(){ shivaLib.SendShivaMessage("ShivaVideo=pause")});
-
 
 ////////////////////////// VIDEO WRAPPER ///////////////////////////////////////////////////
 
@@ -86,6 +79,10 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
    		shivaLib.player.load();												// Send pause
 		}
 	
+	this.VideoMediaHeight=function() {										// GET MEDIA HEIGHT
+  		return (shivaLib.player.media.clientHeight);						// Return height
+  		}
+
 	this.VideoTime=function(time) {											// GET/SET CURRENT TIME
  		if (time != undefined) 												// If setting time
 		   	shivaLib.player.currentTime(time);								// Send timecode
@@ -94,8 +91,26 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		return(time);														// Return time
 	}
 
+	this.VideoCue=function(mode, time, callback, num) {						// SET VIDEO CUE
+		if (mode == "add") 													// If adding a new cue
+			shivaLib.player.cue(time,callback);								// Add end cue
+ 		}
+
+	this.VideoEvent=function(mode, type, callback) {						// SET VIDEO EENT
+		if (mode == "add") 													// If adding a new cue
+			shivaLib.player.on(type,callback);								// Add event listener
+		else																// Remove it
+			shivaLib.player.off(type,callback);								// Remove event listener
+		}
+		
 ////////////////////////// EVENTS ///////////////////////////////////////////////////
 
+	this.VideoEvent("add","timeupdate",drawOverlay);
+	this.VideoEvent("add","loadeddata",onVidLoaded);
+	this.VideoEvent("add","ended",function(){ shivaLib.SendShivaMessage("ShivaVideo=done")});
+	this.VideoEvent("add","playing",function(){ shivaLib.SendShivaMessage("ShivaVideo=play")});
+	this.VideoEvent("add","pause",function(){ shivaLib.SendShivaMessage("ShivaVideo=pause")});
+	
 	if (this.ev) 
 		t=this.ev.events;
 	else
@@ -118,7 +133,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
     		shivaLib.VideoPlay();
     	else
      		shivaLib.VideoPause();
-		$("#shivaEventDiv").height(Math.max(shivaLib.player.media.clientHeight-40,0));
+		$("#shivaEventDiv").height(Math.max(shivaLib.VideoMediaHeight()-40,0));
 		shivaLib.VideoNotes();
  		shivaLib.SendShivaMessage("ShivaVideo=ready");
    		setInterval(onVideoTimer,400);	

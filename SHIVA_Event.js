@@ -40,10 +40,10 @@ SHIVA_Event.prototype.EventEditor=function() 							// EDIT EVENT
 	var _this=this;															// Save 'this' locally
 	if ($("#shivaEventEditorDiv").length) {									// If already on
 		$("#shivaEventEditorDiv").remove();									// Remove it
-		this.player.off("timeupdate",$.proxy(_this.DrawEventDots,this));	// Kill handler
+		shivaLib.VideoEvent("remove","timeupdate",$.proxy(_this.DrawEventDots,this));	// Kill handler
 		return;																// Quit
 		}
-	this.player.on("timeupdate",$.proxy(_this.DrawEventDots,this));			// Redraw dots on player change
+	shivaLib.VideoEvent("add","timeupdate",$.proxy(_this.DrawEventDots,this));	// Redraw dots on player change
 	var con="#"+this.container;
 	var w=$(con).css("width").replace(/px/,"");
 	var h=$(con).css("height").replace(/px/,"")
@@ -449,12 +449,12 @@ SHIVA_Event.prototype.AddToCue=function(num) 							// ADD EVENT TO EVENT QUEUE
 	var o=this.events[num];													// Point at event
 	if (!o.start)															// If no start defined
 		return;																// Don't add to cue
-	this.player.cue(o.start,function() 	{ 									// A cue
+	shivaLib.VideoCue("add",o.start,function() { 							// A cue
 		_this.Draw(num,true); 												// Add start cue
 		shivaLib.SendShivaMessage("ShivaPlayer=event",num);					// Send message
  		 });		
 	if (o.end)																// If an end set
-		this.player.cue(o.end,function() { _this.Draw(num,false); });		// Add end cue
+		shivaLib.VideoCue("add",o.end,function() {_this.Draw(num,false);});	// Add end cue
 }
 
 SHIVA_Event.prototype.CreateEventDisplay=function(num, params) 			// CREATE EVENT DISPLAY

@@ -99,7 +99,7 @@
 	
 	$(document).ready(function() {
   		shivaLib=new SHIVA_Show("containerDiv");
-		shivaLib.drupalMan=((""+window.location.search).match(/pr=d/) == "pr=d");
+		shivaLib.drupalMan=((""+window.location.search).match(/pr=d/) == "pr=d")
 	  	SetAttributes(false);
 		shivaLib.callback=Draw;
 		shivaLib.posterMode="Edit";
@@ -120,7 +120,8 @@
 			window.addEventListener("message",shivaEventHandler,false);
 		else
 			window.attachEvent("message",shivaEventHandler);
-		if (!shivaLib.drupalMan) {
+ 		shivaLib.drupalMan=((""+window.location.search).match(/pr=d/) == "pr=d")
+ 		if (!shivaLib.drupalMan) {
 			var str="&nbsp;&nbsp;Share as: <select id='formatter' onChange='SaveData(this.value)'>";
 			str+="<option>Choose format</option>";
 			str+="<option>WordPress</option>";

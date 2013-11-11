@@ -122,9 +122,9 @@ SHIVA_Event.prototype.DrawEventDots=function() 							// DRAW EVENT DOTS
 			x=((s-now)/dur)*wid/this.scale;									// Start x, account for now	
 		else																// If scrolling
 			x=(s/dur)*wid/this.scale;										// Start x		
-		w=Math.max(14,((e-s)/dur)*wid/this.scale)-1;							// Width
+		w=Math.max(15,((e-s)/dur)*wid/this.scale)-1;							// Width
 		str="<div id='shivaEventDot-"+i+"' style='position:absolute;text-align:center;cursor:pointer;";
-		str+="width:"+w+"px;left:"+x+"px;height:14px;padding:0px;";
+		str+="width:"+w+"px;left:"+x+"px;height:14px;padding:0px;margin:0px;";
 		str+="border-radius:8px;-moz-border-radius:8px;background-color:#ccc;border:1px #eee solid'";
 		str+="title='"+o.type.toUpperCase()+" "+o.start;					// Tool tip
 		if (o.end)															// If an end
@@ -810,14 +810,14 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 	else if (o.type == "find") {											// A find
 		if (!(o.text.split(">>")[1].split("|")[0].match(/--/)))	{			// If spatial										
  			var _this=this;													// Point at this
- 			$("#shivaEventDiv").append("<div style='width:100%;height:100%;cursor:crosshair' id='shivaEventDivFinder-"+num+"'></div>");
+ 			$("#shivaEventDiv").append("<div style='width:100%;height:100%;cursor:crosshair;background-color:white;opacity:0;z-index:2510' id='shivaEventDivFinder-"+num+"'></div>");
 			$("#shivaEventDivFinder-"+num).click(function(e) {
 				if (e.offsetX == undefined) { 								//  Firefox doesn't support offsetX
 					e.offsetX=e.clientX-$("#containerDiv").position().left;	// Use clientX
 					e.offsetY=e.clientY-$("#containerDiv").position().top;	// and sub pos 
 					}
  				_this.CloseEvent(this.id,e.offsetX,e.offsetY); 				// Close event
-				this.remove();												// Remove event capture div
+				$("#"+this.id).remove();									// Remove event capture div
 				});
 			}
  		}

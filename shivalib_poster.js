@@ -241,7 +241,8 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 				u=srs+"e="+u;															// Add file base
 			else if ((u.match(/e=/)) || (u.match(/m=/)))								// An eStore or drupal
 				u=srs+u;																// Add file base
-			u+="&if="+i;																// Add id
+			if (u.match(/go.htm/))														// A shiva module
+				u+="&if="+i;															// Add id
 			str+="<iframe id='posterFrame-"+i+"' src='"+u+"'";							// Iframe base
 			if (this.items[i].scrollbars == "false")									// If not scrolling
 				str+="scrolling='no' ";													// Inhibit it
@@ -254,6 +255,9 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 				var str="<div style='position:absolute;left:0px;top:0px;width:100%;height:100%;border:1px dashed'>";	// Make overlay div for dragging
 				str+="<div id='posterPaneLab"+i+"' style='position:absolute;left:0px;text-shadow:1px 1px #eee'>";
 				str+="<b> "+(i+1)+". "+this.items[i].layerTitle+"</b></div>";			// Label
+//			else if (this.items[i].caption)												// If a caption
+//				str+="<span style='font-size:small'><b> "+this.items[i].caption+"</b></span></div>";							// Show it
+
 				$("#posterPane"+i).append(str+"</div>");								// Add div
 				}
 			}
@@ -280,13 +284,14 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 		if (this.posterMode != "Edit")													// If viewing
 			continue;																	// No need for interaction
 		$("#posterPane"+i).resizable({ 	containment:"parent",							// Resizable
-										aspectRatio:isImg,
 										stop:function(event,ui) {						// On resize stop
 											var i=event.target.id.substr(10);			// Extract id
 											var v=shivaLib.items[i].data.split("|");	// Get parts
 											v[0]=Math.floor(Math.min(ui.size.width/$("#containerDiv").width()/shivaLib.posterScale,1)*1000); // Get new scale, cap at 100%					
 											shivaLib.items[i].data=v[0]+"|"+v[1]+"|"+v[2];		// Set new size
 											$("#itemInput"+i+"-1").val(shivaLib.items[i].data);	// Put in menu
+											if (shivaLib.items[i].url.match(/http/))	// If not a shiva module
+												shivaLib.eva.aspects[i]=ui.size.height/ui.size.width;	// Set aspect
 											shivaLib.DrawPosterPanes(i,"resize");		// Redraw this pane, and resize 								
 											}
 										});
@@ -411,7 +416,7 @@ EvA.prototype.ShivaEventHandler=function(e) 						// CATCH SHIVA EVENTS
 {
 	var from;
 	var i,o,n=this.ondos.length;
-	trace(e.data)
+//	trace(e.data)
 	var v=e.data.split("|");											// Get parts
 	if (v[0].match(/ShivaChart=ready/)) {								// A ready message
 		if (v[1].match(/posterFrame-/)) 								// A frame ready

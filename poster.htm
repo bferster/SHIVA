@@ -92,14 +92,13 @@
 	helpText['Show scroll bars?']="Show controls bars on website and SHIVA viz's the are larger than the space provided for.";
 	helpText['Caption']="Caption that will appear underneath pane when viewed.";
 	helpText['Height of poster']="The height of the player box where the montage will play in";
-
 	helpText['OVERVIEW']="Samples:<br><br>375-Pie chart<br>390=Map<br>392-Earth<br>393-Montage<br>394-Video<br>395-Timeline<br>404-Sample poster<br>405-Word<br>406-Network<br><br>https://docs.google.com/spreadsheet/ccc?key=0AsMQEd_YoBWldFBoYjZfWkdSLVBkRTY2QTNDS2lWVWc&usp=drive_web#gid=0";
 	
 ///// INIT  /////////////
 	
 	$(document).ready(function() {
   		shivaLib=new SHIVA_Show("containerDiv");
-		shivaLib.drupalMan=((""+window.location.search).match(/pr=d/) == "pr=d")
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
 	  	SetAttributes(false);
 		shivaLib.callback=Draw;
 		shivaLib.posterMode="Edit";
@@ -120,8 +119,7 @@
 			window.addEventListener("message",shivaEventHandler,false);
 		else
 			window.attachEvent("message",shivaEventHandler);
- 		shivaLib.drupalMan=((""+window.location.search).match(/pr=d/) == "pr=d")
- 		if (!shivaLib.drupalMan) {
+  		if (!shivaLib.drupalMan) {
 			var str="&nbsp;&nbsp;Share as: <select id='formatter' onChange='SaveData(this.value)'>";
 			str+="<option>Choose format</option>";
 			str+="<option>WordPress</option>";

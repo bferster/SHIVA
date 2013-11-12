@@ -230,7 +230,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 			str+=this.items[i].style.replace(/\|/g,";").replace(/=/g,":");				// Add it
 		str+="'>"
 		u=this.items[i].url;															// Point at url
-		if (isImg=u.match(/[jpg|jpeg|gif|png]/i))										// If an image file
+		if (isImg=u.match(/\.jpg|\.jpeg|\.gif|\.png/i))									// If an image file
 			str+="<img src='"+this.items[i].url+"' width='100%'>";						// Image				
 		else if (u) {																	// Something else
 			if (this.eva.aspects[i] != undefined)										// If loaded

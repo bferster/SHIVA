@@ -1432,7 +1432,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num,mode)
 dh=dw*this.eva.aspects[i];else
 dh=v[0]/1000*h;x=w*v[1]/1000-(dw/2);y=h*v[2]/1000-(dh/2);str="<div id='posterPane"+i+"' style='position:absolute;background:none transparent;";if(this.items[i].style)
 str+=this.items[i].style.replace(/\|/g,";").replace(/=/g,":");str+="'>"
-u=this.items[i].url;if(isImg=u.match(/[jpg|jpeg|gif|png]/i))
+u=this.items[i].url;if(isImg=u.match(/\.jpg|\.jpeg|\.gif|\.png/i))
 str+="<img src='"+this.items[i].url+"' width='100%'>";else if(u){if(this.eva.aspects[i]!=undefined)
 srs="go.htm?srs=100&";else
 srs="go.htm?";if(!isNaN(u))

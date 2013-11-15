@@ -219,8 +219,8 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 	for (i=0;i<e;++i) {																	// For each pane
 		v=this.items[i].data.split("|");												// Get specs
 		dw=v[0]/1000*w;																	// Div width
-		if (this.eva.aspects[i] != undefined)											// If loaded
-			dh=dw*this.eva.aspects[i];													// Div height based on aspect
+		if (this.items[i].asp)															// If loaded
+			dh=dw*this.items[i].asp/1000;												// Div height based on aspect
 		else																			// Not loaded yet
 			dh=v[0]/1000*h;																// Div height based on poster frame
 		x=w*v[1]/1000-(dw/2);															// Set centered left
@@ -233,7 +233,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 		if (isImg=u.match(/\.jpg|\.jpeg|\.gif|\.png/i))									// If an image file
 			str+="<img src='"+this.items[i].url+"' width='100%'>";						// Image				
 		else if (u) {																	// Something else
-			if (this.eva.aspects[i] != undefined)										// If loaded
+			if (this.items[i].asp)														// If loaded
 				srs="go.htm?srs=100&";													// Resize to 100%
 			else																		// First time
 				srs="go.htm?";															// Get in original aspect ratio
@@ -285,6 +285,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 			}
 		if (this.posterMode != "Edit")													// If viewing
 			continue;																	// No need for interaction
+
 		$("#posterPane"+i).resizable({ 	containment:"parent",							// Resizable
 										stop:function(event,ui) {						// On resize stop
 											var i=event.target.id.substr(10);			// Extract id
@@ -292,11 +293,16 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 											v[0]=Math.floor(Math.min(ui.size.width/$("#containerDiv").width()/shivaLib.posterScale,1)*1000); // Get new scale, cap at 100%					
 											shivaLib.items[i].data=v[0]+"|"+v[1]+"|"+v[2];				// Set new size
 											$("#itemInput"+i+"-1").val(shivaLib.items[i].data);			// Put in menu
-											if (shivaLib.items[i].url.match(/http/))					// If not a shiva module
-												shivaLib.eva.aspects[i]=ui.size.height/ui.size.width;	// Set aspect
+											if (shivaLib.items[i].url.match(/http/)) { 					// If not a shiva module
+												var asp=ui.size.height/ui.size.width;					// Get aspect
+											 	asp=Math.round(shivaLib.items[i].asp*1000);				// Set asp string
+												shivaLib.items[i].asp=asp;								// Set new asp
+												$("#itemInput"+i+"-2").val(asp);						// Set props
+												}
 											shivaLib.DrawPosterPanes(i,"resize");						// Redraw this pane, and resize 								
 											}
 										});
+		
 		$("#posterPane"+i).draggable({  containment:"parent",							// Draggable
 										drag:function(event,ui) {						// On drag stop
 											var i=event.target.id.substr(10);			// Extract id
@@ -325,7 +331,6 @@ function EvA() 														// CONSTRUCTOR
 {
 	this.ondos=new Array();												// Hold ondo statements
 	this.data=new Array();												// Holds table data
-	this.aspects=new Array();											// Holds aspect ratios
 	if (window.addEventListener) 
 		window.addEventListener("message",$.proxy(this.ShivaEventHandler,this),false); // Add event listener
 	else
@@ -423,8 +428,9 @@ EvA.prototype.ShivaEventHandler=function(e) 						// CATCH SHIVA EVENTS
 	if (v[0].match(/ShivaChart=ready/)) {								// A ready message
 		if (v[1].match(/posterFrame-/)) 								// A frame ready
 			if (i=v[1].substr(12)) 										// Get id
-				if (!this.aspects[i]) {									// If not set
-					this.aspects[i]=v[2]/1000;							// Set it
+				if (!shivaLib.items[i].asp[i]) {						// If not set
+					shivaLib.items[i].asp=v[2];							// Set it
+					$("#itemInput"+i+"-2").val(v[2]);					// Set props
 					}
 		}
 	v[0]=v[0].split("=")[1];											// Strip prefix

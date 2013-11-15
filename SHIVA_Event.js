@@ -131,12 +131,11 @@ SHIVA_Event.prototype.DrawEventDots=function() 							// DRAW EVENT DOTS
 		$("#shivaEventDot-"+i).draggable();									// Make dots draggable					
 	
 		$("#shivaEventDot-"+i).bind("drag",function(event,ui) { 
-trace(ui)			
-/*			ui.position.top=0; 												// Force in track
+			ui.position.top=0; 												// Force in track
 			x=Math.max(Math.min(ui.position.left,wid),0);					// Cap 0-wid
 			x=x/wid*shivaLib.VideoDuration()*_this.scale;					// Absolute time from bar
 			$("#shivaTimecode").text(_this.par.SecondsToTimecode(x));		// Show position
-	*/		});
+			});
 
 		$("#shivaEventDot-"+i).bind("dragstop",function(event,ui) { 		// Handle drag stop
 			o=_this.events[this.id.substr(14)];								// Point at event

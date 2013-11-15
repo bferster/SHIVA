@@ -54,8 +54,12 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 ////////////////////////// VIDEO WRAPPER ///////////////////////////////////////////////////
 
 	this.VideoPlay=function(time) {											// PLAY A CLIP
-		if (time != undefined)												// If a time set
+		if (time != undefined) {												// If a time set
 			shivaLib.player.play();											// Start it playing first for some unknown reason
+			time=""+time;													// Cast to string
+ 			if (time.match(/:/))											// If a timecode
+ 				time=shivaLib.TimecodeToSeconds(time);						// Convert to seconds
+			}
 		shivaLib.player.play(time);											// Send timecode
 		}
 

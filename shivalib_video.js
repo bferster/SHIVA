@@ -84,8 +84,12 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
   		}
 
 	this.VideoTime=function(time) {											// GET/SET CURRENT TIME
- 		if (time != undefined) 												// If setting time
-		   	shivaLib.player.currentTime(time);								// Send timecode
+ 		if (time != undefined) {											// If setting time
+ 			time=""+time;													// Cast to string
+ 			if (time.match(/:/))											// If a timecode
+ 				time=shivaLib.TimecodeToSeconds(time);						// Convert to seconds
+		   	shivaLib.player.currentTime(time-0);							// Send timecode
+			}
 		else																// Getting time
 			time=shivaLib.player.currentTime();								// Get time
 		return(time);														// Return time

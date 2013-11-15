@@ -101,7 +101,15 @@
 			str+="</select>"; 
 			$("#saveAsDiv").html(str);
 			}
+		$("body").click(function(e) {
+					if (e.ctrlKey) {
+						var x=e.clientX-$("#containerDiv").css("left").replace(/px/,"");
+						var y=e.clientY-$("#containerDiv").css("top").replace(/px/,"");
+						$("#helpDiv").html("<br/><b>Clicked position is: </b> "+x+","+y);
+						}
+					});
 	});
+
 
 	function shivaEventHandler(e)
 	{

@@ -81,20 +81,7 @@ SHIVA_Event.prototype.EventEditor=function() 							// EDIT EVENT
 	$("#shivaTimebarDiv").css("overflow","hidden"); 						// Disable spillover
 	$("#shivaEventEditorDiv").slideDown();									// Slide it on
 	this.DrawEventDots();													// Draw doys
-	
-	$("#shivaTimebarDiv").bind("click",function(e) { 					// HANDLE CLICK STOP
-		var x=e.pageX-8-$("#shivaEventEditorDiv").css("left").replace(/px/,"")	// Position in bar
-		x=x/w*shivaLib.VideoDuration*_this.scale;							// Absolute time
-		});
-	
-	$("#shivaTimebarDiv").dblclick( function(e) { 						// SET TIME
-		var x=e.clientX-$("#"+_this.par.container).css("left").replace(/px/,"")-8;
-		var wid=$("#shivaTimebarDiv").width();								// Width
-		x=Math.max(Math.min(x,wid),0);										// Cap 0-wid
-		x=x/wid*shivaLib.VideoDuration()*_this.scale;						// Absolute time from bar
-		shivaLib.VideoTime(x);												// Set time
-		});
-}
+	}
 
 SHIVA_Event.prototype.DrawEventDots=function() 							// DRAW EVENT DOTS
 {
@@ -133,14 +120,24 @@ SHIVA_Event.prototype.DrawEventDots=function() 							// DRAW EVENT DOTS
 			str+=" ("+o.id+")";												// Add id
 		str+="'>"+(i+1)+"</div>";											// Event num
 		$("#shivaTimebarDiv").append(str);
-		$("#shivaEventDot-"+i).dblclick( function(e) { _this.EditEvent(this.id.substr(14));  }).draggable();
-		
-		$("#shivaEventDot-"+i).bind("drag",function(event,ui) { 
-			ui.position.top=0; 												// Force in track
-			x=Math.max(Math.min(ui.position.left,wid),0);					// Cap 0-wid
-			x=x/wid*shivaLib.VideoDuration()*_this.scale;						// Absolute time from bar
-			$("#shivaTimecode").text(_this.par.SecondsToTimecode(x+now));	// Show position
+
+		$("#shivaEventDot-"+i).dblclick( function(e) { 						// Handle double-click
+			var id=this.id.substr(14);										// Get id
+			var time=shivaLib.TimecodeToSeconds(_this.events[id].start)-1; 	// Back up one second
+			shivaLib.VideoTime(time);										// Set time
+			_this.EditEvent(id);  											// Edit the event
 			});
+			
+		$("#shivaEventDot-"+i).draggable();									// Make dots draggable					
+	
+		$("#shivaEventDot-"+i).bind("drag",function(event,ui) { 
+trace(ui)			
+/*			ui.position.top=0; 												// Force in track
+			x=Math.max(Math.min(ui.position.left,wid),0);					// Cap 0-wid
+			x=x/wid*shivaLib.VideoDuration()*_this.scale;					// Absolute time from bar
+			$("#shivaTimecode").text(_this.par.SecondsToTimecode(x));		// Show position
+	*/		});
+
 		$("#shivaEventDot-"+i).bind("dragstop",function(event,ui) { 		// Handle drag stop
 			o=_this.events[this.id.substr(14)];								// Point at event
 			x=Math.max(Math.min(ui.position.left,wid),0);					// Cap 0-wid
@@ -274,11 +271,22 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 		if (v[2]) 															// If exists
 			$("#sf2").val(v[2]);											// Set failure
 		}
+
 	$("#text").val($("#text").val().replace(/\*!!\*/g,"\n"));				// *!!* -> LF
 	$("#text").val($("#text").val().replace(/&quot;/g,"\""));				// &quot; -> "
 	$("#title").val($("#title").val().replace(/&quot;/g,"\""));				// &quot; -> "
 	$("#text").val($("#text").val().replace(/&apos;/g,"'"));				// &apos; -> '
 	$("#title").val($("#title").val().replace(/&apos;/g,"'"));				// &apos; -> '
+	if ($("#sqpr").length) {												// If exists
+		$("#sqpr").val($("#sqpr").val().replace(/&apos;/g,"'"));			// &apos; -> '
+		$("#sqpr").val($("#sqpr").val().replace(/&quot;/g,"\""));			// &quot; -> '
+		}
+	for (i=1;i<6;++i) 														// For eaxch possible answer
+		if ($("#sq"+i+"a").length) {										// If exists
+			$("#sq"+i+"a").val($("#sq"+i+"a").val().replace(/&apos;/g,"'"));// &apos; -> '
+			$("#sq"+i+"a").val($("#sq"+i+"a").val().replace(/&quot;/g,"\""));// &aquot; -> '
+			}
+
 	o=o.frame;																// Point at field
 	for (key in o)															// For each field member
 		$("#frame-"+key).val(o[key]);										// Set field
@@ -1020,8 +1028,8 @@ SHIVA_Event.prototype.SetEventHelp=function()
 	helpText['sq5a']="Text of answer."; helpText['sq5b']="Action to occur when answer is chosen."; helpText['sq5c']="Click if answer is correct one.";
 	helpText['sf1']="Action to occur when user clicks in desired area.";		
 	helpText['sf2']="Action to occur when user does NOT click in area.";
-	helpText['sf3']="Point on video screen to click on x,y or timecode to find";		
-	helpText['sf4']="Number of pixels user can click next x,y and still be correct, or seconds from the timecode.";
+	helpText['sf3']="Point on video screen to click on x,y or timecode to find. Find x,y by clicking on video and hold Control key.";		
+	helpText['sf4']="Number of pixels can click near target and still be correct, or seconds from the target.";
 
 	var id;
 	for (id in helpText) {

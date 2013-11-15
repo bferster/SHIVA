@@ -1094,8 +1094,9 @@ this.VideoDuration=function(){return(shivaLib.player.duration());}
 this.VideoVolume=function(vol){shivaLib.player.volume(vol);}
 this.VideoLoad=function(clip){shivaLib.player.load();}
 this.VideoMediaHeight=function(){return(shivaLib.player.media.clientHeight);}
-this.VideoTime=function(time){if(time!=undefined)
-shivaLib.player.currentTime(time);else
+this.VideoTime=function(time){if(time!=undefined){time=""+time;if(time.match(/:/))
+time=shivaLib.TimecodeToSeconds(time);shivaLib.player.currentTime(time-0);}
+else
 time=shivaLib.player.currentTime();return(time);}
 this.VideoCue=function(mode,time,callback,num){if(mode=="add")
 shivaLib.player.cue(time,callback);}

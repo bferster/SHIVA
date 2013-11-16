@@ -252,12 +252,13 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 			$("#posterPane"+i).remove();												// Remove old one, if there
 			$("#posterDiv").append(str+"</div>");										// Add div to poster
 			if (this.posterMode == "Edit") {											// If editing
-				var str="<div style='position:absolute;left:0px;top:0px;width:100%;height:100%;border:1px dashed'>";	// Make overlay div for dragging
+				str="<div style='position:absolute;left:0px;top:0px;width:100%;height:100%;border:1px dashed'>";	// Make overlay div for dragging
 				str+="<div id='posterPaneLab"+i+"' style='position:absolute;left:0px;text-shadow:1px 1px #eee'>";
 				str+="<b> "+(i+1)+". "+this.items[i].layerTitle+"</b></div>";			// Label
-//			else if (this.items[i].caption)												// If a caption
-//				str+="<span style='font-size:small'><b> "+this.items[i].caption+"</b></span></div>";							// Show it
-
+				$("#posterPane"+i).append(str+"</div>");								// Add div
+				}
+			else if (this.items[i].caption) {											// If a caption
+				str="<div style='font-size:small;position:absolute;left:0px;top:100%;width:100%;padding:4px;text-align:center'><b>"+this.items[i].caption+"</b>";// Show it
 				$("#posterPane"+i).append(str+"</div>");								// Add div
 				}
 			}

@@ -61,8 +61,8 @@ SHIVA_Draw.prototype.DrawPalette=function(tool) 						//	DRAW
 	var left=$("#"+this.container).css("left").replace(/px/g,"")-0+12;		// Get left
 	if ($("#shivaDrawPaletteDiv").length == 0) {							// If no palette
 		var h=225;															// Default height
-		if (shivaLib.player)												// If over a player										
-			h+=16;															// Add space for start/end times
+//		if (shivaLib.player)												// If over a player										
+//			h+=16;															// Add space for start/end times
 		str="<div id='shivaDrawPaletteDiv' style='position:absolute;left:"+left+"px;top:"+(top-12+Number(hgt)-100)+"px;width:180px;height:"+h+"px'>";
 		$("body").append("</div>"+str);										// Add palette to body
 		$("#shivaDrawPaletteDiv").addClass("propTable");					// Style same as property menu
@@ -187,11 +187,11 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 	str+="<input type='radio' id='sdtb5' name='draw' onclick='shivaLib.dr.SetTool(4)'/><label for='sdtb5'>Image</label>";
 	str+="<input type='radio' id='sdtb7' name='draw' onclick='shivaLib.dr.SetTool(6)'/><label for='sdtb7'>Idea</label>";
 	str+="</span></div>";	
-	if (shivaLib.player) {
-		str+="<img src='startdot.gif' style='position:absolute;left:13px;top:220px'  onclick='shivaLib.dr.SetVal(\"startTime\")'/>";
-		str+="<img src='enddot.gif'   style='position:absolute;left:150px;top:220px' onclick='shivaLib.dr.SetVal(\"endTime\")'/>";
-		str+="<p id='startEndTime' align='center' style='position:absolute;left:40px;top:214px;width:108px;color:#777'/>";
-		}
+//	if (shivaLib.player) {
+//		str+="<img src='startdot.gif' style='position:absolute;left:13px;top:220px'  onclick='shivaLib.dr.SetVal(\"startTime\")'/>";
+//		str+="<img src='enddot.gif'   style='position:absolute;left:150px;top:220px' onclick='shivaLib.dr.SetVal(\"endTime\")'/>";
+//		str+="<p id='startEndTime' align='center' style='position:absolute;left:40px;top:214px;width:108px;color:#777'/>";
+//		}
 	$("#shivaDrawPaletteDiv").html(str);	
 	$("#shivaDrawPaletteDiv").css("font-size","xx-small");	
 	$("#sdtb"+(this.curTool+1)).attr("checked","checked");					// Check current tool button
@@ -340,8 +340,8 @@ SHIVA_Draw.prototype.AddDot=function(x,y,up) 							// ADD DOT
 		o.y=new Array();													// y
 		o.alpha=this.alpha;													// Alpha
 		o.curve=this.curve;													// Curved path?
-		if (shivaLib.player)												// If over a player
-			o.s=this.startTime,o.e=this.endTime;							// Set time
+//		if (shivaLib.player)												// If over a player
+//			o.s=this.startTime,o.e=this.endTime;							// Set time
 		if (o.type < 3) {													// Line/Box/Cir
 			o.color=this.color;												// Set color from property menu
 			o.edgeColor=this.edgeColor;										// Edge color
@@ -402,7 +402,7 @@ SHIVA_Draw.prototype.SetVal=function(prop, val) 						//	SET VALUE
 			val="#"+val;													// Add it
 		}
 	var num=this.curSeg;													// Get index
-	if ((prop == "startTime") || (prop == "endTime")) {						// If a time
+/*	if ((prop == "startTime") || (prop == "endTime")) {						// If a time
 		var time=shivaLib.player.currentTime();								// Get time
 		val=Math.floor(time/60)+":";										// Mins
 		val+=Math.ceil(time%60);											// Secs
@@ -410,7 +410,7 @@ SHIVA_Draw.prototype.SetVal=function(prop, val) 						//	SET VALUE
 		this.DrawMenu();													// Redraw menu
 		shivaLib.Sound("click");											// Click
 		}
-	this[prop]=val;															// Set property
+*/	this[prop]=val;															// Set property
 	if ((this.curTool < 3) && (num != -1)) {								// If in polygon, cir, or bar
 		this.segs[num].curve=this.curve;									// Set prop
 		this.segs[num].arrow=this.arrow;									// Set prop
@@ -457,10 +457,10 @@ SHIVA_Draw.prototype.SetVal=function(prop, val) 						//	SET VALUE
 				this.segs[num].alpha=this.alpha;							// each
 				this.segs[num].imageURL=this.imageURL;						// property
 				}
-			if (shivaLib.player) {											// If over a player
-				this.segs[num].s=this.startTime;							// Set start
-				this.segs[num].e=this.endTime;								// Set end
-				}
+//			if (shivaLib.player) {											// If over a player
+//				this.segs[num].s=this.startTime;							// Set start
+//				this.segs[num].e=this.endTime;								// Set end
+//				}
 			}
 		this.DrawOverlay();													// Draw segments
 		this.DrawWireframes(false);											// Draw wireframes
@@ -883,8 +883,8 @@ SHIVA_Draw.prototype.AddIdea=function(num) 								//	ADD IDEA NODE
 		o.ideaLeft=this.segs[num].ideaLeft+off;								// Same x
 		o.ideaTop=(Number(this.segs[num].ideaTop)+Number(this.segs[num].ideaHgt)+32+off);	// Put under parent
 		}
-	if (shivaLib.player)													// If over a player
-		o.s=this.startTime,o.e=this.endTime;								// Set time
+//	if (shivaLib.player)													// If over a player
+//		o.s=this.startTime,o.e=this.endTime;								// Set time
 	num=this.selectedItems[0]=this.segs.length;;							// Set select
 	this.segs.push(o);														// Add idea
 	shivaLib.Sound("ding");													// Ding sound

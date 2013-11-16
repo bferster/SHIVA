@@ -217,14 +217,21 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 		}
 }
 
-SHIVA_Show.prototype.AddOverlay=function() 								// ADD OVERLAY
+SHIVA_Show.prototype.AddOverlay=function(data) 								// ADD OVERLAY
 {
 	var key;
    	this.overlay=new Array();												// Alloc new array
 	this.DrawOverlay();														// Initialize
-   	for (key in this.options) {												// For each element
-		if (key.match(/draw-/g)) 											// If a drawing	segment					
-			this.AddOverlaySeg(this.options[key],false);					// Add seg
+   	if (data){																// If data provided
+		var v=data.split("&draw-");											// Divide into segs
+		for (var i=0;i<v.length;++i) 										// For each seg
+			this.AddOverlaySeg(v[i].replace(/^[0-9]+=/,""),true);			// Add seg after replacing seg num
+  		}
+   	else{																	// Get draw data from options
+	   	for (key in this.options) {											// For each element
+			if (key.match(/draw-/g)) 										// If a drawing	segment					
+				this.AddOverlaySeg(this.options[key],false);				// Add seg
+			}
 		}
 	$("#shivaDrawDiv").css('pointer-events','none');						// Inibit pointer clicks if menu gone
  	this.DrawOverlay();														// Draw
@@ -296,7 +303,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 	this.DrawIdeaLinks(false);												// Draw idea link lines, if any												
 	for (i=0;i<this.overlay.length;++i) {									// For each seg
 		o=this.overlay[i];													// Point at it
-		if (this.player) {													// If over a player
+/*		if (this.player) {													// If over a player
 			now=Math.floor(this.player.currentTime());						// Get time in seconds
 			if (o.s) {														// If a start defined
 				v=o.s.split(":");											// Split
@@ -314,7 +321,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 			if ((now < s) || (now >= e))									// If out of range
 				continue;													// Skip it
 			}
-		$("#shtx"+i).remove();												// Remove text
+*/		$("#shtx"+i).remove();												// Remove text
 		$("#shim"+i).remove();												// Remove image
 		$("#shivaIdea"+i).remove();											// Remove idea node
 		if (o.type == 5) {													// Idea map

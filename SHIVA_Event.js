@@ -275,6 +275,15 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 		if (v[2]) 															// If exists
 			$("#sf2").val(v[2]);											// Set failure
 		}
+	else if (o.type == "draw") {											// Get drawing
+		var x=$("#containerDiv").css("left").replace(/px/,"")-0;			// Get left side of video
+		x+=$("#containerDiv").width()-0+8;									// Set right
+		$("#shivaLightBoxDiv").css("left",x+"px");							// Move background
+		$("#shivaLightBoxIntDiv").css("left","8px");						// Move dialog
+		shivaLib.AddOverlay(o.text);										// Get draw data
+		shivaLib.dr.segs=shivaLib.overlay;									// Set drawing segs
+		shivaLib.DrawOverlay();												// Reshow
+		}
 
 	$("#text").val($("#text").val().replace(/\*!!\*/g,"\n"));				// *!!* -> LF
 	$("#text").val($("#text").val().replace(/&quot;/g,"\""));				// &quot; -> "
@@ -310,7 +319,7 @@ SHIVA_Event.prototype.SetContentPanel=function(etype) 					// SET CONTENT PANEL 
 	var _this=this;															// Save 'this' locally
 	str="<table cellspacing=0 cellpadding=0 style='font-size:small' width='100%'>";
 	var chg="onchange='$(\"#content\").html(shivaLib.ev.SetContentPanel(this.value));	shivaLib.ev.SetEventHelp(); '";
-	str+="<tr><td>Type</td><td>"+this.par.MakeSelect("type",false,["ask","find","iframe","image","menu","popup","poller"],etype,chg)+"</td></tr>";
+	str+="<tr><td>Type</td><td>"+this.par.MakeSelect("type",false,["ask","draw","find","iframe","image","menu","popup","poller"],etype,chg)+"</td></tr>";
 	str+="<tr><td>ID</td><td><input type='text' size='20' id='id'/></td></tr>";
 	str+="<tr><td>Title</td><td><input type='text' size='20' id='title'/></td></tr>";
 	str+="<tr><td>Image Url</td><td><input type='text' size='20' id='url'/></td></tr>";
@@ -332,6 +341,14 @@ SHIVA_Event.prototype.SetContentPanel=function(etype) 					// SET CONTENT PANEL 
 		str+="<tr><td>On failure</td><td><input type='text' id='sf2'/></td></tr>";
 		str+="<tr><td>Target</td><td><input type='text' id='sf3'/></td></tr>";
 		str+="<tr><td>Fudge factor</td><td><input type='text' id='sf4'/></td></tr>";
+		}
+	else if (etype == "draw") {
+		str+="<input type='hidden' id='text'>";								// Holds drawing data
+		str+="<tr><td>Freehand drawing</td><td><input type='button' onclick='shivaLib.Annotate()' value='Draw/Edit'/></td></tr>";
+		var x=$("#containerDiv").css("left").replace(/px/,"")-0;			// Get left side of video
+		x+=$("#containerDiv").width()-0+8;									// Set right
+		$("#shivaLightBoxDiv").css("left",x+"px");							// Move background
+		$("#shivaLightBoxIntDiv").css("left","8px");						// Move dialog
 		}
 	else
 		str+="<tr><td>Text</td><td><textarea rows='4' cols='20' id='text'/></td></tr>";
@@ -398,7 +415,18 @@ SHIVA_Event.prototype.SaveEditedEvent=function(num, remove) 			// SAVE EDITED EV
 		if ($("#sf2").val())												// If set
 			o.text+="|"+$("#sf2").val();									// Add failure
 		}				
+	else if (o.type == "draw") {											// Get data from draw tool
+		if (shivaLib.dr) {													// If drawing lib open
+			o.text=shivaLib.dr.SaveDrawData(false);							// Get drawing data
+			shivaLib.dr.segs=[];											// Clear segs
+			}
+		shivaLib.overlay=[];												// Clear data from memory
+		$("#shtx0").remove();						// Kill text boxes
 
+		
+		shivaLib.DrawOverlay();												// Redraw	
+		$("#shivaDrawPaletteDiv").remove();									// Close drawing tool
+		}
 	o.frame.scroller=($("#frame-scroller").attr("checked") == "checked"); 	// Set checkbox
 	o.frame.closer=($("#frame-closer").attr("checked") == "checked"); 		// Set checkbox
 	o.frame.draggable=($("#frame-draggable").attr("checked") == "checked"); // Set checkbox
@@ -542,7 +570,7 @@ SHIVA_Event.prototype.CreateEventDisplay=function(num, params) 			// CREATE EVEN
 				str+="<div style='text-align:center;border:none;color:"+tcol+"'><b>"+o.title+"</b></div>";	// Add title
 			$("#shivaEvent-"+num).html(str);								// Set content							
 			break;
-		case "ask": 														// Ask for response
+		case "ask": 														// Ask dialog
 		case "menu": 														// Menu dialog
 		case "find": 														// Find dialog
 			if (params == undefined)										// If not just updating
@@ -802,6 +830,10 @@ SHIVA_Event.prototype.HideAll=function() 								// HIDE ALL EVENTS
 		if ($("#shivaIframe-"+i).length)									// If an iframe
 			$("#shivaIframe-"+i).remove();									// Remove it from DOM	
 		}
+	shivaLib.overlay=[];													// Clear draw data
+	$("#shtx0").remove();						// Kill text boxes
+
+	shivaLib.DrawOverlay();													// Reshow
 }
 
 SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
@@ -857,6 +889,15 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 			$("#shivaIframe-"+num).remove();								// Remove it from DOM	
 		return;																// Quit		
 		}	 
+	else if (o.type == "draw") {											// A drawing
+		if (visible)
+			shivaLib.AddOverlay(o.text);									// Get draw data
+		else{
+			shivaLib.overlay=[];
+			$("#shtx0").remove();						// Kill text boxes
+			}
+		shivaLib.DrawOverlay();												// Reshow
+		}
 	var fade=0;																// Assume no fade
 	if (visible) {															// If making visible
 		if (o.fadein)	fade=o.fadein*1000;									// If set, use it

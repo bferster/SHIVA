@@ -421,9 +421,10 @@ SHIVA_Event.prototype.SaveEditedEvent=function(num, remove) 			// SAVE EDITED EV
 			shivaLib.dr.segs=[];											// Clear segs
 			}
 		shivaLib.overlay=[];												// Clear data from memory
-		for (var z=0;z<20;++z)	$("#shtx"+z).remove();						// Remove textboxes
 		shivaLib.DrawOverlay();												// Redraw	
+		$("#shivaDrawDiv").html("");										// Clear draw div
 		$("#shivaDrawPaletteDiv").remove();									// Close drawing tool
+//		delete shivaLib.dr;
 		}
 	o.frame.scroller=($("#frame-scroller").attr("checked") == "checked"); 	// Set checkbox
 	o.frame.closer=($("#frame-closer").attr("checked") == "checked"); 		// Set checkbox
@@ -829,7 +830,7 @@ SHIVA_Event.prototype.HideAll=function() 								// HIDE ALL EVENTS
 			$("#shivaIframe-"+i).remove();									// Remove it from DOM	
 		}
 	shivaLib.overlay=[];													// Clear draw data
-	for (var z=0;z<20;++z)	$("#shtx"+z).remove();							// Remove textboxes
+	$("#shivaDrawDiv").html("");											// Clear draw div
 	shivaLib.DrawOverlay();													// Reshow
 }
 
@@ -891,7 +892,7 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 			shivaLib.AddOverlay(o.text);									// Get draw data
 		else{																// Hide
 			shivaLib.overlay=[];											// Clear data
-			for (var z=0;z<20;++z)	$("#shtx"+z).remove();					// Remove textboxes
+			$("#shivaDrawDiv").html("");									// Clear draw div
 			}
 		shivaLib.DrawOverlay();												// Reshow
 		}

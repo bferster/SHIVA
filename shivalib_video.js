@@ -147,28 +147,29 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
    		setInterval(onVideoTimer,400);	
    	}
 
-  	function onVideoTimer(e) {												// VIDEO TIMER HANDLER
-		if ($("#shivaNotesDiv").length) {									// If open
+  	function onVideoTimer(e) {										// VIDEO TIMER HANDLER
+		if ($("#shivaNotesDiv").length) {								// If open
 			var t,i,j,next;
-			var now=shivaLib.VideoTime();									// Get current time
-			for (i=0;i<500;++i) {											// Loop
-				if (!$("#ntc-"+i).length)									// If no more                                  
-					break;													// Quit
-				$("#ntc-"+i).css("color","#009900");						// Clear it
-	        	t=shivaLib.TimecodeToSeconds($("#ntc-"+i).text());			// Convert to seconds      
-				if (now >= t) {												// Post start
+			var now=shivaLib.VideoTime();								// Get current time
+			for (i=0;i<500;++i) {										// Loop
+				if (!$("#ntc-"+i).length)								// If no more                                  
+					break;												// Quit
+				$("#ntc-"+i).css("color","#009900");					// Clear it
+	        	t=shivaLib.TimecodeToSeconds($("#ntc-"+i).text());		// Convert to seconds      
+				if (now >= t) {											// Post start
 	        		next=shivaLib.TimecodeToSeconds($("#ntc-"+(i+1)).text()); // Next tc in secs    
-					if (now < next) {										// If before next
-						$("#ntc-"+i).css("color","#ff0000");				// Highlight it
-			            break;                                             	// Quit
+					if (now < next) {									// If before next
+						$("#ntc-"+i).css("color","#ff0000");			// Highlight it
+			            break;                                         	// Quit
 	            		}
        				}
        			}
        		}
 	}
 	
-  	function drawOverlay()	{
-   		shivaLib.DrawOverlay();
+  	function drawOverlay()	{										// ON TIME CHANGE										
+		if (!$("#shivaDrawPaletteDiv").length)							// If not drawing
+   			shivaLib.DrawOverlay();										// Refresh overlay
    		}		
 }
   

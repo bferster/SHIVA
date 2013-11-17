@@ -424,7 +424,6 @@ SHIVA_Event.prototype.SaveEditedEvent=function(num, remove) 			// SAVE EDITED EV
 		shivaLib.DrawOverlay();												// Redraw	
 		$("#shivaDrawDiv").html("");										// Clear draw div
 		$("#shivaDrawPaletteDiv").remove();									// Close drawing tool
-//		delete shivaLib.dr;
 		}
 	o.frame.scroller=($("#frame-scroller").attr("checked") == "checked"); 	// Set checkbox
 	o.frame.closer=($("#frame-closer").attr("checked") == "checked"); 		// Set checkbox

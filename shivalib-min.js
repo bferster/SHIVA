@@ -1588,7 +1588,8 @@ break;keys.push(lab);}
 cols=keys.length;}
 var rows=data.length;if(fields){for(i=1;i<rows;++i){o={};for(j=0;j<keys.length;++j)
 o[keys[j]]=data[i][j];theData.push(o);}}
-else{for(i=0;i<rows;++i){o=[];for(j=0;j<cols;++j){if(isNaN(data[i][j]))
+else{if(addHeader)
+theData.push(keys);for(i=0;i<rows;++i){o=[];for(j=0;j<cols;++j){if(isNaN(data[i][j]))
 o.push(data[i][j]);else
 o.push((data[i][j]-0));}
 theData.push(o);}}
@@ -1608,3 +1609,49 @@ if(cc==','&&!quote){++col;continue;}
 if(cc=='\n'&&!quote){++row;col=0;continue;}
 arr[row][col]+=cc;}
 return arr;}
+SHIVA_Show.prototype.Query=function(src,dst,query,fields,sort)
+{var v,j,i=0;var allFields=false;var nAnds=0;if(!src||!dst)
+return;var n=src.length;var clause=new Array();var ands=new Array();var ors=new Array();if((!fields)||(fields=="*")){fields=src[0];allFields=true;}
+else
+fields=fields.split("+");if((!query)||(query=="*"))
+query="* * *";var o=new Object();clause.push(o);o.type="AND";v=query.split(" ");while(i<v.length){o.hits=[];o.field=v[i++];o.cond=v[i++];o.what=v[i++];if((i<v.length)&&(v[i]!="AND")&&(v[i]!="OR"))
+o.what+=" "+v[i++];if(i<v.length){o={};o.type=v[i++];clause.push(o);}}
+for(i=0;i<clause.length;++i){o=clause[i];h=ands;if(o.type=="OR")
+h=ors;else
+nAnds++;for(j=0;j<src[0].length;++j)
+if(o.field==src[0][j]){o.field=j;break;}
+for(j=1;j<n;++j){if(o.cond=="*"){h.push(j-1);}
+if(o.cond=="LT"){if(src[j][o.field]<o.what)
+h.push(j-1);}
+else if(o.cond=="GT"){if(src[j][o.field]>o.what)
+h.push(j-1);}
+if(o.cond=="LE"){if(src[j][o.field]<=o.what)
+h.push(j-1);}
+else if(o.cond=="GE"){if(src[j][o.field]>=o.what)
+h.push(j-1);}
+if(o.cond=="EQ"){if(src[j][o.field]==o.what)
+h.push(j-1);}
+if(o.cond=="NE"){if(src[j][o.field]!=o.what)
+h.push(j-1);}
+if(o.cond=="LK"){if(src[j][o.field].toLowerCase().indexOf(o.what.toLowerCase())!=-1)
+h.push(j-1);}
+if(o.cond=="NL"){if(src[j][o.field].toLowerCase().indexOf(o.what.toLowerCase())==-1)
+h.push(j-1);}}}
+var results=new Array();if(nAnds==1)
+results=ands;else{var thisOne;n=ands.length;var matches=1;for(i=0;i<n;++i){thisOne=ands[i];for(j=i+1;j<n;++j){if(ands[j]==thisOne)
+++matches;if(matches==nAnds){results.push(ands[i]);matches=1;break;}}}}
+n=results.length;if(ors.length){for(i=0;i<ors.length;++i){for(j=0;j<n;++j)
+if(ors[i]==results[j])
+break;if(j==n)
+results.push(ors[i]);}}
+n=fields.length;if(allFields){for(i=0;i<results.length;++i)
+dst.push(src[results[i]]);}
+else{var ids=new Array();for(i=0;i<n;++i){for(j=0;j<src[0].length;++j)
+if(fields[i]==src[0][j]){ids[i]=j;break;}}
+for(i=0;i<results.length;++i){o=[];for(j=0;j<n;++j){o.push(src[results[i]+1][ids[j]]);}
+dst.push(o);}}
+if(sort){var dir=1;if(sort.charAt(0)=="-"){dir=-1;sort=sort.substr(1);}
+for(j=0;j<n;++j)
+if(sort==src[0][j]){sort=j;break;}
+dst.sort(function(a,b){return a[sort]>b[sort]?-1*dir:1*dir});}
+dst.splice(0,0,fields);}

@@ -300,7 +300,7 @@ str+=atts[k]+":"+str1+";";}
 str=str.substring(0,str.length-1)+"\",\n";}
 if(!this.overlay)
 str=str.substring(0,str.length-3)+"\",\n";}
-if(this.overlay)
+if(this.overlay&&this.dr)
 str+=this.dr.SaveDrawData(true);if(this.ev&&this.ev.events.length){var group=this.options.shivaGroup;str+="\"shivaEvents\": "+this.ArrayToString(this.ev.events,group)+",\n";}
 var j=0;if(type)
 str+="\t\"chartType\": \""+type+"\",\n";for(o in props){if(o=="item")

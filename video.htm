@@ -29,6 +29,7 @@
 	</table> 
 		<p style="text-align:right">
 			<img src='eventsbutton.gif' style='vertical-align:middle' alt='Event editor' onclick='shivaLib.ev.EventEditor()'>&nbsp;&nbsp;&nbsp;
+			<img src='annotate.gif' style='vertical-align:bottom' alt='Annotate' onclick='shivaLib.Annotate()'>
 			<span id='saveAsDiv'></span>
 			<br/><br/><a onclick='ShowSample()'><i>Click <u>here</u> to load sample events</i></a>
 	</p>		
@@ -165,7 +166,7 @@
 		var data={
 			"shivaEvents": [{"type":"popup","start":"00:05","fadein":"2","title":"This is a popup box","text":"This is <i>HTML formatted</i> text within a light grey box that faded in over 1 second, is draggable and has an icon.","url":"http://www.viseyes.org/shiva/icons/blue/book_alt2_16x14.png","frame":{"draggable":"true","width":"150","left":"70%","closer":"true"	}},
 			{"type":"image","start":"00:10","end":"00:15","click":"http://www.viseyes.org","fadein":"2","fadeout":"2","title":"75% opacity -- Click to go to viseyes.org","url":"http://www.viseyes.org/shiva/map.jpg","frame":{"width":"300","top":"50","left":"100","opacity":"75%"	}},
-			{"type":"image","start":"00:15","end":"00:24","fadein":"1","fadeout":"2","hover":"mypop","click":"play()","title":"Video pauses<br>Hover over me, then click","player":"pause","url":"http://www.primaryaccess.org/test.jpg","frame":{"width":"120","top":"20","left":"70%","color":"red"	}},
+			{"type":"image","start":"00:18","end":"00:24","fadein":"1","fadeout":"2","hover":"mypop","click":"play()","title":"Video pauses<br>Hover over me, then click","player":"pause","url":"http://www.primaryaccess.org/test.jpg","frame":{"width":"120","top":"20","left":"70%","color":"red"	}},
 			{"type":"iframe","start":"00:25","end":"00:34","url":"http://www.primaryaccess.org","frame":{"border":"1","width":"600","left":"620","height":"600"	}},
 			{"type":"draw","start":"00:25","end":"00:30","frame":{"width":"auto","top":"10%" },"text":"&draw-1=type:1;x:314,392;y:104,151;alpha:100;curve:false;color:-1;edgeColor:~FF0000;edgeWidth:30;arrow:false&draw-2=type:0;x:407;y:292;alpha:100;curve:false;color:-1;edgeColor:~FF0000;edgeWidth:30;arrow:false&draw-3=type:0;x:496,406;y:233,170;alpha:100;curve:false;color:-1;edgeColor:~FF9900;edgeWidth:30;arrow:true&draw-4=type:0;x:525,421;y:143,137;alpha:100;curve:false;color:-1;edgeColor:~FF9900;edgeWidth:30;arrow:true&draw-5=type:0;x:524,422;y:68,91;alpha:100;curve:false;color:-1;edgeColor:~FF9900;edgeWidth:30;arrow:true&draw-6=type:0;x:455,407;y:34,55;alpha:100;curve:false;color:-1;edgeColor:~FF9900;edgeWidth:30;arrow:true"},
 			{"type":"menu","start":"00:35","title":"A quick quiz","done":"play()","url":"http://www.viseyes.org/shiva/icons/blue/question_mark_8x16.png","frame":{"left":"8","top":"60","width":"300","draggable":"true","scroller":"false","closer":"false","height":"auto","radius":"8","color":"black","background-color":"","border":"1px solid","opacity":"100"	},"text":"When did Christopher Columbus sail to America? Hint:He sailed the ocean blue in...*!!*>>1942|popup(In the middle of WW2?)*!!*>>1493|popup(Close, but no cigar)*!!*>>1492|*popup(Yes! Columbus sailed the ocean blue in 1492)","player":"pause","id":"","end":"","fadein":"","fadeout":"","hover":"","click":"","response":""},

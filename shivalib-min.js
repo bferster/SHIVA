@@ -1095,15 +1095,16 @@ this.VideoTime=function(time){if(time!=undefined){time=""+time;if(time.match(/:/
 time=shivaLib.TimecodeToSeconds(time);shivaLib.player.currentTime(time-0);}
 else
 time=shivaLib.player.currentTime();return(time);}
-this.VideoCue=function(mode,time,callback,num){if(mode=="add")
-shivaLib.player.cue(time,callback);}
+this.VideoCue=function(mode,time,callback,num){if(mode=="add"){shivaLib.player.cue(time,callback);shivaLib.player.numCues++;}
+else if(mode=="delete"){for(var i=0;i<shivaLib.player.numCues;++i)
+shivaLib.player.removeTrackEvent(this.player.getLastTrackEventId());shivaLib.player.numCues=0;}}
 this.VideoEvent=function(mode,type,callback){if(mode=="add")
 shivaLib.player.on(type,callback);else
 shivaLib.player.off(type,callback);}
-this.VideoEvent("add","timeupdate",drawOverlay);this.VideoEvent("add","loadeddata",onVidLoaded);this.VideoEvent("add","ended",function(){shivaLib.SendShivaMessage("ShivaVideo=done")});this.VideoEvent("add","playing",function(){shivaLib.SendShivaMessage("ShivaVideo=play")});this.VideoEvent("add","pause",function(){shivaLib.SendShivaMessage("ShivaVideo=pause")});if(this.ev)
+if(this.ev)
 t=this.ev.events;else
-t=options["shivaEvents"];this.ev=new SHIVA_Event(this);if((t)&&(t.length))
-this.ev.AddEvents(t);this.SendReadyMessage(true);function onVidLoaded(){var v=shivaLib.options.start.split(":");if(v.length==1)
+t=options["shivaEvents"];this.ev=new SHIVA_Event(this);if((t)&&(t.length)){this.ev.AddEvents(t);this.ev.HideAll(0);}
+this.SendReadyMessage(true);this.VideoEvent("add","timeupdate",drawOverlay);this.VideoEvent("add","loadeddata",onVidLoaded);this.VideoEvent("add","ended",function(){shivaLib.SendShivaMessage("ShivaVideo=done")});this.VideoEvent("add","playing",function(){shivaLib.SendShivaMessage("ShivaVideo=play")});this.VideoEvent("add","pause",function(){shivaLib.SendShivaMessage("ShivaVideo=pause")});function onVidLoaded(){var v=shivaLib.options.start.split(":");if(v.length==1)
 v[1]=v[0],v[0]=0;var time=Math.max(Number(v[0]*60)+Number(v[1]),.25);shivaLib.VideoTime(time);shivaLib.VideoVolume(shivaLib.options.volume/100);if(shivaLib.options.autoplay=="true")
 shivaLib.VideoPlay();else
 shivaLib.VideoPause();$("#shivaEventDiv").height(Math.max(shivaLib.VideoMediaHeight()-40,0));shivaLib.VideoNotes();shivaLib.SendShivaMessage("ShivaVideo=ready");setInterval(onVideoTimer,400);if(shivaLib.ev)

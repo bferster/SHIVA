@@ -28,6 +28,7 @@ function SHIVA_Event(parent) 											// CONSTRUCTOR
 	$('body').append(str);													// Add to dom								
 	$("#shivaEventDiv").css("z-index",1999);								// Force on top
 	this.Do("Startup");														// Save undo
+	shivaLib.player.numCues=0;												// No cues yet
 }
 
 
@@ -370,13 +371,7 @@ SHIVA_Event.prototype.UpdatePlayerEvents=function() 					// ADD EVENTS
 	var i,o;
 	if (!this.player)														// No player
 		return;																// Quit
-	for (i=0;i<this.events.length;++i) {									// For each event
-		o=this.events[i];													// Point at event
-		if (o.start)														// If a start event
-			this.player.removeTrackEvent(this.player.getLastTrackEventId()); // Remove last
-		if (o.end)															// If end
-			this.player.removeTrackEvent(this.player.getLastTrackEventId());// Remove last
-		}
+	shivaLib.VideoCue("delete");											// Delete existing cues
 	for (i=0;i<this.events.length;++i) 										// For each event
 		this.AddToCue(i);													// Add them back
 	this.DrawEventDots();													// Redraw events
@@ -454,23 +449,7 @@ SHIVA_Event.prototype.SaveEditedEvent=function(num, remove) 			// SAVE EDITED EV
 	this.DrawEventDots();													// Update event dots
 	this.UpdatePlayerEvents();												// Update player
 }
-SHIVA_Event.prototype.UpdatePlayerEvents=function() 					// ADD EVENTS
-{
-	var i,o;
-	if (!this.player)														// No player
-		return;																// Quit
-	for (i=0;i<this.events.length;++i) {									// For each event
-		o=this.events[i];													// Point at event
-		if (o.start)														// If a start event
-			this.player.removeTrackEvent(this.player.getLastTrackEventId()); // Remove last
-		if (o.end)															// If end
-			this.player.removeTrackEvent(this.player.getLastTrackEventId());// Remove last
-		}
-	for (i=0;i<this.events.length;++i) 										// For each event
-		this.AddToCue(i);													// Add them back
-	this.DrawEventDots();													// Redraw events
-}
-
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //   EVENT CREATION   
@@ -496,7 +475,7 @@ SHIVA_Event.prototype.AddToCue=function(num) 							// ADD EVENT TO EVENT QUEUE
 		return;																// Quit
 	var _this=this;															// Save 'this' locally
 	var o=this.events[num];													// Point at event
-	if (o.id)															// If no start defined
+	if (o.id)																// If an id
 		return;																// Don't add to cue
 	shivaLib.VideoCue("add",o.start,function() { 							// A cue
 		_this.Draw(num,true); 												// Add start cue
@@ -919,6 +898,8 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 	else{																	// If hiding
 		if (o.fadeout)	fade=o.fadeout*1000;								// If set, use it
 		$("#shivaEvent-"+num).fadeOut(fade);								// Fade out in to hide
+		if (o.done)															// If done action
+			this.EventRouter(o.done,"");									// Run events(s)
 		}
 	if ((o.player) && (this.player) && (visible)) {							// Player motion
 		var param="";

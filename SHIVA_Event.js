@@ -330,7 +330,7 @@ SHIVA_Event.prototype.SetContentPanel=function(etype) 					// SET CONTENT PANEL 
 	str="<table cellspacing=0 cellpadding=0 style='font-size:small' width='100%'>";
 	var chg="onchange='$(\"#content\").html(shivaLib.ev.SetContentPanel(this.value));	shivaLib.ev.SetEventHelp(); '";
 	str+="<tr><td>Type</td><td>"+this.par.MakeSelect("type",false,["ask","draw","find","iframe","image","menu","popup","poller"],etype,chg)+"</td></tr>";
-	str+="<tr><td>ID</td><td><input type='text' size='20' id='id'/></td></tr>";
+	str+="<tr><td>Calling ID</td><td><input type='text' size='20' id='id'/></td></tr>";
 	str+="<tr><td>Title</td><td><input type='text' size='20' id='title'/></td></tr>";
 	str+="<tr><td>Image Url</td><td><input type='text' size='20' id='url'/></td></tr>";
 	str+="<tr><td>Has scrollbar?</td><td><input type='checkbox' id='frame-scroller'/></td></tr>";
@@ -496,7 +496,7 @@ SHIVA_Event.prototype.AddToCue=function(num) 							// ADD EVENT TO EVENT QUEUE
 		return;																// Quit
 	var _this=this;															// Save 'this' locally
 	var o=this.events[num];													// Point at event
-	if (!o.start)															// If no start defined
+	if (o.id)															// If no start defined
 		return;																// Don't add to cue
 	shivaLib.VideoCue("add",o.start,function() { 							// A cue
 		_this.Draw(num,true); 												// Add start cue
@@ -559,9 +559,10 @@ SHIVA_Event.prototype.CreateEventDisplay=function(num, params) 			// CREATE EVEN
 			$("#shivaEvent-"+num).css("background-color","#eee").css('border',"1px solid #ccc");
 			if (o.url) 														// If an icon defined
 				str+="<img src='"+o.url+"' style='vertical-align:middle'/> "; // Add icon image		
-			str+="<span style='text-align:center;text-shadow:1px 1px white'><b>"+o.title+"</b></span>";
-			if (o.text)														// If set
-				str+="<p>"+o.text.replace(/\*!!\*/g,"<br/>")+"</p>";		// Add body text, LFs -> <br>'s
+			if (o.title)													// If title defined
+				str+="<span style='text-align:center;text-shadow:1px 1px white'><b>"+o.title+"</b></span>";
+			if (o.text)														// If text defined
+				str+="<p>"+shivaLib.LinkToAnchor(o.text.replace(/\*!!\*/g,"<br>")),"<br/>"+"</p>";	// Add body text
 			$("#shivaEvent-"+num).html(str);								// Set content								
 			break;
 		case "image": 														// Image
@@ -829,16 +830,23 @@ SHIVA_Event.prototype.SaveResponse=function(num, val) 					// SAVE RESPONSE TO A
 		$.post("http://www.primaryaccess.org/REST/addeasyfile.php",{ email:name, type: "Response", title:id,data:val });
 }
 
-SHIVA_Event.prototype.HideAll=function() 								// HIDE ALL EVENTS
+SHIVA_Event.prototype.HideAll=function(now) 							// HIDE ALL EVENTS
 {
-	$("#shivaPopupDiv").remove();											// Remove popup, if there
-	for (var i=0;i<this.events.length;++i) {								// For each event
-		if (i == this.modalEvent)											// Don't hide the modal one
-			continue;														// Continue
+	var i,s,e,o;
+	for (i=0;i<this.events.length;++i) {									// For each event
+		o=this.events[i];													// Point at event
+		s=shivaLib.TimecodeToSeconds(o.start)-0;							// Get start
+		if (o.end)															// If an end set
+			e=shivaLib.TimecodeToSeconds(o.end);							// Get end
+		else																// No end
+			e=100000;														// Inifinite
+		if ((now > s) && (now <= e))										// If in it
+			continue;														// Don't hide it	
 		$("#shivaEvent-"+i).hide();											// Hide it
 		if ($("#shivaIframe-"+i).length)									// If an iframe
 			$("#shivaIframe-"+i).remove();									// Remove it from DOM	
 		}
+	$("#shivaPopupDiv").remove();											// Remove popup, if there
 	shivaLib.overlay=[];													// Clear draw data
 	$("#shivaDrawDiv").html("");											// Clear draw div
 	shivaLib.DrawOverlay();													// Reshow
@@ -850,13 +858,10 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 	if ((num < 0) || (num >= this.events.length))							// If out of bounds
 		return;																// Quit
 	$("#shivaDrawDiv").css('pointer-events','none');						// Inibit pointer clicks if menu gone
- 	var o=this.events[num];													// Point at event
-	if (this.player && visible && o.start) {								// If player is active and not a named event
-		if (shivaLib.VideoPaused()) 										// If paused
-			return this.HideAll();											// Clear all and quit
-		else if ((o.type == "ask") || (o.type == "menu")|| (o.type == "find"))	// Ask, find or menu event
-			this.modalEvent=num;											// Set modal flag
-		}
+   	var o=this.events[num];													// Point at event
+	this.HideAll(shivaLib.VideoTime());										// Clear inactive events
+	if ((o.type == "ask") || (o.type == "menu")|| (o.type == "find"))		// Ask, find or menu event
+		this.modalEvent=num;												// Set modal flag
 	if (o.type == "canvas") 												// A canvas event
 		window.postMessage("ShivaTrigger="+this.container.substr(4)+","+(num+1)+",clicked","*");
 	else if (o.type == "find") {											// A find
@@ -895,7 +900,6 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 			}
 		else																// Hide it
 			$("#shivaIframe-"+num).remove();								// Remove it from DOM	
-		return;																// Quit		
 		}	 
 	else if (o.type == "draw") {											// A drawing
 		if (visible)														// Show
@@ -906,6 +910,7 @@ SHIVA_Event.prototype.Draw=function(num, visible) 						//	DRAW OR HIDE EVENT
 			}
 		shivaLib.DrawOverlay();												// Reshow
 		}
+	
 	var fade=0;																// Assume no fade
 	if (visible) {															// If making visible
 		if (o.fadein)	fade=o.fadein*1000;									// If set, use it
@@ -1067,7 +1072,7 @@ SHIVA_Event.prototype.SetEventHelp=function()
 	helpText['fadeout']="The duration of the fade out for your  event. This should be a number of seconds.";
 	helpText['content']="For configuring what text, images, and other content to display in your event.";
 	helpText['type']="Use the drop-down menu to choose what type of event you would like to use. ";
-	helpText['id']="The name for this  event.";
+	helpText['id']="The name for this  event. Use only for called events";
 	helpText['title ']="The title for the event.";
 	helpText['url']="The web URL of an image to optionally add an image to your event.";
 	helpText['frame-scroller']="Should your event popup box has scrollbars?";

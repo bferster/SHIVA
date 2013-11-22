@@ -877,6 +877,19 @@ SHIVA_Show.prototype.ArrayToString=function(jsonArray) 					// SAVE JSON ARRAY A
 }
 
 
+SHIVA_Show.prototype.LinkToAnchor=function(str) 						// CONVERT LINKS TO ANCHORS
+{
+	var i,v;
+	if (str.match(/http/)) {												// If an embedded url
+		v=(str+" ").match(/http.?:\/\/.*?\s/ig);							// Extract url(s)
+		for (i=0;i<v.length;++i) {											// For each url
+			v[i]=$.trim(v[i]);												// Trim it
+			str=str.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='"+v[i]+"' target='_blank'>here</a> ");	// Replace with anchor tag
+			}
+		}
+	return str;																// Return converted string
+}
+
 SHIVA_Show.prototype.Clone=function(obj) 								// CLONE OBJECT/ARRAY
 {
     var i;

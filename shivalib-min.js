@@ -228,6 +228,9 @@ else
 str+="\""+val+"\",";}
 str=str.substr(0,str.length-1);if(i!=jsonArray.length-1)str+="},\n";else str+="}]";}
 return str;}
+SHIVA_Show.prototype.LinkToAnchor=function(str)
+{var i,v;if(str.match(/http/)){v=(str+" ").match(/http.?:\/\/.*?\s/ig);for(i=0;i<v.length;++i){v[i]=$.trim(v[i]);str=str.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='"+v[i]+"' target='_blank'>here</a> ");}}
+return str;}
 SHIVA_Show.prototype.Clone=function(obj)
 {var i;if(null==obj||"object"!=typeof obj)return obj;else if(obj instanceof Array){var copy=[];for(i=0;i<obj.length;++i)
 copy[i]=this.Clone(obj[i]);return copy;}

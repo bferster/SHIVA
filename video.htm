@@ -190,7 +190,9 @@
 			}
 		ReEdit(data);
 		shivaLib.Sound("ding");
-		shivaLib.ev.EventEditor();
+		if (!$("#shivaEventEditorDiv").length) 									
+			shivaLib.ev.EventEditor();
+		shivaLib.ev.DrawEventDots();	
 	}
 
 	function SetAttributes()

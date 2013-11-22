@@ -238,21 +238,24 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 	if (o.type == "menu") {													// Deconstruct menu
 		var lines=o.text.split(">>");										// Split into lines
 		if (lines[0]) {														// If exists
-			lines[0]=lines[0].replace(/\*!!\*/g,"\n").replace(/&quot;/g,"\"");	// *!!* -> LF and &quot; -> "
+			lines[0]=lines[0].replace(/\*!!\*/g,"\n").replace(/&quot;/g,"\"").replace(/&apos;/g,"\'");	// *!!* -> LF and quot/apos
 			$("#sqpr").val(lines[0]);										// Set prompt
 			}
-		for (i=1;i<lines.length;++i) {										// For each line
-			v=lines[i].split("|");											// Get sub-parts
-			if (v[0]) {														// If exists
-				v[0]=v[0].replace(/\*!!\*/g,"\n").replace(/&quot;/g,"\"");	// *!!* -> LF and &quot; -> "
-				$("#sq"+i+"a").val(v[0]);									// Set answer
+		for (i=1;i<lines.length+1;++i) {									// For each line
+			if (lines[i]) {													// If something there
+				lines[i]=lines[i].replace(/&quot;/g,"\"").replace(/&apos;/g,"\'");	// Unescape
+				v=lines[i].split("|");										// Get sub-parts
+				if (v[0]) {													// If exists
+					v[0]=v[0].replace(/\*!!\*/g,"\n").replace(/&quot;/g,"\"");	// *!!* -> LF and &quot; -> "
+					$("#sq"+i+"a").val(v[0]);								// Set answer
+					}
+				if (v[1].charAt(0) == "*") {								// A leading *
+					v[1]=v[1].substr(1);									// Lop it off
+					$("#sq"+i+"c").attr("checked","checked");				// Set check			
+					}
+				if (v[1])													// If exists
+					$("#sq"+i+"b").val(v[1]);								// Set action
 				}
-			if (v[1].charAt(0) == "*") {									// A leading *
-				v[1]=v[1].substr(1);										// Lop it off
-				$("#sq"+i+"c").attr("checked","checked");					// Set check			
-				}
-			if (v[1])														// If exists
-				$("#sq"+i+"b").val(v[1]);									// Set action
 			}
 		}
 	else if (o.type == "find") {											// Deconstruct find
@@ -261,6 +264,8 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 			lines[0]=lines[0].replace(/\*!!\*/g,"\n").replace(/&quot;/g,"\"");	// *!!* -> LF and &quot; -> "
 			$("#sqpr").val(lines[0]);										// Set prompt
 			}
+		if (lines[1])														// If something there
+			lines[1]=lines[1].replace(/&quot;/g,"\"").replace(/&apos;/g,"\'");	// Unescape
 		v=lines[1].split("|");												// Get sub-parts
 		if (v[0]) {															// If exists
 			var vv=v[0].split("-");											// Chop up x-y-d
@@ -286,19 +291,24 @@ SHIVA_Event.prototype.EditEvent=function(num) 							// EDIT EVENT
 		}
 
 	$("#text").val($("#text").val().replace(/\*!!\*/g,"\n"));				// *!!* -> LF
-	$("#text").val($("#text").val().replace(/&quot;/g,"\""));				// &quot; -> "
-	$("#title").val($("#title").val().replace(/&quot;/g,"\""));				// &quot; -> "
-	$("#text").val($("#text").val().replace(/&apos;/g,"'"));				// &apos; -> '
-	$("#title").val($("#title").val().replace(/&apos;/g,"'"));				// &apos; -> '
-	if ($("#sqpr").length) {												// If exists
-		$("#sqpr").val($("#sqpr").val().replace(/&apos;/g,"'"));			// &apos; -> '
-		$("#sqpr").val($("#sqpr").val().replace(/&quot;/g,"\""));			// &quot; -> '
-		}
-	for (i=1;i<6;++i) 														// For eaxch possible answer
-		if ($("#sq"+i+"a").length) {										// If exists
-			$("#sq"+i+"a").val($("#sq"+i+"a").val().replace(/&apos;/g,"'"));// &apos; -> '
-			$("#sq"+i+"a").val($("#sq"+i+"a").val().replace(/&quot;/g,"\""));// &aquot; -> '
-			}
+	$("#text").val($("#text").val().replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"));	// Unescape
+	$("#title").val($("#title").val().replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"));	// Unescape
+	$("#done").val($("#done").val().replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"));	// Unescape
+	$("#click").val($("#click").val().replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"));	// Unescape
+	$("#hover").val($("#hover").val().replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"));	// Unescape
+	$("#done").val($("#done").val().replace(/&quot;/g,"\"").replace(/&apos;/g,"\'"));	// Unescape
+
+	if ($("#sqpr").length)													// If exists
+		$("#sqpr").val($("#sqpr").val().replace(/&apos;/g,"'").replace(/&quot;/g,"\"")); // Unescape
+	
+	if ($("#sq1").length)													// If exists
+		$("#sq1").val($("#sq1").val().replace(/&apos;/g,"'").replace(/&quot;/g,"\"")); // Unescape
+	if ($("#sq2").length)													// If exists
+		$("#sq2").val($("#sq2").val().replace(/&apos;/g,"'").replace(/&quot;/g,"\"")); // Unescape
+
+	for (i=1;i<6;++i) 														// For each possible answer
+		if ($("#sq"+i+"a").length) 											// If exists
+			$("#sq"+i+"a").val($("#sq"+i+"a").val().replace(/&apos;/g,"'").replace(/&quot;/g,"\""));	// Unescape
 
 	o=o.frame;																// Point at field
 	for (key in o)															// For each field member
@@ -392,7 +402,7 @@ SHIVA_Event.prototype.SaveEditedEvent=function(num, remove) 			// SAVE EDITED EV
 		}
 	if (o.type == "menu") {													// Construct text from parts
 		o.text=$("#sqpr").val();											// Prompt
-		for (i=0;i<5;++i)													// For each question
+		for (i=1;i<6;++i)													// For each question
 			if ($("#sq"+i+"a").val()) {										// If an answer title
 			o.text+=">>"+$("#sq"+i+"a").val()+"|";							// Add title
 			if ($("#sq"+i+"c").attr("checked")) 							// If correct
@@ -429,10 +439,11 @@ SHIVA_Event.prototype.SaveEditedEvent=function(num, remove) 			// SAVE EDITED EV
 	o.frame.closer=($("#frame-closer").attr("checked") == "checked"); 		// Set checkbox
 	o.frame.draggable=($("#frame-draggable").attr("checked") == "checked"); // Set checkbox
 	o.text=o.text.replace(/\r/g,"").replace(/\n/g,"*!!*");					// Remove CR, LF -> *!!*
-	o.text=o.text.replace(/"/g,"&quot;");									// Escape quotes
-	o.title=o.title.replace(/"/g,"&quot;");									// Escape quotes
-	o.text=o.text.replace(/'/g,"&apos;");									// Escape apost
-	o.title=o.title.replace(/'/g,"&apos;");									// Escape apost
+	o.text=o.text.replace(/"/g,"&quot;").replace(/'/g,"&apos;");			// Escape quotes/apos
+	o.title=o.title.replace(/"/g,"&quot;").replace(/'/g,"&apos;");			// Escape quotes/apos
+	o.hover=o.hover.replace(/"/g,"&quot;").replace(/'/g,"&apos;");			// Escape quotes/apos
+	o.click=o.click.replace(/"/g,"&quot;").replace(/'/g,"&apos;");			// Escape quotes/apos
+	o.done=o.done.replace(/"/g,"&quot;").replace(/'/g,"&apos;");			// Escape quotes/apos
 	$("#shivaEvent-"+num).remove();											// Remove display div
 	if (remove)	{															// If removing it
 		this.events.splice(num,1);											// Remove from events list

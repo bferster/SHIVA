@@ -145,6 +145,8 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		shivaLib.VideoNotes();
  		shivaLib.SendShivaMessage("ShivaVideo=ready");
    		setInterval(onVideoTimer,400);	
+ 		if (shivaLib.ev)
+ 			shivaLib.ev.DrawEventDots();										
    	}
 
   	function onVideoTimer(e) {										// VIDEO TIMER HANDLER

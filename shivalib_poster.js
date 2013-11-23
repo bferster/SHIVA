@@ -258,7 +258,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 				$("#posterPane"+i).append(str+"</div>");								// Add div
 				}
 			else if (this.items[i].caption) {											// If a caption
-				str="<div style='font-size:small;position:absolute;left:0px;top:100%;width:100%;padding:4px;text-align:center'><b>"+this.items[i].caption+"</b>";// Show it
+				str="<div style='font-size:small;position:absolute;left:0px;top:100%;width:100%;padding:4px;text-align:center'><b>"+shivaLib.LinkToAnchor(this.items[i].caption)+"</b>";// Show it
 				$("#posterPane"+i).append(str+"</div>");								// Add div
 				}
 			}

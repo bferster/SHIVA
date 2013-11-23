@@ -67,6 +67,7 @@ SHIVA_Event.prototype.EventEditor=function() 							// EDIT EVENT
 	$("#shivaEventEditorDiv").css("-moz-border-radius","6px");				// Mozilla
 	$("#shivaEventEditorDiv").css("background-color","#000");
 	$("#shivaEventSlider .ui-slider-handle").css("height","8px");
+	$("#shivaEventSlider .ui-slider-handle").css("cursor","pointer");
 	$("#shivaEventSlider").css("background","#ccc");
 	$("#shivaEventSlider .ui-slider-range").css("background","#999");
 	$("#shivaEventSlider").bind("slidechange",$.proxy(function(event, ui) {	// Add handler
@@ -75,14 +76,14 @@ SHIVA_Event.prototype.EventEditor=function() 							// EDIT EVENT
 		$("#shivaTimescale").text("Show: "+d);								// Show span
 		this.DrawEventDots();												// Redraw bar
 		},this));
-	str="<div id='shivaTimescale' style='position:absolute;";			
+	str="<div id='shivaTimescale' class='unselectable' style='position:absolute;";			
 	str+="left:125px;top:35px;color:#ccc''>Show: "+dur+"</div>";
 	$("#shivaEventEditorDiv").append(str);
 	$("#shivaEventEditorDiv").append("<div id='shivaTimecode' style='position:absolute;left:"+(w/2-12)+"px;top:35px;color:#ccc'/>");
 	str="<div id='shivaTimebarDiv' style='position:absolute;-moz-user-select: none;-khtml-user-select:none;-webkit-user-select:none;";			
 	str+="width:"+w+"px;left:8px;top:10px;height:16px;";
 	str+="border-radius:3px;-moz-border-radius:3px;background-color:#999'/>";
-	str+="<img src='addeventdot.gif' style='position:absolute;left:"+(w-8)+"px;top:33px' onclick='shivaLib.ev.EditEvent(-1)'/>";
+	str+="<span class='unselectable' style='position:absolute;left:"+(w-86)+"px;top:33px;color:#ccc;vertical-align:top'>Add new event &nbsp;<img src='addeventdot.gif' width='14' style='cursor:pointer' onclick='shivaLib.ev.EditEvent(-1)'/></span?";
 	$("#shivaEventEditorDiv").append(str);
 	$("#shivaTimebarDiv").css("overflow","hidden"); 						// Disable spillover
 	$("#shivaEventEditorDiv").slideDown();									// Slide it on

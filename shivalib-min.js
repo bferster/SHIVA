@@ -229,7 +229,9 @@ str+="\""+val+"\",";}
 str=str.substr(0,str.length-1);if(i!=jsonArray.length-1)str+="},\n";else str+="}]";}
 return str;}
 SHIVA_Show.prototype.LinkToAnchor=function(str)
-{var i,v;if(str.match(/http/)){v=(str+" ").match(/http.?:\/\/.*?\s/ig);for(i=0;i<v.length;++i){v[i]=$.trim(v[i]);str=str.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='"+v[i]+"' target='_blank'>here</a> ");}}
+{var i,v,vv,url,title;if(str.match(/href=/))
+return;if(str.match(/http/)){v=(str+" ").match(/http.?:\/\/.*?\s/ig);for(i=0;i<v.length;++i){v[i]=$.trim(v[i]);vv=v[i].split("|");url=title=vv[0];if(vv.length>1)
+title=vv[1].replace(/_/g," ");str=str.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='"+url+"' target='_blank'>"+title+"</a> ");}}
 return str;}
 SHIVA_Show.prototype.Clone=function(obj)
 {var i;if(null==obj||"object"!=typeof obj)return obj;else if(obj instanceof Array){var copy=[];for(i=0;i<obj.length;++i)
@@ -1433,7 +1435,7 @@ u=srs+u;if(u.match(/go.htm/))
 u+="&if="+i;str+="<iframe id='posterFrame-"+i+"' src='"+u+"'";if(this.items[i].scrollbars=="false")
 str+="scrolling='no' ";str+="frameborder='0' allowtransparency='true'></iframe>";}
 if(mode=="draw"){$("#posterPane"+i).remove();$("#posterDiv").append(str+"</div>");if(this.posterMode=="Edit"){str="<div style='position:absolute;left:0px;top:0px;width:100%;height:100%;border:1px dashed'>";str+="<div id='posterPaneLab"+i+"' style='position:absolute;left:0px;text-shadow:1px 1px #eee'>";str+="<b> "+(i+1)+". "+this.items[i].layerTitle+"</b></div>";$("#posterPane"+i).append(str+"</div>");}
-else if(this.items[i].caption){str="<div style='font-size:small;position:absolute;left:0px;top:100%;width:100%;padding:4px;text-align:center'><b>"+this.items[i].caption+"</b>";$("#posterPane"+i).append(str+"</div>");}}
+else if(this.items[i].caption){str="<div style='font-size:small;position:absolute;left:0px;top:100%;width:100%;padding:4px;text-align:center'><b>"+shivaLib.LinkToAnchor(this.items[i].caption)+"</b>";$("#posterPane"+i).append(str+"</div>");}}
 $("#posterFrame-"+i).height(dh);$("#posterFrame-"+i).width(dw);$("#posterPane"+i).height(dh);$("#posterPane"+i).width(dw);$("#posterPane"+i).css({"left":x+"px","top":y+"px"});$("#posterPaneLab"+i).css("top",$("#posterPane"+i).height()+3+"px");if(this.options.overview=="true"){str="<div id='posterOverPane"+i+"' style='position:absolute;opacity:.4;border:1px solid white;pointer-events:none;background-color:#666'/>";if(mode=="draw")
 $("#posterOverDiv").append(str);x=$("#posterPane"+i).position().left;y=$("#posterPane"+i).position().top;$("#posterOverPane"+i).css({"left":x/4/scale+"px","top":y/4/scale+"px"});$("#posterOverPane"+i).height(dh/4/scale);$("#posterOverPane"+i).width(dw/4/scale);}
 if((mode=="resize")&&(u)){if(u.match(/go\.htm/)){var win=document.getElementById("posterFrame-"+i).contentWindow;win.postMessage("ShivaAct=resize","*");}}

@@ -881,7 +881,7 @@ SHIVA_Show.prototype.LinkToAnchor=function(str) 						// CONVERT LINKS TO ANCHOR
 {
 	var i,v,vv,url,title;
 	if (str.match(/href=/)) 												// If an embedded <a> tag
-		return;																// Don't convert
+		return str;															// Don't convert
 
 	if (str.match(/http/)) {												// If an embedded url
 		v=(str+" ").match(/http.?:\/\/.*?\s/ig);							// Extract url(s)

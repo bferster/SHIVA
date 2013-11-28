@@ -570,8 +570,8 @@ SHIVA_Show.prototype.Annotate=function(x,y) 											// SHOW ANNOTATION PALATT
 SHIVA_Show.prototype.DrawHTML=function() 												//	DRAW HTML
 {
 	var sca=1;																				// Assume 1:1
-	if (options.scale)																		// If a scale set
-		sca=options.scale;																	// Use it
+	if (this.options.scale)																	// If a scale set
+		sca=this.options.scale;																// Use it
 	$("#"+this.container).html(this.options.html);											// Add to container
 	$("#"+this.container).css({"transform":"scale("+sca+")","-webkit-transform":"scale("+sca+")","transform-origin":"0% 0%","-webkit-transform-origin":"0% 0%"});
 	this.SendReadyMessage(true);															// Send ready message									

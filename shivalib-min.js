@@ -148,8 +148,8 @@ SHIVA_Show.prototype.Annotate=function(x,y)
 else this.dr.DrawPalette();if(x!=undefined){$("#shivaDrawPaletteDiv").css("left",x+"px");$("#shivaDrawPaletteDiv").css("top",y+"px");}
 this.Sound("click");}
 SHIVA_Show.prototype.DrawHTML=function()
-{var sca=1;if(options.scale)
-sca=options.scale;$("#"+this.container).html(this.options.html);$("#"+this.container).css({"transform":"scale("+sca+")","-webkit-transform":"scale("+sca+")","transform-origin":"0% 0%","-webkit-transform-origin":"0% 0%"});this.SendReadyMessage(true);}
+{var sca=1;if(this.options.scale)
+sca=this.options.scale;$("#"+this.container).html(this.options.html);$("#"+this.container).css({"transform":"scale("+sca+")","-webkit-transform":"scale("+sca+")","transform-origin":"0% 0%","-webkit-transform-origin":"0% 0%"});this.SendReadyMessage(true);}
 SHIVA_Show.prototype.DrawWebpage=function()
 {$("#"+this.container+"IF").remove();var h=this.options.height;var w=this.options.width;if(!isNaN(h))h+="px";if(!isNaN(w))w+="px";h=h.replace(/%25/,"%");w=w.replace(/%25/,"%");$("#"+this.container).css("height",h);$("#"+this.container).css("width",w);var str="<iframe src='"+this.options.url+"' id='"+this.container+"IF' style='";str+="width:"+w+";height:"+h+"'>";$("#"+this.container).append(str);this.SendReadyMessage(true);}
 SHIVA_Show.prototype.DrawChart=function()

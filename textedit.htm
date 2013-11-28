@@ -30,6 +30,8 @@
 	<div id="outputDiv" style="width:460px"></div>
 	<div id="containerDiv" style="width:600px;height:400px"></div>
 	<input type="hidden" id="propInput0">	
+	<input type="hidden" id="propInput1">	
+	<input type="hidden" id="propInput2">	
 
 <script>
 
@@ -53,10 +55,12 @@
 		var str=CKEDITOR.instances.editor1.getData();
 		str=str.replace(/"/g,"&quot;").replace(/'/g,"&apos;").replace(/[\n|\r]/g,"");
 		$("#propInput0").val(str);
+		$("#propInput1").val(CKEDITOR.instances.editor1.container.getClientRect().height);
+		$("#propInput2").val(CKEDITOR.instances.editor1.container.getClientRect().width);
+		$("#propInput3").val(CKEDITOR.instances.editor1.container.getClientRect().width);
 		$("#containerDiv").html(str)
-//		var val=.5
-	
-		return shivaLib.SaveData(mode,"HTML","",{html:0});
+		var o={html:0,height:0,width:0,oWid:0};
+		return shivaLib.SaveData(mode,"HTML","",o);
 	}	
 
 	function ReEdit(jsonData)

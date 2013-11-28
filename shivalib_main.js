@@ -216,6 +216,8 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 			shivaLib.WordActions(e.data);									// Route
 		else if (shivaLib.options.shivaGroup == "Control")					// If an control action
 			shivaLib.ControlActions(e.data);								// Route
+		else if (shivaLib.options.shivaGroup == "HTML")						// If an HTML action
+			shivaLib.HTMLActions(e.data);									// Route
 		}
 }
 
@@ -569,13 +571,25 @@ SHIVA_Show.prototype.Annotate=function(x,y) 											// SHOW ANNOTATION PALATT
 
 SHIVA_Show.prototype.DrawHTML=function() 												//	DRAW HTML
 {
-	var sca=1;																				// Assume 1:1
-	if (this.options.scale)																	// If a scale set
-		sca=this.options.scale;																// Use it
+	$("#"+this.container).width("100%");													// Set width
+	$("#"+this.container).height("100%");													// Set height
+	var w=$("#"+this.container).width();													// Get true width
+	var sca=w/this.options.oWid;															// Get scale
 	$("#"+this.container).html(this.options.html);											// Add to container
 	$("#"+this.container).css({"transform":"scale("+sca+")","-webkit-transform":"scale("+sca+")","transform-origin":"0% 0%","-webkit-transform-origin":"0% 0%"});
+	$("#"+this.container).css({"font-family":"Verdana,Geneva,sans-serif","font-size":"small","padding":"16px"});
 	this.SendReadyMessage(true);															// Send ready message									
 }
+
+SHIVA_Show.prototype.HTMLActions=function(msg)											// REACT TO SHIVA ACTION MESSAGE
+{
+	var v=msg.split("|");																	// Split msg into parts
+	if (v[0] == "ShivaAct=resize")  														// RESIZE
+		this.DrawHTML();																	// Redraw
+	else if (v[0] == "ShivaAct=data") {														// DATA
+		}
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	WEBPAGE

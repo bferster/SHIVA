@@ -65,7 +65,8 @@ shivaLib.ChartActions(e.data);else if(shivaLib.options.shivaGroup=="Image")
 shivaLib.ImageActions(e.data);else if(shivaLib.options.shivaGroup=="Network")
 shivaLib.NetworkActions(e.data);else if(shivaLib.options.shivaGroup=="WordCloud")
 shivaLib.WordActions(e.data);else if(shivaLib.options.shivaGroup=="Control")
-shivaLib.ControlActions(e.data);}}
+shivaLib.ControlActions(e.data);else if(shivaLib.options.shivaGroup=="HTML")
+shivaLib.HTMLActions(e.data);}}
 SHIVA_Show.prototype.AddOverlay=function(data)
 {var key;this.overlay=new Array();this.DrawOverlay();if(data){var v=data.split("&draw-");for(var i=0;i<v.length;++i)
 this.AddOverlaySeg(v[i].replace(/^[0-9]+=/,""),true);}
@@ -148,8 +149,10 @@ SHIVA_Show.prototype.Annotate=function(x,y)
 else this.dr.DrawPalette();if(x!=undefined){$("#shivaDrawPaletteDiv").css("left",x+"px");$("#shivaDrawPaletteDiv").css("top",y+"px");}
 this.Sound("click");}
 SHIVA_Show.prototype.DrawHTML=function()
-{var sca=1;if(this.options.scale)
-sca=this.options.scale;$("#"+this.container).html(this.options.html);$("#"+this.container).css({"transform":"scale("+sca+")","-webkit-transform":"scale("+sca+")","transform-origin":"0% 0%","-webkit-transform-origin":"0% 0%"});this.SendReadyMessage(true);}
+{$("#"+this.container).width("100%");$("#"+this.container).height("100%");var w=$("#"+this.container).width();var sca=w/this.options.oWid;$("#"+this.container).html(this.options.html);$("#"+this.container).css({"transform":"scale("+sca+")","-webkit-transform":"scale("+sca+")","transform-origin":"0% 0%","-webkit-transform-origin":"0% 0%"});$("#"+this.container).css({"font-family":"Verdana,Geneva,sans-serif","font-size":"small","padding":"16px"});this.SendReadyMessage(true);}
+SHIVA_Show.prototype.HTMLActions=function(msg)
+{var v=msg.split("|");if(v[0]=="ShivaAct=resize")
+this.DrawHTML();else if(v[0]=="ShivaAct=data"){}}
 SHIVA_Show.prototype.DrawWebpage=function()
 {$("#"+this.container+"IF").remove();var h=this.options.height;var w=this.options.width;if(!isNaN(h))h+="px";if(!isNaN(w))w+="px";h=h.replace(/%25/,"%");w=w.replace(/%25/,"%");$("#"+this.container).css("height",h);$("#"+this.container).css("width",w);var str="<iframe src='"+this.options.url+"' id='"+this.container+"IF' style='";str+="width:"+w+";height:"+h+"'>";$("#"+this.container).append(str);this.SendReadyMessage(true);}
 SHIVA_Show.prototype.DrawChart=function()

@@ -19,7 +19,8 @@ this.DrawChart();else if(group=='Network')
 this.DrawNetwork();else if(group=='Earth')
 this.DrawEarth();else if(group=='Draw'){if(ops.width)$("#"+this.container).css("width",ops.width+"px");if(ops.height)$("#"+this.container).css("height",ops.height+"px");this.DrawOverlay();this.SendReadyMessage(true);}
 else if(group=='Webpage')
-this.DrawWebpage();else if(group=='WordCloud')
+this.DrawWebpage();else if(group=='HTML')
+this.DrawHTML();else if(group=='WordCloud')
 this.DrawWordCloud();else if(group=='Poster')
 this.DrawPoster();if(ops["draw-1"])
 this.AddOverlay();var ud=ops["ud"];if(ud=="true")ud=true;else if(ud=="false")ud=false;if((ud)&&(this.inGo)){var h=$("#"+this.container).css("height").replace(/px/g,"");var str="<img  id='shivaAnnotateBut' src='annotate.gif' style='position:absolute";str+=";top:"+(h-0+12)+"px'>";$("body").append(str);$("#shivaAnnotateBut").click(function(){_this.Annotate();});$("#shivaAnnotateBut").css('pointer-events','auto');}}
@@ -146,6 +147,9 @@ SHIVA_Show.prototype.Annotate=function(x,y)
 {if(!this.dr){this.Draw({shivaGroup:"Draw"});this.dr=new SHIVA_Draw(this.container);}
 else this.dr.DrawPalette();if(x!=undefined){$("#shivaDrawPaletteDiv").css("left",x+"px");$("#shivaDrawPaletteDiv").css("top",y+"px");}
 this.Sound("click");}
+SHIVA_Show.prototype.DrawHTML=function()
+{var sca=1;if(options.scale)
+sca=options.scale;$("#"+this.container).html(this.options.html);$("#"+this.container).css({"transform":"scale("+sca+")","-webkit-transform":"scale("+sca+")","transform-origin":"0% 0%","-webkit-transform-origin":"0% 0%"});this.SendReadyMessage(true);}
 SHIVA_Show.prototype.DrawWebpage=function()
 {$("#"+this.container+"IF").remove();var h=this.options.height;var w=this.options.width;if(!isNaN(h))h+="px";if(!isNaN(w))w+="px";h=h.replace(/%25/,"%");w=w.replace(/%25/,"%");$("#"+this.container).css("height",h);$("#"+this.container).css("width",w);var str="<iframe src='"+this.options.url+"' id='"+this.container+"IF' style='";str+="width:"+w+";height:"+h+"'>";$("#"+this.container).append(str);this.SendReadyMessage(true);}
 SHIVA_Show.prototype.DrawChart=function()

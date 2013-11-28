@@ -67,7 +67,9 @@ SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 		}
 	else if (group == 'Webpage')
 		this.DrawWebpage();
-   else if (group == 'WordCloud')
+	else if (group == 'HTML')
+		this.DrawHTML();
+   	else if (group == 'WordCloud')
         this.DrawWordCloud();
   	else if (group == 'Poster')
         this.DrawPoster();
@@ -558,6 +560,21 @@ SHIVA_Show.prototype.Annotate=function(x,y) 											// SHOW ANNOTATION PALATT
 		$("#shivaDrawPaletteDiv").css("top",y+"px");										// Set y
 		}
 	this.Sound("click");																	// Click
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//	HTML
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+SHIVA_Show.prototype.DrawHTML=function() 												//	DRAW HTML
+{
+	var sca=1;																				// Assume 1:1
+	if (options.scale)																		// If a scale set
+		sca=options.scale;																	// Use it
+	$("#"+this.container).html(this.options.html);											// Add to container
+	$("#"+this.container).css({"transform":"scale("+sca+")","-webkit-transform":"scale("+sca+")","transform-origin":"0% 0%","-webkit-transform-origin":"0% 0%"});
+	this.SendReadyMessage(true);															// Send ready message									
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

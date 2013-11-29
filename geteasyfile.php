@@ -28,6 +28,8 @@
 			$data=str_replace("\t","",$data);	
 			echo "{ \"kml\":\"";
 			}
+//		else
+//			$data=str_replace("\"","\\\"",$data);	
 		echo $data;
 		if ($type == "KML")
 			echo "\"}";

@@ -164,6 +164,8 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE 
 	if (shivaLib.drupalMan) 												// If called from Drupal manager
 		window.parent.postMessage("ShivaReady="+mode.toString(),"*");		// Send message to parent wind		
 	var asp=$("#"+shivaLib.container).height()/$("#"+shivaLib.container).width();	// Get asp of container															// Assume 1:1
+	if (this.options.height && this.options.width)							// If height and width defined
+		asp=this.options.height/this.options.width;							// Calc asp
 	shivaLib.SendShivaMessage("ShivaChart=ready",Math.round(asp*1000)); 	// Send ready message to EvA with aspect ratio
 }
 
@@ -575,7 +577,7 @@ SHIVA_Show.prototype.DrawHTML=function() 												//	DRAW HTML
 	$("#"+this.container).height("100%");													// Set height
 	var w=$("#"+this.container).width();													// Get true width
 	var sca=w/this.options.oWid;															// Get scale
-	$("#"+this.container).html(this.options.html);											// Add to container
+	$("#"+this.container).html(this.options.html.replace(/&quot;/g,"\""));					// Add to container
 	$("#"+this.container).css({"transform":"scale("+sca+")","-webkit-transform":"scale("+sca+")","transform-origin":"0% 0%","-webkit-transform-origin":"0% 0%"});
 	$("#"+this.container).css({"font-family":"Verdana,Geneva,sans-serif","font-size":"small","padding":"16px"});
 	this.SendReadyMessage(true);															// Send ready message									

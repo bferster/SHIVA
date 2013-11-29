@@ -32,6 +32,7 @@
 	<input type="hidden" id="propInput0">	
 	<input type="hidden" id="propInput1">	
 	<input type="hidden" id="propInput2">	
+	<input type="hidden" id="propInput3">	
 
 <script>
 
@@ -55,10 +56,9 @@
 		var str=CKEDITOR.instances.editor1.getData();
 		str=str.replace(/"/g,"&quot;").replace(/'/g,"&apos;").replace(/[\n|\r]/g,"");
 		$("#propInput0").val(str);
-		$("#propInput1").val(CKEDITOR.instances.editor1.container.getClientRect().height);
-		$("#propInput2").val(CKEDITOR.instances.editor1.container.getClientRect().width);
-		$("#propInput3").val(CKEDITOR.instances.editor1.container.getClientRect().width);
-		$("#containerDiv").html(str)
+		$("#propInput1").val($("#cke_1_contents").height());
+		$("#propInput2").val($("#cke_1_contents").width());
+		$("#propInput3").val($("#cke_1_contents").width());
 		var o={html:0,height:0,width:0,oWid:0};
 		return shivaLib.SaveData(mode,"HTML","",o);
 	}	

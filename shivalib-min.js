@@ -262,6 +262,7 @@ if(!_title){alert("Please type title to save under");return;}
 document.cookie="ez-email="+_email;$("#shivaLightBoxDiv").remove();if($("#containerDiv").height()<10)
 $("#containerDiv").height($("#containerDiv").height()*100);str="\",\n\t\"shivaTitle\": \""+_title+"\"\n}";if((type!="Canvas")&&(type!="KML"))
 _data=_data.substr(0,_data.lastIndexOf("\""))+str;$.post("http://www.primaryaccess.org/REST/addeasyfile.php",{email:_email,type:_type,title:_title,data:_data.replace(/'/g,"\\'")});});$("#loadBut").button().click(function(){email=$("#email").val();if(!email){alert("Please type your email");return;}
+if(!isNaN(email)){shivaLib.LoadEasyFile(email,callback);return;}
 document.cookie="ez-email="+email;var dat={email:email};if(type!="all")
 dat["type"]=type;str="http://www.primaryaccess.org/REST/listeasyfile.php";shivaLib.ezcb=callback;shivaLib.ezmode="load";$.ajax({url:str,data:dat,dataType:'jsonp'});});$("#linkBut").button().click(function(){email=$("#email").val();if(!email){alert("Please type your email");return;}
 document.cookie="ez-email="+email;var dat={email:email};if(type!="all")
@@ -277,6 +278,9 @@ alert("http://www.primaryaccess.org/REST/getkml.php?id="+this.id.substr(7));if((
 alert("www.viseyes.org/shiva/go.htm?e="+this.id.substr(7));else{var dat={id:this.id.substr(7)};str="http://www.primaryaccess.org/REST/geteasyfile.php";shivaLib.ezcb=callback;shivaLib.ezmode=this.id.substr(7);$.ajax({url:str,data:dat,dataType:'jsonp'});}
 $("#shivaLightBoxDiv").remove();if($("#containerDiv").height()<10)
 $("#containerDiv").height($("#containerDiv").height()*100);});}}
+SHIVA_Show.prototype.LoadEasyFile=function(num,callback)
+{var str="http://www.primaryaccess.org/REST/geteasyfile.php";shivaLib.ezcb=callback;shivaLib.ezmode=num;$.ajax({url:str,data:{id:num},dataType:'jsonp'});$("#shivaLightBoxDiv").remove();if($("#containerDiv").height()<10)
+$("#containerDiv").height($("#containerDiv").height()*100);}
 function easyFileListWrapper(data)
 {shivaLib.ShowEasyFile(data,shivaLib.ezcb,shivaLib.ezmode);}
 function easyFileDataWrapper(data)

@@ -1017,6 +1017,10 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 			alert("Please type your email");								// Alert
 			return;															// Don't save
 			}						
+		if (!isNaN(email)) {												// If just a number
+			shivaLib.LoadEasyFile(email, callback);							// Load it directly
+			return;															// Quit
+			}	
 		document.cookie="ez-email="+email;									// Save email in cookie
 		var dat={ email:email };											// Set email to look for
 		if (type != "all")													// If not loading all
@@ -1099,6 +1103,17 @@ SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	/
 				$("#containerDiv").height($("#containerDiv").height()*100);	// Restore it
 			});	
 		}
+}
+
+SHIVA_Show.prototype.LoadEasyFile=function(num, callback) 				// GET SINGLE EASYFILE 
+{
+	var str="http://www.primaryaccess.org/REST/geteasyfile.php";			// eStore url
+	shivaLib.ezcb=callback;													// Set callback
+	shivaLib.ezmode=num;	 												// Set ID
+	$.ajax({ url: str, data:{id:num}, dataType:'jsonp' });					// Get jsonp
+	$("#shivaLightBoxDiv").remove();										// Close lightbox
+	if ($("#containerDiv").height() < 10)									// If a shrunken frame (Earth kluge)
+		$("#containerDiv").height($("#containerDiv").height()*100);			// Restore it
 }
 
 function easyFileListWrapper(data)										// LOAD EASY FILE LIST

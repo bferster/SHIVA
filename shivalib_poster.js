@@ -424,15 +424,16 @@ EvA.prototype.ShivaEventHandler=function(e) 						// CATCH SHIVA EVENTS
 {
 	var from;
 	var i,o,n=this.ondos.length;
-//	trace(e.data)
+	trace(e.data)
 	var v=e.data.split("|");											// Get parts
 	if (v[0].match(/ShivaChart=ready/)) {								// A ready message
 		if (v[1].match(/posterFrame-/)) 								// A frame ready
-			if (i=v[1].substr(12)) 										// Get id
+			if ((i=v[1].substr(12)) && (v.length > 2)){					// Get id
 				if (!shivaLib.items[i].asp[i]) {						// If not set
 					shivaLib.items[i].asp=v[2];							// Set it
 					$("#itemInput"+i+"-2").val(v[2]);					// Set props
 					}
+				}
 		}
 	v[0]=v[0].split("=")[1];											// Strip prefix
 	for (i=0;i<n;++i) {													// For each ondo

@@ -261,6 +261,11 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 				str="<div style='font-size:small;position:absolute;left:0px;top:100%;width:100%;padding:4px;text-align:center'><b>"+shivaLib.LinkToAnchor(this.items[i].caption)+"</b>";// Show it
 				$("#posterPane"+i).append(str+"</div>");								// Add div
 				}
+			if ((this.posterMode != "Edit") && (this.items[i].drag == "true")) {		// If in draggable view
+				str="<div style='position:absolute;left:0px;top:0px;width:80%;height:20px;'>";	// Make overlay div for dragging
+				$("#posterPane"+i).append(str+"</div>");								// Add div
+				$("#posterPane"+i).draggable({ containment:"parent" });					// Make draggable		
+				}
 			}
 		$("#posterFrame-"+i).height(dh);												// Set iframe height
 		$("#posterFrame-"+i).width(dw);													// Set iframe width
@@ -284,7 +289,7 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 				win.postMessage("ShivaAct=resize","*");									// Send message to container
 				}
 			}
-		if (this.posterMode != "Edit")													// If viewing
+		if (this.posterMode != "Edit") 													// If viewing
 			continue;																	// No need for interaction
 
 		$("#posterPane"+i).resizable({ 	containment:"parent",							// Resizable

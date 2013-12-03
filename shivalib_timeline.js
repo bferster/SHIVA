@@ -124,7 +124,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
           "show_footer":Boolean(stimeline.options.show_footer),
           "display_zoom_level":Boolean(stimeline.options.display_zoom_level),
           "constrain_to_data":false,
-          "image_lane_height": stimeline.options.imglane_height * 1
+          "image_lane_height": stimeline.options.imglane_height * 1,
         },
         display : true
       };
@@ -182,6 +182,7 @@ SHIVA_Show.prototype.DrawTimeGlider=function() //  DRAW TIMEGLIDER
         dateTime=Date.parse(dt)+50000000;
         dt = new Date(dateTime);
       }*/
+      if (typeof(dt) == "undefined" || dt == null) { return ''; }
       var mn = padZero(dt.getMonth() + 1);
       var dy = padZero(dt.getDate());
       var hrs = padZero(dt.getHours());

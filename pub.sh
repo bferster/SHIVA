@@ -1,4 +1,4 @@
-echo "Publishing ShivaLib:"
+echo "Publishing ShivaLib"
 cat shivaLib_main.js \
 shivaLib_props.js \
 shivaLib_controls.js \

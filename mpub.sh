@@ -15,5 +15,5 @@ shivalib_poster.js \
 shivalib_image.js \
 shivalib_data.js \
 > tmp
-jsmin.exe <tmp >shivalib-min.js
+./jsmin <tmp >shivalib-min.js
 rm tmp

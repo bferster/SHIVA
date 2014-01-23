@@ -300,10 +300,11 @@ SHIVA_Show.prototype.DrawPosterPanes=function(num, mode) 							// DRAW POSTER P
 											shivaLib.items[i].data=v[0]+"|"+v[1]+"|"+v[2];				// Set new size
 											$("#itemInput"+i+"-1").val(shivaLib.items[i].data);			// Put in menu
 											if (shivaLib.items[i].url.match(/http/)) { 					// If not a shiva module
-												var asp=ui.size.height/ui.size.width;					// Get aspect
-											 	asp=Math.round(shivaLib.items[i].asp*1000);				// Set asp string
-												shivaLib.items[i].asp=asp;								// Set new asp
-												$("#itemInput"+i+"-2").val(asp);						// Set props
+												if (!shivaLib.items[i].asp) {							// If not set
+												 	var asp=Math.round(ui.size.height/ui.size.width*1000);	// Set asp string
+													shivaLib.items[i].asp=asp;							// Set new asp
+													$("#itemInput"+i+"-2").val(asp);					// Set props
+													}
 												}
 											shivaLib.DrawPosterPanes(i,"resize");						// Redraw this pane, and resize 								
 											}

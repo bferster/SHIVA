@@ -192,11 +192,14 @@ DoIt($.parseJSON(SaveData("GetJSON")));
 	
 function DoIt(data)
 {
+	var styles=new Object();
+	var dataset=new Object();
+	styles.first={shape:"star",col:"990000",size:"40",eWid:"0",opacity:"100",eCol:"000000"};
 	
-			//Original data
-			var dataset = {
+	
+			dataset = {
 				nodes: [
-					{ name: "Adam", info:"First man" ,shape:"star"},
+					{ name: "Adam", info:"First man", style:"first"},
 					{ name: "Bob", info:"As in apples" },
 					{ name: "Carrie", info:"Was a scary movie" },
 					{ name: "Donovan", info:"Wrote Mellow Yellow" },
@@ -229,9 +232,11 @@ function DoIt(data)
 	var h=data.height;														// Height
 	var unselectable={"-moz-user-select":"none","-khtml-user-select":"none",// Unselectable
 		   			  "-webkit-user-select":"none","-ms-user-select":"none",
-		   			  "user-select":"none" }
+		   			  "user-select":"none","pointer-events":"none" }
 	
-	if (data.backCol != -1)													// If not transparent
+	if (data.backCol == "none")												// If  transparent
+		$("#containerDiv").css("background-color","transparent");			// Set background color
+	else																	// Normal color
 		$("#containerDiv").css("background-color","#"+data.backCol);		// Set background color
 	$("#containerDiv").html("");											// Clear div
 	var colors=d3.scale.category10();										// Default colors
@@ -255,26 +260,69 @@ function DoIt(data)
 			.data(dataset.edges)											// Set data
 			.enter()														// Enter
 			.append("line")													// Add line
-			.style("stroke", "#"+data.eCol)									// Color
-			.style("stroke-width", data.eWid);								// Width
+			.style("stroke", function(d, i) {								// Edge col
+				if (d.style && styles[d.style].eCol)						// If a style spec'd
+					return styles[d.style].eCol;							// Get col from data
+				else														// Default
+					return data.eCol;										// Set wid
+					})									
+			.style("stroke-width", function(d, i) {							// Edge width
+				if (d.style && styles[d.style].eWid)						// If a style spec'd
+					return styles[d.style].eWid;							// Get col from data
+				else														// Default
+					return data.eWid;										// Set wid
+				})									
+			.style("opacity", function(d, i) {								// Opacity
+				if (d.style && styles[d.style].opacity)						// If a style spec'd
+					return styles[d.style].opacity/100;						// Get opacity from data
+				})									
+
+
 				
 			var nodes=svg.selectAll("g")									// Create nodes
 			.data(dataset.nodes)											// Set data
 			.enter()														// Enter
 			.append(function(d,i) {											// Add shape
 				shape=data.nShape;											// Set shape
-				if (d.shape)												// If a style spec'd
-					shape=d.shape;											// Get shape from data
+				if (d.style && styles[d.style].shape)						// If a style spec'd
+					shape=styles[d.style].shape;							// Get shape from data
 				return document.createElementNS("http://www.w3.org/2000/svg",shape.toLowerCase() != "circle"?"polygon":"circle");	// Create svg based on shape
 				})
 			.attr("points",function(d,i) {									// Add points
 				shape=data.nShape;											// Set shape
-				if (d.shape)												// If a style spec'd
-					shape=d.shape;											// Get shape from data
-				return DrawSVGShape(shape.toLowerCase(),data.nSize);		// Create svg based on shape
+				if (d.style && styles[d.style].shape)						// If a style spec'd
+					shape=styles[d.style].shape;							// Get shape from data
+				var size=data.nSize;										// Default size
+				if (d.style && styles[d.style].size)						// If a style spec'd
+					size=styles[d.style].size;								// Get size from data
+				return DrawSVGShape(shape.toLowerCase(),size);				// Create svg based on shape
 				})
-			.attr("r",data.nSize)											// Set size
-			.style("fill", function(d, i) {	return colors(i); })			// Set color
+			.attr("r",function(d,i) {										// Add points
+				if (d.style && styles[d.style].size)						// If a style spec'd
+					return styles[d.style].size;							// Get size from data
+				else														// Default
+					return data.nSize;										// Return size
+				})
+			.style("fill", function(d, i) {									// Color
+				if (d.style && styles[d.style].col)							// If a style spec'd
+					return styles[d.style].col;								// Get col from data
+				else														// Default			
+					return colors(i); 										// Set color
+				})									
+			.style("stroke", function(d, i) {								// Edge col
+				if (d.style && styles[d.style].eCol)						// If a style spec'd
+					return styles[d.style].eCol;							// Get col from data
+				})									
+			.style("stroke-width", function(d, i) {							// Edge width
+				if (d.style && styles[d.style].eWid)						// If a style spec'd
+					return styles[d.style].eWid;							// Get col from data
+				})									
+			.style("opacity", function(d, i) {								// Opacity
+				if (d.style && styles[d.style].opacity)						// If a style spec'd
+					return styles[d.style].opacity/100;						// Get opacity from data
+				})									
+
+
 			.call(force.drag);							
 		
 			nodes.append("title")											// Add title for tooltip
@@ -293,12 +341,20 @@ function DoIt(data)
 			.text(function(d) { return d.name; });							// Set text
 		
 			force.on("tick", function() {									// Every time the simulation "ticks", this will be called
-				labels.style("left", function(d) { return d.x-100+"px"; })
-					.style("top", function(d) { return d.y+(data.nSize*1)+"px"; });
+	
+				labels.style("left", function(d) { return d.x-100+"px"; })	// Position labels
+					.style("top", function(d) { 							// Set top
+						var size=data.nSize;								// Default size
+						if (d.style && styles[d.style].size)				// If a style spec'd
+						size=styles[d.style].size;							// Get size from data
+						return d.y+(size*1)+"px"; 							// Return size
+						});
+
 				edges.attr("x1", function(d) { return d.source.x; })
 					.attr("y1", function(d) { return d.source.y; })
 					.attr("x2", function(d) { return d.target.x; })
 					.attr("y2", function(d) { return d.target.y; });
+
 				nodes.attr("transform",function(d) { return "translate("+d.x+" "+d.y+")" });
 				});
 		}

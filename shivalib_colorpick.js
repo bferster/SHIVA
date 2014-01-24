@@ -583,7 +583,9 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             $("#cp_chip").css("border", "1px dashed gray");
             $(".slider").first().slider("option", "value", 100);
             $(".slider").last().slider("option", "value", 100);
-            //handle inputBox?
+  			inputBox.val("none");
+			inputBox.css('border-color',"white");
+			inputBoxChip.css('background-color', "white");
         } else if (attr == null) {
             $(".tab").eq(cp_current).children().html("");
             $(".tab").eq(cp_current).children().css("backgroundColor", "transparent");

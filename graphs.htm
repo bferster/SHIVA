@@ -63,7 +63,9 @@
 				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
 				linkDist:					{	def:'300', 			opt:'number',			des:'Node distance'},
 				linkCharge:					{	def:'300', 			opt:'number',			des:'Node charge'},
-				nShape:						{	def:'Circle', 		opt:'Circle|Box|Star|Triangle',	des:'Node shape'},
+				linkGravity:				{	def:'10', 			opt:'number',			des:'Node gravity (0-100)'},
+				linkStrength:				{	def:'100', 			opt:'number',			des:'Node strength (0-100)'},
+				nShape:						{	def:'Circle', 		opt:'Circle|Box|Star|Triangle|Caret|Diamond|Plus',	des:'Node shape'},
 				nSize:						{	def:'20', 			opt:'number',			des:'Node size'},
 				nCol:						{	def:'ff0066', 		opt:'color',		 	des:'Node color'},
 				eWid:						{	def:'2', 			opt:'number',		 	des:'Link line width'},
@@ -194,7 +196,7 @@ function DoIt(data)
 			//Original data
 			var dataset = {
 				nodes: [
-					{ name: "Adam", info:"First man" },
+					{ name: "Adam", info:"First man" ,shape:"star"},
 					{ name: "Bob", info:"As in apples" },
 					{ name: "Carrie", info:"Was a scary movie" },
 					{ name: "Donovan", info:"Wrote Mellow Yellow" },
@@ -222,6 +224,7 @@ function DoIt(data)
 				]
 			};
 	
+	var shape;
 	var w=data.width;														// Width
 	var h=data.height;														// Height
 	var unselectable={"-moz-user-select":"none","-khtml-user-select":"none",// Unselectable
@@ -236,6 +239,7 @@ function DoIt(data)
 			.append("svg")													// Add SVG shell
 			.attr("width",w).attr("height",h);								// Set size
 
+
 	if (data.chartType == "Network") {										// Force directed
 		var force=d3.layout.force()											// Force layout
 			 .nodes(dataset.nodes)											// Set nodes
@@ -243,6 +247,8 @@ function DoIt(data)
 			 .size([w,h])													// Set size
 			 .linkDistance([data.linkDist])									// Set link distance
 			 .charge([-data.linkCharge])									// Set charge
+			 .gravity([data.linkGravity/100])								// Set gravity
+			 .linkStrength(Math.min([data.linkStrength/100],1))				// Set link strength
 			 .start();														// Draw
 	
 		var edges=svg.selectAll("line")										// Create edges
@@ -252,16 +258,25 @@ function DoIt(data)
 			.style("stroke", "#"+data.eCol)									// Color
 			.style("stroke-width", data.eWid);								// Width
 				
-		var shape=data.nShape.toLowerCase();								// Get node shape
-		if (shape != "circle")	shape="polygon";							// All but circle are polygonal
-		var nodes=svg.selectAll(shape)										// Create nodes
+			var nodes=svg.selectAll("g")									// Create nodes
 			.data(dataset.nodes)											// Set data
 			.enter()														// Enter
-			.append(shape)													// Add shape
-			.attr("points",DrawSVGShape(data.nShape,data.nSize))			// Set points		
+			.append(function(d,i) {											// Add shape
+				shape=data.nShape;											// Set shape
+				if (d.shape)												// If a style spec'd
+					shape=d.shape;											// Get shape from data
+				return document.createElementNS("http://www.w3.org/2000/svg",shape.toLowerCase() != "circle"?"polygon":"circle");	// Create svg based on shape
+				})
+			.attr("points",function(d,i) {									// Add points
+				shape=data.nShape;											// Set shape
+				if (d.shape)												// If a style spec'd
+					shape=d.shape;											// Get shape from data
+				return DrawSVGShape(shape.toLowerCase(),data.nSize);		// Create svg based on shape
+				})
 			.attr("r",data.nSize)											// Set size
 			.style("fill", function(d, i) {	return colors(i); })			// Set color
 			.call(force.drag);							
+		
 			nodes.append("title")											// Add title for tooltip
 	      		.text(function(d) { return d.info; });						// Set label
 				  
@@ -275,42 +290,67 @@ function DoIt(data)
 				"font-size":data.lSize+"px"									// Size
 				})
 			.style(unselectable)											// Make text unselectable
-			
 			.text(function(d) { return d.name; });							// Set text
 		
-				  
-	
-				//Every time the simulation "ticks", this will be called
-				force.on("tick", function() {
-					labels.style("left", function(d) { return d.x-100+"px"; })
-						.style("top", function(d) { return d.y+(data.nSize*1)+"px"; });
-					
-					edges.attr("x1", function(d) { return d.source.x; })
-						.attr("y1", function(d) { return d.source.y; })
-						.attr("x2", function(d) { return d.target.x; })
-						.attr("y2", function(d) { return d.target.y; });
-
-					nodes.attr("transform",function(d) { return "translate("+d.x+" "+d.y+")" });
-					});
+			force.on("tick", function() {									// Every time the simulation "ticks", this will be called
+				labels.style("left", function(d) { return d.x-100+"px"; })
+					.style("top", function(d) { return d.y+(data.nSize*1)+"px"; });
+				edges.attr("x1", function(d) { return d.source.x; })
+					.attr("y1", function(d) { return d.source.y; })
+					.attr("x2", function(d) { return d.target.x; })
+					.attr("y2", function(d) { return d.target.y; });
+				nodes.attr("transform",function(d) { return "translate("+d.x+" "+d.y+")" });
+				});
 		}
 
 function DrawSVGShape(shape, size)											// DRAW A SHAPE
 {
 	var i,r,o,pts="";
 	size/=1.5;																	// Halve size
-	if (shape == "Box") {														// A box
+	var s2=size/2;																	// Quarter
+	if (shape == "box") {														// A box
 		pts=-size+","+(-size)+" ";
 		pts+=size+","+(-size)+" ";
 		pts+=size+","+size+" ";
 		pts+=-size+","+size+" ";
 		return pts;																// Return points
 		}
-	if (shape == "Triangle") {													// A triangle
-		pts="0,"+(-size/2)+" ";
+	else if (shape == "triangle") {												// A triangle
+		pts="0,"+(-size)+" ";
+		pts+=size+","+s2+" ";
+		pts+=-size+","+s2+" ";
+		return pts;																// Return points
+		}
+	else if (shape == "caret") {												// A caret
+		pts="0,"+(-s2)+" ";
 		pts+=size+","+size+" ";
+		pts+="0,"+(+s2)+" ";
 		pts+=-size+","+size+" ";
 		return pts;																// Return points
 		}
+	else if (shape == "diamond") {												// A diamond
+		pts="0,"+(-size*3/2)+" ";
+		pts+=size+",0 ";
+		pts+="0,"+(size*3/2)+" ";
+		pts+=-size+",0 ";
+		return pts;																// Return points
+		}
+	else if (shape == "plus") {													// A plus
+		pts=-s2+","+(-s2*3)+" ";
+		pts+=s2+","+(-s2*3)+" ";
+		pts+=s2+","+(-s2)+" ";
+		pts+=(s2+size)+","+(-s2)+" ";
+		pts+=(s2+size)+","+(s2)+" ";
+		pts+=s2+","+s2+" ";
+		pts+=s2+","+(s2*3)+" ";
+		pts+=-s2+","+(s2*3)+" ";
+		pts+=-s2+","+s2+" ";
+		pts+=-s2*3+","+s2+" ";
+		pts+=-s2*3+","+(-s2)+" ";
+		pts+=-(s2)+","+(-s2)+" ";
+		return pts;																// Return points
+	}
+
 	var a=(2*Math.PI)/10; 
 	for (i=11;i!=0;i--) {														// For each point
 	    r=size*(i%2+.6);														// Radius

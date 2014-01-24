@@ -63,6 +63,7 @@
 				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
 				linkDist:					{	def:'300', 			opt:'number',			des:'Node distance'},
 				linkCharge:					{	def:'300', 			opt:'number',			des:'Node charge'},
+				nShape:						{	def:'Circle', 		opt:'Circle|Box|Star|Triangle',	des:'Node shape'},
 				nSize:						{	def:'20', 			opt:'number',			des:'Node size'},
 				nCol:						{	def:'ff0066', 		opt:'color',		 	des:'Node color'},
 				eWid:						{	def:'2', 			opt:'number',		 	des:'Link line width'},
@@ -193,16 +194,16 @@ function DoIt(data)
 			//Original data
 			var dataset = {
 				nodes: [
-					{ name: "Adam" },
-					{ name: "Bob" },
-					{ name: "Carrie" },
-					{ name: "Donovan" },
-					{ name: "Edward" },
-					{ name: "Felicity" },
-					{ name: "George" },
-					{ name: "Hannah" },
-					{ name: "Iris" },
-					{ name: "Jerry" }
+					{ name: "Adam", info:"First man" },
+					{ name: "Bob", info:"As in apples" },
+					{ name: "Carrie", info:"Was a scary movie" },
+					{ name: "Donovan", info:"Wrote Mellow Yellow" },
+					{ name: "Edward", info:"Leaked NSA files" },
+					{ name: "Felicity", info:"Was a TV show" },
+					{ name: "George", info:"Was a Beatle "},
+					{ name: "Hannah", info:"Had sisters" },
+					{ name: "Iris", info:"Used to be a printer" },
+					{ name: "Jerry", info:"Makes subs" }
 				],
 				edges: [
 					{ source: 0, target: 1 },
@@ -251,17 +252,18 @@ function DoIt(data)
 			.style("stroke", "#"+data.eCol)									// Color
 			.style("stroke-width", data.eWid);								// Width
 				
-		var nodes=svg.selectAll("circle")									// Create nodes
+		var shape=data.nShape.toLowerCase();								// Get node shape
+		if (shape != "circle")	shape="polygon";							// All but circle are polygonal
+		var nodes=svg.selectAll(shape)										// Create nodes
 			.data(dataset.nodes)											// Set data
 			.enter()														// Enter
-			.append("circle")												// Add circle
+			.append(shape)													// Add shape
+			.attr("points",DrawSVGShape(data.nShape,data.nSize))			// Set points		
 			.attr("r",data.nSize)											// Set size
-			.style("stroke",data.eCol)										// Set edge
 			.style("fill", function(d, i) {	return colors(i); })			// Set color
 			.call(force.drag);							
-				
 			nodes.append("title")											// Add title for tooltip
-	      		.text(function(d) { return d.name; });						// Set label
+	      		.text(function(d) { return d.info; });						// Set label
 				  
 		  var labels=d3.select("#containerDiv").selectAll("div")			// Create labels
 			.data(dataset.nodes)											// Set data
@@ -287,13 +289,42 @@ function DoIt(data)
 						.attr("y1", function(d) { return d.source.y; })
 						.attr("x2", function(d) { return d.target.x; })
 						.attr("y2", function(d) { return d.target.y; });
-				
-					nodes.attr("cx", function(d) { return d.x; })
-						.attr("cy", function(d) { return d.y; });
+
+					nodes.attr("transform",function(d) { return "translate("+d.x+" "+d.y+")" });
 					});
 		}
+
+function DrawSVGShape(shape, size)											// DRAW A SHAPE
+{
+	var i,r,o,pts="";
+	size/=1.5;																	// Halve size
+	if (shape == "Box") {														// A box
+		pts=-size+","+(-size)+" ";
+		pts+=size+","+(-size)+" ";
+		pts+=size+","+size+" ";
+		pts+=-size+","+size+" ";
+		return pts;																// Return points
+		}
+	if (shape == "Triangle") {													// A triangle
+		pts="0,"+(-size/2)+" ";
+		pts+=size+","+size+" ";
+		pts+=-size+","+size+" ";
+		return pts;																// Return points
+		}
+	var a=(2*Math.PI)/10; 
+	for (i=11;i!=0;i--) {														// For each point
+	    r=size*(i%2+.6);														// Radius
+	    o=a*i;																	// Angle
+	    pts+=(r*Math.sin(o))+",";												// Get X
+	    pts+=(r*Math.cos(o))+" ";												// Y
+		}
+	return pts;																	// Return points
+}
+
+
 	}	
 	
+
 		
 </script>
 </body></html>

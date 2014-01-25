@@ -174,8 +174,12 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				.style("fill", function(d, i) {							// Color
 					if (d.style && styles[d.style].col)					// If a style spec'd
 						return styles[d.style].col;						// Get col from options
-					else												// Default			
-						return colors(i); 								// Set color
+					else{												// Default	
+						if (options.nCol == "none")						// If no color set														
+							return colors(i); 							// Set color from auto colors
+						else											// A color set
+							return options.nCol;						// Set color
+						}
 					})									
 				.style("stroke", function(d, i) {						// Edge col
 					if (d.style && styles[d.style].eCol)				// If a style spec'd

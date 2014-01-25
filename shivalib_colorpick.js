@@ -309,7 +309,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             var val = $(this).attr("value");
             if (val[0] != "#")
                 val = "#" + val;
-            if (val == "none")
+              if (val == "none")
                 self.update(null);
             else if (val.length === 7) {
                 var hsv = self.HEX_to_HSV(val);
@@ -574,7 +574,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
     }
 
     this.update = function(attr, value) {     //Sets "hue", "sat", or "val" and handles the consequences
-        if (attr == "none") {
+         if (attr == "none") {
             $(".tab").eq(cp_current).children().html("<center>none</center>");
             $(".tab").eq(cp_current).children().css("backgroundColor", "white");
             $("#cp_chip").css("backgroundColor", "white");
@@ -584,6 +584,8 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
   			inputBox.val("none");
 			inputBox.css('border-color',"white");
 			inputBoxChip.css('background-color', "white");
+            $("#shiva_dialogDiv").remove();
+  	 		Draw();
         } else if (attr == null) {
             $(".tab").eq(cp_current).children().html("");
             $(".tab").eq(cp_current).children().css("backgroundColor", "transparent");
@@ -594,19 +596,22 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             $(".slider").last().slider("option", "value", 100)
             //handle inputBox?
         } else {
-            if (attr == "saturation") {
+             if (attr == "saturation") {
                 sat = value;
             } else if (attr == "brightness") {
                 val = value;
             } else if (attr == "hue") {
                 hue = value;
             }
+            
             var color = self.HSV_to_HEX(hue, sat, val);
+            if (isNaN(color.substr(1)))
+            	color="";
             $("#cp_chip").css("backgroundColor", color);
             $("#cp_chip").css("border", "1px solid gray");
+      	    $(".tab").eq(cp_current).children().css("backgroundColor", color)
             $("#cp_current").attr("value", color.slice(1))
-            $(".tab").eq(cp_current).children().css("backgroundColor", color)
-            $(".tab").eq(cp_current).children().html('');
+             $(".tab").eq(cp_current).children().html('');
             $(".slider").first().slider("option", "value", val * 100)
             $(".slider").last().slider("option", "value", sat * 100)
         }

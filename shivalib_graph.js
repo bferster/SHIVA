@@ -4,60 +4,36 @@
 
 SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 {
-	var options=this.options;
-	var container=this.container;
-	var con="#"+container;
-	var _this=this;
-
-	var styles=new Object();
-	var dataset={ nodes:[],edges:[]};
-	styles.first={shape:"star",col:"green",size:"40",eWid:"0",alpha:"1",eCol:"000000"};
-	
-			dataset = {
-				nodes: [
-					{ name: "Adam", info:"First man", style:"first"},
-					{ name: "Bob", info:"As in apples" },
-					{ name: "Carrie", info:"Was a scary movie" },
-					{ name: "Donovan", info:"Wrote Mellow Yellow" },
-					{ name: "Edward", info:"Leaked NSA files" },
-					{ name: "Felicity", info:"Was a TV show" },
-					{ name: "George", info:"Was a Beatle "},
-					{ name: "Hannah", info:"Had sisters" },
-					{ name: "Iris", info:"Used to be a printer" },
-					{ name: "Jerry", info:"Makes subs" }
-				],
-				edges: [
-					{ source: 0, target: 1 },
-					{ source: 0, target: 2 },
-					{ source: 0, target: 3 },
-					{ source: 0, target: 4 },
-					{ source: 1, target: 5 },
-					{ source: 2, target: 5 },
-					{ source: 2, target: 5 },
-					{ source: 3, target: 4 },
-					{ source: 5, target: 8 },
-					{ source: 5, target: 9 },
-					{ source: 6, target: 7 },
-					{ source: 7, target: 8 },
-					{ source: 8, target: 9 }
-				]
-			};
-	
-
 	var i,o,shape;
+	var options=this.options;
 	var w=options.width;												// Width
 	var h=options.height;												// Height
-	var unselectable={"-moz-user-select":"none","-khtml-user-select":"none",	// Unselectable
+	var unselectable={"-moz-user-select":"none","-khtml-user-select":"none",	
 		   			  "-webkit-user-select":"none","-ms-user-select":"none",
 		   			  "user-select":"none","pointer-events":"none" }
-	
+	var styles=new Object();											// Styles
+	var dataset={ nodes:[												// Default data
+					{ name: "Adam", info:"First man" }, { name: "Bob", info:"As in apples" },
+					{ name: "Carrie", info:"Was a scary movie" }, { name: "Donovan", info:"Wrote Mellow Yellow" },
+					{ name: "Edward", info:"Leaked NSA files" }, { name: "Felicity", info:"Was a TV show" },
+					{ name: "George", info:"Was a Beatle "}, { name: "Hannah", info:"Had sisters" },
+					{ name: "Iris", info:"Used to be a printer" }, { name: "Jerry", info:"Makes subs" }],
+				  edges:[
+					{ source: 0, target: 1 },{ source: 0, target: 2 },{ source: 0, target: 3 },
+					{ source: 0, target: 4 },{ source: 1, target: 5 },{ source: 2, target: 5 },
+					{ source: 2, target: 5 },{ source: 3, target: 4 },{ source: 5, target: 8 },
+					{ source: 5, target: 9 },{ source: 6, target: 7 },{ source: 7, target: 8 },
+					{ source: 8, target: 9 }]
+					};
+
+
 	if (options.backCol == "none")										// If  transparent
 		$("#containerDiv").css("background-color","transparent");		// Set background color
 	else																// Normal color
 		$("#containerDiv").css("background-color","#"+options.backCol);	// Set background color
-	$("#containerDiv").html("");										// Clear div
+	$("#"+this.container).html("");										// Clear div
 	var colors=d3.scale.category10();									// Default colors
-	var svg=d3.select("#containerDiv")									// Add SVG to container div
+	var svg=d3.select("#"+this.container)								// Add SVG to container div
 			.append("svg")												// Add SVG shell
 			.attr("width",w).attr("height",h);							// Set size
 
@@ -65,6 +41,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
     	this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
 			var ids=new Object();
 			dataset={ nodes:[],edges:[]};								// Clear data
+			styles={};													// Clear styles
 			for (i=0;i<data.length;++i) {								// For each row
 				if (!data[i][0])										// If no data
 					continue;											// Skip
@@ -193,7 +170,6 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					if (d.style && styles[d.style].alpha)				// If a style spec'd
 						return styles[d.style].alpha;					// Get alpha from options
 					})									
-	
 	
 				.call(force.drag);							
 			

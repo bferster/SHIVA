@@ -104,8 +104,8 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				 .start();												// Draw
 		
 			var edges=svg.selectAll("line")								// Create edges
-				.data(dataset.edges)									// Set data
-				.enter()												// Enter
+				.data(dataset.edges);									// Set data
+			edges.enter()												// Enter
 				.append("line")											// Add line
 				.style("stroke", function(d, i) {						// Edge col
 					if (d.style && styles[d.style].eCol)				// If a style spec'd
@@ -122,11 +122,12 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				.style("opacity", function(d, i) {						// Alpha
 					if (d.style && styles[d.style].alpha)				// If a style spec'd
 						return styles[d.style].alpha;					// Get alpha from options
-					})									
+					});
+			edges.exit().remove();										// Exit function							
 	
-				var nodes=svg.selectAll("g")							// Create nodes
-				.data(dataset.nodes)									// Set data
-				.enter()												// Enter
+			var nodes=svg.selectAll("g")								// Create nodes
+				.data(dataset.nodes);									// Set data
+			nodes.enter()												// Enter
 				.append(function(d,i) {									// Add shape
 					shape=options.nShape;								// Set shape
 					if (d.style && styles[d.style].shape)				// If a style spec'd
@@ -170,15 +171,14 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					if (d.style && styles[d.style].alpha)				// If a style spec'd
 						return styles[d.style].alpha;					// Get alpha from options
 					})									
-	
-				.call(force.drag);							
-			
-				nodes.append("title")									// Add title for tooltip
-		      		.text(function(d) { return d.info; });				// Set label
+				.call(force.drag);
+			nodes.append("title")										// Add title for tooltip
+		      	.text(function(d) { return d.info; });					// Set label
+			nodes.exit().remove();										// Exit function							
 					  
-			  var labels=d3.select("#containerDiv").selectAll("div")	// Create labels
-				.data(dataset.nodes)									// Set data
-				.enter()												// Enter
+			var labels=d3.select("#containerDiv").selectAll("div")		// Create labels
+				.data(dataset.nodes);									// Set data
+			labels.enter()												// Enter
 				.append("div")											// Add div
 				.style({												// Style labels
 					"width":"200px","height":"auto","position":"absolute",	// Positioning
@@ -187,7 +187,8 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					})
 				.style(unselectable)									// Make text unselectable
 				.text(function(d) { return d.name; });					// Set text
-			
+			labels.exit().remove();										// Exit function							
+		
 				force.on("tick", function() {							// Every time the simulation "ticks", this will be called
 		
 					labels.style("left", function(d) { return d.x-100+"px"; })	// Position labels

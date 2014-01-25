@@ -1709,13 +1709,12 @@ else if(data[i][0].match(/link/i)){o={};o.source=data[i][1];o.target=data[i][3];
 for(i=0;i<dataset.edges.length;++i){dataset.edges[i].source=ids[dataset.edges[i].source];dataset.edges[i].target=ids[dataset.edges[i].target];if(!styles[dataset.edges[i].style])
 dataset.edges[i].style=null;}
 Draw();});else
-Draw();function Draw(){if(options.chartType=="Network"){var force=d3.layout.force().nodes(dataset.nodes).links(dataset.edges).size([w,h]).linkDistance([options.linkDist]).charge([options.linkCharge]).gravity([options.linkGravity/100]).linkStrength(Math.min([options.linkStrength/100],1)).start();var edges=svg.selectAll("line").data(dataset.edges).enter().append("line").style("stroke",function(d,i){if(d.style&&styles[d.style].eCol)
+Draw();function Draw(){if(options.chartType=="Network"){var force=d3.layout.force().nodes(dataset.nodes).links(dataset.edges).size([w,h]).linkDistance([options.linkDist]).charge([options.linkCharge]).gravity([options.linkGravity/100]).linkStrength(Math.min([options.linkStrength/100],1)).start();var edges=svg.selectAll("line").data(dataset.edges);edges.enter().append("line").style("stroke",function(d,i){if(d.style&&styles[d.style].eCol)
 return styles[d.style].eCol;else
 return options.eCol;}).style("stroke-width",function(d,i){if(d.style&&styles[d.style].eWid)
 return styles[d.style].eWid;else
 return options.eWid;}).style("opacity",function(d,i){if(d.style&&styles[d.style].alpha)
-return styles[d.style].alpha;})
-var nodes=svg.selectAll("g").data(dataset.nodes).enter().append(function(d,i){shape=options.nShape;if(d.style&&styles[d.style].shape)
+return styles[d.style].alpha;});edges.exit().remove();var nodes=svg.selectAll("g").data(dataset.nodes);nodes.enter().append(function(d,i){shape=options.nShape;if(d.style&&styles[d.style].shape)
 shape=styles[d.style].shape;return document.createElementNS("http://www.w3.org/2000/svg",shape.toLowerCase()!="circle"?"polygon":"circle");}).attr("points",function(d,i){shape=options.nShape;if(d.style&&styles[d.style].shape)
 shape=styles[d.style].shape;var size=options.nSize;if(d.style&&styles[d.style].size)
 size=styles[d.style].size;return DrawSVGShape(shape.toLowerCase(),size);}).attr("r",function(d,i){if(d.style&&styles[d.style].size)
@@ -1726,7 +1725,7 @@ return colors(i);else
 return options.nCol;}}).style("stroke",function(d,i){if(d.style&&styles[d.style].eCol)
 return styles[d.style].eCol;}).style("stroke-width",function(d,i){if(d.style&&styles[d.style].eWid)
 return styles[d.style].eWid;}).style("opacity",function(d,i){if(d.style&&styles[d.style].alpha)
-return styles[d.style].alpha;}).call(force.drag);nodes.append("title").text(function(d){return d.info;});var labels=d3.select("#containerDiv").selectAll("div").data(dataset.nodes).enter().append("div").style({"width":"200px","height":"auto","position":"absolute","color":"#"+options.lCol,"text-align":"center","font-size":options.lSize+"px"}).style(unselectable).text(function(d){return d.name;});force.on("tick",function(){labels.style("left",function(d){return d.x-100+"px";}).style("top",function(d){var size=options.nSize;if(d.style&&styles[d.style].size)
+return styles[d.style].alpha;}).call(force.drag);nodes.append("title").text(function(d){return d.info;});nodes.exit().remove();var labels=d3.select("#containerDiv").selectAll("div").data(dataset.nodes);labels.enter().append("div").style({"width":"200px","height":"auto","position":"absolute","color":"#"+options.lCol,"text-align":"center","font-size":options.lSize+"px"}).style(unselectable).text(function(d){return d.name;});labels.exit().remove();force.on("tick",function(){labels.style("left",function(d){return d.x-100+"px";}).style("top",function(d){var size=options.nSize;if(d.style&&styles[d.style].size)
 size=styles[d.style].size;return d.y+(size*1)+"px";});edges.attr("x1",function(d){return d.source.x;}).attr("y1",function(d){return d.source.y;}).attr("x2",function(d){return d.target.x;}).attr("y2",function(d){return d.target.y;});nodes.attr("transform",function(d){return"translate("+d.x+" "+d.y+")"});});}
 shivaLib.SendReadyMessage(true);}
 function DrawSVGShape(shape,size)

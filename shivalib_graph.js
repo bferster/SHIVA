@@ -90,9 +90,11 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					o.id=data[i][1];									// Add id
 					if (data[i][3])										// If a style set
 						o.style=data[i][3];								// Add style
+					if (data[i][4])										// If an info set
+						o.info=data[i][4];								// Add info
 					ids[o.id]=dataset.nodes.length;						// Set index
 					dataset.nodes.push(o);								// Add node to list
-					}
+					
 				else if (data[i][0].match(/link/i)) {					// If a link
 					o={};												// New object
 					o.source=data[i][1];								// Add name
@@ -145,7 +147,6 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 						return styles[d.style].alpha;					// Get alpha from options
 					})									
 	
-					
 				var nodes=svg.selectAll("g")							// Create nodes
 				.data(dataset.nodes)									// Set data
 				.enter()												// Enter

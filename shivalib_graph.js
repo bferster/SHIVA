@@ -94,7 +94,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 						o.info=data[i][4];								// Add info
 					ids[o.id]=dataset.nodes.length;						// Set index
 					dataset.nodes.push(o);								// Add node to list
-					
+					}
 				else if (data[i][0].match(/link/i)) {					// If a link
 					o={};												// New object
 					o.source=data[i][1];								// Add name

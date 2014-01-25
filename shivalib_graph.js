@@ -2,7 +2,7 @@
 //  SHIVALIB GRAPH
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-SHIVA_Show.prototype.DrawGraph=function() 								//	DRAW GRAPH
+SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 {
 	var options=this.options;
 	var container=this.container;
@@ -10,9 +10,8 @@ SHIVA_Show.prototype.DrawGraph=function() 								//	DRAW GRAPH
 	var _this=this;
 
 	var styles=new Object();
-	var set=new Object();
+	var dataset=new Object();
 	styles.first={shape:"star",col:"990000",size:"40",eWid:"0",opacity:"100",eCol:"000000"};
-	
 	
 			dataset = {
 				nodes: [
@@ -44,6 +43,16 @@ SHIVA_Show.prototype.DrawGraph=function() 								//	DRAW GRAPH
 				]
 			};
 	
+	if (options.dataSourceUrl) {											// If a spreadsheet spec'd
+    	this.Sound("ding")
+    	this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
+			trace(data)
+  			});
+		}
+ 
+
+
+
 	var shape;
 	var w=options.width;												// Width
 	var h=options.height;												// Height
@@ -175,6 +184,10 @@ SHIVA_Show.prototype.DrawGraph=function() 								//	DRAW GRAPH
 				});
 			}
 
+	shivaLib.SendReadyMessage(true);									// Send ready msg to drupal manager
+
+
+
 /////////////////////////////////
 // HELPER FUNCTIONS
 /////////////////////////////////
@@ -242,19 +255,15 @@ function DrawSVGShape(shape, size)									// DRAW A SHAPE
 SHIVA_Show.prototype.GraphActions=function(msg)						// REACT TO SHIVA ACTION MESSAGE
 {
 	var v=msg.split("|");												// Split msg into parts
-/*	if (v[0] == "ShivaAct=resize") { 									// RESIZE
-		if (v[1] == "100") {											// If forcing 100%
-			$("#containerDiv").width("100%");							// Set container 100%
-			$("#containerDiv").height("100%");							// Set container 100%
-			shivaLib.map.setOption("width","100%");						// Set chart wid 100%
-			shivaLib.map.setOption("height","100%");					// Set chart hgt 100%
-			}
-		shivaLib.map.draw();											// Redraw chart
+	if (v[0] == "ShivaAct=resize") {  									// RESIZE
+		if (v[1] == "100") 												// If forcing 100%
+			shivaLib.options.width=shivaLib.options.height="100%";		// Set values
+		shivaLib.DrawGraph();											// Redraw
 		}
 	else if (v[0] == "ShivaAct=data") {									// DATA
-		var data=google.visualization.arrayToDataTable($.parseJSON(v[1]));	// Convert to table format
-		shivaLib.map.setDataTable(data);								// Set data
-		shivaLib.map.draw();											// Redraw chart
+//		var data=$.parseJSON(v[1]);										// Convert to table format
+//		shivaLib.map.setDataTable(data);								// Set data
+		shivaLib.DrawGraph();											// Redraw
 		}
-*/}
+}
                       

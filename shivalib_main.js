@@ -73,6 +73,8 @@ SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
         this.DrawWordCloud();
   	else if (group == 'Poster')
         this.DrawPoster();
+  	else if (group == 'Graph')
+        this.DrawGraph();
 	if (ops["draw-1"])
 		this.AddOverlay();
 	var ud=ops["ud"];														// Get ud flag
@@ -112,6 +114,11 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
 			obj="$jit.id";													// Object to test for
 			lib="jit-yc.js";  												// Lib to load
            	break;
+		case "Graph": 														// Graph
+			obj="d3.select";												// Object to test for
+			lib="d3.v3.min.js";  											// Lib to load
+           	break;
+
 		case "Map": 														// Google maps		
   			obj="google.maps.Map";											// Object to test for
         	lib="//maps.googleapis.com/maps/api/js?sensor=false&callback=shivaJSLoaded"; 		// Lib to load
@@ -220,6 +227,8 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 			shivaLib.ControlActions(e.data);								// Route
 		else if (shivaLib.options.shivaGroup == "HTML")						// If an HTML action
 			shivaLib.HTMLActions(e.data);									// Route
+		else if (shivaLib.options.shivaGroup == "Graph")					// If an graph action
+			shivaLib.GraphActions(e.data);									// Route
 		}
 }
 

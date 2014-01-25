@@ -6,7 +6,6 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
     $("#shiva_dialogDiv").remove();                                     //remove existing dialogs
     var self = this;
 	var sel = "";
-	console.log(isNaN(attr));
 	if (isNaN(attr)) 
 		sel="#"+attr.replace(/___/g,"");
 	else if (attr < 0) 
@@ -15,7 +14,6 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
 		sel="#itemInput"+(Math.floor(attr/100)-1)+"-"+(attr%100);	
 	else sel = "#propInput" + attr;
 		
-	console.log(sel);
     var inputBox = $(sel);
     var inputBoxChip = $(sel+"C");
 

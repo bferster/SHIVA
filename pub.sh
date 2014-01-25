@@ -13,7 +13,7 @@ shivalib_colorpick.js \
 shivalib_word.js \
 shivalib_poster.js \
 shivalib_image.js \
-shivalib_data.js \
+shivalib_graph.js \
 > tmp
 jsmin.exe <tmp >shivalib-min.js
 rm tmp

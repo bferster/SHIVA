@@ -1689,7 +1689,7 @@ if(sort==src[0][j]){sort=j;break;}
 dst.sort(function(a,b){return a[sort]>b[sort]?-1*dir:1*dir});}
 dst.splice(0,0,fields);}
 SHIVA_Show.prototype.DrawGraph=function()
-{var i,o,shape;var options=this.options;var con="#"+options.container;var w=options.width;var h=options.height;var unselectable={"-moz-user-select":"none","-khtml-user-select":"none","-webkit-user-select":"none","-ms-user-select":"none","user-select":"none","pointer-events":"none"}
+{var i,o,shape;var options=this.options;var con="#"+this.container;var w=options.width;var h=options.height;var unselectable={"-moz-user-select":"none","-khtml-user-select":"none","-webkit-user-select":"none","-ms-user-select":"none","user-select":"none","pointer-events":"none"}
 var styles=new Object();var dataset={nodes:[{name:"Adam",info:"First man"},{name:"Bob",info:"As in apples"},{name:"Carrie",info:"Was a scary movie"},{name:"Donovan",info:"Wrote Mellow Yellow"},{name:"Edward",info:"Leaked NSA files"},{name:"Felicity",info:"Was a TV show"},{name:"George",info:"Was a Beatle "},{name:"Hannah",info:"Had sisters"},{name:"Iris",info:"Used to be a printer"},{name:"Jerry",info:"Makes subs"}],edges:[{source:0,target:1},{source:0,target:2},{source:0,target:3},{source:0,target:4},{source:1,target:5},{source:2,target:5},{source:2,target:5},{source:3,target:4},{source:5,target:8},{source:5,target:9},{source:6,target:7},{source:7,target:8},{source:8,target:9}]};if(options.backCol=="none")
 $(con).css("background-color","transparent");else
 $(con).css("background-color","#"+options.backCol);$(con).width(options.width);$(con).height(options.height);$(con).html("");var colors=d3.scale.category10();var svg=d3.select(con).append("svg").attr("width",w).attr("height",h);if(options.dataSourceUrl)

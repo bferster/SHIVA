@@ -45,7 +45,21 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			for (i=0;i<data.length;++i) {								// For each row
 				if (!data[i][0])										// If no data
 					continue;											// Skip
-				if (data[i][0].match(/class/i)) {						// If a class
+				if (data[i][0].match(/link-class/i)) {					// If a link-class
+					if (!styles[data[i][1]])							// If new
+						styles[data[i][1]]={};							// Create new style object
+					if (data[i][2].match(/color/i))						// A color
+						styles[data[i][1]].eCol=data[i][3];				// Set it
+					if (data[i][2].match(/type/i))						// A shape
+						styles[data[i][1]].shape=data[i][3];			// Set it
+					if (data[i][2].match(/linewidth/i))					// A line width
+						styles[data[i][1]].eWid=data[i][3];				// Set it
+					if (data[i][2].match(/linecolor/i))					// A line color
+						styles[data[i][1]].eCol=data[i][3];				// Set it
+					if (data[i][2].match(/alpha/i))						// alpha
+						styles[data[i][1]].alpha=data[i][3];			// Set it
+					}
+				else if (data[i][0].match(/class/i)) {					// If a class
 					if (!styles[data[i][1]])							// If new
 						styles[data[i][1]]={};							// Create new style object
 					if (data[i][2].match(/color/i))						// A color

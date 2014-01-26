@@ -603,14 +603,13 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
             } else if (attr == "hue") {
                 hue = value;
             }
-            
-            var color = self.HSV_to_HEX(hue, sat, val);
-            if (isNaN(color.substr(1)))
-            	color="";
+             var color = self.HSV_to_HEX(hue, sat, val);
             $("#cp_chip").css("backgroundColor", color);
             $("#cp_chip").css("border", "1px solid gray");
       	    $(".tab").eq(cp_current).children().css("backgroundColor", color)
-            $("#cp_current").attr("value", color.slice(1))
+             if (color.match(/NaN/))
+  	         	color="#none";
+          	$("#cp_current").attr("value", color.slice(1))
              $(".tab").eq(cp_current).children().html('');
             $(".slider").first().slider("option", "value", val * 100)
             $(".slider").last().slider("option", "value", sat * 100)

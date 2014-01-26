@@ -6,7 +6,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 {
 	var i,o,shape;
 	var options=this.options;											// Local options
-	var con="#"+options.container;										// Container
+	var con="#"+this.container;											// Container
  	var w=options.width;												// Width
 	var h=options.height;												// Height
 	var unselectable={"-moz-user-select":"none","-khtml-user-select":"none",	

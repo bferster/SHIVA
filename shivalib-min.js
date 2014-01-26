@@ -1689,10 +1689,10 @@ if(sort==src[0][j]){sort=j;break;}
 dst.sort(function(a,b){return a[sort]>b[sort]?-1*dir:1*dir});}
 dst.splice(0,0,fields);}
 SHIVA_Show.prototype.DrawGraph=function()
-{var i,o,shape;var options=this.options;var w=options.width;var h=options.height;var unselectable={"-moz-user-select":"none","-khtml-user-select":"none","-webkit-user-select":"none","-ms-user-select":"none","user-select":"none","pointer-events":"none"}
+{var i,o,shape;var options=this.options;var con="#"+options.container;var w=options.width;var h=options.height;var unselectable={"-moz-user-select":"none","-khtml-user-select":"none","-webkit-user-select":"none","-ms-user-select":"none","user-select":"none","pointer-events":"none"}
 var styles=new Object();var dataset={nodes:[{name:"Adam",info:"First man"},{name:"Bob",info:"As in apples"},{name:"Carrie",info:"Was a scary movie"},{name:"Donovan",info:"Wrote Mellow Yellow"},{name:"Edward",info:"Leaked NSA files"},{name:"Felicity",info:"Was a TV show"},{name:"George",info:"Was a Beatle "},{name:"Hannah",info:"Had sisters"},{name:"Iris",info:"Used to be a printer"},{name:"Jerry",info:"Makes subs"}],edges:[{source:0,target:1},{source:0,target:2},{source:0,target:3},{source:0,target:4},{source:1,target:5},{source:2,target:5},{source:2,target:5},{source:3,target:4},{source:5,target:8},{source:5,target:9},{source:6,target:7},{source:7,target:8},{source:8,target:9}]};if(options.backCol=="none")
-$("#containerDiv").css("background-color","transparent");else
-$("#containerDiv").css("background-color","#"+options.backCol);$("#"+this.container).html("");var colors=d3.scale.category10();var svg=d3.select("#"+this.container).append("svg").attr("width",w).attr("height",h);if(options.dataSourceUrl)
+$(con).css("background-color","transparent");else
+$(con).css("background-color","#"+options.backCol);$(con).width(options.width);$(con).height(options.height);$(con).html("");var colors=d3.scale.category10();var svg=d3.select(con).append("svg").attr("width",w).attr("height",h);if(options.dataSourceUrl)
 this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data){var ids=new Object();dataset={nodes:[],edges:[]};styles={};for(i=0;i<data.length;++i){if(!data[i][0])
 continue;if(data[i][0].match(/link-class/i)){if(!styles[data[i][1]])
 styles[data[i][1]]={};if(data[i][2].match(/color/i))
@@ -1732,7 +1732,7 @@ return colors(i);else
 return options.nCol;}}).style("stroke",function(d,i){if(d.style&&styles[d.style].eCol)
 return styles[d.style].eCol;}).style("stroke-width",function(d,i){if(d.style&&styles[d.style].eWid)
 return styles[d.style].eWid;}).style("opacity",function(d,i){if(d.style&&styles[d.style].alpha)
-return styles[d.style].alpha;}).call(force.drag);nodes.append("title").text(function(d){return d.info;});nodes.exit().remove();var labels=d3.select("#containerDiv").selectAll("div").data(dataset.nodes);labels.enter().append("div").style({"width":"200px","height":"auto","position":"absolute","color":"#"+options.lCol,"text-align":"center","font-size":options.lSize+"px"}).style(unselectable).text(function(d){return d.name;});labels.exit().remove();force.on("tick",function(){labels.style("left",function(d){return d.x-100+"px";}).style("top",function(d){var size=options.nSize;if(d.style&&styles[d.style].size)
+return styles[d.style].alpha;}).call(force.drag);nodes.append("title").text(function(d){return d.info;});nodes.exit().remove();var labels=d3.select(con).selectAll("div").data(dataset.nodes);labels.enter().append("div").style({"width":"200px","height":"auto","position":"absolute","color":"#"+options.lCol,"text-align":"center","font-size":options.lSize+"px"}).style(unselectable).text(function(d){return d.name;});labels.exit().remove();force.on("tick",function(){labels.style("left",function(d){return d.x-100+"px";}).style("top",function(d){var size=options.nSize;if(d.style&&styles[d.style].size)
 size=styles[d.style].size;return d.y+(size*1)+"px";});edges.attr("x1",function(d){return d.source.x;}).attr("y1",function(d){return d.source.y;}).attr("x2",function(d){return d.target.x;}).attr("y2",function(d){return d.target.y;});nodes.attr("transform",function(d){return"translate("+d.x+" "+d.y+")"});});}
 shivaLib.SendReadyMessage(true);}
 function DrawSVGShape(shape,size)

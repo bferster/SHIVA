@@ -5,8 +5,9 @@
 SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 {
 	var i,o,shape;
-	var options=this.options;
-	var w=options.width;												// Width
+	var options=this.options;											// Local options
+	var con="#"+options.container;										// Container
+ 	var w=options.width;												// Width
 	var h=options.height;												// Height
 	var unselectable={"-moz-user-select":"none","-khtml-user-select":"none",	
 		   			  "-webkit-user-select":"none","-ms-user-select":"none",
@@ -28,12 +29,13 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 
 
 	if (options.backCol == "none")										// If  transparent
-		$("#containerDiv").css("background-color","transparent");		// Set background color
+		$(con).css("background-color","transparent");					// Set background color
 	else																// Normal color
-		$("#containerDiv").css("background-color","#"+options.backCol);	// Set background color
-	$("#"+this.container).html("");										// Clear div
+		$(con).css("background-color","#"+options.backCol);				// Set background color
+	$(con).width(options.width);	$(con).height(options.height);		// Set size
+	$(con).html("");													// Clear div
 	var colors=d3.scale.category10();									// Default colors
-	var svg=d3.select("#"+this.container)								// Add SVG to container div
+	var svg=d3.select(con)												// Add SVG to container div
 			.append("svg")												// Add SVG shell
 			.attr("width",w).attr("height",h);							// Set size
 
@@ -190,7 +192,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		      	.text(function(d) { return d.info; });					// Set label
 			nodes.exit().remove();										// Exit function							
 					  
-			var labels=d3.select("#containerDiv").selectAll("div")		// Create labels
+			var labels=d3.select(con).selectAll("div")					// Create labels
 				.data(dataset.nodes);									// Set data
 			labels.enter()												// Enter
 				.append("div")											// Add div

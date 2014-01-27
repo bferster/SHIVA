@@ -23,6 +23,9 @@
 	options.nCol="b0c4de";
 	options.eCol="ccc";
 	options.eWid=1.5;
+	options.width=800;
+	options.height=600;
+	options.trans=1000;
 	
 	////////////////////////////////////////
 	// STYLE
@@ -37,9 +40,9 @@
 		   			  "user-select":"none","pointer-events":"none" }
 
 	var	i=0,															// Graph globals
-		m=[20, 120, 20, 120],											// Margins
-		w=1280- m[1]-m[3],												// Width
-		h=800- m[0]-m[2],												// Height
+		m=[20,options.spacing/2,20,options.spacing/2],					// Margins
+		w=options.width- m[1]-m[3],										// Width
+		h=options.height-m[0]-m[2],										// Height
 		vis,															// V
 		root;															// Data root
 	
@@ -75,7 +78,6 @@
 
 	function update()												// DRAW
 	{
-		var duration=1000;												// Transition duration
 		var nodes=tree.nodes(root).reverse();							// Compute the new tree layout.
 		nodes.forEach(function(d) { d.y=d.depth*options.spacing; });	// Normalize for fixed-depth.
 		var node=vis.selectAll("g.node")								// Update the nodes
@@ -101,7 +103,7 @@
 			.style(unselectable);										// Unselectable
 	
 		var nodeUpdate=node.transition()	  							// Transition nodes to their new position
-			.duration(duration)											// Set time
+			.duration(options.trans)									// Set time
 			.attr("transform", function(d) { return "translate("+d.y+","+d.x+")"; });	// Move
 	
 		nodeUpdate.select("circle")										// Update circle
@@ -112,7 +114,7 @@
 			.style("fill-opacity",1);									// Full alpha
 	
 		var nodeExit=node.exit().transition()	  						// Transition exiting nodes to the parent's new position.
-			.duration(duration)											// Set time
+			.duration(options.trans)									// Set time
 			.attr("transform", function(d) { return "translate("+root.y+","+root.x+")"; })	// Move to 1st dot
 			.remove();													// Remove
 	
@@ -135,11 +137,11 @@
 				})
 	   
 		link.transition()	  											// Transition links to their new position
-			.duration(duration)											// Set time
+			.duration(options.trans)									// Set time
 			.attr("d", diagonal);
 	
 	  link.exit().transition()	  										// Transition exiting nodes to the parent's new position
-			.duration(duration)											// Set time
+			.duration(options.trans)									// Set time
 			.attr("d", function(d) {									// Set path data
 	       		var o={ x:root.x, y:root.y };							// Set dot
 	       	 	return diagonal({source:o, target:o});					// Set diagonal
@@ -147,21 +149,21 @@
 			.remove();
 	
 		nodes.forEach(function(d) {	  									// Stash the old positions for transition
-			d.x0=d.x;
-			d.y0=d.y;
+			d.x0=d.x;													// Save x
+			d.y0=d.y;													// Y
 			});
 		}
 	
-		function toggle(d) {// Toggle children.
-
-	  if (d.children) {
-	    d._children = d.children;
-	    d.children = null;
-	  } else {
-	    d.children = d._children;
-	    d._children = null;
-	  }
-	}
+		function toggle(d) {											// CLICK HANDLER
+			if (d.children) {											// If it has children
+				d._children=d.children;									// Save old children
+				d.children=null;										// Clear current children
+	  			} 
+	  		else{														// If no children
+				d.children=d._children;									// Restore old children
+				d._children=null;										// Clear saved children
+			  	}
+		}
 
     </script>
   </body>

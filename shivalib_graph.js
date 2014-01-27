@@ -10,6 +10,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
  	var w=options.width;												// Width
 	var h=options.height;												// Height
 	var svg=null,nodes=null,edges=null,labels=null;						// Pointers to d3 data
+	var d3Scale=1;														// Scale
 	
 	var unselectable={"-moz-user-select":"none","-khtml-user-select":"none",	
 		   			  "-webkit-user-select":"none","-ms-user-select":"none",
@@ -38,17 +39,23 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	$(con).html("");													// Clear div
 	var colors=d3.scale.category10();									// Default colors
 
-/*	function zoom() {													// ZOOM HANDLER
-  		svg.attr("transform",
-      	"translate("+d3.event.translate+")"+
-      	"scale("+d3.event.scale+")");
- 		labels.style("font-size",(options.lSize*d3.event.scale)+"px");
- 		}
-*/
+
+	function zoomed() {													// ZOOM HANDLER
+ 		d3Scale=d3.event.scale;											// Set current scale
+  		svg.attr("transform","scale("+d3Scale+")");						// Set scale
+		labels.style("font-size",(options.lSize*d3Scale)+"px");			// Label size
+   		}
+	
 	var svg=d3.select(con)												// Add SVG to container div
 			.append("svg")												// Add SVG shell
 			.attr("width",w).attr("height",h)							// Set size
- 
+			.append("g")												// Needed for pan/zoom	
+   			.call(d3.behavior.zoom().scaleExtent([.1,10]).on("zoom",zoomed))	// Set zoom
+ 				
+	svg.append("rect")													// Pan and zoom rect
+		.style({"fill":"none","pointer-events":"all"})					// Invisble
+    	.attr("width",w).attr("height",h);								// Set size
+
 	if (options.dataSourceUrl) 											// If a spreadsheet spec'd
     	this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
 			var ids=new Object();
@@ -148,7 +155,19 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				.style("opacity", function(d, i) {						// Alpha
 					if (d.style && styles[d.style].alpha)				// If a style spec'd
 						return styles[d.style].alpha;					// Get alpha from options
-					});
+						})
+
+			edges.append("title")										// Add title for tooltip
+		      	.text(function(d) {										// Set edge tooltip
+					var str=d.source.name;								// From
+		      		if (d.style)										// If a class
+		      		 	str+=" "+d.style+" ";							// Use it
+		      		else												// No class
+		      		 	str+=" is linked to to ";						// Connects
+	      			str+=d.target.name;									// To
+		      		return str; 										// Return
+		      		});					
+
 			edges.exit().remove();										// Exit function							
 	
 			nodes=svg.selectAll("g")									// Create nodes
@@ -216,21 +235,21 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			labels.exit().remove();										// Exit function							
 		
 			force.on("tick", function() {								// Every time the simulation "ticks", this will be called
-			var size=options.nSize;										// Default size
-			labels.style("left", function(d) { return d.x-100+"px"; })	// Position labels
-				.style("top", function(d) { 							// Set top
-				if (d.style && styles[d.style].size)					// If a style spec'd
-					size=styles[d.style].size;							// Get size from options
-				return d.y+(size*1)+"px"; 								// Return size
+				var size=options.nSize;									// Default size
+				labels.style("left", function(d) { return (d.x*d3Scale-100)+"px"; })	// Position labels
+					.style("top", function(d) { 						// Set top
+					if (d.style && styles[d.style].size)				// If a style spec'd
+						size=styles[d.style].size;						// Get size from options
+					return (d.y+size*1)*d3Scale+"px"; 					// Return size
+					});
+	
+				edges.attr("x1", function(d) { return d.source.x; })		// Move edges
+					.attr("y1", function(d) { return d.source.y; })
+					.attr("x2", function(d) { return d.target.x; })
+					.attr("y2", function(d) { return d.target.y; });
+			
+				nodes.attr("transform",function(d) { return "translate("+d.x+" "+d.y+")" }); // Move nodes
 				});
-
-			edges.attr("x1", function(d) { return d.source.x; })		// Move edges
-				.attr("y1", function(d) { return d.source.y; })
-				.attr("x2", function(d) { return d.target.x; })
-				.attr("y2", function(d) { return d.target.y; });
-		
-			nodes.attr("transform",function(d) { return "translate("+d.x+" "+d.y+")" }); // Move nodes
-		});
 	}
 	shivaLib.SendReadyMessage(true);									// Send ready msg to drupal manager
 }

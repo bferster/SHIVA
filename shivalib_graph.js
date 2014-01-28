@@ -10,25 +10,13 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
  	var w=options.width;												// Width
 	var h=options.height;												// Height
 	var svg=null,nodes=null,edges=null,labels=null;						// Pointers to d3 data
+	var dataSet=null;													// Holds data
 	var d3Scale=1;														// Scale
 	
 	var unselectable={"-moz-user-select":"none","-khtml-user-select":"none",	
 		   			  "-webkit-user-select":"none","-ms-user-select":"none",
 		   			  "user-select":"none","pointer-events":"none" }
 	var styles=new Object();											// Styles
-	var dataset={ nodes:[												// Default data
-					{ name: "Adam", info:"First man" }, { name: "Bob", info:"As in apples" },
-					{ name: "Carrie", info:"Was a scary movie" }, { name: "Donovan", info:"Wrote Mellow Yellow" },
-					{ name: "Edward", info:"Leaked NSA files" }, { name: "Felicity", info:"Was a TV show" },
-					{ name: "George", info:"Was a Beatle "}, { name: "Hannah", info:"Had sisters" },
-					{ name: "Iris", info:"Used to be a printer" }, { name: "Jerry", info:"Makes subs" }],
-				  edges:[
-					{ source: 0, target: 1 },{ source: 0, target: 2 },{ source: 0, target: 3 },
-					{ source: 0, target: 4 },{ source: 1, target: 5 },{ source: 2, target: 5 },
-					{ source: 2, target: 5 },{ source: 3, target: 4 },{ source: 5, target: 8 },
-					{ source: 5, target: 9 },{ source: 6, target: 7 },{ source: 7, target: 8 },
-					{ source: 8, target: 9 }]
-					};
 
 
 	if (options.backCol == "none")										// If  transparent
@@ -39,27 +27,29 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	$(con).html("");													// Clear div
 	var colors=d3.scale.category10();									// Default colors
 
-
 	function zoomed() {													// ZOOM HANDLER
  		d3Scale=d3.event.scale;											// Set current scale
-  		svg.attr("transform","scale("+d3Scale+")");						// Set scale
-		labels.style("font-size",(options.lSize*d3Scale)+"px");			// Label size
-   		}
-	
+ 		if (d3Scale > 1)												// If zoomed in
+ 			svg.attr("transform","translate("+d3.event.translate+") scale("+d3Scale+")");	// Set scale and translate
+		else															// Else
+  			svg.attr("transform","scale("+d3Scale+")");					// Just set scale
+	  	}
+ 	
 	var svg=d3.select(con)												// Add SVG to container div
-			.append("svg")												// Add SVG shell
-			.attr("width",w).attr("height",h)							// Set size
-			.append("g")												// Needed for pan/zoom	
-   			.call(d3.behavior.zoom().scaleExtent([.1,10]).on("zoom",zoomed))	// Set zoom
- 				
+		.append("svg")													// Add SVG shell
+		.attr("width",w).attr("height",h)								// Set size
+		.append("g")													// Needed for pan/zoom	
+		.call(d3.behavior.zoom().scaleExtent([.05,10]).on("zoom",zoomed)) // Set zoom
+			
 	svg.append("rect")													// Pan and zoom rect
 		.style({"fill":"none","pointer-events":"all"})					// Invisble
+    	.attr("id","underLayer")										// Set id
     	.attr("width",w).attr("height",h);								// Set size
 
 	if (options.dataSourceUrl) 											// If a spreadsheet spec'd
     	this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
 			var ids=new Object();
-			dataset={ nodes:[],edges:[]};								// Clear data
+			dataSet={ nodes:[],edges:[]};								// Clear data
 			styles={};													// Clear styles
 			for (i=0;i<data.length;++i) {								// For each row
 				if (!data[i][0])										// If no data
@@ -102,33 +92,33 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 						o.style=data[i][3];								// Add style
 					if (data[i][4])										// If an info set
 						o.info=data[i][4];								// Add info
-					ids[o.id]=dataset.nodes.length;						// Set index
-					dataset.nodes.push(o);								// Add node to list
+					ids[o.id]=dataSet.nodes.length;						// Set index
+					dataSet.nodes.push(o);								// Add node to list
 					}
 				else if (data[i][0].match(/link/i)) {					// If a link
 					o={};												// New object
 					o.source=data[i][1];								// Add name
 					o.target=data[i][3];								// Add id
 					o.style=data[i][2];									// Add style
-					dataset.edges.push(o);								// Add node to list
+					dataSet.edges.push(o);								// Add node to list
 					}
 				}
- 			for (i=0;i<dataset.edges.length;++i) {						// For each edge
- 				dataset.edges[i].source=ids[dataset.edges[i].source];	// Convert id to index
- 				dataset.edges[i].target=ids[dataset.edges[i].target];	// Convert id to index
- 				if (!styles[dataset.edges[i].style])					// If not a valid style	
-					dataset.edges[i].style=null;						// Null it out				
+ 			for (i=0;i<dataSet.edges.length;++i) {						// For each edge
+ 				dataSet.edges[i].source=ids[dataSet.edges[i].source];	// Convert id to index
+ 				dataSet.edges[i].target=ids[dataSet.edges[i].target];	// Convert id to index
+ 				if (!styles[dataSet.edges[i].style])					// If not a valid style	
+					dataSet.edges[i].style=null;						// Null it out				
  				}
   			redraw();													// Draw graph
 			});
-	else
+	else if (dataSet)													// If data
 		redraw();														// Draw graph
 	
-	function redraw() {													// DRAW
+	function redraw() {												// DRAW
 		if (options.chartType == "Network") {							// Force directed
-			force=d3.layout.force()										// Force layout
-				 .nodes(dataset.nodes)									// Set nodes
-				 .links(dataset.edges)									// Set links
+			force=d3.layout.force()									// CREATE LAYOUT
+				 .nodes(dataSet.nodes)									// Set nodes
+				 .links(dataSet.edges)									// Set links
 				 .size([w,h])											// Set size
 				 .linkDistance([options.linkDist])						// Set link distance
 				 .charge([options.linkCharge])							// Set charge
@@ -136,8 +126,8 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				 .linkStrength(Math.min([options.linkStrength/100],1))	// Set link strength
 				 .start();												// Draw
 		
-			edges=svg.selectAll("line")									// Create edges
-				.data(dataset.edges);									// Set data
+			edges=svg.selectAll("line")								// CREATE EDGES
+				.data(dataSet.edges);									// Set data
 			edges.enter()												// Enter
 				.append("line")											// Add line
 				.style("stroke", function(d, i) {						// Edge col
@@ -157,7 +147,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 						return styles[d.style].alpha;					// Get alpha from options
 						})
 
-			edges.append("title")										// Add title for tooltip
+			edges.append("title")									// CREATE EDGE TOOLTIPS
 		      	.text(function(d) {										// Set edge tooltip
 					var str=d.source.name;								// From
 		      		if (d.style)										// If a class
@@ -170,8 +160,8 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 
 			edges.exit().remove();										// Exit function							
 	
-			nodes=svg.selectAll("g")									// Create nodes
-				.data(dataset.nodes);									// Set data
+			nodes=svg.selectAll("g")									// CREATE NODES
+				.data(dataSet.nodes);									// Set data
 			nodes.enter()												// Enter
 				.append(function(d,i) {									// Add shape
 					shape=options.nShape;								// Set shape
@@ -190,9 +180,9 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					})
 				.attr("r",function(d,i) {								// Add points
 					if (d.style && styles[d.style].size)				// If a style spec'd
-						return styles[d.style].size;					// Get size from options
+						return styles[d.style].size/2;					// Get size from options
 					else												// Default
-						return options.nSize;							// Return size
+						return options.nSize/2;							// Return size
 					})
 				.style("fill", function(d, i) {							// Color
 					if (d.style && styles[d.style].col)					// If a style spec'd
@@ -217,40 +207,42 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 						return styles[d.style].alpha;					// Get alpha from options
 					})									
 				.call(force.drag);
-			nodes.append("title")										// Add title for tooltip
+			nodes.append("title")									// CREATE EDGE TOOLTIPS
 		      	.text(function(d) { return d.info; });					// Set label
 			nodes.exit().remove();										// Exit function							
 					  
-			labels=d3.select(con).selectAll("div")						// Create labels
-				.data(dataset.nodes);									// Set data
+			labels=svg.selectAll("text")							// CREATE LABELS
+				.data(dataSet.nodes);									// Set data
 			labels.enter()												// Enter
-				.append("div")											// Add div
-				.style({												// Style labels
-					"width":"200px","height":"auto","position":"absolute",	// Positioning
-					"color":"#"+options.lCol,"text-align":"center",		// Font col/align
-					"font-size":options.lSize+"px"						// Size
-					})
-				.style(unselectable)									// Make text unselectable
+				.append("text")											// Add div
+				.attr("font-family","sans-serif")						// Sans
+				.attr("text-anchor", "middle")							// Centered
+				.attr("font-size",options.lSize+"px")					// Size
+				.attr("fill","#"+options.lCol)							// Color
 				.text(function(d) { return d.name; });					// Set text
 			labels.exit().remove();										// Exit function							
 		
 			force.on("tick", function() {								// Every time the simulation "ticks", this will be called
-				var size=options.nSize;									// Default size
-				labels.style("left", function(d) { return (d.x*d3Scale-100)+"px"; })	// Position labels
-					.style("top", function(d) { 						// Set top
-					if (d.style && styles[d.style].size)				// If a style spec'd
-						size=styles[d.style].size;						// Get size from options
-					return (d.y+size*1)*d3Scale+"px"; 					// Return size
-					});
-	
-				edges.attr("x1", function(d) { return d.source.x; })		// Move edges
+				var size;									
+				labels.attr("x", function(d) { return d.x+"px"; })		// Position labels
+					.attr("y", function(d) { 							// Set top
+						if (d.style && styles[d.style].size)			// If a style spec'd
+							size=styles[d.style].size;					// Get size from data
+						else											// Use default
+							size=options.nSize;							// Get size from options
+						size=size*.6+options.lSize*1;					// Add text height
+						return d.y+size+"px"; 							// Return pos
+						});
+				edges.attr("x1", function(d) { return d.source.x; })	// Move edges
 					.attr("y1", function(d) { return d.source.y; })
 					.attr("x2", function(d) { return d.target.x; })
 					.attr("y2", function(d) { return d.target.y; });
 			
 				nodes.attr("transform",function(d) { return "translate("+d.x+" "+d.y+")" }); // Move nodes
 				});
-	}
+			}
+		else if (options.chartType == "Tree") {							// Force directed
+			}
 	shivaLib.SendReadyMessage(true);									// Send ready msg to drupal manager
 }
 
@@ -262,7 +254,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 function DrawSVGShape(shape, size)									// DRAW A SHAPE
 {
 	var i,r,o,pts="";
-	size/=1.5;															// Halve size
+	size/=2;															// Halve size
 	var s2=size/2;														// Quarter
 	if (shape == "square") {											// A square
 		pts=-size+","+(-size)+" ";

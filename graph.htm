@@ -27,8 +27,11 @@
 <body>
 	<div style="width:279px;position:absolute;top:0px;left:0px">
  		<p><select id="chartType" onchange="ChangeChart(this.value)">
-			<option>Chord</option>
 			<option>Network</option>
+			<option>Tree</option>
+			<option>Chord</option>
+			<option>Radial</option>
+			<option>Bubble</option>
 		</select></p>
     <table id="propertyTable" class="propTable">
 		<tr style="height:8px"><td> </td></tr>
@@ -50,15 +53,8 @@
 	var chartType="Network";
 	
 	var props={
-		Chord: {
-				dataSourceUrl: 				{	def:'', 			opt:'string',		 	des:'Data source URL'}, 
-				height: 					{	def:'600', 			opt:'number',			des:'Height'},
-				width: 						{	def:'800', 			opt:'number',			des:'Width'}, 
-				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
-				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
-				},
-		Network: {
-				dataSourceUrl: 				{	def:'', 			opt:'string',			des:'Data source URL'}, 
+		Network:{
+				dataSourceUrl: 				{	def:'https://docs.google.com/spreadsheet/pub?key=0AohdE1_3ZElJdEVSSFNnOTF4OW9hUUQ3aHNNMmJxZ2c&output=html', 	opt:'string',			des:'Data source URL'}, 
 				height: 					{	def:'600', 			opt:'number',			des:'Height'},
 				width: 						{	def:'800', 			opt:'number',			des:'Width'}, 
 				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
@@ -67,14 +63,33 @@
 				linkGravity:				{	def:'10', 			opt:'number',			des:'Node gravity (0-100)'},
 				linkStrength:				{	def:'100', 			opt:'number',			des:'Node strength (0-100)'},
 				nShape:						{	def:'Circle', 		opt:'Circle|Square|Star|Triangle|Caret|Diamond|Plus',	des:'Node shape'},
-				nSize:						{	def:'12', 			opt:'number',			des:'Node size'},
+				nSize:						{	def:'20', 			opt:'number',			des:'Node size'},
 				nCol:						{	def:'none', 		opt:'color',		 	des:'Node color'},
 				eWid:						{	def:'2', 			opt:'number',		 	des:'Link line width'},
 				eCol: 						{	def:'cccccc', 		opt:'color',		 	des:'Link color'},
 				lSize: 						{	def:'12', 			opt:'number',		 	des:'Font size'},
 				lCol: 						{	def:'000000', 		opt:'color',		 	des:'Font color'},
 				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
-			}
+				},
+		Tree: 	{
+				dataSourceUrl: 				{	def:'', 			opt:'string',		 	des:'Data source URL'}, 
+				height: 					{	def:'600', 			opt:'number',			des:'Height'},
+				width: 						{	def:'800', 			opt:'number',			des:'Width'}, 
+				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
+				nCol:						{	def:'b0c4de', 		opt:'color',		 	des:'Node color'},
+				eWid:						{	def:'1.5', 			opt:'number',		 	des:'Link line width'},
+				eCol: 						{	def:'cccccc', 		opt:'color',		 	des:'Link color'},
+				lSize: 						{	def:'12', 			opt:'number',		 	des:'Font size'},
+				lCol: 						{	def:'000000', 		opt:'color',		 	des:'Font color'},
+				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
+				},
+		Chord: {
+				dataSourceUrl: 				{	def:'', 			opt:'string',		 	des:'Data source URL'}, 
+				height: 					{	def:'600', 			opt:'number',			des:'Height'},
+				width: 						{	def:'800', 			opt:'number',			des:'Width'}, 
+				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
+				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
+				}
 		}
 	
 	var helpText=new Array();

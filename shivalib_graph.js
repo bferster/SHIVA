@@ -29,17 +29,13 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 
 	function zoomed() {													// ZOOM HANDLER
  		d3Scale=d3.event.scale;											// Set current scale
- 		if (d3Scale > 1)												// If zoomed in
- 			svg.attr("transform","translate("+d3.event.translate+") scale("+d3Scale+")");	// Set scale and translate
-		else															// Else
-  			svg.attr("transform","scale("+d3Scale+")");					// Just set scale
-	  	}
- 	
+ 		svg.attr("transform","translate("+d3.event.translate+") scale("+d3Scale+")");	// Set scale and translate
+		} 	
 	var svg=d3.select(con)												// Add SVG to container div
 		.append("svg")													// Add SVG shell
 		.attr("width",w).attr("height",h)								// Set size
 		.append("g")													// Needed for pan/zoom	
-		.call(d3.behavior.zoom().scaleExtent([1,10]).on("zoom",zoomed)) // Set zoom
+		.call(d3.behavior.zoom().scaleExtent([1,10]).center([w/2,h/2]).on("zoom",zoomed)) // Set zoom
 			
 	svg.append("rect")													// Pan and zoom rect
 		.style({"fill":"none","pointer-events":"all"})					// Invisble

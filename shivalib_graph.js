@@ -36,7 +36,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		.attr("width",w).attr("height",h)								// Set size
 		.append("g")													// Needed for pan/zoom	
 		.call(d3.behavior.zoom().scaleExtent([1,10]).center([w/2,h/2]).on("zoom",zoomed)) // Set zoom
-			
+	 		
 	svg.append("rect")													// Pan and zoom rect
 		.style({"fill":"none","pointer-events":"all"})					// Invisble
     	.attr("id","underLayer")										// Set id

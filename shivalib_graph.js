@@ -39,7 +39,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		.append("svg")													// Add SVG shell
 		.attr("width",w).attr("height",h)								// Set size
 		.append("g")													// Needed for pan/zoom	
-		.call(d3.behavior.zoom().scaleExtent([.05,10]).on("zoom",zoomed)) // Set zoom
+		.call(d3.behavior.zoom().scaleExtent([1,10]).on("zoom",zoomed)) // Set zoom
 			
 	svg.append("rect")													// Pan and zoom rect
 		.style({"fill":"none","pointer-events":"all"})					// Invisble

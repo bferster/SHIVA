@@ -29,7 +29,11 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 
 	function zoomed() {													// ZOOM HANDLER
  		d3Scale=d3.event.scale;											// Set current scale
- 		svg.attr("transform","translate("+d3.event.translate+") scale("+d3Scale+")");	// Set scale and translate
+ 		if (d3Scale != 1)												// If zoomed
+ 			svg.attr("transform","translate("+d3.event.translate+") scale("+d3Scale+")");	// Set scale and translate
+		else
+ 			svg.attr("transform","translate("+[0,0]+") scale("+d3Scale+")");	// Set scale and translate
+
 		} 	
 	var svg=d3.select(con)												// Add SVG to container div
 		.append("svg")													// Add SVG shell

@@ -106,8 +106,6 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
  			for (i=0;i<dataSet.edges.length;++i) {						// For each edge
  				dataSet.edges[i].source=ids[dataSet.edges[i].source];	// Convert id to index
  				dataSet.edges[i].target=ids[dataSet.edges[i].target];	// Convert id to index
- 				if (!styles[dataSet.edges[i].style])					// If not a valid style	
-					dataSet.edges[i].style=null;						// Null it out				
  				}
   			redraw();													// Draw graph
 			});
@@ -145,6 +143,8 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				.style("opacity", function(d, i) {						// Alpha
 					if (d.style && styles[d.style] && styles[d.style].alpha) // If a style spec'd
 						return styles[d.style].alpha;					// Get alpha from options
+					else
+						return 1;										// Fullapha			
 						})
 
 			edges.append("title")									// CREATE EDGE TOOLTIPS

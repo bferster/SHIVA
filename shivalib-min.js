@@ -1717,15 +1717,15 @@ else if(data[i][0].match(/node/i)){o={};o.name=data[i][2];o.id=data[i][1];if(dat
 o.style=data[i][3];if(data[i][4])
 o.info=data[i][4];ids[o.id]=dataSet.nodes.length;dataSet.nodes.push(o);}
 else if(data[i][0].match(/link/i)){o={};o.source=data[i][1];o.target=data[i][3];o.style=data[i][2];dataSet.edges.push(o);}}
-for(i=0;i<dataSet.edges.length;++i){dataSet.edges[i].source=ids[dataSet.edges[i].source];dataSet.edges[i].target=ids[dataSet.edges[i].target];if(!styles[dataSet.edges[i].style])
-dataSet.edges[i].style=null;}
+for(i=0;i<dataSet.edges.length;++i){dataSet.edges[i].source=ids[dataSet.edges[i].source];dataSet.edges[i].target=ids[dataSet.edges[i].target];}
 redraw();});else if(dataSet)
 redraw();function redraw(){if(options.chartType=="Network"){force=d3.layout.force().nodes(dataSet.nodes).links(dataSet.edges).size([w,h]).linkDistance([options.linkDist]).charge([options.linkCharge]).gravity([options.linkGravity/100]).linkStrength(Math.min([options.linkStrength/100],1)).start();edges=svg.selectAll("line").data(dataSet.edges);edges.enter().append("line").style("stroke",function(d,i){if(d.style&&styles[d.style]&&styles[d.style].eCol)
 return styles[d.style].eCol;else
 return options.eCol;}).style("stroke-width",function(d,i){if(d.style&&styles[d.style]&&styles[d.style].eWid)
 return styles[d.style].eWid;else
 return options.eWid;}).style("opacity",function(d,i){if(d.style&&styles[d.style]&&styles[d.style].alpha)
-return styles[d.style].alpha;})
+return styles[d.style].alpha;else
+return 1;})
 edges.append("title").text(function(d){var str=d.source.name;if(d.style)
 str+=" "+d.style+" ";else
 str+=" is linked to to ";str+=d.target.name;return str;});edges.exit().remove();nodes=svg.selectAll("g").data(dataSet.nodes);nodes.enter().append(function(d,i){shape=options.nShape;if(d.style&&styles[d.style]&&styles[d.style].shape)

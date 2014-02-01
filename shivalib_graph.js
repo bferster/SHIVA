@@ -138,9 +138,8 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					o.info=data[i][4];									// Add info
 				items.push(o);											// Add to array
 				}
-    ];
  
-		dataSet=[];														// Init as array first
+ 		dataSet=[];														// Init as array first
 		var dataMap=items.reduce(function(map, node) {					// Create datamap					
 			map[node.name]=node;
 			return map;

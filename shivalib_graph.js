@@ -4,7 +4,7 @@
 
 SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 {
-	var i,o,shape;
+	var i,o,shape,id=0;
 	var options=this.options;											// Local options
 	var con="#"+this.container;											// Container
  	var w=options.width;												// Width
@@ -12,12 +12,14 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	var svg=null,nodes=null,edges=null,labels=null;						// Pointers to d3 data
 	var dataSet=null;													// Holds data
 	var d3Scale=1;														// Scale
-	
+	var margins=[0,0,0,0];												// Default margins
+	var firstTime=true;
+		
 	var unselectable={"-moz-user-select":"none","-khtml-user-select":"none",	
 		   			  "-webkit-user-select":"none","-ms-user-select":"none",
 		   			  "user-select":"none","pointer-events":"none" }
+	
 	var styles=new Object();											// Styles
-
 
 	if (options.backCol == "none")										// If  transparent
 		$(con).css("background-color","transparent");					// Set background color
@@ -28,16 +30,21 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	var colors=d3.scale.category10();									// Default colors
 
 	function zoomed() {													// ZOOM HANDLER
+ 		var t;
  		d3Scale=d3.event.scale;											// Set current scale
- 		if (d3Scale != 1)												// If zoomed
- 			svg.attr("transform","translate("+d3.event.translate+") scale("+d3Scale+")");	// Set scale and translate
-		else
- 			svg.attr("transform","translate("+[0,0]+") scale("+d3Scale+")");	// Set scale and translate
-
+ 		var tp=[margins[0]-0,margins[3]-0];								// Move to margins
+ 		if (options.chartType == "Tree")								// Tree is x/y flopped
+ 			t=tp[0],tp[0]=tp[1],tp[1]=t;								// Flop coords
+		var tx=Math.min(Math.max(d3.event.translate[0]-0,-w*d3Scale),w*d3Scale);		// Xpos
+		var ty=Math.min(Math.max(d3.event.translate[1]-0,-h*d3Scale),h*d3Scale);		// Y
+		if ((d3Scale != 1) || (options.chartType != "Network"))			// If zoomed
+ 			tp[0]+=tx,tp[1]+=ty;										// Add translation
+ 		svg.attr("transform","translate("+tp+") scale("+d3Scale+")");	// Do it
 		} 	
-	var svg=d3.select(con)												// Add SVG to container div
+	
+	svg=d3.select(con)													// Add SVG to container div
 		.append("svg")													// Add SVG shell
-		.attr("width",w).attr("height",h)								// Set size
+		.attr("width",w-margins[0]-margins[2]).attr("height",h-margins[1]-margins[3])	// Set size
 		.append("g")													// Needed for pan/zoom	
 		.call(d3.behavior.zoom().scaleExtent([1,10]).center([w/2,h/2]).on("zoom",zoomed)) // Set zoom
 	 		
@@ -46,73 +53,154 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
     	.attr("id","underLayer")										// Set id
     	.attr("width",w).attr("height",h);								// Set size
 
-	if (options.dataSourceUrl) 											// If a spreadsheet spec'd
-    	this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
-			var ids=new Object();
-			dataSet={ nodes:[],edges:[]};								// Clear data
-			styles={};													// Clear styles
+	if (options.chartType == "Network") {								// Force directed
+		if (options.dataSourceUrl) 										// If a spreadsheet spec'd
+	    	this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
+				var ids=new Object();
+				dataSet={ nodes:[],edges:[]};							// Clear data
+				styles={};												// Clear styles
+				for (i=0;i<data.length;++i) {							// For each row
+					if (!data[i][0])									// If no data
+						continue;										// Skip
+					if (data[i][0].match(/link-class/i)) {				// If a link-class
+						if (!styles[data[i][1]])						// If new
+							styles[data[i][1]]={};						// Create new style object
+						if (data[i][2].match(/color/i))					// A color
+							styles[data[i][1]].eCol=data[i][3];			// Set it
+						if (data[i][2].match(/type/i))					// A shape
+							styles[data[i][1]].shape=data[i][3];		// Set it
+						if (data[i][2].match(/linewidth/i))				// A line width
+							styles[data[i][1]].eWid=data[i][3];			// Set it
+						if (data[i][2].match(/linecolor/i))				// A line color
+							styles[data[i][1]].eCol=data[i][3];			// Set it
+						if (data[i][2].match(/alpha/i))					// alpha
+							styles[data[i][1]].alpha=data[i][3];		// Set it
+						}
+					else if (data[i][0].match(/class/i)) {				// If a class
+						if (!styles[data[i][1]])						// If new
+							styles[data[i][1]]={};						// Create new style object
+						if (data[i][2].match(/color/i))					// A color
+							styles[data[i][1]].col=data[i][3];			// Set it
+						if (data[i][2].match(/type/i))					// A shape
+							styles[data[i][1]].shape=data[i][3];		// Set it
+						if (data[i][2].match(/linewidth/i))				// A line width
+							styles[data[i][1]].eWid=data[i][3];			// Set it
+						if (data[i][2].match(/linecolor/i))				// A line color
+							styles[data[i][1]].eCol=data[i][3];			// Set it
+						if (data[i][2].match(/alpha/i))					// Alpha
+							styles[data[i][1]].alpha=data[i][3];		// Set it
+						if (data[i][2].match(/dim/i))					// Size
+							styles[data[i][1]].size=data[i][3];			// Set it
+						}
+					else if (data[i][0].match(/node/i)) {				// If a node
+						o={};											// New object
+						o.name=data[i][2];								// Add name
+						o.id=data[i][1];								// Add id
+						if (data[i][3])									// If a style set
+							o.style=data[i][3];							// Add style
+						if (data[i][4])									// If an info set
+							o.info=data[i][4];							// Add info
+						ids[o.id]=dataSet.nodes.length;					// Set index
+						dataSet.nodes.push(o);							// Add node to list
+						}
+					else if (data[i][0].match(/link/i)) {				// If a link
+						o={};											// New object
+						o.source=data[i][1];							// Add name
+						o.target=data[i][3];							// Add id
+						o.style=data[i][2];								// Add style
+						dataSet.edges.push(o);							// Add node to list
+						}
+					}
+	 			for (i=0;i<dataSet.edges.length;++i) {					// For each edge
+	 				dataSet.edges[i].source=ids[dataSet.edges[i].source];	// Convert id to index
+	 				dataSet.edges[i].target=ids[dataSet.edges[i].target];	// Convert id to index
+	 				}
+	  			redraw();												// Draw graph
+				});
+		else if (dataSet)												// If data
+			redraw();													// Draw graph
+		}
+	else if (options.chartType == "Tree") {								// Tree
+		if (options.dataSourceUrl) {									// If a spreadsheet spec'd
+  			this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
+			var items=new Array();										// Holds items
 			for (i=0;i<data.length;++i) {								// For each row
 				if (!data[i][0])										// If no data
 					continue;											// Skip
-				if (data[i][0].match(/link-class/i)) {					// If a link-class
-					if (!styles[data[i][1]])							// If new
-						styles[data[i][1]]={};							// Create new style object
-					if (data[i][2].match(/color/i))						// A color
-						styles[data[i][1]].eCol=data[i][3];				// Set it
-					if (data[i][2].match(/type/i))						// A shape
-						styles[data[i][1]].shape=data[i][3];			// Set it
-					if (data[i][2].match(/linewidth/i))					// A line width
-						styles[data[i][1]].eWid=data[i][3];				// Set it
-					if (data[i][2].match(/linecolor/i))					// A line color
-						styles[data[i][1]].eCol=data[i][3];				// Set it
-					if (data[i][2].match(/alpha/i))						// alpha
-						styles[data[i][1]].alpha=data[i][3];			// Set it
-					}
-				else if (data[i][0].match(/class/i)) {					// If a class
-					if (!styles[data[i][1]])							// If new
-						styles[data[i][1]]={};							// Create new style object
-					if (data[i][2].match(/color/i))						// A color
-						styles[data[i][1]].col=data[i][3];				// Set it
-					if (data[i][2].match(/type/i))						// A shape
-						styles[data[i][1]].shape=data[i][3];			// Set it
-					if (data[i][2].match(/linewidth/i))					// A line width
-						styles[data[i][1]].eWid=data[i][3];				// Set it
-					if (data[i][2].match(/linecolor/i))					// A line color
-						styles[data[i][1]].eCol=data[i][3];				// Set it
-					if (data[i][2].match(/alpha/i))						// alpha
-						styles[data[i][1]].alpha=data[i][3];			// Set it
-					if (data[i][2].match(/dim/i))						// Size
-						styles[data[i][1]].size=data[i][3];				// Set it
-					}
-				else if (data[i][0].match(/node/i)) {					// If a node
-					o={};												// New object
-					o.name=data[i][2];									// Add name
-					o.id=data[i][1];									// Add id
-					if (data[i][3])										// If a style set
-						o.style=data[i][3];								// Add style
-					if (data[i][4])										// If an info set
-						o.info=data[i][4];								// Add info
-					ids[o.id]=dataSet.nodes.length;						// Set index
-					dataSet.nodes.push(o);								// Add node to list
-					}
-				else if (data[i][0].match(/link/i)) {					// If a link
-					o={};												// New object
-					o.source=data[i][1];								// Add name
-					o.target=data[i][3];								// Add id
-					o.style=data[i][2];									// Add style
-					dataSet.edges.push(o);								// Add node to list
-					}
+			 	if (!data[i][0].match(/node/i)) 						// If not a node
+					continue;											// Skip
+				o={};													// New object
+				o.name=data[i][2];										// Add name
+				o.parent=data[i][1];									// Add parent
+				if (o.parent == "null") o.parent=null
+				
+				if (data[i][3])											// If an info set
+					o.info=data[i][4];									// Add info
+				items.push(o);											// Add to array
 				}
- 			for (i=0;i<dataSet.edges.length;++i) {						// For each edge
- 				dataSet.edges[i].source=ids[dataSet.edges[i].source];	// Convert id to index
- 				dataSet.edges[i].target=ids[dataSet.edges[i].target];	// Convert id to index
- 				}
-  			redraw();													// Draw graph
+    ];
+ 
+		dataSet=[];														// Init as array first
+		var dataMap=items.reduce(function(map, node) {					// Create datamap					
+			map[node.name]=node;
+			return map;
+			},{});
+ 
+
+		items.forEach(function(node) {									// For each node	
+			if (dataMap[node.parent]) {									// If a parent exists
+				(parent.children || (parent.children = []))				// Create a child
+					.push(node);										// Add node
+				} 
+			else														// A sibling
+				dataSet.push(node);										// Add node
 			});
-	else if (dataSet)													// If data
-		redraw();														// Draw graph
+		 		
+		dataSet=dataSet[0];
+		dataSet.x0=h/2;													// Center x
+		dataSet.y0=0;													// At top
+		dataSet.children.forEach( function (d){ setOpen(d,0) }); 		// Initialize the display to show only certain levels
+
+		function setOpen(d, depth) {									// SET OPEN NODES
+			++depth;													// Add to depth
+			if (d.children) {											// If node has children									
+				d.children.forEach(function (d){ setOpen(d,depth) });	// Toggle all children
+				if ((d.children) && (depth > (options.depth-1))) {		// If it has children and over depth
+					d._children=d.children;								// Save old children
+					d.children=null;									// Clear current children to close it
+			  		} 
+				}
+			}
+		
+		redraw();														// Draw
+		});
+		}
+/*		d3.json("flare.json", function(json) {
+		dataSet=json;													// Set data dataSet
+		dataSet.x0=h/2;													// Center x
+		dataSet.y0=0;													// At top
+		dataSet.children.forEach( function (d){ setOpen(d,0) }); 		// Initialize the display to show only certain levels
+
+		function setOpen(d, depth) {								// SET OPEN NODES
+			++depth;													// Add to depth
+			if (d.children) {											// If node has children									
+				d.children.forEach(function (d){ setOpen(d,depth) });	// Toggle all children
+				if ((d.children) && (depth > (options.depth-1))) {		// If it has children and over depth
+					d._children=d.children;								// Save old children
+					d.children=null;									// Clear current children to close it
+			  		} 
+				}
+			}
+		
+		redraw();														// Draw
+		});
+*/
+	}
 	
-	function redraw() {												// DRAW
+	function redraw(what) {												// DRAW
+
+		// NETWORK /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+
 		if (options.chartType == "Network") {							// Force directed
 			force=d3.layout.force()									// CREATE LAYOUT
 				 .nodes(dataSet.nodes)									// Set nodes
@@ -143,8 +231,8 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				.style("opacity", function(d, i) {						// Alpha
 					if (d.style && styles[d.style] && styles[d.style].alpha) // If a style spec'd
 						return styles[d.style].alpha;					// Get alpha from options
-					else
-						return 1;										// Fullapha			
+					else												// Default
+						return 1;										// Full alpha			
 						})
 
 			edges.append("title")									// CREATE EDGE TOOLTIPS
@@ -241,8 +329,110 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				nodes.attr("transform",function(d) { return "translate("+d.x+" "+d.y+")" }); // Move nodes
 				});
 			}
+		
+		// TREE /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+		
 		else if (options.chartType == "Tree") {							// Force directed
-			}
+		 	margins=[20,options.spacing/2,20,options.spacing/2],			// Margins
+	   	 	svg.attr("transform","translate("+margins[3]+","+margins[0]+")"); // Move into margin area
+	   	 	var tree=d3.layout.tree()									// Create tree layout
+		   		.size([h,w]);											// Set size
+			var diagonal=d3.svg.diagonal()								// Create link lines
+		    	.projection(function(d) { return [d.y, d.x]; });		// Set projection with x/y crossed
+  			nodes=tree.nodes(dataSet).reverse();						// Compute the new tree layout.
+			nodes.forEach(function(d) { d.y=d.depth*options.spacing; });// Normalize for fixed-depth.
+				
+			var node=svg.selectAll("g")									// Update the nodes
+		      .data(nodes,function(d) { return d.id || (d.id=++id); });	// Get data
+		
+			var nodeEnter=node.enter().append("g")	  					// Enter any new nodes at the parent's previous position.
+				.attr("transform", function(d) { 						// Initial position
+					if (d.parent)										// If not dataSet
+						return  "translate("+d.parent.y+","+d.parent.x+")"; // Position to parent dot
+					else												// If dataSet
+						return  "translate("+dataSet.y0+","+dataSet.x0+")"; // Position to dataSet
+					})
+				.on("click", function(d) { toggle(d); redraw(d); });	// Add click handler
+		
+			nodeEnter.append("circle")									// Add circle
+				.attr("r",1e-6)											// Set size
+				.style("stroke","#999")									// Edge
+				.style("cursor", function(d) { return d._children ? "pointer" : "auto"; })	// Set cursor based on children
+				.style("fill", function(d) { return d._children ? "#"+options.nCol : "#fff"; });	// Set color based on children
+		
+			nodeEnter.append("text")									// Add label
+				.style("font-family","sans-serif")						// San serif
+				.attr("x", function(d) { var dx=options.lSize/1.5; return d.children || d._children ? -dx : dx; })	// Position based on children
+				.attr("dy",".3em")
+				.attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; }) // Set anchor based on children
+				.text(function(d) { return d.name; })					// Set name
+				.style("fill-opacity", 1e-6)							// Transparent
+				.style("fill",options.lCol)								// Color
+				.style("font-size",options.lSize)						// Size
+				.style(unselectable);									// Unselectable
+		
+			var nodeUpdate=node.transition()	  						// Transition nodes to their new position
+				.duration(options.trans)								// Set time
+				.attr("transform", function(d) { return "translate("+d.y+","+d.x+")"; });	// Move
+		
+			nodeUpdate.select("circle")									// Update circle
+				.attr("r",options.lSize/2.67)							// Set size
+				.style("fill", function(d) { return d._children ? "#"+options.nCol : "#fff"; });	// Set color based on children
+		
+			nodeUpdate.select("text")									// Update label
+				.style("fill-opacity",1);								// Full alpha
+		
+			var nodeExit=node.exit().transition()	  					// Transition exiting nodes to the parent's new position.
+				.duration(options.trans)								// Set time
+				.attr("transform", function(d) { return "translate("+d.parent.y+","+d.parent.x+")"; })	// Move to 1st dot
+				.remove();												// Remove
+		
+			nodeExit.select("circle")									// On circle exit
+				.attr("r",1e-6);										// Make really small
+		
+			nodeExit.select("text")										// On text exit
+		      .style("fill-opacity",1e-6);								// Make really transparent
+		
+			var link=svg.selectAll("path")	  							// Update the links
+				.data(tree.links(nodes), function(d) { return d.target.id; });	// Set data
+		
+			link.enter().insert("path","g")	  							// Enter any new links at the parent's previous position
+				.style("fill","none")									// No fule
+				.style("stroke",options.eCol)							// Color
+				.style("stroke-width",options.eWid)						// Width
+				.attr("d", function(d) {								// Set path data
+					var o={ x:d.source.x,y:d.source.y };				// dataSet dot											
+			        return diagonal({source:o, target:o});				// Create diagonal
+					})
+			link.transition()	  										// Transition links to their new position
+				.duration(options.trans)								// Set time
+				.attr("d", diagonal);
+		
+		 	link.exit().transition()	  								// Transition exiting nodes to the parent's new position
+				.duration(options.trans)								// Set time
+				.attr("d", function(d) {								// Set path data
+		       		var o={ x:d.source.x, y:d.source.y };				// Set dot
+		       	 	return diagonal({source:o, target:o});				// Set diagonal
+		     		})
+				.remove();
+		
+			nodes.forEach(function(d) {	  								// Stash the old positions for transition
+				d.x0=d.x;												// Save x
+				d.y0=d.y;												// Y
+				});
+				
+			function toggle(d) {										// CLICK HANDLER
+				if (d.children) {										// If it has children
+					d._children=d.children;								// Save old children
+					d.children=null;									// Clear current children
+		  			} 
+		  		else{													// If no children
+					d.children=d._children;								// Restore old children
+					d._children=null;									// Clear saved children
+				  	}
+			}															// End tree
+		firstTime=false;												// Not firs time thru
+		}																// End update
 	shivaLib.SendReadyMessage(true);									// Send ready msg to drupal manager
 }
 

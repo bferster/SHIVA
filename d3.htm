@@ -31,35 +31,26 @@
 	// STYLE
 	////////////////////////////////////////
 	
-	$("<style type='text/css'>.node circle{cursor:pointer;fill:#fff;stroke:#999}</style>").appendTo("head");
-	$("<style type='text/css'>.node text{font-family:sans-serif}</style>").appendTo("head");
-	$("<style type='text/css'>.link{fill:none;}</style>").appendTo("head");
-
 	var unselectable={"-moz-user-select":"none","-khtml-user-select":"none",	
 		   			  "-webkit-user-select":"none","-ms-user-select":"none",
 		   			  "user-select":"none","pointer-events":"none" }
 
-	var	i=0,															// Graph globals
+	var	i,id=0,																// Graph globals
 		m=[20,options.spacing/2,20,options.spacing/2],					// Margins
 		w=options.width- m[1]-m[3],										// Width
 		h=options.height-m[0]-m[2],										// Height
-		vis,															// V
-		root;															// Data root
+		svg,															// V
+		dataSet;														// Data 
 	
-	var tree=d3.layout.tree()											// Create tree layout
-	    .size([h,w]);													// Set size
-	var diagonal=d3.svg.diagonal()										// Create link lines
-	    .projection(function(d) { return [d.y, d.x]; });				// Set projection with x/y crossed
-	vis=d3.select("#body").append("svg")								// Create SVG
+	svg=d3.select("#body").append("svg")								// Create SVG
 		.attr("width",w+m[1]+m[3])										// Set width
 	    .attr("height",h+m[0]+m[2])										// Height
 		.append("g")													// Add element
-	    .attr("transform","translate("+m[3]+","+m[0]+")");				// Move into margin area
 	
 	d3.json("flare.json", function(json) {
-		root=json;														// Set data root
-		root.x0=h/2;													// Center x
-		root.y0=0;														// At top
+		dataSet=json;													// Set data root
+		dataSet.x0=h/2;													// Center x
+		dataSet.y0=0;													// At top
 		
 		function toggleAll(d) {											// TOGGLE NODES
 			if (d.children) {											// If node has children									
@@ -68,31 +59,45 @@
 		   		}
 		  }
 	
-		root.children.forEach(toggleAll); 								// Initialize the display to show a few nodes
-		toggle(root.children[1]);
-		toggle(root.children[1].children[2]);
-		toggle(root.children[9]);
-		toggle(root.children[9].children[0]);
-		update();														// Draw
+		dataSet.children.forEach(toggleAll); 								// Initialize the display to show a few nodes
+		toggle(dataSet.children[1]);
+		toggle(dataSet.children[1].children[2]);
+		toggle(dataSet.children[9]);
+		toggle(dataSet.children[9].children[0]);
+		redraw();														// Draw
 		});
 
-	function update()												// DRAW
+	function redraw(what)												// DRAW
 	{
-		var nodes=tree.nodes(root).reverse();							// Compute the new tree layout.
-		nodes.forEach(function(d) { d.y=d.depth*options.spacing; });	// Normalize for fixed-depth.
-		var node=vis.selectAll("g.node")								// Update the nodes
-	      .data(nodes,function(d) { return d.id || (d.id=++i); });		// Get data
+ 		 	margins=[0,options.spacing/2,0,options.spacing/2],			// Margins
+	   	 	svg.attr("transform","translate("+margins[3]+","+margins[0]+")"); // Move into margin area
+	   	 	var tree=d3.layout.tree()									// Create tree layout
+		   		.size([h,w]);											// Set size
+			var diagonal=d3.svg.diagonal()								// Create link lines
+		    	.projection(function(d) { return [d.y, d.x]; });		// Set projection with x/y crossed
+  			nodes=tree.nodes(dataSet).reverse();						// Compute the new tree layout.
+			nodes.forEach(function(d) { d.y=d.depth*options.spacing; });// Normalize for fixed-depth.
+			
+			var node=svg.selectAll("g")									// Update the nodes
+		      .data(nodes,function(d) { return d.id || (d.id=++id); });	// Get data
 	
 		var nodeEnter=node.enter().append("g")	  						// Enter any new nodes at the parent's previous position.
-			.attr("class","node")										// Set style
-			.attr("transform", function(d) { return "translate("+root.y0+","+root.x0+")"; }) // Position
-			.on("click", function(d) { toggle(d); update(d); });		// Add click handler
+			.attr("transform", function(d) { 							// Initial position
+				if (d.parent)											// If not dataSet
+					return  "translate("+d.parent.y+","+d.parent.x+")"; // Position to parent dot
+				else													// If dataSet
+					return  "translate("+dataSet.y0+","+dataSet.x0+")"; // Position to dataSet
+				})
+			.on("click", function(d) { toggle(d); redraw(d); });		// Add click handler
 	
 		nodeEnter.append("circle")										// Add circle
 			.attr("r",1e-6)												// Set size
+			.style("stroke","#999")										// Edge
+			.style("cursor", function(d) { return d._children ? "pointer" : "auto"; })	// Set cursor based on children
 			.style("fill", function(d) { return d._children ? "#"+options.nCol : "#fff"; });	// Set color based on children
 	
 		nodeEnter.append("text")										// Add label
+			.style("font-family","sans-serif")							// San serif
 			.attr("x", function(d) { return d.children || d._children ? -10 : 10; })	// Position based on children
 			.attr("dy",".3em")
 			.attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; }) // Set anchor based on children
@@ -115,7 +120,7 @@
 	
 		var nodeExit=node.exit().transition()	  						// Transition exiting nodes to the parent's new position.
 			.duration(options.trans)									// Set time
-			.attr("transform", function(d) { return "translate("+root.y+","+root.x+")"; })	// Move to 1st dot
+			.attr("transform", function(d) { return "translate("+d.parent.y+","+d.parent.x+")"; })	// Move to 1st dot
 			.remove();													// Remove
 	
 		nodeExit.select("circle")										// On circle exit
@@ -124,26 +129,25 @@
 		nodeExit.select("text")											// On text exit
 	      .style("fill-opacity",1e-6);									// Make really transparent
 	
-		var link=vis.selectAll("path.link")	  							// Update the links…
+		var link=svg.selectAll("path")	  								// Update the links
 			.data(tree.links(nodes), function(d) { return d.target.id; });	// Set data
 	
-		link.enter().insert("path", "g")	  							// Enter any new links at the parent's previous position
-			.attr("class","link")										// Set class
+		link.enter().insert("path","g")	  								// Enter any new links at the parent's previous position
+			.style("fill","none")										// No fule
 			.style("stroke",options.eCol)								// Color
 			.style("stroke-width",options.eWid)							// Width
 			.attr("d", function(d) {									// Set path data
-				var o={ x:root.x0,y:root.y0 };							// Root dot											
+				var o={ x:d.source.x,y:d.source.y };					// dataSet dot											
 		        return diagonal({source:o, target:o});					// Create diagonal
 				})
-	   
 		link.transition()	  											// Transition links to their new position
 			.duration(options.trans)									// Set time
 			.attr("d", diagonal);
 	
-	  link.exit().transition()	  										// Transition exiting nodes to the parent's new position
+	 	link.exit().transition()	  									// Transition exiting nodes to the parent's new position
 			.duration(options.trans)									// Set time
 			.attr("d", function(d) {									// Set path data
-	       		var o={ x:root.x, y:root.y };							// Set dot
+	       		var o={ x:d.source.x, y:d.source.y };					// Set dot
 	       	 	return diagonal({source:o, target:o});					// Set diagonal
 	     		})
 			.remove();
@@ -164,6 +168,8 @@
 				d._children=null;										// Clear saved children
 			  	}
 		}
+
+	function trace(msg) { console.log(msg) };
 
     </script>
   </body>

@@ -11,7 +11,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	var h=options.height;												// Height
 	var svg=null,nodes=null,edges=null,labels=null;						// Pointers to d3 data
 	var dataSet=null;													// Holds data
-	var d3Scale=1;														// Scale
+	var d3Zoom;															// Scale/zoom
 	var margins=[0,0,0,0];												// Default margins
 	var firstTime=true;
 		
@@ -31,23 +31,21 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 
 	function zoomed() {													// ZOOM HANDLER
  		var t;
- 		d3Scale=d3.event.scale;											// Set current scale
+ 		var scale=d3.event.scale;										// Set current scale
  		var tp=[margins[0]-0,margins[3]-0];								// Move to margins
  		if (options.chartType == "Tree")								// Tree is x/y flopped
  			t=tp[0],tp[0]=tp[1],tp[1]=t;								// Flop coords
-		var tx=Math.min(Math.max(d3.event.translate[0]-0,-w*d3Scale),w*d3Scale);		// Xpos
-		var ty=Math.min(Math.max(d3.event.translate[1]-0,-h*d3Scale),h*d3Scale);		// Y
-		if ((d3Scale != 1) || (options.chartType != "Network"))			// If zoomed
- 			tp[0]+=tx,tp[1]+=ty;										// Add translation
- 		svg.attr("transform","translate("+tp+") scale("+d3Scale+")");	// Do it
+			if (!d3.event.sourceEvent.shiftKey)							// Don't move with shift key down (to allow node dragging)
+			tp[0]+=d3.event.translate[0],tp[1]+=d3.event.translate[1]	// Set translation
+ 		svg.attr("transform","translate("+tp+") scale("+scale+")");		// Do it
 		} 	
-	
+
 	svg=d3.select(con)													// Add SVG to container div
 		.append("svg")													// Add SVG shell
 		.attr("width",w-margins[0]-margins[2]).attr("height",h-margins[1]-margins[3])	// Set size
+		.call(d3Zoom=d3.behavior.zoom().scaleExtent([.1,10]).on("zoom",zoomed)) // Set zoom
 		.append("g")													// Needed for pan/zoom	
-		.call(d3.behavior.zoom().scaleExtent([1,10]).center([w/2,h/2]).on("zoom",zoomed)) // Set zoom
-	 		
+		
 	svg.append("rect")													// Pan and zoom rect
 		.style({"fill":"none","pointer-events":"all"})					// Invisble
     	.attr("id","underLayer")										// Set id
@@ -332,11 +330,16 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		// TREE /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
 		
 		else if (options.chartType == "Tree") {							// Force directed
-		 	margins=[20,options.spacing/2,20,options.spacing/2],			// Margins
-	   	 	svg.attr("transform","translate("+margins[3]+","+margins[0]+")"); // Move into margin area
+	
+		 	margins=[20,20,20,options.spacing/2];			// Margins
+	   	 	if (firstTime)
+		   	 	svg.attr("transform","translate("+margins[3]+","+margins[0]+")"); // Move into margin area
+	   	 	
 	   	 	var tree=d3.layout.tree()									// Create tree layout
+ //				.nodeSize([options.lSize*1.25,options.spacing])			// Set size based on label
 		   		.size([h,w]);											// Set size
-			var diagonal=d3.svg.diagonal()								// Create link lines
+ 			
+ 			var diagonal=d3.svg.diagonal()								// Create link lines
 		    	.projection(function(d) { return [d.y, d.x]; });		// Set projection with x/y crossed
   			nodes=tree.nodes(dataSet).reverse();						// Compute the new tree layout.
 			nodes.forEach(function(d) { d.y=d.depth*options.spacing; });// Normalize for fixed-depth.
@@ -429,7 +432,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					d.children=d._children;								// Restore old children
 					d._children=null;									// Clear saved children
 				  	}
-			}															// End tree
+				}															// End tree
 		firstTime=false;												// Not firs time thru
 		}																// End update
 	shivaLib.SendReadyMessage(true);									// Send ready msg to drupal manager

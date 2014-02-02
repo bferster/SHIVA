@@ -1722,12 +1722,12 @@ redraw();});else if(dataSet)
 redraw();}
 else if(options.chartType=="Tree"){if(options.dataSourceUrl){this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data){var items=new Array();for(i=0;i<data.length;++i){if(!data[i][0])
 continue;if(!data[i][0].match(/node/i))
-continue;o={};o.name=data[i][2];o.parent=data[i][1];if(o.parent=="null")o.parent=null
-if(data[i][3])
+continue;o={};o.name=data[i][2];o.parent=data[i][1];if(data[i][3])
 o.info=data[i][4];items.push(o);}
-dataSet=[];var dataMap=items.reduce(function(map,node){map[node.name]=node;return map;},{});items.forEach(function(node){if(dataMap[node.parent]){(parent.children||(parent.children=[])).push(node);}
+dataSet=[];var dataMap=items.reduce(function(map,node){map[node.name]=node;return map;},{});items.forEach(function(node){var parent=dataMap[node.parent];if(parent){(parent.children||(parent.children=[])).push(node);}
 else
-dataSet.push(node);});dataSet=dataSet[0];dataSet.x0=h/2;dataSet.y0=0;dataSet.children.forEach(function(d){setOpen(d,0)});function setOpen(d,depth){++depth;if(d.children){d.children.forEach(function(d){setOpen(d,depth)});if((d.children)&&(depth>(options.depth-1))){d._children=d.children;d.children=null;}}}
+dataSet.push(node);});dataSet=dataSet[0];dataSet.x0=h/2;dataSet.y0=0;if(options.depth>0)
+dataSet.children.forEach(function(d){setOpen(d,0)});function setOpen(d,depth){++depth;if(d.children){d.children.forEach(function(d){setOpen(d,depth)});if((d.children)&&(depth>(options.depth-1))){d._children=d.children;d.children=null;}}}
 redraw();});}}
 function redraw(what){if(options.chartType=="Network"){force=d3.layout.force().nodes(dataSet.nodes).links(dataSet.edges).size([w,h]).linkDistance([options.linkDist]).charge([options.linkCharge]).gravity([options.linkGravity/100]).linkStrength(Math.min([options.linkStrength/100],1)).start();edges=svg.selectAll("line").data(dataSet.edges);edges.enter().append("line").style("stroke",function(d,i){if(d.style&&styles[d.style]&&styles[d.style].eCol)
 return styles[d.style].eCol;else

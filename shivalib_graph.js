@@ -132,35 +132,35 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				o={};													// New object
 				o.name=data[i][2];										// Add name
 				o.parent=data[i][1];									// Add parent
-				if (o.parent == "null") o.parent=null
-				
 				if (data[i][3])											// If an info set
 					o.info=data[i][4];									// Add info
 				items.push(o);											// Add to array
 				}
- 
- 		dataSet=[];														// Init as array first
+
+		dataSet=[];														// Init as array first
+
 		var dataMap=items.reduce(function(map, node) {					// Create datamap					
 			map[node.name]=node;
 			return map;
 			},{});
  
-
-		items.forEach(function(node) {									// For each node	
-			if (dataMap[node.parent]) {									// If a parent exists
-				(parent.children || (parent.children = []))				// Create a child
-					.push(node);										// Add node
+ 		items.forEach(function(node) {									// For each item	
+			var parent=dataMap[node.parent];							// Make map
+			if (parent) {												// If a parent
+				(parent.children || (parent.children = []))				// If an array present
+					.push(node);										// Add to it
 				} 
-			else														// A sibling
-				dataSet.push(node);										// Add node
+			else														// No parent
+				dataSet.push(node);										// Add node to root
 			});
 		 		
-		dataSet=dataSet[0];
+		dataSet=dataSet[0];												// Save as object
 		dataSet.x0=h/2;													// Center x
 		dataSet.y0=0;													// At top
-		dataSet.children.forEach( function (d){ setOpen(d,0) }); 		// Initialize the display to show only certain levels
+		if (options.depth > 0)											// If limiting
+			dataSet.children.forEach( function (d){ setOpen(d,0) }); 	// Initialize the display to show only certain levels
 
-		function setOpen(d, depth) {									// SET OPEN NODES
+		function setOpen(d, depth) {								// SET OPEN NODES
 			++depth;													// Add to depth
 			if (d.children) {											// If node has children									
 				d.children.forEach(function (d){ setOpen(d,depth) });	// Toggle all children

@@ -122,7 +122,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		else if (dataSet)												// If data
 			redraw();													// Draw graph
 		}
-	else if (options.chartType == "Tree") {								// Tree
+	else if ((options.chartType == "Tree") || (options.chartType == "Bubble")) {	// Tree like data
 		if (options.dataSourceUrl) {									// If a spreadsheet spec'd
   			this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
 			var items=new Array();										// Holds items
@@ -135,6 +135,10 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				o.name=data[i][2];										// Add name
 				o.parent=data[i][1];									// Add parent
 				if (data[i][3])											// If an info set
+					o.val=data[i][3];									// Add val
+				else													// If nothing there
+					o.val=1;											// Put 1 in
+				if (data[i][4])											// If an info set
 					o.info=data[i][4];									// Add info
 				items.push(o);											// Add to array
 				}
@@ -155,7 +159,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			else														// No parent
 				dataSet.push(node);										// Add node to root
 			});
-		 		
+			
 		dataSet=dataSet[0];												// Save as object
 		dataSet.x0=h/2;													// Center x
 		dataSet.y0=0;													// At top
@@ -172,7 +176,6 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			  		} 
 				}
 			}
-		
 		redraw();														// Draw
 		});
 		}
@@ -183,6 +186,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		// NETWORK /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
 
 		if (options.chartType == "Network") {							// Force directed
+			
 			force=d3.layout.force()									// CREATE LAYOUT
 				 .nodes(dataSet.nodes)									// Set nodes
 				 .links(dataSet.edges)									// Set links
@@ -324,7 +328,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		
 		// TREE /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
 		
-		else if (options.chartType == "Tree") {							// Force directed
+		else if (options.chartType == "Tree") {							// Tree
 	
 		 	margins=[20,20,20,options.spacing/2];						// Margins
 	   	 	if (firstTime)
@@ -426,11 +430,101 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					d.children=d._children;								// Restore old children
 					d._children=null;									// Clear saved children
 				  	}
-				}														// End tree
-		firstTime=false;												// Not firs time thru
+				}
+			}															// End Tree
+
+		// BUBBLE /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+		
+		else if (options.chartType == "Bubble") {						// Bubble graph
+  		    colors=d3.scale.category20c();								// Set colors
+			var dia=Math.min(options.height,options.width)-8;			// Diameter
+		  	if (options.style == "Packed") {							// If packed
+				var pack=d3.layout.pack()								// Create layout
+				    .size([dia,dia])									// Set size
+				    .value(function(d) { return d.val ? d.val : 1 });	// Set value to use
+
+				node=svg.datum(dataSet).selectAll(".node")				// Add nodes
+				    .data(pack.nodes)									// Set data
+				    .enter()											// Add
+				    .append("g")										// Add element
+	 		     	.attr("transform", function(d) { return "translate("+d.x+","+d.y+")"; });	// Position
+				
+				node.append("title").text(function(d) { 				// Set tool tip
+	     			var str=d.name;										// Add name
+	     			if (!d.children && d.val)							// If children and a value
+	     				str+=": "+d.val;								// Show it
+	     			return str });
+				
+				node.append("circle")									// Add circle
+			      	.attr("r", function(d) {  return d.r; })			// Set diameter
+				    .style("stroke","#"+options.gCol)					// Edge
+	     			.style("fill", function(d) { return  d.children ? "#"+options.gCol : "#"+options.nCol; })
+	 	  			.style("fill-opacity", function(d) { return  d.children ? .25 : 1})
+					
+				node.filter(function(d) { return !d.children; })		// Filter
+					.append("text")
+			      	.attr("dy",".3em")									// Shift
+					.attr("font-family","sans-serif")					// Sans
+					.attr("text-anchor", "middle")						// Centered
+					.attr("font-size",options.lSize+"px")				// Size
+					.attr("fill","#"+options.lCol)						// Color
+			      	.style("text-anchor","middle")						// Center
+			      	.style(unselectable)								// Unselectable
+			      	.text(function(d) { return d.name.substring(0,d.r/3); });	// Set text
+					}
+		  	else{														// Not packed
+				var bubble=d3.layout.pack()								// Create layout
+					.size([dia,dia])									// Set size
+		    		.padding(options.padding);							// Padding
+			  	
+				if (options.style != "Spiral")							// If not a spiral
+			  		bubble.sort(null)									// Don't sort
+			  	
+			  	var node=svg.selectAll("node")							// Select the nodes
+					.data(bubble.nodes(classes(dataSet))				// Set data							
+					.filter(function(d) { return !d.children; }))		// Filter by children
+			   
+			    node.enter().append("g")								// Add node
+			      .attr("transform",function(d) { return "translate("+d.x+","+d.y+")"; });	// Position
+			  	
+			  	node.append("title")									// Set tool tip
+			      .text(function(d) { return d.className + ": " + d.value; });	// Value
+				
+				node.append("circle")									// Add circle
+			      	.attr("r", function(d) { return d.r; })				// Set diameter
+			      	.style("fill", function(d) { return colors(d.packageName); });	// Set color
+		
+		 		node.append("text")										// Add text
+			      	.attr("dy",".3em")									// Shift
+					.attr("font-family","sans-serif")					// Sans
+					.attr("text-anchor", "middle")						// Centered
+					.attr("font-size",options.lSize+"px")				// Size
+					.attr("fill","#"+options.lCol)						// Color
+			      	.style("text-anchor","middle")						// Center
+			      	.style(unselectable)								// Unselectable
+			      	.text(function(d) { return d.className.substring(0,d.r/3); });
+	
+				function classes(root) {								// Returns a flattened hierarchy 
+					var classes=[];
+					
+					function recurse(name, node) {
+				    	if (node.children) node.children.forEach(function(child) { recurse(node.name, child); });
+				    	else classes.push({packageName: name, className: node.name, value: node.val});
+				  		}
+				  	
+				  	recurse(null, root);
+				  	return {children: classes};
+					}
+					
+			d3.select(self.frameElement).style("height",dia+"px");
+			}															// End bubble
+		
+		firstTime=false;												// Not first time thru
 		}																// End update
 	shivaLib.SendReadyMessage(true);									// Send ready msg to drupal manager
 }
+
+
 
 
 /////////////////////////////////

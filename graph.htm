@@ -29,9 +29,8 @@
  		<p><select id="chartType" onchange="ChangeChart(this.value)">
 			<option>Network</option>
 			<option>Tree</option>
-			<option>Chord</option>
-			<option>Radial</option>
 			<option>Bubble</option>
+			<option>Chord</option>
 		</select></p>
     <table id="propertyTable" class="propTable">
 		<tr style="height:8px"><td> </td></tr>
@@ -82,6 +81,19 @@
 				nCol:						{	def:'b0c4de', 		opt:'color',		 	des:'Node color'},
 				eWid:						{	def:'1.5', 			opt:'number',		 	des:'Link line width'},
 				eCol: 						{	def:'dddddd', 		opt:'color',		 	des:'Link color'},
+				lSize: 						{	def:'12', 			opt:'number',		 	des:'Font size'},
+				lCol: 						{	def:'000000', 		opt:'color',		 	des:'Font color'},
+				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
+				},
+		Bubble: {
+				dataSourceUrl: 				{	def:'https://docs.google.com/spreadsheet/pub?key=0AohdE1_3ZElJdERqTXJTbnJGUzdMamtzVUV1d0NFalE&output=html', 			opt:'string',		 	des:'Data source URL'}, 
+				height: 					{	def:'600', 			opt:'number',			des:'Height'},
+				width: 						{	def:'800', 			opt:'number',			des:'Width'}, 
+				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
+				style: 						{	def:'Grouped', 		opt:'Grouped|Spiral|Packed',	des:'Style of graph'}, 
+				padding: 					{	def:'2', 			opt:'number',		 	des:'Bubble spacing'},
+				gCol:						{	def:'1f77b4', 		opt:'color',		 	des:'Group color'},
+				nCol:						{	def:'ff9333', 		opt:'color',		 	des:'Node color'},
 				lSize: 						{	def:'12', 			opt:'number',		 	des:'Font size'},
 				lCol: 						{	def:'000000', 		opt:'color',		 	des:'Font color'},
 				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 

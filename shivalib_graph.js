@@ -19,6 +19,9 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		   			  "-webkit-user-select":"none","-ms-user-select":"none",
 		   			  "user-select":"none","pointer-events":"none" }
 	
+	if (!$("d3Popup").length)											// If not popup div yet
+		$("body").append("<div id='d3Popup' class='rounded-corners' style='display:none;position:absolute;border:1px solid #999;background-color:#eee;padding:8px'></div>");
+	
 	var styles=new Object();											// Styles
 
 	if (options.backCol == "none")										// If  transparent
@@ -49,7 +52,8 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	svg.append("rect")													// Pan and zoom rect
 		.style({"fill":"none","pointer-events":"all"})					// Invisble
     	.attr("id","underLayer")										// Set id
-    	.attr("width",w).attr("height",h);								// Set size
+    	.attr("width",w).attr("height",h)								// Set size
+    	.on("click",function(){ $("#d3Popup").hide(); });				// Hide any open popups				
 
 	if (options.chartType == "Network") {								// Force directed
 		if (options.dataSourceUrl) 										// If a spreadsheet spec'd
@@ -172,26 +176,6 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		redraw();														// Draw
 		});
 		}
-/*		d3.json("flare.json", function(json) {
-		dataSet=json;													// Set data dataSet
-		dataSet.x0=h/2;													// Center x
-		dataSet.y0=0;													// At top
-		dataSet.children.forEach( function (d){ setOpen(d,0) }); 		// Initialize the display to show only certain levels
-
-		function setOpen(d, depth) {								// SET OPEN NODES
-			++depth;													// Add to depth
-			if (d.children) {											// If node has children									
-				d.children.forEach(function (d){ setOpen(d,depth) });	// Toggle all children
-				if ((d.children) && (depth > (options.depth-1))) {		// If it has children and over depth
-					d._children=d.children;								// Save old children
-					d.children=null;									// Clear current children to close it
-			  		} 
-				}
-			}
-		
-		redraw();														// Draw
-		});
-*/
 	}
 	
 	function redraw(what) {												// DRAW
@@ -291,9 +275,19 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					if (d.style && styles[d.style] && styles[d.style].alpha)	// If a style spec'd
 						return styles[d.style].alpha;					// Get alpha from options
 					})									
+				.on("click",AddPopup)									// Click on node
 				.call(force.drag);
 			nodes.append("title")									// CREATE EDGE TOOLTIPS
-		      	.text(function(d) { return d.info; });					// Set label
+		      	.text(function(d) { 
+					var str=d.info;										// Copy info
+					if (d.info.match(/http/)) {							// If an embedded url
+						var v=(str+" ").match(/http.?:\/\/.*?\s/ig);	// Extract url(s)
+						for (var i=0;i<v.length;++i) {					// For each url
+							v[i]=v[i].trim();							// Trim it
+							str=str.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&")),"");	// Remove link
+							}
+						}
+		      		return str; });										// Set label
 			nodes.exit().remove();										// Exit function							
 					  
 			labels=svg.selectAll("text")							// CREATE LABELS
@@ -325,19 +319,19 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			
 				nodes.attr("transform",function(d) { return "translate("+d.x+" "+d.y+")" }); // Move nodes
 				});
+			
 			}
 		
 		// TREE /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
 		
 		else if (options.chartType == "Tree") {							// Force directed
 	
-		 	margins=[20,20,20,options.spacing/2];			// Margins
+		 	margins=[20,20,20,options.spacing/2];						// Margins
 	   	 	if (firstTime)
 		   	 	svg.attr("transform","translate("+margins[3]+","+margins[0]+")"); // Move into margin area
 	   	 	
 	   	 	var tree=d3.layout.tree()									// Create tree layout
- //				.nodeSize([options.lSize*1.25,options.spacing])			// Set size based on label
-		   		.size([h,w]);											// Set size
+ 		   		.size([h,w]);											// Set size
  			
  			var diagonal=d3.svg.diagonal()								// Create link lines
 		    	.projection(function(d) { return [d.y, d.x]; });		// Set projection with x/y crossed
@@ -432,7 +426,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					d.children=d._children;								// Restore old children
 					d._children=null;									// Clear saved children
 				  	}
-				}															// End tree
+				}														// End tree
 		firstTime=false;												// Not firs time thru
 		}																// End update
 	shivaLib.SendReadyMessage(true);									// Send ready msg to drupal manager
@@ -442,6 +436,15 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 /////////////////////////////////
 // HELPER FUNCTIONS
 /////////////////////////////////
+
+function AddPopup(d)												// SHOW A POPUP
+{
+	var x=d3.event.clientX+8;											// Set xPos
+	var y=d3.event.clientY+8;											// Y
+	$("#d3Popup").css({left:x,top:y});									// Position
+	$("#d3Popup").html(shivaLib.LinkToAnchor(d.info));					// Add text										
+	$("#d3Popup").show();												// Show it
+	}
 
 function DrawSVGShape(shape, size)									// DRAW A SHAPE
 {

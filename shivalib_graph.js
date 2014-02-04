@@ -38,10 +38,15 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
  		var tp=[margins[0]-0,margins[3]-0];								// Move to margins
  		if (options.chartType == "Tree")								// Tree is x/y flopped
  			t=tp[0],tp[0]=tp[1],tp[1]=t;								// Flop coords
-			if (!d3.event.sourceEvent.shiftKey)							// Don't move with shift key down (to allow node dragging)
+		if (!d3.event.sourceEvent.shiftKey)								// Don't move with shift key down (to allow node dragging)
 			tp[0]+=d3.event.translate[0],tp[1]+=d3.event.translate[1]	// Set translation
  		svg.attr("transform","translate("+tp+") scale("+scale+")");		// Do it
-		} 	
+ 		if (options.chartType == "Bubble")								// Bubble needs text control
+		 	if (options.style == "Packed")
+			 	svg.selectAll("text")									// Add text
+					.attr("font-size",options.lSize/scale+"px")			// Size
+					   .text(function(d) { return d.name.substring(0,d.r/3*scale); });	// Set text
+			} 	
 
 	svg=d3.select(con)													// Add SVG to container div
 		.append("svg")													// Add SVG shell

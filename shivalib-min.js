@@ -1696,7 +1696,9 @@ $(con).css("background-color","transparent");else
 $(con).css("background-color","#"+options.backCol);$(con).width(options.width);$(con).height(options.height);$(con).html("");var colors=d3.scale.category10();function zoomed(){var t;var scale=d3.event.scale;var tp=[margins[0]-0,margins[3]-0];if(options.chartType=="Tree")
 t=tp[0],tp[0]=tp[1],tp[1]=t;if(!d3.event.sourceEvent.shiftKey)
 tp[0]+=d3.event.translate[0],tp[1]+=d3.event.translate[1]
-svg.attr("transform","translate("+tp+") scale("+scale+")");}
+svg.attr("transform","translate("+tp+") scale("+scale+")");if(options.chartType=="Bubble")
+if(options.style=="Packed")
+svg.selectAll("text").attr("font-size",options.lSize/scale+"px").text(function(d){return d.name.substring(0,d.r/3*scale);});}
 svg=d3.select(con).append("svg").attr("width",w-margins[0]-margins[2]).attr("height",h-margins[1]-margins[3]).call(d3Zoom=d3.behavior.zoom().scaleExtent([.1,10]).on("zoom",zoomed)).append("g")
 svg.append("rect").style({"fill":"none","pointer-events":"all"}).attr("id","underLayer").attr("width",w).attr("height",h).on("click",function(){$("#d3Popup").hide();});if(options.chartType=="Network"){if(options.dataSourceUrl)
 this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data){var ids=new Object();dataSet={nodes:[],edges:[]};styles={};for(i=0;i<data.length;++i){if(!data[i][0])

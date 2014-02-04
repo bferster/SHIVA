@@ -464,7 +464,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			      	.attr("r", function(d) {  return d.r; })			// Set diameter
 				    .style("stroke","#"+options.gCol)					// Edge
 	     			.style("fill", function(d) { return  d.children ? "#"+options.gCol : "#"+options.nCol; })
-	 	  			.style("fill-opacity", function(d) { return  d.children ? .25 : 1})
+	 	  			.style("fill-opacity", function(d) { return  d.children ? .15 : 1})
 					
 				node.filter(function(d) { return !d.children; })		// Filter
 					.append("text")

@@ -210,7 +210,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					if (d.style && styles[d.style] && styles[d.style].eCol)	// If a style spec'd
 						return styles[d.style].eCol;					// Get col from data
 					else												// Default
-						return options.eCol;							// Set wid
+						return "#"+options.eCol;						// Set wid
 						})									
 				.style("stroke-width", function(d, i) {					// Edge width
 					if (d.style && styles[d.style] && styles[d.style].eWid)	// If a style spec'd
@@ -269,7 +269,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 						if (options.nCol == "none")						// If no color set														
 							return colors(i); 							// Set color from auto colors
 						else											// A color set
-							return options.nCol;						// Set color
+							return "#"+options.nCol;					// Set color
 						}
 					})									
 				.style("stroke", function(d, i) {						// Edge col
@@ -403,7 +403,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		
 			link.enter().insert("path","g")	  							// Enter any new links at the parent's previous position
 				.style("fill","none")									// No fule
-				.style("stroke",options.eCol)							// Color
+				.style("stroke","#"+options.eCol)						// Color
 				.style("stroke-width",options.eWid)						// Width
 				.attr("d", function(d) {								// Set path data
 					var o={ x:d.source.x,y:d.source.y };				// dataSet dot											
@@ -478,6 +478,19 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			      	.text(function(d) { return d.name.substring(0,d.r/3); });	// Set text
 					}
 		  	else{														// Not packed
+	
+				function classes(root) {								// Returns a flattened hierarchy 
+					var classes=[];
+					
+					function recurse(name, node) {
+				    	if (node.children) node.children.forEach(function(child) { recurse(node.name, child); });
+				    	else classes.push({packageName: name, className: node.name, value: node.val});
+				  		}
+				  	
+				  	recurse(null, root);
+				  	return {children: classes};
+					}
+	
 				var bubble=d3.layout.pack()								// Create layout
 					.size([dia,dia])									// Set size
 		    		.padding(options.padding);							// Padding
@@ -508,19 +521,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			      	.style("text-anchor","middle")						// Center
 			      	.style(unselectable)								// Unselectable
 			      	.text(function(d) { return d.className.substring(0,d.r/3); });
-	
-				function classes(root) {								// Returns a flattened hierarchy 
-					var classes=[];
-					
-					function recurse(name, node) {
-				    	if (node.children) node.children.forEach(function(child) { recurse(node.name, child); });
-				    	else classes.push({packageName: name, className: node.name, value: node.val});
-				  		}
-				  	
-				  	recurse(null, root);
-				  	return {children: classes};
-					}
-					
+						
 			d3.select(self.frameElement).style("height",dia+"px");
 			}															// End bubble
 		

@@ -2,125 +2,575 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
-		<title>D3 Testbed</title>
+		<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 		<script type="text/javascript" src="d3.v3.min.js"></script>
+		<title>D3 Testbed</title>
 		<style type="text/css">
-
- </style>
+		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+		 </style>
   </head>
   <body>
-    <div id="body">
-      <div id="footer">
-     </div>
+ 	<div id="containerDiv" style="position:absolute;top:10px;width:300px;height:700px;left:700px;border:1px solid #666;background-color:#eee">
+	 	<div id="selectDiv" style="position:absolute;top:118px;width:300px;height:582px;left:0px;background-color:#eee"></div>
+ 		<div id="overDiv" class="rounded-corners" style="position:absolute;top:8px;width:284px;height:100px;left:8px;border:1px solid;background-color:#fff"></div>
+   </div>
     <script type="text/javascript">
 
-	var options={}
-	options.lSize=12;
-	options.lCol="000";
-	options.width=800;
-	options.height=600;
-	options.trans=1000;
-	options.padding=2;
-	options.style="Grou[p";
-	options.gCol="1f77b4";
-	options.nCol="ff9333";
-	
-	var dataSet=null;
-	firstTime=true;	
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// SETUP
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	var options={}
+	options.lSize=13;
+	options.lCol="000";
+	options.trans=250;
+	options.nCol="b0c4de";
+	options.depth=0;
+	
 	var unselectable={"-moz-user-select":"none","-khtml-user-select":"none",	
 		   			  "-webkit-user-select":"none","-ms-user-select":"none",
 		   			  "user-select":"none","pointer-events":"none" }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	var w=$("#selectDiv").width();										// Width
+    var h=$("#selectDiv").height();										// Height
+	var dataSet=[];														// Holds data
+	var firstTime=true;													// If first time
+	var id=0;															// Id counter
+	var d3Zoom;															// D3 zoom obj
+	var maxDepth=0;
+	var overTree,selectTree	
 
-    colors = d3.scale.category10();
-	var svg=d3.select("body").append("svg")
-	    .attr("width",options.width)
-	    .attr("height",options.height)
+	function zoomed(d) {												// ZOOM HANDLER
+ 		var tp=d3.event.translate;										// Translation
+ 		var scale=d3.event.scale;										// Scale
+  		svgSelect.attr("transform","translate("+tp+") scale("+scale+")");	// Do it
+ 		} 	
 
-	d3.json("flare.json", function(d) { dataSet=d; redraw() });
-
-	function redraw() {												// DRAW
-		
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	function zoom(d, i) {
-  var k = r / d.r / 2;
-  x.domain([d.x - d.r, d.x + d.r]);
-  y.domain([d.y - d.r, d.y + d.r]);
-
-  var t = vis.transition()
-      .duration(d3.event.altKey ? 7500 : 750);
-
-  t.selectAll("circle")
-      .attr("cx", function(d) { return x(d.x); })
-      .attr("cy", function(d) { return y(d.y); })
-      .attr("r", function(d) { return k * d.r; });
-
-  t.selectAll("text")
-      .attr("x", function(d) { return x(d.x); })
-      .attr("y", function(d) { return y(d.y); })
-      .style("opacity", function(d) { return k * d.r > 20 ? 1 : 0; });
-
-  node = d;
-  d3.event.stopPropagation();
-}
-		
-				var dia=Math.min(options.height,options.width)-8;			// Diameter
-				var bubble=d3.layout.pack()								// Create layout
-					.size([dia,dia])									// Set size
-		    		.padding(options.padding);							// Padding
-			  	
-				if (options.style != "Spiral")							// If not a spiral
-			  		bubble.sort(null)									// Don't sort
-			  	
-			  	var node=svg.selectAll("node")							// Select the nodes
-					.data(bubble.nodes(classes(dataSet))				// Set data							
-					.filter(function(d) { return !d.children; }))		// Filter by children
-			   
-			    node.enter().append("g")								// Add node
-			      .attr("transform",function(d) { return "translate("+d.x+","+d.y+")"; });	// Position
-			  	
-			  	node.append("title")									// Set tool tip
-			      .text(function(d) { return d.className + ": " + d.value; });	// Value
-				
-				node.append("circle")									// Add circle
-			      	.attr("r", function(d) { return d.r; })				// Set diameter
-			      	.style("fill", function(d) { return colors(d.packageName); })	// Set color
-      .on("click", function(d) { return zoom(node == d ? root : d); });
-		
-		 		node.append("text")										// Add text
-			      	.attr("dy",".3em")									// Shift
-					.attr("font-family","sans-serif")					// Sans
-					.attr("text-anchor", "middle")						// Centered
-					.attr("font-size",options.lSize+"px")				// Size
-					.attr("fill","#"+options.lCol)						// Color
-			      	.style("text-anchor","middle")						// Center
-			      	.style(unselectable)								// Unselectable
-			      	.text(function(d) { return d.className.substring(0,d.r/3); });
+	var svgOver=d3.select("#overDiv")									// Add SVG 
+		.append("svg")													// Add SVG shell
+		.attr("width",$("#overDiv").width()).attr("height",$("#overDiv").height())	// Set size
+//		.on("click", function () { svgSelect.attr("transform","translate(108,"+(-1000)+")"); })	// Move into margin area
+ 		.style("cursor","pointer")										// Set cursor to pointer
+		.append("g")													// Add group	
 	
-				function classes(root) {								// Returns a flattened hierarchy 
-					var classes=[];
+ 	var svgSelect=d3.select("#selectDiv")								// Add SVG
+		.append("svg")													// Add SVG shell
+		.attr("width",w-16).attr("height",h-8)							// Set size
+		.call(d3Zoom=d3.behavior.zoom().scaleExtent([.1,1]).on("zoom",zoomed)) // Set zoom
+		.append("g")													// Needed for pan/zoom	
+			
+	svgSelect.append("rect")											// Pan and zoom rect
+		.style({"fill":"none","pointer-events":"all"})					// Invisble
+    	.attr("id","underLayer")										// Set id
+    	.attr("width",w).attr("height",h)								// Set size
+ 				
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DATA
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	var items=GetData();
+	
+	var dataMap=items.reduce(function(map, node) {						// Create datamap					
+			map[node.name]=node;
+			return map;
+			},{});
+ 
+	items.forEach(function(node) {										// For each item	
+		var parent=dataMap[node.parent];								// Make map
+		if (parent) {													// If a parent
+			(parent.children || (parent.children = []))					// If an array present
+				.push(node);											// Add to it
+			} 
+		else															// No parent
+			dataSet.push(node);											// Add node to root
+		});
+		
+	dataSet=dataSet[0];													// Save as object
+	dataSet.x0=h/2;														// Center x
+	dataSet.y0=0;														// At top
+	redraw(null,"select");												// Draw select	
+	redraw(null,"over");												// Draw overview	
+	firstTime=false;													// Been there
+ 	
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DRAW
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+		
+	function redraw(d, type) 											// DRAW
+   	 {
+   	 	var h,w,spacing,eWid,eCol;
+   	 	var container=svgSelect;
+	    format = d3.format(",d");
+		 	 	
+	 	if (firstTime)
+	   	 	container.attr("transform","translate(108,"+(-1000)+")"); 	// Move into margin area
+   	 	
+    	if (type == "over") {											// Overview
+   			container=svgOver;											// Point at svg
+	   		w=$("#overDiv").width()-16;									// Width
+    		h=$("#overDiv").height()-16;								// Height
+  			spacing=w/3;												// Between node spacing
+			eWid=.5;													// Line width  		
+ 			eCol="#b0c4de";												// Line color  		
+ 	   	 	container.attr("transform","translate("+[8,8]+")"); 		// Move into margin area
+	  		}
+    	else{															// Selection
+ 	   		w=$("#selectDiv").width();									// Width
+    		h=$("#selectDiv").height();									// Height
+ 			h=2500
+ 			spacing=w;													// Between node spacing
+			eWid=1.5;													// Line width  		
+ 			eCol="#ccc";												// Line color  		
+    		}
+    	 	
+   	 	var tree=d3.layout.tree()										// Create tree layout
+	   		.size([h,w]);												// Set size
+		
+	 	if (type == "over") 											// Overview
+	 		overTree=tree;												// Point at tree
+	 	else															// Selection
+	 		selectTree=tree;
+   		
+		var diagonal=d3.svg.diagonal()									// Create link lines
+	    	.projection(function(d) { return [d.y, d.x]; });			// Set projection with x/y crossed
+		nodes=tree.nodes(dataSet).reverse();							// Compute the new tree layout.
+		
+		nodes.forEach(function(d, i) { maxDepth=Math.max(maxDepth,d.depth); });  // Find max depth
+		nodes.forEach(function(d, i) { d.y=d.depth*spacing });			// Position
+		var node=container.selectAll("g")								// Update the nodes
+	      .data(nodes,function(d) { return d.id || (d.id=++id); });		// Get data
+	
+		var nodeEnter=node.enter().append("g")	  						// Enter any new nodes at the parent's previous position.
+			.attr("transform", function(d) { 							// Initial position
+				if (d.parent)											// If not dataSet
+					return  "translate("+d.parent.y+","+d.parent.x+")"; // Position to parent dot
+				else												// If dataSet
+					return  "translate("+dataSet.y0+","+dataSet.x0+")"; // Position to dataSet
+				})
+			.on("click", function(d) { toggle(d); redraw(d,container); });	// Add click handler
+		
+	  	if (type == "select") {											// Select mode
+	 		nodeEnter.append("circle")									// Add circle
+				.attr("r",1e-6)											// Set size
+				.style("stroke","#999")									// Edge
+		 		.style("cursor","pointer")								// Set cursor to pointer
+				.style("fill", function(d) { return d._children ? "#"+options.nCol : "#fff"; });	// Set color based on children
+		
+			nodeEnter.append("text")									// Add label
+				.style("font-family","sans-serif")						// San serif
+				.attr("dy",".3em")
+				.attr("text-anchor", function(d) { return d.children || d._children ? "start" : "start"; }) // Set anchor based on children
+				.text(function(d) {	var str=d.name;						// Copy name
+									var l=w/options.lSize*2;			// Max chars
+									if (str.length > l)	str=str.substring(0,l-3)+"..."; 	// Shorten?
+									return str;							// Set name
+									})									
+								.attr("x", function(d) { var dx=options.lSize/1.5; return d.children || d._children ? dx : dx; })	// Position based on children
+				.style("fill-opacity", 1e-6)							// Transparent to start
+				.style("fill",options.lCol)								// Color
+				.style("font-size",options.lSize)						// Size
+				.style(unselectable);									// Unselectable
 					
-					function recurse(name, node) {
-				    	if (node.children) node.children.forEach(function(child) { recurse(node.name, child); });
-				    	else classes.push({packageName: name, className: node.name, value: node.val});
-				  		}
-				  	
-				  	recurse(null, root);
-				  	return {children: classes};
-					}
-					
-			d3.select(self.frameElement).style("height",dia+"px");
+			var nodeUpdate=node.transition()	  						// Transition nodes to their new position
+				.duration(options.trans)								// Set time
+				.attr("transform", function(d) { return "translate("+d.y+","+d.x+")"; });	// Move
+		
+			nodeUpdate.select("circle")									// Update circle
+				.attr("r", function(d) { return options.lSize/2.5})	// Set size
+				.style("fill", function(d) { return !d._children ? "#"+options.nCol : "#fff"; });	// Set color based on children
+		
+			nodeUpdate.select("text")									// Update label
+				.style("fill-opacity",1);								// Full alpha
+		
+			var nodeExit=node.exit().transition()	  					// Transition exiting nodes to the parent's new position.
+				.duration(options.trans)								// Set time
+				.attr("transform", function(d) { return "translate("+d.parent.y+","+d.parent.x+")"; })	// Move to 1st dot
+				.remove();												// Remove
+		
+			nodeExit.select("circle")									// On circle exit
+				.attr("r",1e-6);										// Make really small
+		
+			nodeExit.select("text")										// On text exit
+		      .style("fill-opacity",1e-6);								// Make really transparent
+			
+			}
+
+		var link=container.selectAll("path")	  						// Update the links
+			.data(tree.links(nodes), function(d) { return d.target.id; });	// Set data
+	
+		link.enter().insert("path","g")	  								// Enter any new links at the parent's previous position
+			.style("fill","none")										// No fule
+			.style("stroke",eCol)										// Color
+			.style("stroke-width",eWid)									// Width
+			.attr("d", function(d) {									// Set path data
+				var o={ x:d.source.x,y:d.source.y };					// dataSet dot											
+		        return diagonal({source:o, target:o});					// Create diagonal
+				})		
+		if (type == "over")	{											// If overview										
+ 			link.on("mouseover",onOverview);							// Mouse over
+			link.on("mouseout", offOverview);							// Mouse out
+			} 			
+   
+  		link.transition()	  											// Transition links to their new position
+			.duration(options.trans)									// Set time
+			.attr("d", diagonal);
+	
+	 	link.exit().transition()	  									// Transition exiting nodes to the parent's new position
+			.duration(options.trans)									// Set time
+			.attr("d", function(d) {									// Set path data
+	       		var o={ x:d.source.x, y:d.source.y };					// Set dot
+	       	 	return diagonal({source:o, target:o});					// Set diagonal
+	     		})
+			.remove();
+	
+		nodes.forEach(function(d) {	  									// Stash the old positions for transition
+			d.x0=d.x;													// Save x
+			d.y0=d.y;													// Y
+			});
+		}																// End update
+
+	function toggle(d) {											// CLICK HANDLER
+		alert(d.url)
 	}
 	
+	function offOverview(d) {										// ON MOUSEOUT OVERVIEW
+		this.style.stroke="#"+options.nCol;								// Restore color
+		this.style["stroke-width"]=.5;									// Restore width
+	}
+
+	function onOverview(d) {										// ON MOUSEOVER OVERVIEW
+		if (d3.event.which)												// If button pushed
+			return;														// Quit
+		this.style.stroke="#ff0000";									// Highlight link				
+		this.style["stroke-width"]=3;									// Make thicker
+		var r=2500/($("#overDiv").height()-16);							// Ratio between overview and select heights
+		var yPos=(d3.event.offsetY-8)*-r;								// Extrapolate select from overview
+		var w=$("#selectDiv").width();									// Get width	
+		r=Math.ceil((d3.event.offsetX-8)/((w-16)/maxDepth));			// Depth		
+		var t=d3.event.translate=[-r*w+options.lSize,yPos];				// Make up new position
+		d3Zoom.translate(t);											// Set dragger pos
+		d3Zoom.scale(1);												// Set dragger pos
+		svgSelect.attr("transform","scale(1) translate("+t+")");		// Move it
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DATA SOURCE
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+function GetData() {
 	
-	
-	
-	
-	
+return [{"name":"Collections","val":"1677","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A5","parent":""},
+{"name":"Academic Lectures in Tibetan","val":"12","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A119","parent":"Collections"},
+{"name":"Buddhist Logic","val":"10","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A293","parent":"Academic Lectures in Tibetan"},
+{"name":"Academic Lectures on Tibet","val":"17","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A357","parent":"Collections"},
+{"name":"Presentations at “Three Decades and Eighteen PhDs: The Tibetan and Buddhist Studies Legacy of Jeffrey Hopkins at the University of Virginia”","val":"17","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A358","parent":"Academic Lectures on Tibet"},
+{"name":"Arts and Crafts in Tibet","val":"50","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A77","parent":"Collections"},
+{"name":"Modern Art","val":"18","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A368","parent":"Arts and Crafts in Tibet"},
+{"name":"Gendun Choephel Artists' Guild Interviews","val":"18","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A369","parent":"Modern Art"},
+{"name":"The Making of a Thangka in Lhasa","val":"18","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A78","parent":"Arts and Crafts in Tibet"},
+{"name":"Thangka Painting Techniques in Action","val":"10","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A101","parent":"The Making of a Thangka in Lhasa"},
+{"name":"The Social Process of Thangka Creation in Lhasa","val":"9","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A79","parent":"The Making of a Thangka in Lhasa"},
+{"name":"Tibetan Art History Lectures","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A131","parent":"Arts and Crafts in Tibet"},
+{"name":"Tibetan Wood and Stone Carving","val":"3","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A87","parent":"Arts and Crafts in Tibet"},
+{"name":"Tibetan Wood Furniture Making","val":"6","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A359","parent":"Arts and Crafts in Tibet"},
+{"name":"Body language-facial expressions-sign  language","val":"12","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A272","parent":"Collections"},
+{"name":"Body language in Tibet","val":"12","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A273","parent":"Body language-facial expressions-sign  language"},
+{"name":"Buddhism and Science","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A355","parent":"Collections"},
+{"name":"Dialects Of Tibet","val":"18","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A296","parent":"Collections"},
+{"name":"Amdo Tibetan Dialect","val":"18","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A297","parent":"Dialects Of Tibet"},
+{"name":"Amdo Dialect Conversations","val":"18","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A298","parent":"Amdo Tibetan Dialect"},
+{"name":"Domestic Life in Tibet","val":"12","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A32","parent":"Collections"},
+{"name":"Dealing with the Outside","val":"3","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A125","parent":"Domestic Life in Tibet"},
+{"name":"Finances","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A270","parent":"Domestic Life in Tibet"},
+{"name":"Gossiping","val":"4","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A33","parent":"Domestic Life in Tibet"},
+{"name":"House Tours","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A113","parent":"Domestic Life in Tibet"},
+{"name":"In the Kitchen and Dining Room","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A249","parent":"Domestic Life in Tibet"},
+{"name":"Dreams","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A164","parent":"Collections"},
+{"name":"Education in Tibet","val":"60","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A347","parent":"Collections"},
+{"name":"University","val":"60","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A348","parent":"Education in Tibet"},
+{"name":"English Instruction for Tibetans","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A343","parent":"Collections"},
+{"name":"Interviews in English","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A344","parent":"English Instruction for Tibetans"},
+{"name":"Festivals of Tibet","val":"9","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A85","parent":"Collections"},
+{"name":"New Year's Festivals","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A86","parent":"Festivals of Tibet"},
+{"name":"Overview of Festivals in Tibet","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A124","parent":"Festivals of Tibet"},
+{"name":"The Music of Tibetan Festivals","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A166","parent":"Festivals of Tibet"},
+{"name":"Food in Tibet","val":"11","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A92","parent":"Collections"},
+{"name":"Domestic Meals","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A99","parent":"Food in Tibet"},
+{"name":"In the Kitchen","val":"3","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A100","parent":"Food in Tibet"},
+{"name":"In the Restaurant","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A114","parent":"Food in Tibet"},
+{"name":"Frederick Williamson's Films","val":"24","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A250","parent":"Collections"},
+{"name":"Furer-Haimendorf's Films","val":"11","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A246","parent":"Collections"},
+{"name":"Apa Tani films","val":"11","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A247","parent":"Furer-Haimendorf's Films"},
+{"name":"Greetings","val":"4","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A271","parent":"Collections"},
+{"name":"Historical Films","val":"23","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A251","parent":"Collections"},
+{"name":"The Frederick Williamson Collection","val":"23","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A252","parent":"Historical Films"},
+{"name":"History of Central Tibet","val":"84","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A312","parent":"Collections"},
+{"name":"Site Lectures for important Historical Sites in Central Tibet","val":"43","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A314","parent":"History of Central Tibet"},
+{"name":"Visual Documentation of Famous Historical Sites of Central Tibet","val":"13","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A328","parent":"History of Central Tibet"},
+{"name":"Humor in Tibet","val":"16","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A158","parent":"Collections"},
+{"name":"Humorous Conversations","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A159","parent":"Humor in Tibet"},
+{"name":"Professional Tibetan Comics","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A333","parent":"Humor in Tibet"},
+{"name":"Tibetan Comics at the University of Virginia","val":"10","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A334","parent":"Humor in Tibet"},
+{"name":"Kham","val":"7","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A379","parent":"Collections"},
+{"name":"Monasteries in Kham","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A383","parent":"Kham"},
+{"name":"Oral Histories of Kham","val":"3","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A380","parent":"Kham"},
+{"name":"Places in Kham","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A381","parent":"Kham"},
+{"name":"Degé","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A382","parent":"Places in Kham"},
+{"name":"Lhasa","val":"279","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A8","parent":"Collections"},
+{"name":"An Afternoon Off at Home","val":"7","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A104","parent":"Lhasa"},
+{"name":"At the Drama Group Office","val":"6","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A157","parent":"Lhasa"},
+{"name":"Greetings and Goodbyes","val":"16","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A301","parent":"Lhasa"},
+{"name":"Greetings in Amdo","val":"4","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A316","parent":"Greetings and Goodbyes"},
+{"name":"Humor in Lhasa","val":"lha sa","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A160","parent":"Lhasa"},
+{"name":"Comedy Performance","val":"10","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A335","parent":"Humor in Lhasa"},
+{"name":"Ordinary Conversation","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A161","parent":"Humor in Lhasa"},
+{"name":"Lhasa Resident Interviews","val":"16","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A356","parent":"Lhasa"},
+{"name":"Medicine in Lhasa","val":"lha sa","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A62","parent":"Lhasa"},
+{"name":"Dental Problems","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A300","parent":"Medicine in Lhasa"},
+{"name":"Expressing Physical Pain","val":"22","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A346","parent":"Medicine in Lhasa"},
+{"name":"Medical Problems","val":"6","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A299","parent":"Medicine in Lhasa"},
+{"name":"Old Friends at the Kyichu Hotel","val":"7","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A63","parent":"Lhasa"},
+{"name":"Old Times","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A39","parent":"Lhasa"},
+{"name":"People and Appearances in Lhasa","val":"lha sa","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A34","parent":"Lhasa"},
+{"name":"Body Language","val":"15","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A274","parent":"People and Appearances in Lhasa"},
+{"name":"Clothes","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A35","parent":"People and Appearances in Lhasa"},
+{"name":"Describing People","val":"34","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A317","parent":"People and Appearances in Lhasa"},
+{"name":"Religion in Lhasa","val":"lha sa","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A255","parent":"Lhasa"},
+{"name":"Monastic Religion","val":"4","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A256","parent":"Religion in Lhasa"},
+{"name":"Shopping in Lhasa","val":"lha sa","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A93","parent":"Lhasa"},
+{"name":"Bargaining in the Barkor","val":"bar skor","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A269","parent":"Shopping in Lhasa"},
+{"name":"Shopping for Food","val":"6","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A94","parent":"Shopping in Lhasa"},
+{"name":"The Norbulingka Picnic","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A162","parent":"Lhasa"},
+{"name":"Thieves' Island","val":"15","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A350","parent":"Lhasa"},
+{"name":"Three's Company","val":"25","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A9","parent":"Lhasa"},
+{"name":"Two Children Talking About Things","val":"4","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A115","parent":"Lhasa"},
+{"name":"Two Young Men in Lhasa","val":"lha sa","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A268","parent":"Lhasa"},
+{"name":"Lhasa Language Instructional Units","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A25","parent":"Collections"},
+{"name":"Intermediate Lhasa Colloquial","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A26","parent":"Lhasa Language Instructional Units"},
+{"name":"Literature: Genres, Readings and Oral  Commentaries in Tibetan","val":"70","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A57","parent":"Collections"},
+{"name":"Art Literature","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A132","parent":"Literature: Genres, Readings and Oral  Commentaries in Tibetan"},
+{"name":"Biographies","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A127","parent":"Literature: Genres, Readings and Oral  Commentaries in Tibetan"},
+{"name":"Bon Literature Traditional Oral Commentaries","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A265","parent":"Literature: Genres, Readings and Oral  Commentaries in Tibetan"},
+{"name":"Gesar of Ling Epic","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A264","parent":"Literature: Genres, Readings and Oral  Commentaries in Tibetan"},
+{"name":"Historical Literature","val":"33","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A129","parent":"Literature: Genres, Readings and Oral  Commentaries in Tibetan"},
+{"name":"Oral Commentaries on the Fifth Dalai Lama's History","val":"29","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A313","parent":"Historical Literature"},
+{"name":"Modern Tibetan Literature Unit","val":"29","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A319","parent":"Literature: Genres, Readings and Oral  Commentaries in Tibetan"},
+{"name":"ljang bu","val":"tshe ring rdo rje","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A320","parent":"Modern Tibetan Literature Unit"},
+{"name":"Philosophical Literature","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A294","parent":"Literature: Genres, Readings and Oral  Commentaries in Tibetan"},
+{"name":"Poetics and Poetry Interpretation","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A58","parent":"Literature: Genres, Readings and Oral  Commentaries in Tibetan"},
+{"name":"Tibetan Buddhist Philosophical Literature","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A267","parent":"Literature: Genres, Readings and Oral  Commentaries in Tibetan"},
+{"name":"Traditional Buddhist Narrative Literature","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A80","parent":"Literature: Genres, Readings and Oral  Commentaries in Tibetan"},
+{"name":"Jataka Tales","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A81","parent":"Traditional Buddhist Narrative Literature"},
+{"name":"Music in Tibet","val":"391","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A51","parent":"Collections"},
+{"name":"Music by Genre","val":"145","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A167","parent":"Music in Tibet"},
+{"name":"Ceremonial songs","val":"gzhas chen","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A190","parent":"Music by Genre"},
+{"name":"Classical songs","val":"nang ma","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A219","parent":"Music by Genre"},
+{"name":"Dancing songs","val":"zhabs bro","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A188","parent":"Music by Genre"},
+{"name":"Dramnyen-dance songs","val":"sgra snyan zhabs bro","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A175","parent":"Music by Genre"},
+{"name":"Drinking songs","val":"chang gzhas","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A181","parent":"Music by Genre"},
+{"name":"Folk songs","val":"dmangs gzhas","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A214","parent":"Music by Genre"},
+{"name":"Folk songs","val":"glu","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A192","parent":"Music by Genre"},
+{"name":"General songs","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A171","parent":"Music by Genre"},
+{"name":"Narrative songs","val":"rnam thar","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A185","parent":"Music by Genre"},
+{"name":"New Year songs","val":"lo gsar gzhas","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A198","parent":"Music by Genre"},
+{"name":"Pastoral songs","val":"glu gzhas","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A224","parent":"Music by Genre"},
+{"name":"Wedding songs","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A203","parent":"Music by Genre"},
+{"name":"Work songs","val":"las gzhas","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A177","parent":"Music by Genre"},
+{"name":"Music in Basum","val":"78","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A194","parent":"Music in Tibet"},
+{"name":"Cipa","val":"11","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A195","parent":"Music in Basum"},
+{"name":"Duma","val":"21","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A227","parent":"Music in Basum"},
+{"name":"Mukpa","val":"16","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A242","parent":"Music in Basum"},
+{"name":"Tsomjuk","val":"21","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A237","parent":"Music in Basum"},
+{"name":"Tsongo","val":"9","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A236","parent":"Music in Basum"},
+{"name":"Music in Lhasa","val":"36","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A172","parent":"Music in Tibet"},
+{"name":"Dorje, dramnyen player","val":"19","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A173","parent":"Music in Lhasa"},
+{"name":"Lhasa Roofers","val":"17","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A245","parent":"Music in Lhasa"},
+{"name":"Music in Ngari","val":"82","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A199","parent":"Music in Tibet"},
+{"name":"Korcak Circle Dancers","val":"8","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A205","parent":"Music in Ngari"},
+{"name":"New Ruthok Town","val":"10","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A207","parent":"Music in Ngari"},
+{"name":"Nomad Songs","val":"33","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A302","parent":"Music in Ngari"},
+{"name":"Old Ruthok","val":"13","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A206","parent":"Music in Ngari"},
+{"name":"Zhide Group","val":"19","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A200","parent":"Music in Ngari"},
+{"name":"Music in Panam","val":"101","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A182","parent":"Music in Tibet"},
+{"name":"Panam Quintet","val":"49","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A209","parent":"Music in Panam"},
+{"name":"Sokhang village","val":"43","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A187","parent":"Music in Panam"},
+{"name":"Tinjor Village","val":"12","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A183","parent":"Music in Panam"},
+{"name":"Music in Shigatse","val":"37","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A208","parent":"Music in Tibet"},
+{"name":"Music of Amdo","val":"13","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A232","parent":"Music in Tibet"},
+{"name":"Amdo Mandolin, artist Nyima Donma","val":"nyi ma sgron ma (13","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A233","parent":"Music of Amdo"},
+{"name":"Music of Lhatse","val":"32","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A52","parent":"Music in Tibet"},
+{"name":"Drado from Lhatse","val":"23","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A53","parent":"Music of Lhatse"},
+{"name":"Lhatse Group","val":"9","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A168","parent":"Music of Lhatse"},
+{"name":"The Music of Porong","val":"42","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A308","parent":"Music in Tibet"},
+{"name":"Tibetan Nangma Music","val":"7","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A220","parent":"Music in Tibet"},
+{"name":"Nangma, nightclub setting","val":"3","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A221","parent":"Tibetan Nangma Music"},
+{"name":"Tibet University Nangma Group","val":"4","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A244","parent":"Tibetan Nangma Music"},
+{"name":"Naga","val":"238","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A322","parent":"Collections"},
+{"name":"Natural Speech Discourse in Tibet","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A156","parent":"Collections"},
+{"name":"Occupations and Work in Tibet","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A88","parent":"Collections"},
+{"name":"Business","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A89","parent":"Occupations and Work in Tibet"},
+{"name":"Oral Traditions","val":"81","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A371","parent":"Collections"},
+{"name":"Lhoka","val":"81","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A372","parent":"Oral Traditions"},
+{"name":"Places and Regions in Tibet","val":"300","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A6","parent":"Collections"},
+{"name":"bzang mo","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A287","parent":"Places and Regions in Tibet"},
+{"name":"gzhis ka rtse","val":"3","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A332","parent":"Places and Regions in Tibet"},
+{"name":"Lhasa","val":"281","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A7","parent":"Places and Regions in Tibet"},
+{"name":"History of lha sa","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A286","parent":"Lhasa"},
+{"name":"karma dgon gsar Neighborhood","val":"3","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A112","parent":"Lhasa"},
+{"name":"nor bu gling ka Neighborhood","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A116","parent":"Lhasa"},
+{"name":"zhol Neighborhood","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A108","parent":"Lhasa"},
+{"name":"lho kha","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A329","parent":"Places and Regions in Tibet"},
+{"name":"Ngari","val":"mnga' ris","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A48","parent":"Places and Regions in Tibet"},
+{"name":"The mnga' ris Region of Cultural Tibet","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A49","parent":"Ngari"},
+{"name":"Porong","val":"52","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A309","parent":"Collections"},
+{"name":"Music","val":"52","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A310","parent":"Porong"},
+{"name":"The Royal Music of Porong","val":"42","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A311","parent":"Music"},
+{"name":"Recreation in Tibet","val":"9","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A27","parent":"Collections"},
+{"name":"Games in Tibet","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A165","parent":"Recreation in Tibet"},
+{"name":"Picnicking in Tibet","val":"4","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A163","parent":"Recreation in Tibet"},
+{"name":"Sexuality in Tibet","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A28","parent":"Recreation in Tibet"},
+{"name":"Religion in Tibet","val":"42","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A73","parent":"Collections"},
+{"name":"Divination","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A103","parent":"Religion in Tibet"},
+{"name":"Domestic Religion","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A625","parent":"Religion in Tibet"},
+{"name":"Wedding Ceremonies","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A626","parent":"Domestic Religion"},
+{"name":"Festivals","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A367","parent":"Religion in Tibet"},
+{"name":"Introduction to Sects","val":"4","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A280","parent":"Religion in Tibet"},
+{"name":"The jo nang Sect","val":"3","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A318","parent":"Introduction to Sects"},
+{"name":"Monasteries","val":"34","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A257","parent":"Religion in Tibet"},
+{"name":"Drepung Monastery","val":"10","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A366","parent":"Monasteries"},
+{"name":"Se ra Monastery","val":"7","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A258","parent":"Monasteries"},
+{"name":"Sera - Geshe Sopa Interview","val":"18","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A276","parent":"Monasteries"},
+{"name":"Philosophy","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A275","parent":"Religion in Tibet"},
+{"name":"Religious Art","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A254","parent":"Religion in Tibet"},
+{"name":"Ritual","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A74","parent":"Religion in Tibet"},
+{"name":"Sera Monastery","val":"63","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A253","parent":"Collections"},
+{"name":"Geshe Sopa Interview","val":"17","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A288","parent":"Sera Monastery"},
+{"name":"Tantric College Burnt Offering Ritual","val":"39","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A345","parent":"Sera Monastery"},
+{"name":"Social Customs","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A120","parent":"Collections"},
+{"name":"Respect","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A121","parent":"Social Customs"},
+{"name":"Thak Film Archive","val":"21","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A303","parent":"Collections"},
+{"name":"Ghato Ritual","val":"3","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A304","parent":"Thak Film Archive"},
+{"name":"Rice Production","val":"18","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A307","parent":"Thak Film Archive"},
+{"name":"Thangmi Shamanism","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A336","parent":"Collections"},
+{"name":"Tibetan Dialect Amdo","val":"18","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A295","parent":"Collections"},
+{"name":"Tibetan Intellectuals","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A627","parent":"Collections"},
+{"name":"Interviews with Intellectuals","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A628","parent":"Tibetan Intellectuals"},
+{"name":"Tibetan Language","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A109","parent":"Collections"},
+{"name":"Tibetan Scripts","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A110","parent":"Tibetan Language"},
+{"name":"Instructions on Cursive Handwriting","val":"'khyug","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A111","parent":"Tibetan Scripts"},
+{"name":"Tibetan Language Manuals","val":"205","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A68","parent":"Collections"},
+{"name":"A Reader of Classical Tibetan: Oral Commentaries","val":"13","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A69","parent":"Tibetan Language Manuals"},
+{"name":"Historical Documents","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A133","parent":"A Reader of Classical Tibetan: Oral Commentaries"},
+{"name":"Narrative Prose","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A82","parent":"A Reader of Classical Tibetan: Oral Commentaries"},
+{"name":"Religious Fundamentals","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A128","parent":"A Reader of Classical Tibetan: Oral Commentaries"},
+{"name":"The Bon Religion","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A266","parent":"A Reader of Classical Tibetan: Oral Commentaries"},
+{"name":"The Sciences","val":"4","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A70","parent":"A Reader of Classical Tibetan: Oral Commentaries"},
+{"name":"Verse","val":"3","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A130","parent":"A Reader of Classical Tibetan: Oral Commentaries"},
+{"name":"Lectures on Tibetan Religious Culture","val":"42","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A349","parent":"Tibetan Language Manuals"},
+{"name":"Manual of Standard Tibetan","val":"150","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A122","parent":"Tibetan Language Manuals"},
+{"name":"Alternate MST Dialogs","val":"7","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A315","parent":"Manual of Standard Tibetan"},
+{"name":"Dialogues","val":"Jol Dialect","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A375","parent":"Manual of Standard Tibetan"},
+{"name":"Dialogues","val":"Kongra Dialect","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A377","parent":"Manual of Standard Tibetan"},
+{"name":"Dialogues","val":"Mili Dialect","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A373","parent":"Manual of Standard Tibetan"},
+{"name":"MST Dialogues","val":"21","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A123","parent":"Manual of Standard Tibetan"},
+{"name":"MST Lectures","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A370","parent":"Manual of Standard Tibetan"},
+{"name":"MST Vocabulary","val":"60","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A248","parent":"Manual of Standard Tibetan"},
+{"name":"Vocabulary","val":"Jol Dialect","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A376","parent":"Manual of Standard Tibetan"},
+{"name":"Vocabulary","val":"Kongra Dialect","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A378","parent":"Manual of Standard Tibetan"},
+{"name":"Vocabulary","val":"Mili Dialect","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A374","parent":"Manual of Standard Tibetan"},
+{"name":"Tibetan Medicine","val":"82","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A64","parent":"Collections"},
+{"name":"Clinical Practice","val":"25","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A65","parent":"Tibetan Medicine"},
+{"name":"Gastrointestinal Disorders","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A105","parent":"Clinical Practice"},
+{"name":"Liver Disorders","val":"8","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A107","parent":"Clinical Practice"},
+{"name":"Musculoskeletal Disorders","val":"4","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A118","parent":"Clinical Practice"},
+{"name":"Empowering the Medicine","val":"9","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A71","parent":"Tibetan Medicine"},
+{"name":"History of Medicine","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A72","parent":"Tibetan Medicine"},
+{"name":"Informal Discussions About Medicine and Health","val":"12","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A66","parent":"Tibetan Medicine"},
+{"name":"Lectures on Medicine","val":"6","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A67","parent":"Tibetan Medicine"},
+{"name":"Medical Terminology","val":"14","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A117","parent":"Tibetan Medicine"},
+{"name":"Tibetans in America","val":"9","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A83","parent":"Collections"},
+{"name":"Tibetans in Virginia","val":"9","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A84","parent":"Tibetans in America"},
+{"name":"Travel in Tibet and the Himalayas","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A90","parent":"Collections"},
+{"name":"Cultural Regions","val":"18","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A439","parent":""},
+{"name":"Cultural Tibet","val":"18","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A440","parent":"Cultural Regions"},
+{"name":"Northeast","val":"18","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A587","parent":"Cultural Tibet"},
+{"name":"Amdo","val":"18","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A588","parent":"Northeast"},
+{"name":"Rebgong","val":"12","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A665","parent":"Amdo"},
+{"name":"Event","val":"12","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A411","parent":""},
+{"name":"Cultural Events","val":"7","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A412","parent":"Event"},
+{"name":"Fair Celebration","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A607","parent":"Cultural Events"},
+{"name":"Monastic Event","val":"4","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A597","parent":"Cultural Events"},
+{"name":"Butter Lamp Offering","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A598","parent":"Monastic Event"},
+{"name":"Display of Large Tangka","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A600","parent":"Monastic Event"},
+{"name":"Fasting Ritual","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A602","parent":"Monastic Event"},
+{"name":"Monastic Dance","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A601","parent":"Monastic Event"},
+{"name":"Pilgrimage Events","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A608","parent":"Cultural Events"},
+{"name":"Ritual Performed","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A589","parent":"Cultural Events"},
+{"name":"Statue","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A609","parent":"Cultural Events"},
+{"name":"Personal Events","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A573","parent":"Event"},
+{"name":"Marriage","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A591","parent":"Personal Events"},
+{"name":"Language Tree","val":"1014","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A11","parent":""},
+{"name":"Indo-European","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A135","parent":"Language Tree"},
+{"name":"English","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A136","parent":"Indo-European"},
+{"name":"Sino-Tibetan","val":"1013","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A12","parent":"Language Tree"},
+{"name":"Tibeto-Burman","val":"1013","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A13","parent":"Sino-Tibetan"},
+{"name":"Bodic","val":"1013","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A14","parent":"Tibeto-Burman"},
+{"name":"Bodish","val":"1013","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A15","parent":"Bodic"},
+{"name":"Basum","val":"78","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A196","parent":"Bodish"},
+{"name":"Gurung","val":"7","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A148","parent":"Bodish"},
+{"name":"Tibetan","val":"928","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A16","parent":"Bodish"},
+{"name":"Amdo group","val":"68","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A97","parent":"Tibetan"},
+{"name":"Kham-Hor group","val":"9","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A331","parent":"Tibetan"},
+{"name":"Khamké","val":"8","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A352","parent":"Kham-Hor group"},
+{"name":"Degé","val":"8","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A353","parent":"Khamké"},
+{"name":"Standard Tibetan","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A321","parent":"Tibetan"},
+{"name":"Ü-Tsang group","val":"853","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A17","parent":"Tibetan"},
+{"name":"Lhokhaké","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A327","parent":"Ü-Tsang group"},
+{"name":"Tsangké","val":"11","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A243","parent":"Ü-Tsang group"},
+{"name":"Töké","val":"68","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A202","parent":"Ü-Tsang group"},
+{"name":"Üké","val":"404","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A18","parent":"Ü-Tsang group"},
+{"name":"Lhasa","val":"404","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A19","parent":"Üké"},
+{"name":"Literary Genres","val":"42","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A400","parent":""},
+{"name":"Tibetan Literary Genres","val":"42","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A401","parent":"Literary Genres"},
+{"name":"Academic","val":"Modern","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A454","parent":"Tibetan Literary Genres"},
+{"name":"Literary Art","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A402","parent":"Tibetan Literary Genres"},
+{"name":"Story and Drama","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A498","parent":"Literary Art"},
+{"name":"Folk Story","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A501","parent":"Story and Drama"},
+{"name":"Non-Philosophical Religious Literature","val":"4","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A405","parent":"Tibetan Literary Genres"},
+{"name":"Religious Sect","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A546","parent":""},
+{"name":"Buddhism","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A547","parent":"Religious Sect"},
+{"name":"Tibetan Buddhism","val":"5","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A548","parent":"Buddhism"},
+{"name":"Sarma","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A549","parent":"Tibetan Buddhism"},
+{"name":"Geluk","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A669","parent":"Sarma"},
+{"name":"Tibet and Himalayas","val":"19","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A571","parent":""},
+{"name":"Bibliographic Classification","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A629","parent":"Tibet and Himalayas"},
+{"name":"Tibetan and Himalayan","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A630","parent":"Bibliographic Classification"},
+{"name":"Tibetan Literature","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A631","parent":"Tibetan and Himalayan"},
+{"name":"Historical Literature","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A632","parent":"Tibetan Literature"},
+{"name":"Autobiographies","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A633","parent":"Historical Literature"},
+{"name":"Oral Genres","val":"14","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A581","parent":"Tibet and Himalayas"},
+{"name":"Tibetan Oral Genres","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A582","parent":"Oral Genres"},
+{"name":"Rituals","val":"4","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A584","parent":"Tibet and Himalayas"},
+{"name":"Tibetan Rituals","val":"3","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A585","parent":"Rituals"},
+{"name":"Marriage","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A586","parent":"Tibetan Rituals"},
+{"name":"Music","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A592","parent":"Tibetan Rituals"},
+{"name":"Protection rituals","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A590","parent":"Tibetan Rituals"},
+{"name":"Topics","val":"58","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A555","parent":""},
+{"name":"Architecture","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A556","parent":"Topics"},
+{"name":"Art","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A668","parent":"Topics"},
+{"name":"Education","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A650","parent":"Topics"},
+{"name":"History","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A646","parent":"Topics"},
+{"name":"Language","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A670","parent":"Topics"},
+{"name":"parts of the Tibetan language","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A671","parent":"Language"},
+{"name":"Literature","val":"52","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A640","parent":"Topics"},
+{"name":"Music","val":"2","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A580","parent":"Topics"},
+{"name":"Zoologies","val":"Biological and Spiritual","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A458","parent":""},
+{"name":"Tibetan Typologies of Beings","val":"12","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A459","parent":"Zoologies"},
+{"name":"Human","val":"12","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A663","parent":"Tibetan Typologies of Beings"},
+{"name":"Layman","val":"11","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A666","parent":"Human"},
+{"name":"Monk","val":"1","url":"/collection/tibetan-and-himalayan-library?f[0]=im_field_characteristic%3A664","parent":"Human"}];
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////

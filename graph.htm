@@ -90,7 +90,7 @@
 				height: 					{	def:'600', 			opt:'number',			des:'Height'},
 				width: 						{	def:'800', 			opt:'number',			des:'Width'}, 
 				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
-				style: 						{	def:'Grouped', 		opt:'Grouped|Spiral|Packed',	des:'Style of graph'}, 
+				style: 						{	def:'Grouped', 		opt:'Grouped|Spiral|Packed',	des:'Bubble style'}, 
 				padding: 					{	def:'2', 			opt:'number',		 	des:'Bubble spacing'},
 				gCol:						{	def:'1f77b4', 		opt:'color',		 	des:'Group color'},
 				nCol:						{	def:'ff9333', 		opt:'color',		 	des:'Node color'},
@@ -126,6 +126,9 @@
 	helpText['Branch levels to show']="The maximum branch level to show, from 1 to any number deep. Setting this to 0 will show all nodes.";
 	helpText['Transition time']="The time (in milliseconds) for a branch to expand or collapse.";
 	helpText['Branch spacing']="The span that branches of different depths are drawn horizontally.";
+	helpText['Bubble style']="<b>Grouped</b> bubbles are organized by the hierarchy.<br><b>Spiral</b> bubbles are ordered by their appearance in the dataset.<br><b>Packed</b> bubbles are contained in ever-enclosing circles.";
+	helpText['Bubble spacing']="Space between bubbles. Does not have an effect on packed bubbles";
+	helpText['Group color']="Color of packed bubble grouping circles";
 	helpText['Enable user draw?']="Use the drop-down menu to the right to toggle whether or not users can interactively draw on your visualization. Note these drawings are for users only and are not saved with the visualization. In order to draw users will need to click on the pencil icon in the bottom left of your visualization.";
 
 ///// INIT  /////////////

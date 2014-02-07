@@ -161,6 +161,7 @@
 				.attr("dy",".3em")
 				.attr("text-anchor", function(d) { return d.children || d._children ? "start" : "start"; }) // Set anchor based on children
 				.text(function(d) {	var str=d.name;						// Copy name
+									str+=" ("+d.val+")";				// Add num items									
 									var l=w/options.lSize*2;			// Max chars
 									if (str.length > l)	str=str.substring(0,l-3)+"..."; 	// Shorten?
 									return str;							// Set name

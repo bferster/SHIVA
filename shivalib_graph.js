@@ -19,6 +19,8 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		   			  "-webkit-user-select":"none","-ms-user-select":"none",
 		   			  "user-select":"none","pointer-events":"none" }
 	
+	$(con).css("overflow","hidden")										// Keep in container
+
 	if (!$("d3Popup").length)											// If not popup div yet
 		$("body").append("<div id='d3Popup' class='rounded-corners' style='display:none;position:absolute;border:1px solid #999;background-color:#eee;padding:8px'></div>");
 	
@@ -48,12 +50,18 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					   .text(function(d) { return d.name.substring(0,d.r/3*scale); });	// Set text
 			} 	
 
+	
 	svg=d3.select(con)													// Add SVG to container div
 		.append("svg")													// Add SVG shell
 		.attr("width",w-margins[0]-margins[2]).attr("height",h-margins[1]-margins[3])	// Set size
 		.call(d3Zoom=d3.behavior.zoom().scaleExtent([.1,10]).on("zoom",zoomed)) // Set zoom
-		.append("g")													// Needed for pan/zoom	
-		
+ 		.append("g")													// Needed for pan/zoom
+     	
+	svg.append("defs")													// Add defs section
+	    .append("clipPath")
+	    .attr("id","cp0")
+	    .append("rect").attr("width",w).attr("height",h).attr("x",100).attr("y",0)
+	    
 	svg.append("rect")													// Pan and zoom rect
 		.style({"fill":"none","pointer-events":"all"})					// Invisble
     	.attr("id","underLayer")										// Set id
@@ -129,25 +137,35 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		}
 	else if ((options.chartType == "Tree") || (options.chartType == "Bubble")) {	// Tree like data
 		if (options.dataSourceUrl) {									// If a spreadsheet spec'd
+  			var nodeLink=false;											// Assume simple format
   			this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
 			var items=new Array();										// Holds items
-			for (i=0;i<data.length;++i) {								// For each row
-				if (!data[i][0])										// If no data
-					continue;											// Skip
-			 	if (!data[i][0].match(/node/i)) 						// If not a node
-					continue;											// Skip
-				o={};													// New object
-				o.name=data[i][2];										// Add name
-				o.parent=data[i][1];									// Add parent
-				if (data[i][3])											// If an info set
-					o.val=data[i][3];									// Add val
-				else													// If nothing there
-					o.val=1;											// Put 1 in
-				if (data[i][4])											// If an info set
-					o.info=data[i][4];									// Add info
-				items.push(o);											// Add to array
+			for (i=0;i<data.length;++i) 								// For each row
+				if (data[i][0] == "link") {								// If link node
+					nodeLink=true;										// Node/link format
+					break;												// Quit looking
+					}
+			if (nodeLink) {
+				trace("node link")
 				}
-
+			else{														// Simple tree format
+				for (i=0;i<data.length;++i) {							// For each row
+					if (!data[i][0])									// If no data
+						continue;										// Skip
+				 	if (!data[i][0].match(/node/i)) 					// If not a node
+						continue;										// Skip
+					o={};												// New object
+					o.name=data[i][2];									// Add name
+					o.parent=data[i][1];								// Add parent
+					if (data[i][3])										// If an info set
+						o.val=data[i][3];								// Add val
+					else												// If nothing there
+						o.val=1;										// Put 1 in
+					if (data[i][4])										// If an info set
+						o.info=data[i][4];								// Add info
+					items.push(o);										// Add to array
+					}
+				}
 		dataSet=[];														// Init as array first
 
 		var dataMap=items.reduce(function(map, node) {					// Create datamap					
@@ -284,7 +302,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					if (d.style && styles[d.style] && styles[d.style].alpha)	// If a style spec'd
 						return styles[d.style].alpha;					// Get alpha from options
 					})									
-				.on("click",AddPopup)									// Click on node
+				.on("click",function(d){ if (!d3.event.shiftKey) AddPopup(d); })	// Click on node unless dragging w/ shift
 				.call(force.drag);
 			nodes.append("title")									// CREATE EDGE TOOLTIPS
 		      	.text(function(d) { 
@@ -465,7 +483,9 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				    .style("stroke","#"+options.gCol)					// Edge
 	     			.style("fill", function(d) { return  d.children ? "#"+options.gCol : "#"+options.nCol; })
 	 	  			.style("fill-opacity", function(d) { return  d.children ? .15 : 1})
-					
+					.style("cursor", function(d) { return d.info ? "pointer" : "auto"; })	// Set cursor presence of info
+					.on("click",AddPopup)								// Click on node
+
 				node.filter(function(d) { return !d.children; })		// Filter
 					.append("text")
 			      	.attr("dy",".3em")									// Shift
@@ -530,15 +550,14 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	shivaLib.SendReadyMessage(true);									// Send ready msg to drupal manager
 }
 
-
-
-
 /////////////////////////////////
 // HELPER FUNCTIONS
 /////////////////////////////////
 
 function AddPopup(d)												// SHOW A POPUP
 {
+	if (!d.info)														// Nothing to show
+		return;															// Quit
 	var x=d3.event.clientX+8;											// Set xPos
 	var y=d3.event.clientY+8;											// Y
 	$("#d3Popup").css({left:x,top:y});									// Position

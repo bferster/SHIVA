@@ -146,7 +146,6 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					break;												// Quit looking
 					}
 			if (nodeLink) {
-				trace("node link")
 				}
 			else{														// Simple tree format
 				for (i=0;i<data.length;++i) {							// For each row

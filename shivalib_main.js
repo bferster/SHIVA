@@ -903,7 +903,7 @@ SHIVA_Show.prototype.FormatDate=function(date, format) 					//	FORMAT DATE STRIN
 	if (format == "m/d/y")													// Based on format...												
 		return (d.getMonth()+1)+"/"+d.getDate()+"/"+d.getFullYear();		// Return string
 	else if (format == "m/y")
-		return (d.getMonth()+1)+"/"+d.geFullYear();
+		return (d.getMonth()+1)+"/"+d.getFullYear();
 	else if (format == "mo d, y")
 		return mos[d.getMonth()]+" "+d.getDate()+", "+d.getFullYear();
 	else if (format == "mo, y")

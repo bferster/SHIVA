@@ -101,18 +101,16 @@
 				},
 		Stream: {
 				dataSourceUrl: 				{	def:'https://docs.google.com/spreadsheet/ccc?key=0AohdE1_3ZElJdE1NNy14SnhUdUhNUV9lWkdJSlZ3OGc&usp=sharing', 			opt:'string',		 	des:'Data source URL'}, 
-				height: 					{	def:'300', 			opt:'number',			des:'Height'},
+				height: 					{	def:'400', 			opt:'number',			des:'Height'},
 				width: 						{	def:'800', 			opt:'number',			des:'Width'}, 
 				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
-				sCol: 						{	def:'000000', 		opt:'colors',		 	des:'Area colors'},
+				sCol: 						{	def:'none', 		opt:'colors',		 	des:'Area colors'},
 				style: 						{	def:'Stream', 		opt:'Stream|Stacked|Full',	des:'Area style'}, 
 				area: 						{	def:'Curved', 		opt:'Curved|Flat|Stepped',	des:'Area shape'}, 
-				dateFormat: 				{	def:'mo d, y', 		opt:'m/d/y|m/y|y|mo d, y|mo, y|m/d/y h|m/d/y h:m',	des:'Area style'}, 
-
+				dateFormat: 				{	def:'mo d, y', 		opt:'m/d/y|m/y|y|mo d, y|mo, y|m/d/y h:m|mo d, y h:m',	des:'Date format'}, 
 				lSize: 						{	def:'12', 			opt:'number',		 	des:'Font size'},
 				lCol: 						{	def:'000000', 		opt:'color',		 	des:'Font color'},
 				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
-				
 				},
 		Chord: {
 				dataSourceUrl: 				{	def:'', 			opt:'string',		 	des:'Data source URL'}, 
@@ -145,6 +143,10 @@
 	helpText['Bubble style']="<b>Grouped</b> bubbles are organized by the hierarchy.<br><b>Spiral</b> bubbles are ordered by their appearance in the dataset.<br><b>Packed</b> bubbles are contained in ever-enclosing circles.";
 	helpText['Bubble spacing']="Space between bubbles. Does not have an effect on packed bubbles";
 	helpText['Group color']="Color of packed bubble grouping circles";
+	helpText['Area colors']="Colors of the area\'s colors. None will diplay the default colors.";
+	helpText['Area style']="<b>Stream</b> data is displayed as a centeredstream.<br><b>Stacked</b> displays as a traditional stacked area chart.<br><b>Full</b> a traditional stacked area chart normalized to fill entire height.";
+	helpText['Area shape']="<b>Curved</b> data area is displayed as a curved shape.<br><b>Flat</b> data area is displayed with straight edges.<br><b>Stepped</b> data area is displayed as a series of steps.";
+	helpText['Date format']="The format that dates will be displayed.";
 	helpText['Enable user draw?']="Use the drop-down menu to the right to toggle whether or not users can interactively draw on your visualization. Note these drawings are for users only and are not saved with the visualization. In order to draw users will need to click on the pencil icon in the bottom left of your visualization.";
 
 ///// INIT  /////////////

@@ -12,6 +12,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	var svg=null,nodes=null,edges=null,labels=null;						// Pointers to d3 data
 	var dataSet=null;													// Holds data
 	var d3Zoom;															// Scale/zoom
+	var minZoom=.1,maxZoom=10;											// Zoom range
 	var margins=[0,0,0,0];												// Default margins
 	var firstTime=true;
 		
@@ -33,41 +34,9 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	$(con).width(options.width);	$(con).height(options.height);		// Set size
 	$(con).html("");													// Clear div
 	var colors=d3.scale.category10();									// Default colors
-
-	function zoomed() {													// ZOOM HANDLER
- 		var t;
- 		var scale=d3.event.scale;										// Set current scale
- 		var tp=[margins[0]-0,margins[3]-0];								// Move to margins
- 		if (options.chartType == "Tree")								// Tree is x/y flopped
- 			t=tp[0],tp[0]=tp[1],tp[1]=t;								// Flop coords
-		if (!d3.event.sourceEvent.shiftKey)								// Don't move with shift key down (to allow node dragging)
-			tp[0]+=d3.event.translate[0],tp[1]+=d3.event.translate[1]	// Set translation
- 		svg.attr("transform","translate("+tp+") scale("+scale+")");		// Do it
- 		if (options.chartType == "Bubble")								// Bubble needs text control
-		 	if (options.style == "Packed")
-			 	svg.selectAll("text")									// Add text
-					.attr("font-size",options.lSize/scale+"px")			// Size
-					   .text(function(d) { return d.name.substring(0,d.r/3*scale); });	// Set text
-			} 	
-
 	
-	svg=d3.select(con)													// Add SVG to container div
-		.append("svg")													// Add SVG shell
-		.attr("width",w-margins[0]-margins[2]).attr("height",h-margins[1]-margins[3])	// Set size
-		.call(d3Zoom=d3.behavior.zoom().scaleExtent([.1,10]).on("zoom",zoomed)) // Set zoom
- 		.append("g")													// Needed for pan/zoom
-     	
-	svg.append("defs")													// Add defs section
-	    .append("clipPath")
-	    .attr("id","cp0")
-	    .append("rect").attr("width",w).attr("height",h).attr("x",100).attr("y",0)
-	    
-	svg.append("rect")													// Pan and zoom rect
-		.style({"fill":"none","pointer-events":"all"})					// Invisble
-    	.attr("id","underLayer")										// Set id
-    	.attr("width",w).attr("height",h)								// Set size
-    	.on("click",function(){ $("#d3Popup").hide(); });				// Hide any open popups				
-
+	// DATA //////////////////////////////////////////////////////////////////////////////////////////////////////
+	
 	if (options.chartType == "Network") {								// Force directed
 		if (options.dataSourceUrl) 										// If a spreadsheet spec'd
 	    	this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
@@ -136,6 +105,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			redraw();													// Draw graph
 		}
 	else if ((options.chartType == "Tree") || (options.chartType == "Bubble")) {	// Tree like data
+		if (options.chartType == "Bubble")	minZoom=1;					// Cap zoom at 1
 		if (options.dataSourceUrl) {									// If a spreadsheet spec'd
   			var nodeLink=false;											// Assume simple format
   			this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
@@ -204,6 +174,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		}
 	}
 	else if (options.chartType == "Stream") {							// Stream
+		minZoom=1;														// Cap zoom at 1
 		if (options.dataSourceUrl) 										// If a spreadsheet spec'd
 	    	this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
 			dataSet=[];													// Init as array 
@@ -221,6 +192,45 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			redraw();													// Draw
 			},true);
 	}																	// End data section
+	
+	// SVG /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+	
+	svg=d3.select(con)													// Add SVG to container div
+		.append("svg")													// Add SVG shell
+		.attr("width",w-margins[0]-margins[2]).attr("height",h-margins[1]-margins[3])	// Set size
+		.call(d3Zoom=d3.behavior.zoom().scaleExtent([minZoom,maxZoom]).on("zoom",zoomed)) // Set zoom
+ 		.append("g")													// Needed for pan/zoom
+     	
+	svg.append("defs")													// Add defs section
+	    .append("clipPath")
+	    .attr("id","cp0")
+	    .append("rect").attr("width",w).attr("height",h).attr("x",100).attr("y",0)
+	    
+	svg.append("rect")													// Pan and zoom rect
+		.style({"fill":"none","pointer-events":"all"})					// Invisble
+    	.attr("id","underLayer")										// Set id
+    	.attr("width",w).attr("height",h)								// Set size
+    	.on("click",function(){ $("#d3Popup").hide(); });				// Hide any open popups				
+	
+	function zoomed() {													// ZOOM HANDLER
+ 		var t;
+ 		var scale=d3.event.scale;										// Set current scale
+ 		var tp=[margins[0]-0,margins[3]-0];								// Move to margins
+ 		if (options.chartType == "Tree")								// Tree is x/y flopped
+ 			t=tp[0],tp[0]=tp[1],tp[1]=t;								// Flop coords
+		if (!d3.event.sourceEvent.shiftKey)								// Don't move with shift key down (to allow node dragging)
+			tp[0]+=d3.event.translate[0],tp[1]+=d3.event.translate[1]	// Set translation
+ 		svg.attr("transform","translate("+tp+") scale("+scale+")");		// Do it
+ 		if (options.chartType == "Bubble")								// Bubble needs text control
+		 	if (options.style == "Packed")
+			 	svg.selectAll("text")									// Add text
+					.attr("font-size",options.lSize/scale+"px")			// Size
+					   .text(function(d) { return d.name.substring(0,d.r/3*scale); });	// Set text
+			} 	
+	
+	
+	// DRAW /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+	
 	
 	function redraw(what) {												// DRAW
 
@@ -574,7 +584,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				}
 			var colorSet=d3.scale.ordinal().range(colorRange);			// Scale colorset
 			var x=d3.time.scale().range([0,options.width]);				// Scale x
-			var y=d3.scale.linear().range([options.height-options.lSize-10,options.lSize+10]);	// Scale y
+			var y=d3.scale.linear().range([options.height-options.lSize-10,options.lSize*1+10]);	// Scale y
 						
 			var timeBar=d3.select(con)									// Add start/end date bar
 		        .append("div")											// Add div
@@ -588,18 +598,19 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		        .style("position","absolute")							// Setup
 		        .style("width","2px").style("height",options.height-options.lSize*2-20+"px")			// Size
 		        .style("pointer-events","none")							// No mouse hits
-		        .style("top",(options.lSize+10)+"px").style("left","0px").style("background","#fff")  // Pos
+		        .style("top",(options.lSize-0+10)+"px").style("left","0px").style("background","#fff")  // Pos
 		    	.style("font-size",options.lSize+"px").style("color","#"+options.lCol).style("font-family","sans-serif")
-				.html("<div id='vdat' style='position:absolute;left:-100px;top:"+(-options.lSize-6)+"px;width:200px;text-align:center'></div><div id='vnow' style='background-color:#fff;position:absolute;left:-100px;top:"+(options.height-options.lSize*2-16)+"px;width:200px;text-align:center'></div>")		
+				.html("<div id='vdat' style='background-color:#"+options.backCol+";position:absolute;left:-100px;top:"+(-options.lSize-6)+"px;width:200px;text-align:center'></div><div id='vnow' style='background-color:#"+options.backCol+";position:absolute;left:-100px;top:"+(options.height-options.lSize*2-16)+"px;width:200px;text-align:center'></div>")		
 						
 			var stack=d3.layout.stack()									// Create layout
 					.offset("silhouette")								// Center the stream
 			    	.values(function(d) { return d.values; })			// Get values
 			   	 	.x(function(d) { return d.date; })					// Plot date on x axis
 			    	.y(function(d) { return d.value; });				// Vaalue on y
+			
 			if (options.style == "Full")	stack.offset("expand")		// Full varient
 			if (options.style == "Stacked")	stack.offset("zero")		// Stacked varient
-			
+						
 			var nest=d3.nest().key(function(d) { return d.key; });		// Nest on keys
 			var layers=stack(nest.entries(dataSet));					// Create layers
 				
@@ -607,10 +618,10 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			    .interpolate("cardinal")								// Use cardinal spline
 			    .x(function(d) { return x(d.date); })					// Plot date on x axis
 			    .y0(function(d) { return y(d.y0); })					// Plot y0 
-			    .y1(function(d) { return y(d.y0 + d.y); });				// Plot y1
+			    .y1(function(d) { return y(d.y0+d.y); });				// Plot y1
 			  
 			x.domain(d3.extent(dataSet, function(d) { return d.date; }));	
-		 	y.domain([0,d3.max(dataSet, function(d) { return d.y0 + d.y; })]);	
+		 	y.domain([0,d3.max(dataSet, function(d) { return d.y0+d.y; })]);	
 		
 			if (options.area == "Flat")	area.interpolate("linear")		// Linear varient
 			if (options.area == "Stepped")	area.interpolate("step")	// Stepped varient

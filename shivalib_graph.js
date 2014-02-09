@@ -4,7 +4,7 @@
 
 SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 {
-	var i,o,shape,id=0;
+	var i,j,o,shape,id=0;
 	var options=this.options;											// Local options
 	var con="#"+this.container;											// Container
  	var w=options.width;												// Width
@@ -165,6 +165,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					items.push(o);										// Add to array
 					}
 				}
+		
 		dataSet=[];														// Init as array first
 
 		var dataMap=items.reduce(function(map, node) {					// Create datamap					
@@ -202,6 +203,24 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		});
 		}
 	}
+	else if (options.chartType == "Stream") {							// Stream
+		if (options.dataSourceUrl) 										// If a spreadsheet spec'd
+	    	this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
+			dataSet=[];													// Init as array 
+			var nRows=data.length;										// Number of rows
+			var nSets=data[0].length-1;									// Number of datasets
+			for (i=1;i<nSets;++i) {										// For each dataset
+				for (j=1;j<nRows;++j) {									// For time point
+					o={};												// New obj
+					o.key=data[0][i];									// Set field name as key
+					o.date=new Date(data[j][0]);							// Set date
+					o.value=data[j][i]-0;								// Set value
+					dataSet.push(o);									// Add item
+					}
+				}
+			redraw();													// Draw
+			},true);
+	}																	// End data section
 	
 	function redraw(what) {												// DRAW
 
@@ -497,7 +516,6 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			      	.text(function(d) { return d.name.substring(0,d.r/3); });	// Set text
 					}
 		  	else{														// Not packed
-	
 				function classes(root) {								// Returns a flattened hierarchy 
 					var classes=[];
 					
@@ -542,10 +560,109 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			      	.text(function(d) { return d.className.substring(0,d.r/3); });
 						
 			d3.select(self.frameElement).style("height",dia+"px");
-			}															// End bubble
+			}
+		}															// End bubble
+	
+		// STEAM /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+
+		else if (options.chartType == "Stream") {						// Stream graph
+			var colorRange=["#B30000", "#E34A33", "#FC8D59", "#FDBB84", "#FDD49E", "#FEF0D9"];
+			if (options.sCol != "none") {								// Using a specified color set
+				colorRange=[];
+				var v=options.sCol.split(",");
+				for (i=0;i<v.length;++i)	colorRange.push("#"+v[i]);
+				}
+			var colorSet=d3.scale.ordinal().range(colorRange);			// Scale colorset
+			var x=d3.time.scale().range([0,options.width]);				// Scale x
+			var y=d3.scale.linear().range([options.height-options.lSize-10,options.lSize+10]);	// Scale y
+						
+			var timeBar=d3.select(con)									// Add start/end date bar
+		        .append("div")											// Add div
+		        .style("position","absolute")							// Setup
+		        .style("top",(options.height-options.lSize-6)+"px").style("left","0px") // Pos
+		    	.style("font-size",options.lSize+"px").style("color","#"+options.lCol).style("font-family","sans-serif")
+				.html("<span id='startDate'></span><span id='endDate' style='position:absolute;left:"+(options.width-200)+"px;width:200px;text-align:right'></span>")
+			
+			var dataBar=d3.select(con)									// Add vertical data bar
+		        .append("div")											// Add div
+		        .style("position","absolute")							// Setup
+		        .style("width","2px").style("height",options.height-options.lSize*2-20+"px")			// Size
+		        .style("pointer-events","none")							// No mouse hits
+		        .style("top",(options.lSize+10)+"px").style("left","0px").style("background","#fff")  // Pos
+		    	.style("font-size",options.lSize+"px").style("color","#"+options.lCol).style("font-family","sans-serif")
+				.html("<div id='vdat' style='position:absolute;left:-100px;top:"+(-options.lSize-6)+"px;width:200px;text-align:center'></div><div id='vnow' style='background-color:#fff;position:absolute;left:-100px;top:"+(options.height-options.lSize*2-16)+"px;width:200px;text-align:center'></div>")		
+						
+			var stack=d3.layout.stack()									// Create layout
+					.offset("silhouette")								// Center the stream
+			    	.values(function(d) { return d.values; })			// Get values
+			   	 	.x(function(d) { return d.date; })					// Plot date on x axis
+			    	.y(function(d) { return d.value; });				// Vaalue on y
+			if (options.style == "Full")	stack.offset("expand")		// Full varient
+			if (options.style == "Stacked")	stack.offset("zero")		// Stacked varient
+			
+			var nest=d3.nest().key(function(d) { return d.key; });		// Nest on keys
+			var layers=stack(nest.entries(dataSet));					// Create layers
+				
+			var area=d3.svg.area()										// Create stream
+			    .interpolate("cardinal")								// Use cardinal spline
+			    .x(function(d) { return x(d.date); })					// Plot date on x axis
+			    .y0(function(d) { return y(d.y0); })					// Plot y0 
+			    .y1(function(d) { return y(d.y0 + d.y); });				// Plot y1
+			  
+			x.domain(d3.extent(dataSet, function(d) { return d.date; }));	
+		 	y.domain([0,d3.max(dataSet, function(d) { return d.y0 + d.y; })]);	
 		
+			if (options.area == "Flat")	area.interpolate("linear")		// Linear varient
+			if (options.area == "Stepped")	area.interpolate("step")	// Stepped varient
+		
+				svg.selectAll(".layer")									// Add layers
+			      		.data(layers)									// Set data
+		    			.enter().append("path")							// Add path
+				      	.attr("class","layer")							// Set class
+			      		.attr("d", function(d) { return area(d.values); })		// Set position
+			      		.style("fill", function(d, i) { return colorSet(i); });	// Set color
+			
+				 svg.selectAll(".layer")								// Point at layers
+						.attr("opacity",1)								//  Assunme fully opaque if mouse is out
+						.on("mouseover", function(d,i) {				// On mouse over
+				      		svg.selectAll(".layer")						// Point at layers
+	      		     		.transition().duration(250)					// Quick transition
+				     	 	.attr("opacity", function(d,j) {			// Set opacity
+				        		return j != i ? 0.6 : 1;				// If over, set to 1, else .6
+				    		})
+				   	 	})
+		
+				.on("mousemove", function(d, i) {						// When hovering over layer
+						var k,o,datearray=[];
+						var date=x.invert(d3.mouse(this)[0]);			// Get date from x pos
+				      	var now=date.getFullYear()*3650+date.getMonth()*300+date.getDate();	// Unique now
+				      	var selected=(d.values);						// Selected layer						
+				      	for (var k=0;k<selected.length;k++) { 			// For each data point
+				        	o=selected[k].date;							// Get date
+				        	datearray[k]=o.getFullYear()*3650+o.getMonth()*300+o.getDate();	// Make unique id
+				        	}
+					   	k=datearray.indexOf(now);						// Data item over
+						d3.select(this).attr("stroke","#000").attr("stroke-width","0.5px")			// Show border
+			        	dataBar.style("left",d3.mouse(this)[0]+"px");	// Position data bar
+			      		$("#vnow").text(shivaLib.FormatDate(date,options.dateFormat))
+			      		$("#vdat").text(d.key+": "+d.values[k].value)	// Show value
+			      		dataBar.style("visibility","visible");			// Show data bar
+			    		})
+
+			    .on("mouseout", function(d, i) {						// Stop hovering on layer
+			     		svg.selectAll(".layer")							// Get all layers
+			      			.transition().duration(250)					// Quick transition
+			      			.attr("opacity","1");						// Make layer opaque
+			      		d3.select(this).attr("stroke-width","0px");		// Add border	
+			      		dataBar.style("visibility","hidden");			// Hide data bar
+			  			})
+			    
+			$("#startDate").text(shivaLib.FormatDate(x.invert(0),options.dateFormat));				// Set start date
+			$("#endDate").text(shivaLib.FormatDate(x.invert(options.width),options.dateFormat));	// Set end date
+			}															// End Stream
+	
 		firstTime=false;												// Not first time thru
-		}																// End update
+//		}																// End update
 	shivaLib.SendReadyMessage(true);									// Send ready msg to drupal manager
 }
 

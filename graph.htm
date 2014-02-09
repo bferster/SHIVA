@@ -100,12 +100,20 @@
 				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
 				},
 		Stream: {
-				dataSourceUrl: 				{	def:'', 			opt:'string',		 	des:'Data source URL'}, 
-				height: 					{	def:'600', 			opt:'number',			des:'Height'},
+				dataSourceUrl: 				{	def:'https://docs.google.com/spreadsheet/ccc?key=0AohdE1_3ZElJdE1NNy14SnhUdUhNUV9lWkdJSlZ3OGc&usp=sharing', 			opt:'string',		 	des:'Data source URL'}, 
+				height: 					{	def:'300', 			opt:'number',			des:'Height'},
 				width: 						{	def:'800', 			opt:'number',			des:'Width'}, 
 				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
+				sCol: 						{	def:'000000', 		opt:'colors',		 	des:'Area colors'},
+				style: 						{	def:'Stream', 		opt:'Stream|Stacked|Full',	des:'Area style'}, 
+				area: 						{	def:'Curved', 		opt:'Curved|Flat|Stepped',	des:'Area shape'}, 
+				dateFormat: 				{	def:'mo d, y', 		opt:'m/d/y|m/y|y|mo d, y|mo, y|m/d/y h|m/d/y h:m',	des:'Area style'}, 
+
+				lSize: 						{	def:'12', 			opt:'number',		 	des:'Font size'},
+				lCol: 						{	def:'000000', 		opt:'color',		 	des:'Font color'},
 				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
-			},
+				
+				},
 		Chord: {
 				dataSourceUrl: 				{	def:'', 			opt:'string',		 	des:'Data source URL'}, 
 				height: 					{	def:'600', 			opt:'number',			des:'Height'},

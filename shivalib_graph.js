@@ -14,6 +14,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	var d3Zoom;															// Scale/zoom
 	var minZoom=.1,maxZoom=10;											// Zoom range
 	var margins=[0,0,0,0];												// Default margins
+	var canPan=true;													// Can pan/zoom screen
 	var firstTime=true;
 		
 	var unselectable={"-moz-user-select":"none","-khtml-user-select":"none",	
@@ -184,14 +185,32 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				for (j=1;j<nRows;++j) {									// For time point
 					o={};												// New obj
 					o.key=data[0][i];									// Set field name as key
-					o.date=new Date(data[j][0]);							// Set date
+					o.date=new Date(data[j][0]);						// Set date
 					o.value=data[j][i]-0;								// Set value
 					dataSet.push(o);									// Add item
 					}
 				}
 			redraw();													// Draw
 			},true);
-	}																	// End data section
+	}																	
+	else if (options.chartType == "Parallel") {							// Parallel
+		minZoom=1;														// Cap zoom at 1
+		if (options.dataSourceUrl) 										// If a spreadsheet spec'd
+	    	this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
+			dataSet=[];													// Init as array 
+			var nRows=data.length;										// Number of rows
+			var nSets=data[0].length;									// Number of datasets
+			for (i=1;i<nRows;++i) {										// For each row
+				var o={};												// New obj
+				o.name=data[i][0];										// Set field name as key
+				for (j=1;j<nSets;++j) 									// For each field
+					o[data[0][j]]=data[i][j]-0;							// Set value
+				dataSet.push(o);										// Add item
+				}
+			redraw();													// Draw
+			},true);
+	}																	
+	
 	
 	// SVG /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
 	
@@ -214,6 +233,8 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	
 	function zoomed() {													// ZOOM HANDLER
  		var t;
+ 		if (!canPan)
+ 			return;
  		var scale=d3.event.scale;										// Set current scale
  		var tp=[margins[0]-0,margins[3]-0];								// Move to margins
  		if (options.chartType == "Tree")								// Tree is x/y flopped
@@ -671,6 +692,133 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			$("#startDate").text(shivaLib.FormatDate(x.invert(0),options.dateFormat));				// Set start date
 			$("#endDate").text(shivaLib.FormatDate(x.invert(options.width),options.dateFormat));	// Set end date
 			}															// End Stream
+	
+		// PARALLEL /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+
+		else if (options.chartType == "Parallel") {						// Parallel coords
+	    	var y={};
+		    var dragging={};
+			canPan=false;												// No pan/zoom
+			var x=d3.scale.ordinal().rangePoints([0,options.width],1);	// X scale
+			var line=d3.svg.line();										// Lines
+			var axis=d3.svg.axis().orient("left").ticks(4).outerTickSize(0); // Axes
+
+			
+			svg.attr("height",options.height-options.lSize*2+"px");
+		   	svg.attr("transform", "translate(0,"+options.lSize*3+")");// Move
+		   	
+		  	x.domain(dimensions=d3.keys(dataSet[0]).filter(function(d) {		// Extract the list of dimensions and create a scale for each.
+		  	  	return d != "name" && (y[d]=d3.scale.linear()					// If not a name, scale data point
+		        	.domain(d3.extent(dataSet, function(p) { return +p[d]; }))	// Link to domain
+		        	.range([options.height-options.lSize*4,0]));								// Set range
+		 	 	}));	
+		   
+		   var background=svg.append("g")  								// Draw lines in grey
+		   		.selectAll("path")										// All paths
+		      	.data(dataSet)											// Set data
+		    	.enter().append("path")									// Add path
+		      	.attr("d",path)											// Set path data using path()
+				.attr("fill","none")									// Lines
+ 				.attr("stroke","#ccc")									// Grey
+				.attr("stroke-opacity",.4)								// Opacity
+ 	
+		   var highlight=svg.append("g")  								// Draw lines in highlight color
+		   		.selectAll("path")										// All paths
+		      	.data(dataSet)											// Set data
+		    	.enter().append("path")									// Add path
+		      	.attr("d", path)										// Set path data
+				.attr("fill","none")									// Lines
+ 				.attr("stroke","#"+options.eCol)						// Highlight color
+ 				.attr("stroke-width",options.eWid)						// Highlight color
+				.attr("stroke-opacity",.7)								// Opacity
+ 
+  			background.append("title").text(function(d) { return d.name })	// Tooltip
+			highlight.append("title").text(function(d) { return d.name })	// Tooltip
+ 		 	var g=svg.selectAll(".dimension")  							// Add a dimension group for each dataset
+      			.data(dimensions)										// Get dataset names
+    			.enter().append("g")									// Add group
+		      	.attr("transform", function(d) { return "translate("+x(d)+")"; })	// Position
+		      	.call(d3.behavior.drag()								// Create new drag behavior
+		        .on("dragstart", function(d) {							// On drag start
+		          	dragging[d]=this.__origin__=x(d);					// Set associatie array by name and set origin to xpos of axis
+		          	background.attr("visibility", "hidden");			// Hide grey lines
+		       		})
+   		        .on("drag", function(d) {								// On drag
+		          	dragging[d]=Math.min(w,Math.max(0,this.__origin__+=d3.event.dx));	// New xpos
+		         	highlight.attr("d",path);											// Set lines
+		          	dimensions.sort(function(a,b) { return position(a)-position(b); });	// Sort by position
+		          	x.domain(dimensions);
+		         	g.attr("transform", function(d) { return "translate("+position(d)+")"; })	
+		        	})
+		        .on("dragend", function(d) {							// On drag end
+		          	delete this.__origin__;								// Remove origin
+		          	delete dragging[d];									// Remove from dragging[]
+		          	transition(d3.select(this)).attr("transform","translate("+x(d)+")");	// Transition to new position
+		          	transition(highlight)								// Reshow highlighted lines
+		              	.attr("d",path);								// Move them to new place
+		         	background.attr("d",path)							// Set pos of grey lines
+		              	.transition().delay(500).duration(0)			// Wait 1/2 sec
+		             	.attr("visibility","visible");					// Show grey lines
+		        	})
+		        );
+		 
+			 g.append("g")  											// Add an axis and title.
+				.style("font-family","sans-serif")						// Sans
+				.style("font-size","10px")								// Size
+				.attr("fill","#999")									// Text color
+ 				.style(unselectable)									// Unselectable
+				.each(function(d) { d3.select(this).call(axis.scale(y[d])); })
+			    .append("text")											// Add axis title
+ 				.style("font-size",options.lSize+"px")					// Size
+				.attr("stroke","none")									// No fill
+				.attr("stroke-width",0)									// No fill
+				.attr("text-anchor","middle")							// Centered
+				.attr("fill","#"+options.lCol)							// Text color
+				.attr("y",-options.lSize)								// Position
+				.attr("font-weight","bold")								// Bold
+				.text(String);
+	
+		    g.selectAll("path")											// Select the paths
+				.attr("fill","none")									// No fill
+				.attr("stroke","#999")									// Set loine color
+ 
+ 		    g.selectAll(".tick")										// Select the ticks
+				.each(function(d,i) {									// For each tick
+					 if (!this.transform.baseVal.getItem(0).matrix.f)	// If top-most
+					 	this.style['opacity']=0;						// Hide it
+					})
+		
+			g.append("g")		  										// Add and store a brush for each axis.
+				.each(function(d) { d3.select(this).call(y[d].brush = d3.svg.brush().y(y[d]).on("brush", brush)); })
+		    	.selectAll("rect")										// Select the rect
+		      	.attr("x",-8)											// Position left of line
+		      	.attr("width",16)										// Set width
+				.attr("fill-opacity",.3)								// Set opacity
+ 	
+			function transition(g) {									// TRANSITION
+			  return g.transition().duration(500);						// Wait 1/2 sec
+			}
+
+			function position(d) {										// GET POSITION
+			  var v=dragging[d];										// Dragging
+			  return v == null ? x(d) : v;								// Return pos based on in dragging or not
+			}
+			
+			function path(d) {											// GET PATH
+		  		return line(dimensions.map(function(p) { return [position(p), y[p](d[p])]; }));
+			}
+			
+			function brush() {											// Handles a brush event, toggling the display of highlight lines.
+			  	var actives=dimensions.filter(function(p) { return !y[p].brush.empty(); });
+			 	var extents=actives.map(function(p) { return y[p].brush.extent(); });
+			 	highlight.style("display", function(d) {
+				  		return actives.every(function(p, i) {
+							return extents[i][0] <= d[p] && d[p] <= extents[i][1];
+				    		}) ? null : "none";
+					  });
+				}
+
+			}															// End Parallel
 	
 		firstTime=false;												// Not first time thru
 //		}																// End update

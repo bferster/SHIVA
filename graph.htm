@@ -31,6 +31,7 @@
 			<option>Tree</option>
 			<option>Bubble</option>
 			<option>Stream</option>
+			<option>Parallel</option>
 			<option>Chord</option>
 		</select></p>
     <table id="propertyTable" class="propTable">
@@ -110,6 +111,17 @@
 				dateFormat: 				{	def:'mo d, y', 		opt:'m/d/y|m/y|y|mo d, y|mo, y|m/d/y h:m|mo d, y h:m',	des:'Date format'}, 
 				lSize: 						{	def:'12', 			opt:'number',		 	des:'Font size'},
 				lCol: 						{	def:'000000', 		opt:'color',		 	des:'Font color'},
+				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
+				},
+		Parallel: {
+				dataSourceUrl: 				{	def:'https://docs.google.com/spreadsheet/ccc?key=0AohdE1_3ZElJdE1NNy14SnhUdUhNUV9lWkdJSlZ3OGc&usp=sharing', 			opt:'string',		 	des:'Data source URL'}, 
+				height: 					{	def:'400', 			opt:'number',			des:'Height'},
+				width: 						{	def:'800', 			opt:'number',			des:'Width'}, 
+				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
+				lSize: 						{	def:'12', 			opt:'number',		 	des:'Font size'},
+				lCol: 						{	def:'000000', 		opt:'color',		 	des:'Font color'},
+				eWid:						{	def:'1', 			opt:'number',			des:'Line width'},
+				eCol: 						{	def:'4682B4', 		opt:'color',		 	des:'Line color'},
 				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
 				},
 		Chord: {

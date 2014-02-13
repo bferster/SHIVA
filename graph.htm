@@ -120,8 +120,9 @@
 				backCol: 					{ 	def:'ffffff', 		opt:'color',			des:'Background color'},
 				lSize: 						{	def:'12', 			opt:'number',		 	des:'Font size'},
 				lCol: 						{	def:'000000', 		opt:'color',		 	des:'Font color'},
-				eWid:						{	def:'1', 			opt:'number',			des:'Line width'},
-				eCol: 						{	def:'4682B4', 		opt:'color',		 	des:'Line color'},
+				eWid:						{	def:'1.5', 			opt:'number',			des:'Active line width'},
+				eCol: 						{	def:'4682B4', 		opt:'color',		 	des:'Active line color'},
+				iCol: 						{	def:'cccccc', 		opt:'color',		 	des:'Inactive line color'},
 				ud: 						{	def:'false', 		opt:'true|false',	 	des:'Enable user draw?'} 
 				},
 		Chord: {
@@ -159,9 +160,9 @@
 	helpText['Area style']="<b>Stream</b> data is displayed as a centeredstream.<br><b>Stacked</b> displays as a traditional stacked area chart.<br><b>Full</b> a traditional stacked area chart normalized to fill entire height.";
 	helpText['Area shape']="<b>Curved</b> data area is displayed as a curved shape.<br><b>Flat</b> data area is displayed with straight edges.<br><b>Stepped</b> data area is displayed as a series of steps.";
 	helpText['Date format']="The format that dates will be displayed.";
-	
-	helpText['Line color']="This is the color of the highlighted lines. In the text box to the right enter a value that sets the default node color. Either click on the square color chip icon to launch the color picker and select a color, or type a hexadecimal color code in the text box.";
-	helpText['Line width']="This is the width of the highlighted lines.";
+	helpText['Active line color']="This is the color of the highlighted lines. In the text box to the right enter a value that sets the default node color. Either click on the square color chip icon to launch the color picker and select a color, or type a hexadecimal color code in the text box.";
+	helpText['Active Line width']="This is the width of the highlighted lines.";
+	helpText['Inactive line color']="This is the color of the undelected lines. In the text box to the right enter a value that sets the default node color. Either click on the square color chip icon to launch the color picker and select a color, or type a hexadecimal color code in the text box.";
 	
 	helpText['Enable user draw?']="Use the drop-down menu to the right to toggle whether or not users can interactively draw on your visualization. Note these drawings are for users only and are not saved with the visualization. In order to draw users will need to click on the pencil icon in the bottom left of your visualization.";
 
@@ -234,20 +235,27 @@
 
 	function ReEdit(jsonData)
 	{
-		if (jsonData) {
-			if (jsonData.chartType)
-				chartType=jsonData.chartType;
+	  if (jsonData) {
+      if (jsonData.chartType)
+        chartType=jsonData.chartType;
+      }
+    else{
+		var s,e;
+	    var query=window.location.search.substring(1);
+	    if ((s=query.indexOf("&chartType=")) != -1)
+			if ((e=query.indexOf("&",s+1)) != -1)
+				chartType=query.substring(s+11,e);
+		}
+	SetAttributes(chartType,false);
+    shivaLib.ReEdit(jsonData,props[chartType]);
+    for (var i=0;i<$("#chartType option").length;i++) 
+		if ($("#chartType option")[i].text.replace(/ /g,"") == chartType) {
+			chartType=$("#chartType option")[i].text;
+			$("select#chartType").val(chartType);
+			break;
 			}
-		else{
-			var s,e;
-			var query=window.location.search.substring(1);
-			if ((s=query.indexOf("&chartType=")) != -1)
-				if ((e=query.indexOf("&",s+1)) != -1)
-					chartType=query.substring(s+11,e);
-			}
-		SetAttributes(chartType);	
-		$("#chartType").val(chartType);
-		Draw();
+    chartType=chartType.replace(/ /g,"");
+    Draw();
 	}
 
 	function ShowHelp(att)

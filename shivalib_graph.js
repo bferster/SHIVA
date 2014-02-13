@@ -594,9 +594,10 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			}
 		}															// End bubble
 	
-		// STEAM /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+		// STREAM /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
 
 		else if (options.chartType == "Stream") {						// Stream graph
+			canPan=false;												// No pan/zoom
 			var colorRange=["#B30000", "#E34A33", "#FC8D59", "#FDBB84", "#FDD49E", "#FEF0D9"];
 			if (options.sCol != "none") {								// Using a specified color set
 				colorRange=[];
@@ -712,15 +713,35 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		        	.domain(d3.extent(dataSet, function(p) { return +p[d]; }))	// Link to domain
 		        	.range([options.height-options.lSize*4,0]));								// Set range
 		 	 	}));	
-		   
-		   var background=svg.append("g")  								// Draw lines in grey
+	
+
+			function position(d) {										// GET POSITION
+				var v=dragging[d];										// Dragging
+			  	return v == null ? x(d) : v;							// Return pos based on in dragging or not
+				}
+			
+			function path(d) {											// GET PATH
+		  		return line(dimensions.map(function(p) { return [position(p), y[p](d[p])]; }));
+				}
+			
+			function brush() {											// Handles a brush event, toggling the display of highlight lines.
+			  	var actives=dimensions.filter(function(p) { return !y[p].brush.empty(); });
+			 	var extents=actives.map(function(p) { return y[p].brush.extent(); });
+			 	highlight.style("display", function(d) {
+				  		return actives.every(function(p, i) {
+							return extents[i][0] <= d[p] && d[p] <= extents[i][1];
+				    		}) ? null : "none";
+					  });
+				}
+	
+   		   var background=svg.append("g")  								// Draw lines in grey
 		   		.selectAll("path")										// All paths
 		      	.data(dataSet)											// Set data
 		    	.enter().append("path")									// Add path
 		      	.attr("d",path)											// Set path data using path()
 				.attr("fill","none")									// Lines
- 				.attr("stroke","#ccc")									// Grey
-				.attr("stroke-opacity",.4)								// Opacity
+				.attr("stroke","#"+options.iCol)						// Inactive color
+ 				.attr("stroke-opacity",.4)								// Opacity
  	
 		   var highlight=svg.append("g")  								// Draw lines in highlight color
 		   		.selectAll("path")										// All paths
@@ -797,33 +818,14 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
  	
 			function transition(g) {									// TRANSITION
 			  return g.transition().duration(500);						// Wait 1/2 sec
-			}
-
-			function position(d) {										// GET POSITION
-			  var v=dragging[d];										// Dragging
-			  return v == null ? x(d) : v;								// Return pos based on in dragging or not
-			}
-			
-			function path(d) {											// GET PATH
-		  		return line(dimensions.map(function(p) { return [position(p), y[p](d[p])]; }));
-			}
-			
-			function brush() {											// Handles a brush event, toggling the display of highlight lines.
-			  	var actives=dimensions.filter(function(p) { return !y[p].brush.empty(); });
-			 	var extents=actives.map(function(p) { return y[p].brush.extent(); });
-			 	highlight.style("display", function(d) {
-				  		return actives.every(function(p, i) {
-							return extents[i][0] <= d[p] && d[p] <= extents[i][1];
-				    		}) ? null : "none";
-					  });
 				}
 
 			}															// End Parallel
 	
-		firstTime=false;												// Not first time thru
-//		}																// End update
+	firstTime=false;													// Not first time thru
 	shivaLib.SendReadyMessage(true);									// Send ready msg to drupal manager
-}
+	}																	// End update
+
 
 /////////////////////////////////
 // HELPER FUNCTIONS

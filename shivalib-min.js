@@ -1624,10 +1624,11 @@ else if(v[0]=="ShivaAct=play"){if(!shivaLib.imageMob.interval)
 $("#"+this.container+"PlyBut").trigger("click");}
 else if(v[0]=="ShivaAct=pause"){if(shivaLib.imageMob.interval)
 shivaLib.DrawImage();}}
-SHIVA_Show.prototype.GetSpreadsheet=function(url,fields,query,callback,addHeader)
-{if(url.indexOf("google.com")!=-1){var query=new google.visualization.Query(url);query.send(handleGoogleResponse);}
+SHIVA_Show.prototype.GetSpreadsheet=function(url,fields,query,callback,addHeader,sendError)
+{this.spreadsheetError=null;if(url.indexOf("google.com")!=-1){var query=new google.visualization.Query(url);query.send(handleGoogleResponse);}
 else{$.ajax({type:'GET',url:'proxy.php',data:{url:url},async:false}).complete(handleCSVResponse);}
-function handleCSVResponse(response){var i,j,o,lab;var keys=new Array();var theData=new Array();var data=shivaLib.parseCSV(response.responseText);var cols=data[0].length;if(addHeader||fields){for(i=0;i<data[0].length;++i){lab=$.trim(data[0][i]);if(!lab)
+function handleCSVResponse(response){var i,j,o,lab;var keys=new Array();var theData=new Array();if(!response.responseText&&sendError){callback(null,url);return(null)}
+var data=shivaLib.parseCSV(response.responseText);var cols=data[0].length;if(addHeader||fields){for(i=0;i<data[0].length;++i){lab=$.trim(data[0][i]);if(!lab)
 break;keys.push(lab);}
 cols=keys.length;}
 var rows=data.length;if(fields){for(i=1;i<rows;++i){o={};for(j=0;j<keys.length;++j)
@@ -1638,7 +1639,8 @@ o.push(data[i][j]);else
 o.push((data[i][j]-0));}
 theData.push(o);}}
 callback(theData,url);}
-function handleGoogleResponse(response){var i,j,o,lab;var keys=new Array();var theData=new Array();var data=response.getDataTable();var cols=data.getNumberOfColumns();var rows=data.getNumberOfRows();if(addHeader||fields){for(i=0;i<cols;++i){lab=$.trim(data.getColumnLabel(i));if(!lab)
+function handleGoogleResponse(response){var i,j,o,lab;var keys=new Array();var theData=new Array();var data=response.getDataTable();if(!data&&sendError){callback(null,url);return(null)}
+var cols=data.getNumberOfColumns();var rows=data.getNumberOfRows();if(addHeader||fields){for(i=0;i<cols;++i){lab=$.trim(data.getColumnLabel(i));if(!lab)
 break;keys.push(lab);}
 cols=keys.length;if(addHeader)
 theData.push(keys);}

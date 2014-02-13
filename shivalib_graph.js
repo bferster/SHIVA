@@ -32,13 +32,17 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		$(con).css("background-color","transparent");					// Set background color
 	else																// Normal color
 		$(con).css("background-color","#"+options.backCol);				// Set background color
-	$(con).width(options.width);	$(con).height(options.height);		// Set size
+	$(con).width(options.width);										// Set width
+	if (options.height)													// If height spec'd												
+		$(con).height(options.height);									// Set height
+	else																// Not spec'd
+		$(con).height(options.width),h=w;								// Use width
 	$(con).html("");													// Clear div
 	var colors=d3.scale.category10();									// Default colors
 	
 	// DATA //////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	if (options.chartType == "Network") {								// Force directed
+	if ((options.chartType == "Network") || (options.chartType == "Chord")) {	// Force directed or chord
 		if (options.dataSourceUrl) 										// If a spreadsheet spec'd
 	    	this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
 				var ids=new Object();
@@ -821,7 +825,104 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				}
 
 			}															// End Parallel
+
+		// CHORD /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
+
+		else if (options.chartType == "Chord") {						// Chord graph
+			canPan=false;												// No pan/zoom
+			options.height=options.width;								// Got to be square
+			var outerRadius=options.width/2;							// Radius
+			var innerRadius=outerRadius-options.padding;				// Real chart area
 	
+			var cols=[];												// Holds chart colors
+			if (options.sCol != "none") {								// Using a specified color set
+				var v=options.sCol.split(",");							// Get from optiona
+				for (i=0;i<v.length;++i)	cols.push("#"+v[i]);		// Add to array
+				}
+			else{
+		 		var c=d3.scale.category20c();							// Default colors
+		 		for (i=0;i<20;++i)	cols.push(c(i));					// Add to array
+		 		}
+			var clen=cols.length-1;										// Wrap factor
+	
+			function fade(opacity, src) {								// FADE IN/OUT GROUPING
+	 			 svg.selectAll(".chord")								// Get all chords
+					.filter(function(d,i) { return d.source.index != src && d.target.index != src; })	// If not current
+					.transition()										// Transition
+			 		.style("opacity", opacity);							// Fade
+				}
+			
+			var chord=d3.layout.chord()									// Set layout
+			    .padding(.04)											// Set padding
+			    .sortSubgroups(d3.descending)							// Sort bands by subgroups
+			    .sortChords(d3.descending);								// Sort chords
+			
+			var arc=d3.svg.arc()										// Outer band
+			    .innerRadius(innerRadius)								// Inner radius
+			    .outerRadius((innerRadius+options.bandWidth*1));		// Outer radius
+	
+		 	svg.attr("transform", "translate("+outerRadius+","+outerRadius+")"); // Position
+		  
+			var indexByName=d3.map();									// Maps names to index
+			var nameByIndex=d3.map();									// Maps index to names
+		   	var	matrix=[];												// Correspondence matrix
+		
+			dataSet.nodes.forEach(function(d,i) {  						// Compute name maps
+				nameByIndex.set(i,d.name);								// Add it to map
+		 		indexByName.set(d.name,i);								// Add it to inverse map
+				});
+				
+			dataSet.nodes.forEach(function(d) {							// For each node
+				var row=[];												// Make new row
+				for (i=0;i<dataSet.nodes.length;++i) row[i]=0;			// Add row elements
+				matrix.push(row);										// Add row
+				});
+		
+			dataSet.edges.forEach(function(d,i) { 						// For each edge
+		    	matrix[d.source][d.target]++;							// Add to count of connections			
+		    	matrix[d.target][d.source]++;							// And back			
+				});
+				
+				chord.matrix(matrix);										// Set correspondence matrix
+		
+			var g=svg.selectAll(".group")								// Add outer groupings
+	      		.data(chord.groups)										// For each node
+	    		.enter().append("g")									// Add group
+	      		.attr("class","group");									// Call it a 'group'
+	
+		  	g.append("path")											// Add grouping arc
+		      	.style("fill",   function(d) { return cols[d.index%clen]; })	// Set fill color
+		      	.style("stroke", function(d) { return cols[d.index%clen]; })	// Set edge color
+		      	.attr("d",arc)											// Draw grouping
+	   			.on("mouseover",function(d,i) { fade(.15,i);} )			// Fade down
+	  			.on("mouseout", function() { fade(.67,i);} );				// Fade up
+	    
+		  	g.append("text")											// Add node label						
+		  		.each(function(d) { d.angle=(d.startAngle+d.endAngle)/2; })	// Angle
+		     	.attr("dy",".35em")										// Y offset
+		     	.style("font-family","sans-serif")						// Sans
+		     	.style("font-size",options.lSize+"px")					// Size
+		    	.style("fill","#"+options.lCol)							// Color
+		      	.attr("transform", function(d) {						// Position
+		       		 return "rotate("+(d.angle*180/Math.PI-90)+")"		// Rotate
+		            	+"translate("+(innerRadius*1+options.bandWidth*1+6)+")"	// Position
+		            	+(d.angle > Math.PI ? "rotate(180)" : "");		// Flip if over 180 degrees
+		     		 })
+		      	.style("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })	// Flip anchor is > 180 degrees
+		      	.text(function(d) { return nameByIndex.get(d.index); });
+	
+			svg.selectAll(".chord")										// Add chords
+				.data(chord.chords)										// For each chord
+			    .enter().append("path")									// Add a path
+			    .attr("class","chord")									// Call it a 'chord'
+				.style("stroke-width",options.eWid)
+				.style("opacity",.67)
+			    .style("stroke", function(d) { return d3.rgb(cols[d.source.index%clen]).darker(); }) // Darker color edge 
+			    .style("fill",   function(d) { return options.fill == "false" ?  "none" : cols[d.source.index%clen] })	// Set fill color
+			    .attr("d", d3.svg.chord().radius(innerRadius));			// Position
+	
+			}															// End Chord
+
 	firstTime=false;													// Not first time thru
 	shivaLib.SendReadyMessage(true);									// Send ready msg to drupal manager
 	}																	// End update

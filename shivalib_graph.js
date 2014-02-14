@@ -985,6 +985,7 @@ function AddPopup(d)												// SHOW A POPUP
 	$("#d3Popup").css({left:x,top:y});									// Position
 	$("#d3Popup").html(shivaLib.LinkToAnchor(d.info));					// Add text										
 	$("#d3Popup").show();												// Show it
+	$("#d3Popup").delay(shivaLib.options.popupTime*1000).fadeOut(400);	// Close after n seconds
 	}
 
 function DrawSVGShape(shape, size)									// DRAW A SHAPE

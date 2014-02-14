@@ -1735,7 +1735,14 @@ redraw();});else if(dataSet)
 redraw();}
 else if((options.chartType=="Tree")||(options.chartType=="Bubble")){if(options.chartType=="Bubble")minZoom=1;if(options.dataSourceUrl){var nodeLink=false;this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data){var items=new Array();for(i=0;i<data.length;++i)
 if(data[i][0]=="link"){nodeLink=true;break;}
-if(nodeLink){}
+if(nodeLink){var ids=new Object();dataSet={nodes:[],edges:[]};for(i=0;i<data.length;++i){if(!data[i][0])
+continue;else if(data[i][0].match(/node/i)){o={};o.name=data[i][2];o.id=data[i][1];if(data[i][4])
+o.info=data[i][4];ids[o.id]=dataSet.nodes.length;dataSet.nodes.push(o);}
+else if(data[i][0].match(/link/i)){o={};o.source=data[i][1];o.target=data[i][3];dataSet.edges.push(o);}}
+for(i=0;i<dataSet.edges.length;++i){dataSet.edges[i].source=ids[dataSet.edges[i].source];dataSet.edges[i].target=ids[dataSet.edges[i].target];}
+var v=[];for(i=0;i<dataSet.nodes.length;++i){v[i]=0;for(j=0;j<dataSet.edges.length;++j){if(dataSet.edges[j].source==i){o={};o.val=1;v[dataSet.edges[j].target]=1;o.parent=dataSet.nodes[i].name;o.name=dataSet.nodes[dataSet.edges[j].target].name;items.push(o);}}}
+for(i=0;i<dataSet.nodes.length;++i)
+if(!v[i]){items.splice(0,0,{name:dataSet.nodes[i].name,parent:"root",val:1});break;}}
 else{for(i=0;i<data.length;++i){if(!data[i][0])
 continue;if(!data[i][0].match(/node/i))
 continue;o={};o.name=data[i][2];o.parent=data[i][1];if(data[i][3])

@@ -212,7 +212,6 @@ d3.json("flare.json", function(error, imports) {
       .style("stroke", function(d) { return d3.rgb(fill(d.source.index)).darker(); })
       .style("fill", function(d) { trace(d); 
       	return fill(d.source.index); })
-    .tension(.5)
  
       .attr("d", d3.svg.chord().radius(innerRadius));
 

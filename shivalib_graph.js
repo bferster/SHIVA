@@ -113,14 +113,58 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		if (options.chartType == "Bubble")	minZoom=1;					// Cap zoom at 1
 		if (options.dataSourceUrl) {									// If a spreadsheet spec'd
   			var nodeLink=false;											// Assume simple format
-  			this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
+   			this.GetSpreadsheet(options.dataSourceUrl,false,null,function(data) {	// Get spreadsheet data
 			var items=new Array();										// Holds items
 			for (i=0;i<data.length;++i) 								// For each row
 				if (data[i][0] == "link") {								// If link node
 					nodeLink=true;										// Node/link format
 					break;												// Quit looking
 					}
-			if (nodeLink) {
+			if (nodeLink) {												// If using line/node format
+				var ids=new Object();
+				dataSet={ nodes:[],edges:[]};							// Clear data
+				for (i=0;i<data.length;++i) {							// For each row
+					if (!data[i][0])									// If no data
+						continue;										// Skip
+					else if (data[i][0].match(/node/i)) {				// If a node
+						o={};											// New object
+						o.name=data[i][2];								// Add name
+						o.id=data[i][1];								// Add id
+						if (data[i][4])									// If an info set
+							o.info=data[i][4];							// Add info
+						ids[o.id]=dataSet.nodes.length;					// Set index
+						dataSet.nodes.push(o);							// Add node to list
+						}
+					else if (data[i][0].match(/link/i)) {				// If a link
+						o={};											// New object
+						o.source=data[i][1];							// Add name
+						o.target=data[i][3];							// Add id
+						dataSet.edges.push(o);							// Add node to list
+						}
+					}
+	 			for (i=0;i<dataSet.edges.length;++i) {						// For each edge
+	 				dataSet.edges[i].source=ids[dataSet.edges[i].source];	// Convert id to index
+	 				dataSet.edges[i].target=ids[dataSet.edges[i].target];	// Convert id to index
+	 				}
+				var v=[];
+	 			for (i=0;i<dataSet.nodes.length;++i) {					// For each node
+		 			v[i]=0;
+		 			for (j=0;j<dataSet.edges.length;++j) {				// For each edge
+						if (dataSet.edges[j].source == i) {				// Source is this node
+							o={};										// New object
+							o.val=1;									// Put 1 in
+							v[dataSet.edges[j].target]=1;				// Has a parent
+							o.parent=dataSet.nodes[i].name;				// Set name
+							o.name=dataSet.nodes[dataSet.edges[j].target].name;	// Set parent
+							items.push(o);								// Add to array
+							}
+						}
+					}
+	 			for (i=0;i<dataSet.nodes.length;++i) 					// For each node
+	 				if (!v[i]) {										// If not linked to anything
+	 					items.splice(0,0,{name:dataSet.nodes[i].name,parent:"root", val:1});	// Add as root
+	 					break;											// Quit looking
+						}
 				}
 			else{														// Simple tree format
 				for (i=0;i<data.length;++i) {							// For each row
@@ -140,7 +184,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					items.push(o);										// Add to array
 					}
 				}
-		
+
 		dataSet=[];														// Init as array first
 
 		var dataMap=items.reduce(function(map, node) {					// Create datamap					

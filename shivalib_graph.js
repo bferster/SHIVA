@@ -135,10 +135,27 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 						ids[o.id]=dataSet.nodes.length;					// Set index
 						dataSet.nodes.push(o);							// Add node to list
 						}
+					else if (data[i][0].match(/class/i)) {				// If a class
+						if (!styles[data[i][1]])						// If new
+							styles[data[i][1]]={};						// Create new style object
+						if (data[i][2].match(/color/i))					// A color
+							styles[data[i][1]].col=data[i][3];			// Set it
+						if (data[i][2].match(/type/i))					// A shape
+							styles[data[i][1]].shape=data[i][3];		// Set it
+						if (data[i][2].match(/linewidth/i))				// A line width
+							styles[data[i][1]].eWid=data[i][3];			// Set it
+						if (data[i][2].match(/linecolor/i))				// A line color
+							styles[data[i][1]].eCol=data[i][3];			// Set it
+						if (data[i][2].match(/alpha/i))					// Alpha
+							styles[data[i][1]].alpha=data[i][3];		// Set it
+						if (data[i][2].match(/dim/i))					// Size
+							styles[data[i][1]].size=data[i][3];			// Set it
+						}
 					else if (data[i][0].match(/link/i)) {				// If a link
 						o={};											// New object
 						o.source=data[i][1];							// Add name
 						o.target=data[i][3];							// Add id
+						o.style=data[i][2];								// Add style
 						dataSet.edges.push(o);							// Add node to list
 						}
 					}
@@ -155,6 +172,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 							o.val=1;									// Put 1 in
 							v[dataSet.edges[j].target]=1;				// Has a parent
 							o.parent=dataSet.nodes[i].name;				// Set name
+							o.style=dataSet.edges[j].style;
 							o.name=dataSet.nodes[dataSet.edges[j].target].name;	// Set parent
 							items.push(o);								// Add to array
 							}
@@ -518,8 +536,18 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		
 			link.enter().insert("path","g")	  							// Enter any new links at the parent's previous position
 				.style("fill","none")									// No fule
-				.style("stroke","#"+options.eCol)						// Color
-				.style("stroke-width",options.eWid)						// Width
+				.style("stroke", function(d, i) {						// Edge col
+					if (d.target.style && styles[d.target.style] && styles[d.target.style].eCol)	// If a style spec'd
+						return styles[d.target.style].eCol;				// Get col from data
+					else												// Default
+						return "#"+options.eCol;						// Set wid
+						})									
+				.style("stroke-width", function(d, i) {					// Edge width
+					if (d.target.style && styles[d.target.style] && styles[d.target.style].eWid)	// If a style spec'd
+						return styles[d.target.style].eWid;				// Get col from options
+					else												// Default
+						return options.eWid;							// Set wid
+					})									
 				.attr("d", function(d) {								// Set path data
 					var o={ x:d.source.x,y:d.source.y };				// dataSet dot											
 			        return diagonal({source:o, target:o});				// Create diagonal

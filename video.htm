@@ -6,6 +6,7 @@
 	<title>SHIVA Video</title>
  	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
 	<script type="text/javascript" src="shivalib-min.js"></script>
+	<script type="text/javascript" src="shivalib_video.js"></script>
 	<script type="text/javascript" src="SHIVA_Event.js"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
@@ -59,7 +60,8 @@
 		height:		 				{	def:'366', 			opt:'number',		 	des:'Height of player'}, 
 		width:	 					{	def:'600', 			opt:'number',		 	des:'Width of player'},
 		duration:	 				{	def:'?', 			opt:'text',		 		des:'Duration of clip'},
-		notes: 						{	def:'false', 		opt:'true|false',		des:'Enable note taking?'},
+		vnotes: 					{	def:'false', 		opt:'true|false',		des:'Enable note taking?'},
+		ntext: 						{	def:'',				opt:'hidden',			des:'Holds notes'},
 		ud: 						{	def:'false', 		opt:'true|false',		des:'Enable user draw?'}
 		}
 	
@@ -140,6 +142,14 @@
 		var v=re.exec($("#propInput0").val());
 		if (v)	
 			$("#propInput0").val("kaltura_"+v[1])
+
+		var n=$("#shivaNotesTbl tr").length;						
+		if (n) {
+			var str="";
+			for (var i=0;i<n;++i) 										
+			if ($("#ntx-"+i).val())	str+=$("#ntc-"+i).text()+$("#ntx-"+i).val()+"|";
+			$("#propInput9").val(str);			
+			}
 		return shivaLib.SaveData(mode,shivaGroup,null,props);
 	}	
 

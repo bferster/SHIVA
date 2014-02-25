@@ -38,22 +38,21 @@
  	</style>
 </head>
 <body>
-<div id="showDiv" style="width:70%;padding:0px;margin:0px">
+<div id="showDiv" style="padding:0px;margin:0px">
 	<div id="titleDiv" style="position:absolute;width:70%" class="title unselectable"></div>
-	<div id="contentDiv" style="position:absolute" class="contents unselectable"></div>
 	<div id="playerDiv" style="position:absolute"></div>
 	<div id="slideDiv" style="position:absolute;" class="slide unselectable"></div>
 	<div id="playerSiz" style="position:absolute;width:16px;cursor:col-resize" class="unselectable"></div>
-	<div id="contentSiz" style="position:absolute;width:8px;cursor:col-resize" class="unselectable"></div>
-	<div id="controlDiv" style="position:absolute;width:70%;height:30px;padding:8px;margin:0px">
+	<div id="controlDiv" style="position:absolute;height:30px;padding:8px;margin:0px">
 	  	<img src='playbut.gif' style='vertical-align:-4px;cursor:pointer'>&nbsp;&nbsp;
    		<div style="display:inline-block" id="slider"></div>&nbsp;
    		<img src='startdot.gif' style='vertical-align:-2px;cursor:pointer'><span style='vertical-align:1px'>&nbsp;&nbsp;|&nbsp;</span>
    		<img src='enddot.gif' style='vertical-align:-2px;cursor:pointer'>
 	</div>
+	<div id="contentDiv" style="position:absolute" class="contents unselectable"></div>
 	<div id="transDiv" style="position:absolute" class="trans"></div>
-	<div id="transHgt" style="position:absolute;width:70%;height:16px;cursor:row-resize" class="unselectable" ></div>
-
+	<div id="transHgt" style="position:absolute;height:16px;cursor:row-resize" class="unselectable" ></div>
+	<div id="contentSiz" style="position:absolute;width:8px;cursor:col-resize" class="unselectable"></div>
 </div>
 
 
@@ -121,7 +120,7 @@
 		
 $("#slideDiv").html("<img width='100%' src='slide.jpg' onload='ResizePanes(.25,.38,.37)'>");
 $("#playerDiv").html("<img width='100%' src='video.jpg'onload='ResizePanes(.25,.38,.37)'>");
-var str="<h3 style='color:#999'>&nbsp;&nbsp;&nbsp;&nbsp;Contents</h3><ul style='cursor:pointer'>"
+var str="<h3 style='color:#999'>&nbsp;&nbsp;Contents</h3><ul style='cursor:pointer'>"
 str+="<li>Opening remarks</li>"
 str+="<li>Clinton Global Initiative</li>"
 str+="<li>Health in Rwanda</li>"
@@ -149,9 +148,9 @@ $("#transDiv").html(str+"</p>")
 		var mar=8;
 		var w=wid-32-mar;
 		$("#playerDiv").css({ left:mar+"px",width:w*m+"px",top:playerTop+"px"});
-		$("#slideDiv").css({ left:(w*(l+m)+mar+16)+"px",width:w*r+"px",top:playerTop+"px"});
+		$("#slideDiv").css({ left:(w*(m)+mar+16)+"px",width:w*r+"px",top:playerTop+"px"});
 		var h=Math.max($("#playerDiv").height(),$("#slideDiv").height())+playerTop;
-		$("#playerSiz").css({ left:(w*(l+m)+mar+8)+"px",height:h+"px",top:playerTop+"px"});
+		$("#playerSiz").css({ left:(w*(m)+mar+8)+"px",height:h+"px",top:playerTop+"px"});
 		
 		
 		controlTop=h+32;

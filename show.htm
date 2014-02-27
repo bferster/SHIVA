@@ -44,7 +44,6 @@
 						color:#999;font-weight:bold;
 						}
 
-
  	</style>
 </head>
 <body>
@@ -60,7 +59,7 @@
 	</div>
 	<div id="playerSiz" style="position:absolute;width:16px;cursor:col-resize" class="unselectable" title="Resize player"></div>
 	<div id="contentDiv" style="position:absolute" class="contents unselectable">
-		<span class="labels">Contents</span><div id="contentsText" style="height:100%;overflow:auto;margin-top:16px""></div>
+		<span class="labels">Contents</span><div id="contentsText" style="height:100%;overflow:auto;margin-top:16px"></div>
 	</div>
 	<div id="transDiv" style="position:absolute" class="trans">
 		<span class="labels">Transcript</span><div id="transcriptText" style="height:100%;overflow:auto;margin-top:16px;padding-right:8px"></div>
@@ -85,41 +84,56 @@
 	
 ///////// INIT  /////////////
 
-	$(document).ready(function() {
-		shivaLib=new SHIVA_Show("containerDiv",[{shivaGroup:"Video"}]);
-		shivaLib.drupalMan=(""+window.location).match(/pr=d/);
-		if (window.addEventListener) 
-			window.addEventListener("message",shivaEventHandler,false);
-		else
-			window.attachEvent("message",shivaEventHandler);
-		$("#slider").slider();
-		showWid=$("#showDiv").width();
-		SetContent();
+	$(document).ready(function() {												// When loaded
+		shivaLib=new SHIVA_Show("containerDiv",[{shivaGroup:"Video"}]);			// Load SHIVA lib
+		shivaLib.drupalMan=(""+window.location).match(/pr=d/);					// Drupal flag
+		if (window.addEventListener) 											// If supported this way
+			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
+		else																	// Use other method
+			window.attachEvent("message",shivaEventHandler);					// Add handler
+		$("#slider").slider();													// Init slider
+		showWid=$("#showDiv").width();											// Get width
+		SetContent();															// Add show content
 		
-		$("#playerSiz").draggable({
-			cursor: "col-resize", axis:"x",
-			stop: ResizePanes,
-			drag: function(event, ui) {
-			 	playerSlideRatio=Math.max(0,Math.min(1,(event.clientX-8)/(showWid+16)));
-				ResizePanes();
+		$("#transHgt").hover(													// If over transcript height control
+			function(){ $(this).css("background-color","lightblue")},			// Highlight
+			function(){ $(this).css("background-color","transparent")			// Hide
+			});
+		$("#transSiz").hover(													// Transcript width
+			function(){ $(this).css("background-color","lightblue")},			// Highlight
+			function(){ $(this).css("background-color","transparent")			// Hide
+			});
+		$("#playerSiz").hover(													// Player width
+			function(){ $(this).css("background-color","lightblue")},			// Highlight
+			function(){ $(this).css("background-color","transparent")			// Hide
+		});
+
+		
+		$("#playerSiz").draggable({												// DRAG PLAYER WIDTH HANDLER
+			cursorAt:{left:8},
+			cursor: "col-resize", axis:"x",										// X-only
+			stop: ResizePanes,													// Resize panes when done
+			drag: function(event, ui) {											// On drag
+			 	playerSlideRatio=Math.max(0,Math.min(1,(event.clientX-8)/(showWid+16)));	// Set ratio between windows
+				ResizePanes();													// Resize panes
 				}
 			});
 		
-		$("#transHgt").draggable({
-			cursor: "row-resize", axis:"y",
-			stop: ResizePanes,
-			drag: function(event, ui) {
-				transcriptHgt=Math.max(event.clientY-$("#controlDiv").css("top").replace(/px/,"")*1-$("#controlDiv").height(),0)-32;
-				ResizePanes();
+		$("#transHgt").draggable({												// DRAG TRANSCRIPT HEIGHT HANDLER		
+			cursor: "row-resize", axis:"y",										// Y-only
+			stop: ResizePanes,													// Resize panes when done
+			drag: function(event, ui) {											// On drag
+				transcriptHgt=Math.max(event.clientY-$("#controlDiv").css("top").replace(/px/,"")*1-$("#controlDiv").height(),0)-32;  // Set hgt
+				ResizePanes();													// Resize panes
 				}
 			});
 
-		$("#transSiz").draggable({
-			cursor: "col-resize", axis:"x",
-			stop: ResizePanes,
-			drag: function(event, ui) {
-			 	transcriptInfoRatio=Math.max(0,Math.min(1,(event.clientX)/showWid));
-				ResizePanes();
+		$("#transSiz").draggable({												// DRAG TRANSCRIPT WIDTH HANDLER
+			cursor: "col-resize", axis:"x",										// X-only
+			stop: ResizePanes,													// Resize panes when done
+			drag: function(event, ui) {											// On drag
+			 	transcriptInfoRatio=Math.max(0,Math.min(1,(event.clientX)/showWid)); // Set ratio between windows
+				ResizePanes();													// Resize panes
 				}
 			});
 
@@ -168,7 +182,7 @@ $("#informationText").html(str)
 		$("#transSiz").css({ left:w+8+"px",height:transcriptHgt+"px",top:ct+"px"});	// Pos transcript sizer
 		w=showWid*(1-transcriptInfoRatio);												// Info window width
 		$("#infoDiv").css({ left:(showWid-w+24)+"px",width:(w-16)+"px",height:transcriptHgt+"px",top:ct+"px"});
-		$("#transHgt").css({ top:h+transcriptHgt+70+"px"});								// Set transcript height
+		$("#transHgt").css({ top:ct+transcriptHgt+"px"});								// Set transcript height
 		}		
 
 	function Popup(msg)

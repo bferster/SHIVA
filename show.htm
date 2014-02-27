@@ -93,7 +93,7 @@
 			window.attachEvent("message",shivaEventHandler);					// Add handler
 		$("#slider").slider();													// Init slider
 		showWid=$("#showDiv").width();											// Get width
-		SetContent();															// Add show content
+		LoadContent();															// Load show content
 		
 		$("#transHgt").hover(													// If over transcript height control
 			function(){ $(this).css("background-color","lightblue")},			// Highlight
@@ -140,7 +140,7 @@
 	});
 
 
-	function SetContent()
+	function LoadContent()												// LOAD SHOW CONTENT
 	{
 		
 $("#slideDiv").html("<img width='100%' src='slide.jpg' onload='ResizePanes()'>");

@@ -53,8 +53,9 @@
 	<div id="slideDiv" style="position:absolute" class="slide unselectable"></div>
 	<div id="controlDiv" style="position:absolute" class="control unselectable">
 	  	<img src="playbut.gif" title="Play video") style="vertical-align:-4px;cursor:pointer">&nbsp;&nbsp;
-   		<div style="display:inline-block" id="slider"></div>&nbsp;
-   		<img src="startdot.gif" title="Go to previous slide" style="vertical-align:-2px;cursor:pointer"><span style="vertical-align:1px">&nbsp;&nbsp;|&nbsp;</span>
+   		<div style="display:inline-block" id="slider"></div>&nbsp;&nbsp;
+   		<img src="settingsbut.gif" id="settings" title="Settings menu" style="vertical-align:-2px;cursor:pointer"><span style="vertical-align:1px">&nbsp;&nbsp;</span>
+  		<img src="startdot.gif" title="Go to previous slide" style="vertical-align:-2px;cursor:pointer"><span style="vertical-align:1px">&nbsp;&nbsp;|&nbsp;</span>
    		<img src="enddot.gif" title="Go to next slide" style="vertical-align:-2px;cursor:pointer">
 	</div>
 	<div id="playerSiz" style="position:absolute;width:16px;cursor:col-resize" class="unselectable" title="Resize player"></div>
@@ -67,8 +68,8 @@
 	<div id="infoDiv" style="position:absolute" class="info">
 		<span class="labels">More information</span><div id="informationText" style="height:100%;overflow:auto;margin-top:16px"></div>
 	</div>
-	<div id="transHgt" style="position:absolute;width:1000px;height:16px;cursor:row-resize" class="unselectable" title="Change transcript height"></div>
-	<div id="transSiz" style="position:absolute;width:16px;cursor:col-resize;" class="unselectable"title="Resize transcript"></div>
+	<div id="transHgt" style="position:absolute;width:1000px;height:16px;cursor:row-resize;border-bottom:3px solid #ccc" class="unselectable" title="Change transcript height"></div>
+	<div id="transSiz" style="position:absolute;width:16px;cursor:col-resize" class="unselectable"title="Resize transcript"></div>
 </div>
 
 
@@ -107,6 +108,26 @@
 			function(){ $(this).css("background-color","lightblue")},			// Highlight
 			function(){ $(this).css("background-color","transparent")			// Hide
 		});
+
+		$("#settings").on("click", function(e) {							// SETTINGS HANDLER
+			if ($("#setpopup").length) {										// If open
+				$("#setpopup").hide(200, function(){ this.remove() });			// Hide, then remove it
+				return;															// Quit
+				}
+			var w=200;
+			var x=$("#controlDiv").width()-w-10;
+			var str="<b>Player Settings</b><br><hr><br>&nbsp;&nbsp;Volume<br>&nbsp;&nbsp;Speed<br>&nbsp;&nbsp;Search<br><br>";
+			$("body").append("<div id='setpopup' style='display:none;position:absolute;width:"+w+"px;height:auto;background-color:#f8f8f8;left:"+x+"px;top:"+y+"px;border:1px solid #999;padding:12px' class='rounded-corners'>"+str+"</div>");
+			var h=$("#setpopup").height();
+			var y=$("#controlDiv").css("top").replace(/px/,"")-h-28;			
+			$("#setpopup").css("top",y);
+			$("#setpopup").show(200);											// Show it
+
+			});
+		
+			
+
+
 
 		
 		$("#playerSiz").draggable({												// DRAG PLAYER WIDTH HANDLER
@@ -176,7 +197,7 @@ $("#informationText").html(str)
 		$("#contentDiv").css({ top:ct+"px",height:transcriptHgt+"px"});					// Position/size contents
 		var cw=$("#contentDiv").width()+8;												// Get width of content panel
 		$("#controlDiv").css({ top:h+"px" });											// Position control slider
-		$("#slider").width(showWid-90);													// Slider width
+		$("#slider").width(showWid-120);													// Slider width
 		w=showWid*transcriptInfoRatio;													// Transcript width
 		$("#transDiv").css({ left:cw+"px",width:(w-cw-8)+"px",height:transcriptHgt+"px",top:ct+"px"});
 		$("#transSiz").css({ left:w+8+"px",height:transcriptHgt+"px",top:ct+"px"});	// Pos transcript sizer

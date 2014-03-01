@@ -67,7 +67,7 @@
 		<span class="labels">Contents</span><div id="contentsText" style="height:100%;overflow:auto;margin-top:16px"></div>
 	</div>
 	<div id="transDiv" style="position:absolute" class="trans">
-		<span class="labels">Transcript</span><div id="transcriptText" style="height:100%;overflow:auto;margin-top:16px;padding-right:8px"></div>
+		<span class="labels">Transcript</span><div id="transcriptText" style="height:90%;overflow:auto;margin-top:16px;padding-right:8px"></div>
 	</div>
 	<div id="infoDiv" style="position:absolute" class="info">
 		<span class="labels">More information</span><div id="informationText" style="height:100%;overflow:auto;margin-top:16px"></div>
@@ -111,12 +111,12 @@
 						RunPlayer("scrub",ui.value);							// Show
 						}
 				});
-		$("#transcriptText").on("click", function (e) {
-				var y=e.clientY-$("#controlDiv").css("top").replace(/px/,"")-80;
-				y=y/$("#transcriptText").height()*playerTRT;
-				RunPlayer("scrub",y);											// Show
-				
-				});
+		$("#transcriptText").on("click", function (e) {							// HANDLE TRANSCRIPT CLICK
+	  		var s=window.getSelection();										// Get selection
+ 			var y=$("#transcriptText").text().indexOf(s.focusNode.textContent);	// Char pos of paragraph
+	 		y=y+s.extentOffset;													// Position in text
+ 			RunPlayer("scrub",GetTimeFromCharPos(y));							// Show
+ 			});
 
 		$("#transHgt").hover(													// If over transcript height control
 			function(){ $(this).css("background-color","lightblue")},			// Highlight
@@ -229,8 +229,8 @@ $("#informationText").html(str)
 		var str="<div style='cursor:pointer;padding-left:12px'>"				// Set up
 		for (i=0;i<toc.length;++i) {											// For each title
 			t=shivaLib.TimecodeToSeconds(toc[i].start);							// Get time
-			str+="<li onclick='RunPlayer(\"play\","+t+")'>"; 					// Add event
-			str+=toc[i].title+"</li>";											// Add title
+			str+="<div onclick='RunPlayer(\"play\","+t+")'><span style='color:#aaa'><b>&bull; </b></span>"; 	// Add event
+			str+=toc[i].title+"</div>";											// Add title
 			}
 		$("#contentsText").html(str+"</div>");									// Set div contents
 	}
@@ -257,6 +257,23 @@ $("#informationText").html(str)
 		$("#transHgt").css({ top:ct+transcriptHgt+"px"});						// Set transcript height
 		}		
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// HELPERS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	function GetTimeFromCharPos(p)										// GET TIME FROM CHARPOS IN TRANSCRIPT
+	{
+	 	var t=p/$("#transcriptText").text().length*playerTRT;				// Position
+ 		return t;															// Return time
+	}
+
+	function GetCharPosTimeFrom(t)										// GET CHARPOS IN TRANSCRIPT FROM TIME
+	{
+	 	var p=$("#transcriptText").text().length*t/playerTRT;				// Position
+ 		return p;															// Return time
+	}
+
 	function Popup(msg)
 	{
 		var x=$("#playerDiv").width()/2-50;
@@ -266,10 +283,6 @@ $("#informationText").html(str)
 		$("body").append(str)
 		$("#popup").show().delay(700).hide(300)
 	}
-
-////////////////////////////////////////////////
-// ACTIONS
-////////////////////////////////////////////////
 
 	function RunPlayer(what, param)
 	{
@@ -302,6 +315,12 @@ $("#informationText").html(str)
 			str+=shivaLib.SecondsToTimecode(playerTRT);						// End time
 			$("#timeDisp").text(str);										// Show now
 			$("#slider").slider("value",playerNow);							// Set slider
+	
+			var max=$("#transcriptText")[0].scrollHeight;					// Max
+			max-=$("#transcriptText").height();
+			$("#transcriptText").scrollTop(max*playerNow/playerTRT);
+
+
 			}
 	}
 	

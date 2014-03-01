@@ -82,6 +82,8 @@
 	var playerSlideRatio=.5;													// Ratio of player to slide windows
 	var transcriptInfoRatio=.5;													// Ratio of conter/transcript to info windows
 	var transcriptHgt=400;														// Height of transscript
+	var playerVolume=75;														// Player volume
+	var playerSpeed=50;															// Player speed
 	
 ///////// INIT  /////////////
 
@@ -111,17 +113,35 @@
 
 		$("#settings").on("click", function(e) {							// SETTINGS HANDLER
 			if ($("#setpopup").length) {										// If open
-				$("#setpopup").hide(200, function(){ this.remove() });			// Hide, then remove it
+				$("#setpopup").hide('slide',{direction:'down'},300, function(){ this.remove() });			// Hide, then remove it
 				return;															// Quit
 				}
-			var w=200;
-			var x=$("#controlDiv").width()-w-10;
-			var str="<b>Player Settings</b><br><hr><br>&nbsp;&nbsp;Volume<br>&nbsp;&nbsp;Speed<br>&nbsp;&nbsp;Search<br><br>";
-			$("body").append("<div id='setpopup' style='display:none;position:absolute;width:"+w+"px;height:auto;background-color:#f8f8f8;left:"+x+"px;top:"+y+"px;border:1px solid #999;padding:12px' class='rounded-corners'>"+str+"</div>");
+			var w=180;
+			var x=$("#controlDiv").width()-w-12;
+			var str="<b>Player Settings</b><br><hr><br><table>";
+			str+="<tr ><td>&nbsp;&nbsp;Volume&nbsp;&nbsp;</td>";
+			str+="<td><div style='display:inline-block;width:110px' id='vslider'></div></td></tr>"
+			str+="<tr height='20'><td>&nbsp;&nbsp;Speed&nbsp;&nbsp;</td>";
+			str+="<td><div style='display:inline-block;width:110px' id='sslider'></div></td></tr>"
+			str+="<tr><td>&nbsp;&nbsp;Search&nbsp;&nbsp;</td>";
+			str+="<td><input style='width:110px;font-size:x-small' id='sbox'></td></tr>"
+			str+="</table>";
+			$("body").append("<div id='setpopup' style='display:none;position:absolute;width:"+w+"px;height:auto;background-color:#f8f8f8;left:"+x+"px;top:"+y+"px;border:1px solid #ccc;padding:8px' class='rousnded-corners'>"+str+"</div>");
 			var h=$("#setpopup").height();
-			var y=$("#controlDiv").css("top").replace(/px/,"")-h-28;			
+			var y=$("#controlDiv").css("top").replace(/px/,"")-h-11;			
+			$("#vslider").slider( { value:playerVolume, 
+					change: function(event,ui ) {
+							playerVolume=ui.value;
+							}
+					});
+
+			$("#sslider").slider({ value:playerSpeed,step:8,
+					change: function(event,ui ) {
+							playerSpeed=ui.value;
+							}
+					});
 			$("#setpopup").css("top",y);
-			$("#setpopup").show(200);											// Show it
+			$("#setpopup").show('slide',{direction:'down'},300);											// Show it
 
 			});
 		

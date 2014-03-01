@@ -111,7 +111,12 @@
 						RunPlayer("scrub",ui.value);							// Show
 						}
 				});
-	
+		$("#transcriptText").on("click", function (e) {
+				var y=e.clientY-$("#controlDiv").css("top").replace(/px/,"")-80;
+				y=y/$("#transcriptText").height()*playerTRT;
+				RunPlayer("scrub",y);											// Show
+				
+				});
 
 		$("#transHgt").hover(													// If over transcript height control
 			function(){ $(this).css("background-color","lightblue")},			// Highlight
@@ -195,47 +200,61 @@
 
 	function LoadContent()												// LOAD SHOW CONTENT
 	{
+var toc=[];
+toc.push({start:"00:00",title:"Opening remarks"});
+toc.push({start:"01:02",title:"Clinton Global Initiative"});
+toc.push({start:"03:08",title:"Health in Rwanda"});
+toc.push({start:"04:33",title:"AIDS vaccines"});
+toc.push({start:"06:12",title:"Malaria reduction"});
+toc.push({start:"06:55",title:"Partners in Health"});
+toc.push({start:"08:09",title:"Jobs"});
+toc.push({start:"10:45",title:"Health care"});
+toc.push({start:"12:1",title:"Closing remarks"});
+	MakeTOC(toc);														// Fill TOC contents
+
 		
 $("#slideDiv").html("<img width='100%' src='slide.jpg' onload='ResizePanes()'>");
 $("#playerDiv").html("<img width='100%' src='video.jpg'onload='ResizePanes()'>");
-var str="<div style='cursor:pointer;padding-left:12px'>"
-str+="<li onclick='Popup(\"Play at 00:12\")'><pp 01:2:3>Opening remarks</li>"
-str+="<li onclick='Popup(\"Play at 01:02\")'>Clinton Global Initiative</li>"
-str+="<li onclick='Popup(\"Play at 03:08\")'>Health in Rwanda</li>"
-str+="<li onclick='Popup(\"Play at 04:33\")'>AIDS vaccines</li>"
-str+="<li onclick='Popup(\"Play at 06:12\")'>Malaria reduction</li>"
-str+="<li onclick='Popup(\"Play at 06:55\")'>Partners in Health</li>"
-str+="<li onclick='Popup(\"Play at 08:09\")'>Jobs</li>"
-str+="<li onclick='Popup(\"Play at 10:45\")'>Health care</li>"
-str+="<li onclick='Popup(\"Play at 12:12\")'i>Closing remarks</li>"
-$("#contentsText").html(str+"</div>");
 $("#titleDiv").html("Bill Clinton speaks at TED Conference");
-str="<span onclick='Popup(\"Player will play this line\")'>I thought in getting up to my TED wish I would try to begin by putting in perspective what I try to do and how it fits with what they try to do. We live in a world that everyone knows is interdependent, but insufficient in three major ways. It is, first of all, profoundly unequal: half the world's people still living on less than two dollars a day; a billion people with no access to clean water; two and a half billion no access to sanitation; a billion going to bed hungry every night; one in four deaths every year from AIDS, TB, malaria and the variety of infections associated with dirty water -- 80 percent of them under five years of age.<br><br>Even in wealthy countries it is common now to see inequality growing. In the United States, since 2001 we've had five years of economic growth, five years of productivity growth in the workplace, but median wages are stagnant and the percentage of working families dropping below the poverty line is up by four percent. The percentage of working families without health care up by four percent. So this interdependent world which has been pretty good to most of us -- which is why we're all here in Northern California doing what we do for a living, enjoying this evening -- is profoundly unequal. It is also unstable. Unstable because of the threats of terror, weapons of mass destruction, the spread of global disease and a sense that we are vulnerable to it in a way that we weren't not so many years ago. And perhaps most important of all, it is unsustainable because of climate change, resource depletion and species destruction.<br><br>When I think about the world I would like to leave to my daughter and the grandchildren I hope to have, it is a world that moves away from unequal, unstable, unsustainable interdependence to integrated communities -- locally, nationally and globally -- that share the characteristics of all successful communities: a broadly shared, accessible set of opportunities, a shared sense of responsibility for the success of the common enterprise and a genuine sense of belonging. All easier said than done. When the terrorist incidents occurred in the United Kingdom a couple of years ago, I think even though they didn't claim as many lives as we lost in the United States on 9/11, I think the thing that troubled the British most was that the perpetrators were not invaders, but homegrown citizens whose religious and political identities were more important to them than the people they grew up with, went to school with, worked with, shared weekends with, shared meals with. In other words, they thought their differences were more important than their common humanity. It is the central psychological plague of humankind in the 21st century.<br><br>Into this mix, people like us, who are not in public office, have more power to do good than at any time in history, because more than half the world\'s people live under governments they voted in and can vote out. And even non-democratic governments are more sensitive to public opinion. Because primarily of the power of the Internet, people of modest means can band together and amass vast sums of money that can change the world for some public good if they all agree. When the tsunami hit South Asia, the United States contributed 1.2 billion dollars. 30 percent of our households gave. Half of them gave over the Internet. The median contribution was somewhere around 57 dollars. And thirdly, because of the rise of non-governmental organizations. They, businesses, other citizens' groups, have enormous power to affect the lives of our fellow human beings. When I became president in 1993, there were none of these organizations in Russia. There are now a couple of hundred thousand. None in India. There are now at least a half a million active. None in China. There are now 250,000 registered with the government, probably twice again that many who are not registered for political reasons.<br><br>When I organized my foundation, and I thought about the world as it is and the world that I hope to leave to the next generation, and I tried to be realistic about what I had cared about all my life that I could still have an impact on. I wanted to focus on activities that would help to alleviate poverty, fight disease, combat climate change, bridge the religious, racial and other divides that torment the world, but to do it in a way that would either use whatever particular skills we could put together in our group to change the way some public good function was performed so that it would sweep across the world more.";
-$("#transcriptText").html(str+"</span>")
+str="I thought in getting up to my TED wish I would try to begin by putting in perspective what I try to do and how it fits with what they try to do. We live in a world that everyone knows is interdependent, but insufficient in three major ways. It is, first of all, profoundly unequal: half the world's people still living on less than two dollars a day; a billion people with no access to clean water; two and a half billion no access to sanitation; a billion going to bed hungry every night; one in four deaths every year from AIDS, TB, malaria and the variety of infections associated with dirty water -- 80 percent of them under five years of age.<br><br>Even in wealthy countries it is common now to see inequality growing. In the United States, since 2001 we've had five years of economic growth, five years of productivity growth in the workplace, but median wages are stagnant and the percentage of working families dropping below the poverty line is up by four percent. The percentage of working families without health care up by four percent. So this interdependent world which has been pretty good to most of us -- which is why we're all here in Northern California doing what we do for a living, enjoying this evening -- is profoundly unequal. It is also unstable. Unstable because of the threats of terror, weapons of mass destruction, the spread of global disease and a sense that we are vulnerable to it in a way that we weren't not so many years ago. And perhaps most important of all, it is unsustainable because of climate change, resource depletion and species destruction.<br><br>When I think about the world I would like to leave to my daughter and the grandchildren I hope to have, it is a world that moves away from unequal, unstable, unsustainable interdependence to integrated communities -- locally, nationally and globally -- that share the characteristics of all successful communities: a broadly shared, accessible set of opportunities, a shared sense of responsibility for the success of the common enterprise and a genuine sense of belonging. All easier said than done. When the terrorist incidents occurred in the United Kingdom a couple of years ago, I think even though they didn't claim as many lives as we lost in the United States on 9/11, I think the thing that troubled the British most was that the perpetrators were not invaders, but homegrown citizens whose religious and political identities were more important to them than the people they grew up with, went to school with, worked with, shared weekends with, shared meals with. In other words, they thought their differences were more important than their common humanity. It is the central psychological plague of humankind in the 21st century.<br><br>Into this mix, people like us, who are not in public office, have more power to do good than at any time in history, because more than half the world\'s people live under governments they voted in and can vote out. And even non-democratic governments are more sensitive to public opinion. Because primarily of the power of the Internet, people of modest means can band together and amass vast sums of money that can change the world for some public good if they all agree. When the tsunami hit South Asia, the United States contributed 1.2 billion dollars. 30 percent of our households gave. Half of them gave over the Internet. The median contribution was somewhere around 57 dollars. And thirdly, because of the rise of non-governmental organizations. They, businesses, other citizens' groups, have enormous power to affect the lives of our fellow human beings. When I became president in 1993, there were none of these organizations in Russia. There are now a couple of hundred thousand. None in India. There are now at least a half a million active. None in China. There are now 250,000 registered with the government, probably twice again that many who are not registered for political reasons.<br><br>When I organized my foundation, and I thought about the world as it is and the world that I hope to leave to the next generation, and I tried to be realistic about what I had cared about all my life that I could still have an impact on. I wanted to focus on activities that would help to alleviate poverty, fight disease, combat climate change, bridge the religious, racial and other divides that torment the world, but to do it in a way that would either use whatever particular skills we could put together in our group to change the way some public good function was performed so that it would sweep across the world more.";
+$("#transcriptText").html(str)
 str="<img src='info.jpg'>"
 $("#informationText").html(str)	
 	}
 
+
+	function MakeTOC(toc)
+	{
+		var i,t;
+		var str="<div style='cursor:pointer;padding-left:12px'>"				// Set up
+		for (i=0;i<toc.length;++i) {											// For each title
+			t=shivaLib.TimecodeToSeconds(toc[i].start);							// Get time
+			str+="<li onclick='RunPlayer(\"play\","+t+")'>"; 					// Add event
+			str+=toc[i].title+"</li>";											// Add title
+			}
+		$("#contentsText").html(str+"</div>");									// Set div contents
+	}
+
 	function ResizePanes()
 	{ 
-		var w=showWid*playerSlideRatio;													// Player width
-		var pt=$("#titleDiv").height()+32;												// Top of player
-		$("#playerDiv").css({ width:w+"px",top:pt+"px"});								// Set player pos
+		var w=showWid*playerSlideRatio;											// Player width
+		var pt=$("#titleDiv").height()+32;										// Top of player
+		$("#playerDiv").css({ width:w+"px",top:pt+"px"});						// Set player pos
 		$("#slideDiv").css({ left:(w+16)+"px",width:(showWid-w)+"px",top:pt+"px"});		// Set slider pos/size
-		var h=Math.max($("#playerDiv").height(),$("#slideDiv").height());				// Player height
-		$("#playerSiz").css({ left:w+"px",height:h+"px",top:pt+"px"});					// Set sizer pos
-		h+=pt;																			// Point at top of control bar
-		var ct=h+$("#controlDiv").height()+24;											// Contents top
-		$("#contentDiv").css({ top:ct+"px",height:transcriptHgt+"px"});					// Position/size contents
-		var cw=$("#contentDiv").width()+8;												// Get width of content panel
-		$("#controlDiv").css({ top:h+"px" });											// Position control slider
-		$("#slider").width(showWid-210);													// Slider width
-		w=showWid*transcriptInfoRatio;													// Transcript width
+		var h=Math.max($("#playerDiv").height(),$("#slideDiv").height());		// Player height
+		$("#playerSiz").css({ left:w+"px",height:h+"px",top:pt+"px"});			// Set sizer pos
+		h+=pt;																	// Point at top of control bar
+		var ct=h+$("#controlDiv").height()+24;									// Contents top
+		$("#contentDiv").css({ top:ct+"px",height:transcriptHgt+"px"});			// Position/size contents
+		var cw=$("#contentDiv").width()+8;										// Get width of content panel
+		$("#controlDiv").css({ top:h+"px" });									// Position control slider
+		$("#slider").width(showWid-210);										// Slider width
+		w=showWid*transcriptInfoRatio;											// Transcript width
 		$("#transDiv").css({ left:cw+"px",width:(w-cw-8)+"px",height:transcriptHgt+"px",top:ct+"px"});
 		$("#transSiz").css({ left:w+8+"px",height:transcriptHgt+"px",top:ct+"px"});	// Pos transcript sizer
-		w=showWid*(1-transcriptInfoRatio);												// Info window width
+		w=showWid*(1-transcriptInfoRatio);										// Info window width
 		$("#infoDiv").css({ left:(showWid-w+24)+"px",width:(w-16)+"px",height:transcriptHgt+"px",top:ct+"px"});
-		$("#transHgt").css({ top:ct+transcriptHgt+"px"});								// Set transcript height
+		$("#transHgt").css({ top:ct+transcriptHgt+"px"});						// Set transcript height
 		}		
 
 	function Popup(msg)
@@ -259,24 +278,42 @@ $("#informationText").html(str)
 				$("#playBut").attr("src","pausebut.gif");					// Show pause but
 				playerMode="play";											// Set mode
 				}
-			else{															// Already in play
+			else if (param == undefined) {									// Already in play, but not going to a time
 				$("#playBut").attr("src","playbut.gif");					// Show play but
 				playerMode="pause";											// Set mode
 				}
+			if (param != undefined) {										// If playing to a time
+				if ((""+param).match(/:/))									// In tc format
+					param=shivaLib.TimecodeToSeconds(param);				// Convert to secs
+				playerNow=Math.max(Math.min(param,playerTRT),0);			// Set cur time
+				}	
+			RunPlayer("show");												// Show where we're at
 			}
 		else if (what == "scrub") {											// Scrub
 			playerNow=Math.max(Math.min(param,playerTRT),0)					// Set now
+			RunPlayer("show");												// Show where we're at
+			}
+		else if (what == "pause") {											// Pause
+			$("#playBut").attr("src","pausebut.gif");						// Show pause but
+			playerMode="pause";												// Set mode
+			}
+		else if (what == "show") {											// Scrub
 			var str=shivaLib.SecondsToTimecode(playerNow)+" / ";			// Cur time
 			str+=shivaLib.SecondsToTimecode(playerTRT);						// End time
 			$("#timeDisp").text(str);										// Show now
+			$("#slider").slider("value",playerNow);							// Set slider
 			}
-
 	}
 	
 	function RunSlide(what, param)
 	{
 		shivaLib.Sound("click");
 		Popup("Advance to "+what+" slide");
+	}
+
+	function RunTranscript(what, param)
+	{
+		trace (what,param);	
 	}
 
 	function RunContent(what, param)

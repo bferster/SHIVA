@@ -43,6 +43,9 @@
 		.labels { 		font-family:Verdana,Geneva,sans-serif; font-size:medium;
 						color:#999;font-weight:bold;
 						}
+		.timeDisp { 	font-family:Verdana,Geneva,sans-serif; font-size:xx-small;
+						color:#666;width:100px;display:inline-block;text-align:center;
+						}
 
  	</style>
 </head>
@@ -52,11 +55,12 @@
 	<div id="playerDiv" style="position:absolute" class="unselectable"></div>
 	<div id="slideDiv" style="position:absolute" class="slide unselectable"></div>
 	<div id="controlDiv" style="position:absolute" class="control unselectable">
-	  	<img src="playbut.gif" title="Play video") style="vertical-align:-4px;cursor:pointer">&nbsp;&nbsp;
+	  	<img id="playBut" src="playbut.gif" onclick="RunPlayer('play')" title="Play video") style="vertical-align:-4px;cursor:pointer">
+   		<div id="timeDisp" class="timeDisp unselectable"></div>
    		<div style="display:inline-block" id="slider"></div>&nbsp;&nbsp;
    		<img src="settingsbut.gif" id="settings" title="Settings menu" style="vertical-align:-2px;cursor:pointer"><span style="vertical-align:1px">&nbsp;&nbsp;</span>
-  		<img src="startdot.gif" title="Go to previous slide" style="vertical-align:-2px;cursor:pointer"><span style="vertical-align:1px">&nbsp;&nbsp;|&nbsp;</span>
-   		<img src="enddot.gif" title="Go to next slide" style="vertical-align:-2px;cursor:pointer">
+  		<img src="startdot.gif" onclick="RunSlide('last')" title="Go to previous slide" style="vertical-align:-2px;cursor:pointer"><span style="vertical-align:1px">&nbsp;&nbsp;|&nbsp;</span>
+   		<img src="enddot.gif" onclick="RunSlide('next')" title="Go to next slide" style="vertical-align:-2px;cursor:pointer">
 	</div>
 	<div id="playerSiz" style="position:absolute;width:16px;cursor:col-resize" class="unselectable" title="Resize player"></div>
 	<div id="contentDiv" style="position:absolute" class="contents unselectable">
@@ -84,6 +88,9 @@
 	var transcriptHgt=400;														// Height of transscript
 	var playerVolume=75;														// Player volume
 	var playerSpeed=50;															// Player speed
+	var playerNow=0;															// Current time in secs
+	var playerTRT=684;															// Total running time in secs
+	var playerMode="empty";														// State of player
 	
 ///////// INIT  /////////////
 
@@ -94,18 +101,28 @@
 			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
 		else																	// Use other method
 			window.attachEvent("message",shivaEventHandler);					// Add handler
-		$("#slider").slider();													// Init slider
+		
 		showWid=$("#showDiv").width();											// Get width
 		LoadContent();															// Load show content
+		RunPlayer("scrub",0);													// Show start/end times
 		
+		$("#slider").slider({ value:playerNow, max:playerTRT,					// Init slider
+					slide: function(event,ui ) {								// Handle change
+						RunPlayer("scrub",ui.value);							// Show
+						}
+				});
+	
+
 		$("#transHgt").hover(													// If over transcript height control
 			function(){ $(this).css("background-color","lightblue")},			// Highlight
 			function(){ $(this).css("background-color","transparent")			// Hide
 			});
+		
 		$("#transSiz").hover(													// Transcript width
 			function(){ $(this).css("background-color","lightblue")},			// Highlight
 			function(){ $(this).css("background-color","transparent")			// Hide
 			});
+		
 		$("#playerSiz").hover(													// Player width
 			function(){ $(this).css("background-color","lightblue")},			// Highlight
 			function(){ $(this).css("background-color","transparent")			// Hide
@@ -129,6 +146,7 @@
 			$("body").append("<div id='setpopup' style='display:none;position:absolute;width:"+w+"px;height:auto;background-color:#f8f8f8;left:"+x+"px;top:"+y+"px;border:1px solid #ccc;padding:8px' class='rousnded-corners'>"+str+"</div>");
 			var h=$("#setpopup").height();
 			var y=$("#controlDiv").css("top").replace(/px/,"")-h-11;			
+			
 			$("#vslider").slider( { value:playerVolume, 
 					change: function(event,ui ) {
 							playerVolume=ui.value;
@@ -142,14 +160,8 @@
 					});
 			$("#setpopup").css("top",y);
 			$("#setpopup").show('slide',{direction:'down'},300);											// Show it
-
 			});
-		
 			
-
-
-
-		
 		$("#playerSiz").draggable({												// DRAG PLAYER WIDTH HANDLER
 			cursorAt:{left:8},
 			cursor: "col-resize", axis:"x",										// X-only
@@ -217,7 +229,7 @@ $("#informationText").html(str)
 		$("#contentDiv").css({ top:ct+"px",height:transcriptHgt+"px"});					// Position/size contents
 		var cw=$("#contentDiv").width()+8;												// Get width of content panel
 		$("#controlDiv").css({ top:h+"px" });											// Position control slider
-		$("#slider").width(showWid-120);													// Slider width
+		$("#slider").width(showWid-210);													// Slider width
 		w=showWid*transcriptInfoRatio;													// Transcript width
 		$("#transDiv").css({ left:cw+"px",width:(w-cw-8)+"px",height:transcriptHgt+"px",top:ct+"px"});
 		$("#transSiz").css({ left:w+8+"px",height:transcriptHgt+"px",top:ct+"px"});	// Pos transcript sizer
@@ -234,6 +246,48 @@ $("#informationText").html(str)
 		var str="<div id='popup' style='position:absolute;display:none;background-color:#eee;left:"+x+"px;top:"+y+"px;border:1px solid;padding:12px' class='rounded-corners'>"+msg+"</div>";
 		$("body").append(str)
 		$("#popup").show().delay(700).hide(300)
+	}
+
+////////////////////////////////////////////////
+// ACTIONS
+////////////////////////////////////////////////
+
+	function RunPlayer(what, param)
+	{
+		trace(what,param);	
+		if (what == "play") {												// Play
+			if ($("#playBut").attr("src") == "playbut.gif")	{				// If in pause
+				$("#playBut").attr("src","pausebut.gif");					// Show pause but
+				playerMode="play";											// Set mode
+				}
+			else{															// Already in play
+				$("#playBut").attr("src","playbut.gif");					// Show play but
+				playerMode="pause";											// Set mode
+				}
+			}
+		else if (what == "scrub") {											// Scrub
+			playerNow=Math.max(Math.min(param,playerTRT),0)					// Set now
+			var str=shivaLib.SecondsToTimecode(playerNow)+" / ";			// Cur time
+			str+=shivaLib.SecondsToTimecode(playerTRT);						// End time
+			$("#timeDisp").text(str);										// Show now
+			}
+
+	}
+	
+	function RunSlide(what, param)
+	{
+		shivaLib.Sound("click");
+		Popup("Advance to "+what+" slide");
+	}
+
+	function RunContent(what, param)
+	{
+		trace (what,param);	
+	}
+
+	function RunInfo(what, param)
+	{
+		trace (what,param);	
 	}
 
 

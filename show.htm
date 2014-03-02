@@ -13,8 +13,9 @@
 		body { 			font-family:Verdana,Geneva,sans-serif; font-size:xx-small; }
 		.rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
 		tr.odd { 		background-color:#e0e0e0; }
-
-		.unselectable { -moz-user-select: none;     -khtml-user-select: none;
+		.ui-autocomplete { max-height: 300px; overflow-y: auto; }
+	
+ 		.unselectable { -moz-user-select: none;     -khtml-user-select: none;
 		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
 		   				}
 		.title { 		font-family:Verdana,Geneva,sans-serif; font-size:x-large;color:#fff;
@@ -67,7 +68,9 @@
 		<span class="labels">Contents</span><div id="contentsText" style="height:100%;overflow:auto;margin-top:16px"></div>
 	</div>
 	<div id="transDiv" style="position:absolute" class="trans">
-		<span class="labels">Transcript</span><div id="transcriptText" style="height:90%;overflow:auto;margin-top:16px;padding-right:8px"></div>
+		<span class="labels">Transcript</span>
+		<div id="transSearchDiv" style='display:inline-block;text-align:right'> <input style='width:100px;font-size:small;border:1px solid #ddd' id='transSearch'></div>
+		<div id="transcriptText" style="height:90%;overflow:auto;margin-top:16px;padding-right:8px"></div>
 	</div>
 	<div id="infoDiv" style="position:absolute" class="info">
 		<span class="labels">More information</span><div id="informationText" style="height:100%;overflow:auto;margin-top:16px"></div>
@@ -91,6 +94,8 @@
 	var playerNow=0;															// Current time in secs
 	var playerTRT=684;															// Total running time in secs
 	var playerMode="empty";														// State of player
+	var playerQuality="Default";												// Video quality
+	var playerCaption="None";													// Captions
 	
 ///////// INIT  /////////////
 
@@ -105,12 +110,25 @@
 		showWid=$("#showDiv").width();											// Get width
 		LoadContent();															// Load show content
 		RunPlayer("scrub",0);													// Show start/end times
+		var words=$("#transcriptText").text().split(" ");						// Get words
+		var i,l,n=words.length;p=0;														
+		for (i=0;i<n;++i) {														// For each word	
+			l=words[i].length;													// Get word length
+			words[i]={ label:words[i],pos:p };									// Make into label index object
+			p+=l+1;																// Start of next word
+			}
+		
+		$("#transSearch").autocomplete({ source: words, 						// AUTOCOMPLETE HANDLER
+			select: function(event, ui) {										// On select
+				RunPlayer("scrub",GetTimeFromCharPos(ui.item.pos));				// Show
+				}
+			});
 		
 		$("#slider").slider({ value:playerNow, max:playerTRT,					// Init slider
-					slide: function(event,ui ) {								// Handle change
-						RunPlayer("scrub",ui.value);							// Show
-						}
-				});
+			slide: function(event,ui ) {										// Handle change
+				RunPlayer("scrub",ui.value);									// Show
+				}
+			});
 		$("#transcriptText").on("click", function (e) {							// HANDLE TRANSCRIPT CLICK
 	  		var s=window.getSelection();										// Get selection
  			var y=$("#transcriptText").text().indexOf(s.focusNode.textContent);	// Char pos of paragraph
@@ -133,40 +151,60 @@
 			function(){ $(this).css("background-color","transparent")			// Hide
 		});
 
-		$("#settings").on("click", function(e) {							// SETTINGS HANDLER
+		$("#settings").on("click", function(e) {								// SETTINGS HANDLER
 			if ($("#setpopup").length) {										// If open
 				$("#setpopup").hide('slide',{direction:'down'},300, function(){ this.remove() });			// Hide, then remove it
 				return;															// Quit
 				}
-			var w=180;
+			var w=190;
 			var x=$("#controlDiv").width()-w-12;
-			var str="<b>Player Settings</b><br><hr><br><table>";
-			str+="<tr ><td>&nbsp;&nbsp;Volume&nbsp;&nbsp;</td>";
-			str+="<td><div style='display:inline-block;width:110px' id='vslider'></div></td></tr>"
-			str+="<tr height='20'><td>&nbsp;&nbsp;Speed&nbsp;&nbsp;</td>";
-			str+="<td><div style='display:inline-block;width:110px' id='sslider'></div></td></tr>"
-			str+="<tr><td>&nbsp;&nbsp;Search&nbsp;&nbsp;</td>";
-			str+="<td><input style='width:110px;font-size:x-small' id='sbox'></td></tr>"
+			var str="<table><tr height='18'><td>Volume</td>";
+			str+="<td><div style='display:inline-block;width:100px' id='pVolume'></div></td></tr>"
+			str+="<tr height='18'><td>Speed</td>";
+			str+="<td><div style='display:inline-block;width:100px' id='pSpeed'></div></td></tr>"
+			str+="<tr height='18'><td>Quality</td><td>";
+			str+=shivaLib.MakeSelect("pQuality",false,["Default","Good","Better","Best"],playerQuality,"style='font-size:x-small'")+"</td></tr>";
+			str+="<tr height='18'><td>Captions</td><td>";
+			str+=shivaLib.MakeSelect("pCaption",false,["None","English","Other"],playerCaption,"style='font-size:x-small'")+"</td></tr>";
+			str+="<tr height='18'><td>Full screen&nbsp;&nbsp;</td>";
+			str+="<td><input type='checkbox' id='pFull'></td></tr>"
 			str+="</table>";
 			$("body").append("<div id='setpopup' style='display:none;position:absolute;width:"+w+"px;height:auto;background-color:#f8f8f8;left:"+x+"px;top:"+y+"px;border:1px solid #ccc;padding:8px' class='rousnded-corners'>"+str+"</div>");
-			var h=$("#setpopup").height();
-			var y=$("#controlDiv").css("top").replace(/px/,"")-h-11;			
+			var y=$("#controlDiv").css("top").replace(/px/,"")-$("#setpopup").height()-11;			
+			$("#setpopup").css("top",y);										// Position above control bat
+			$("#setpopup").show('slide',{direction:'down'},300);				// Show it
 			
-			$("#vslider").slider( { value:playerVolume, 
-					change: function(event,ui ) {
-							playerVolume=ui.value;
-							}
-					});
+			$("#pVolume").slider({ value:playerVolume,							// VOLUME HANDLER 
+				change: function(event, ui) {									// On change
+					playerVolume=ui.value;										// Set param
+					RunPlayer("volume",playerVolume);							// Do it
+					}
+				});
 
-			$("#sslider").slider({ value:playerSpeed,step:8,
-					change: function(event,ui ) {
-							playerSpeed=ui.value;
-							}
-					});
-			$("#setpopup").css("top",y);
-			$("#setpopup").show('slide',{direction:'down'},300);											// Show it
-			});
-			
+			$("#pSpeed").slider({ value:playerSpeed,step:25,					// SPEED CHANGE
+				change: function(event, ui) {									// On change
+					playerSpeed=ui.value;										// Set param
+					RunPlayer("speed",playerSpeed);								// Do it
+					}
+				});
+	
+			$("#pQuality").on("change", function(e) {							// VIDEO QUALITY HANDLER
+				playerQuality=$("#pQuality").val();								// Set param
+				RunPlayer("quality",playerQuality);								// Do it
+				});
+
+			$("#pCaption").on("change", function(e) {							// CAPTIONS HANDLER
+				playerCaption=$("#pCaption").val();								// Set param
+				RunPlayer("caption",playerCaption);								// Do it
+				});
+
+			$("#pFull").on("click", function(e) {								// FULL SCREEN HANDLER
+				$("#setpopup").hide('slide',{direction:'down'},200, function(){ this.remove() });	// Hide, then remove it
+				RunPlayer("full",true);											// Do it
+				});
+		
+			});																	// End settins
+		
 		$("#playerSiz").draggable({												// DRAG PLAYER WIDTH HANDLER
 			cursorAt:{left:8},
 			cursor: "col-resize", axis:"x",										// X-only
@@ -176,7 +214,8 @@
 				ResizePanes();													// Resize panes
 				}
 			});
-		
+
+			
 		$("#transHgt").draggable({												// DRAG TRANSCRIPT HEIGHT HANDLER		
 			cursor: "row-resize", axis:"y",										// Y-only
 			stop: ResizePanes,													// Resize panes when done
@@ -255,6 +294,7 @@ $("#informationText").html(str)
 		w=showWid*(1-transcriptInfoRatio);										// Info window width
 		$("#infoDiv").css({ left:(showWid-w+24)+"px",width:(w-16)+"px",height:transcriptHgt+"px",top:ct+"px"});
 		$("#transHgt").css({ top:ct+transcriptHgt+"px"});						// Set transcript height
+		$("#transSearchDiv").width($("#transDiv").width()-100);					// Search div width
 		}		
 
 
@@ -315,12 +355,17 @@ $("#informationText").html(str)
 			str+=shivaLib.SecondsToTimecode(playerTRT);						// End time
 			$("#timeDisp").text(str);										// Show now
 			$("#slider").slider("value",playerNow);							// Set slider
-	
-			var max=$("#transcriptText")[0].scrollHeight;					// Max
+				var max=$("#transcriptText")[0].scrollHeight;				// Max
 			max-=$("#transcriptText").height();
 			$("#transcriptText").scrollTop(max*playerNow/playerTRT);
-
-
+			}
+		else if (what == "quality") {										// Quality
+			}
+		else if (what == "volume") {										// Volume
+			}
+		else if (what == "speed") {											// Speed
+			}
+		else if (what == "caption") {										// Captions
 			}
 	}
 	
@@ -332,17 +377,17 @@ $("#informationText").html(str)
 
 	function RunTranscript(what, param)
 	{
-		trace (what,param);	
+		trace(what,param);	
 	}
 
 	function RunContent(what, param)
 	{
-		trace (what,param);	
+		trace(what,param);	
 	}
 
 	function RunInfo(what, param)
 	{
-		trace (what,param);	
+		trace(what,param);	
 	}
 
 

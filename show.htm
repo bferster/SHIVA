@@ -237,7 +237,7 @@
 	});
 
 
-	function LoadContent()												// LOAD SHOW CONTENT
+	function LoadContent()													// LOAD SHOW CONTENT
 	{
 var toc=[];
 toc.push({start:"00:00",title:"Opening remarks"});
@@ -249,7 +249,7 @@ toc.push({start:"06:55",title:"Partners in Health"});
 toc.push({start:"08:09",title:"Jobs"});
 toc.push({start:"10:45",title:"Health care"});
 toc.push({start:"12:1",title:"Closing remarks"});
-	MakeTOC(toc);														// Fill TOC contents
+	MakeTOC(toc);																// Fill TOC contents
 
 		
 $("#slideDiv").html("<img width='100%' src='slide.jpg' onload='ResizePanes()'>");
@@ -302,16 +302,31 @@ $("#informationText").html(str)
 // HELPERS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	function GetTimeFromCharPos(p)										// GET TIME FROM CHARPOS IN TRANSCRIPT
+	function GetTimeFromCharPos(p)											// GET TIME FROM CHARPOS IN TRANSCRIPT
 	{
-	 	var t=p/$("#transcriptText").text().length*playerTRT;				// Position
- 		return t;															// Return time
+	 	var t=p/$("#transcriptText").text().length*playerTRT;					// Position
+ 		return t;																// Return time
 	}
 
-	function GetCharPosTimeFrom(t)										// GET CHARPOS IN TRANSCRIPT FROM TIME
+	function GetCharPosTimeFrom(t)											// GET CHARPOS IN TRANSCRIPT FROM TIME
 	{
-	 	var p=$("#transcriptText").text().length*t/playerTRT;				// Position
- 		return p;															// Return time
+	 	var p=$("#transcriptText").text().length*t/playerTRT;					// Position
+ 		return p;																// Return time
+	}
+
+	function HighlightText(start, end)										// HGHLIGHT SELECTED CHARS
+	{
+		var tran=$("#transcriptText").html();									// Get text
+		tran=tran.replace(/<.+?>/g,"");											// Remove tags
+		if (start != end) {														// If something to highlight
+			var str=tran.substring(0,start);									// Pre highlight
+			str+="<span style='color:#009900'>";								// Add style
+			str+=tran.substring(start,end);										// Highlight portion
+			str+="</span>";														// End style
+			str+=tran.substring(end);											// Add end
+			tran=str;															// Copy
+			}
+		$("#transcriptText").html(tran);										// Set text
 	}
 
 	function Popup(msg)
@@ -322,6 +337,8 @@ $("#informationText").html(str)
 		var str="<div id='popup' style='position:absolute;display:none;background-color:#eee;left:"+x+"px;top:"+y+"px;border:1px solid;padding:12px' class='rounded-corners'>"+msg+"</div>";
 		$("body").append(str)
 		$("#popup").show().delay(700).hide(300)
+
+HighlightText(10,30)
 	}
 
 	function RunPlayer(what, param)
@@ -356,8 +373,9 @@ $("#informationText").html(str)
 			$("#timeDisp").text(str);										// Show now
 			$("#slider").slider("value",playerNow);							// Set slider
 				var max=$("#transcriptText")[0].scrollHeight;				// Max
-			max-=$("#transcriptText").height();
+			max-=$("#transcriptText").height()/2;
 			$("#transcriptText").scrollTop(max*playerNow/playerTRT);
+			HighlightText(GetCharPosTimeFrom(playerNow),GetCharPosTimeFrom(playerNow)+60);
 			}
 		else if (what == "quality") {										// Quality
 			}

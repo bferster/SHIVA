@@ -101,9 +101,9 @@
 	var playerVolume=75;														// Volume
 	var playerSpeed=50;															// Play peed
 	var playerNow=0;															// Current time in secs
-	var playerTRT=684;															// Total running time in secs
+	var playerTRT=367;															// Total running time in secs
 	var playerType="youtube";													// Type of player
-	var playerStart=0,playerStop=0;												// Start/end times
+	var playerStart=0,playerStop=playerTRT;										// Start/end times
 	var playerURL="ft24bHtNJwY";												// Source
 	var playerAuto="false";														// Auto play
 	var playerAspect=.5625;														// Player aspect ratio
@@ -340,7 +340,9 @@ $("#informationText").html(str)
 	{
 		if ((player) && (playerType == "youtube")) {							// If initted YouTube
 			if ((player.getPlayerState) && (player.getPlayerState() == 1)) {	// If in play
-				playerNow=player.getCurrentTime();								// Get time
+				if (player.getCurrentTime() >= playerStop)						// Past end
+					RunPlayer("pause");											// Pause
+				playerNow=Math.min(player.getCurrentTime(),playerStop);			// Get time
 				RunPlayer("show");												// Show status
 				}
 			}
@@ -358,7 +360,7 @@ $("#informationText").html(str)
 
 	function GetCharPosTimeFrom(t)											// GET CHARPOS IN TRANSCRIPT FROM TIME
 	{
-	 	var p=$("#transcriptText").text().length*t/playerTRT;					// Position
+ 	 	var p=$("#transcriptText").text().length*t/playerTRT;					// Position
  		return p;																// Return time
 	}
 
@@ -419,6 +421,8 @@ $("#informationText").html(str)
 		else if (what == "pause") {											// Pause
 			$("#playBut").attr("src","pausebut.gif");						// Show pause but
 			playerMode="pause";												// Set mode
+			if ((player) && (playerType == "youtube")) 						// If initted YouTube
+				player.pauseVideo();										// Pause
 			}
 		else if (what == "show") {											// Scrub
 			var str=shivaLib.SecondsToTimecode(playerNow)+" / ";			// Cur time

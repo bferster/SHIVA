@@ -69,9 +69,12 @@
 	</div>
 	<div id="transDiv" style="position:absolute" class="trans">
 		<span class="labels">Transcript</span>
-		<div id="transSearchDiv" style='display:inline-block;text-align:right'> <input style='width:100px;font-size:small;border:1px solid #ddd' id='transSearch'></div>
-		<div id="transcriptText" style="height:90%;overflow:auto;margin-top:16px;padding-right:8px"></div>
-	</div>
+		<div id="transSearchDiv" style='position:absolute;top:0px'> 
+			<input style='width:100px;font-size:small;border:1px solid #ddd' id='transSearch'>
+  			<img src="settingsbut.gif" id="transSettings" title="Transcript menu" style="vertical-align:-2px;cursor:pointer">
+	  	</div>
+  		<div id="transcriptText" style="height:90%;overflow:auto;margin-top:16px;padding-right:8px"></div>
+ 	</div>
 	<div id="infoDiv" style="position:absolute" class="info">
 		<span class="labels">More information</span><div id="informationText" style="height:100%;overflow:auto;margin-top:16px"></div>
 	</div>
@@ -96,6 +99,8 @@
 	var playerMode="empty";														// State of player
 	var playerQuality="Default";												// Video quality
 	var playerCaption="None";													// Captions
+	var transLanguage="English";												// Transcript language
+	var transLangs="None|English|Spanish|French|Tibetan";						// Transcript languages
 	
 ///////// INIT  /////////////
 
@@ -151,6 +156,29 @@
 			function(){ $(this).css("background-color","#acc3db")},				// Highlight
 			function(){ $(this).css("background-color","transparent")			// Hide
 		});
+
+
+		$("#transSettings").on("click", function(e) {							// TRANSCRIPT SETTINGS HANDLER
+			if ($("#setpopup").length) {										// If open
+				$("#setpopup").hide('slide',{direction:'right'},300, function(){ $("#setpopup").remove() });	// Hide, then remove it
+				return;															// Quit
+				}
+			var w=190;
+			var x=$("#transSearchDiv").css("left").replace(/px/,"")-0+80;
+			var str="<table><tr height='18'><td>Language</td><td>";
+			str+=shivaLib.MakeSelect("tLang",false,transLangs.split("|"),transLanguage,"style='font-size:x-small'")+"</td></tr>";
+			str+="</table>";
+			$("body").append("<div id='setpopup' style='display:none;position:absolute;width:"+w+"px;height:auto;background-color:#f8f8f8;left:"+x+"px;top:"+y+"px;border:1px solid #ccc;padding:8px' class='rousnded-corners'>"+str+"</div>");
+			var y=$("#controlDiv").css("top").replace(/px/,"")-0+24+$("#controlDiv").height();			
+			$("#setpopup").css("top",y);										// Position above control bat
+			$("#setpopup").show('slide',{direction:'right'},300);				// Show it
+
+			$("#tLang").on("change", function(e) {								// LANGUAGE HANDLER
+				transLanguage=$("#tLang").val();								// Set param
+				RunTranscript("language",transLanguage);						// Do it
+				});
+
+			});																	// End transcript settings
 
 		$("#settings").on("click", function(e) {								// SETTINGS HANDLER
 			if ($("#setpopup").length) {										// If open
@@ -249,7 +277,7 @@ toc.push({start:"06:12",title:"Malaria reduction"});
 toc.push({start:"06:55",title:"Partners in Health"});
 toc.push({start:"08:09",title:"Jobs"});
 toc.push({start:"10:45",title:"Health care"});
-toc.push({start:"12:1",title:"Closing remarks"});
+toc.push({start:"11:01",title:"Closing remarks"});
 	MakeTOC(toc);																// Fill TOC contents
 
 		
@@ -269,7 +297,9 @@ $("#informationText").html(str)
 		var str="<div style='cursor:pointer;padding-left:12px'>"				// Set up
 		for (i=0;i<toc.length;++i) {											// For each title
 			t=shivaLib.TimecodeToSeconds(toc[i].start);							// Get time
-			str+="<div onclick='RunPlayer(\"play\","+t+")'><span style='color:#aaa'><b>&bull; </b></span>"; 	// Add event
+			str+="<div onclick='RunPlayer(\"play\","+t+")'";					// Add handler						
+			str+="title='"+toc[i].start+"'>";									// Add timecode tooltip
+			str+="<span style='color:#aaa'><b>&bull; </b></span>"; 				// Add bullet
 			str+=toc[i].title+"</div>";											// Add title
 			}
 		$("#contentsText").html(str+"</div>");									// Set div contents
@@ -282,7 +312,7 @@ $("#informationText").html(str)
 		$("#playerDiv").css({ width:w+"px",top:pt+"px"});						// Set player pos
 		$("#slideDiv").css({ left:(w+16)+"px",width:(showWid-w)+"px",top:pt+"px"});		// Set slider pos/size
 		var h=Math.max($("#playerDiv").height(),$("#slideDiv").height());		// Player height
-		$("#playerSiz").css({ left:w+"px",height:h+"px",top:pt+"px"});			// Set sizer pos
+		$("#playerSiz").css({ left:(w+8)+"px",height:h+"px",top:pt+"px"});		// Set sizer pos
 		h+=pt;																	// Point at top of control bar
 		var ct=h+$("#controlDiv").height()+24;									// Contents top
 		$("#contentDiv").css({ top:ct+"px",height:transcriptHgt+"px"});			// Position/size contents
@@ -295,7 +325,7 @@ $("#informationText").html(str)
 		w=showWid*(1-transcriptInfoRatio);										// Info window width
 		$("#infoDiv").css({ left:(showWid-w+24)+"px",width:(w-16)+"px",height:transcriptHgt+"px",top:ct+"px"});
 		$("#transHgt").css({ top:ct+transcriptHgt+"px"});						// Set transcript height
-		$("#transSearchDiv").width($("#transDiv").width()-100);					// Search div width
+		$("#transSearchDiv").css("left",$("#transDiv").width()-104)+"px";		// Search div width
 		}		
 
 
@@ -371,9 +401,9 @@ $("#informationText").html(str)
 			str+=shivaLib.SecondsToTimecode(playerTRT);						// End time
 			$("#timeDisp").text(str);										// Show now
 			$("#slider").slider("value",playerNow);							// Set slider
-				var max=$("#transcriptText")[0].scrollHeight;				// Max
-			max-=$("#transcriptText").height()/2;
-			$("#transcriptText").scrollTop(max*playerNow/playerTRT);
+			var max=$("#transcriptText")[0].scrollHeight;					// Max
+
+			$("#transcriptText").scrollTop(max*playerNow/playerTRT-$("#transcriptText").height()/3);
 			HighlightText(GetCharPosTimeFrom(playerNow),GetCharPosTimeFrom(playerNow)+60);
 			}
 		else if (what == "quality") {										// Quality

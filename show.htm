@@ -5,7 +5,7 @@
 	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
 	<title>SHIVA Show</title>
  	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
-	<script type="text/javascript" src="https://www.youtube.com/iframe_api"></script>
+	<script type="text/javascript" src="//www.youtube.com/iframe_api"></script>
 	<script type="text/javascript" src="shivalib-min.js"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
@@ -64,7 +64,7 @@
    		<img src="enddot.gif" onclick="RunSlide('next')" title="Go to next slide" style="vertical-align:-2px;cursor:pointer">
 	</div>
 	<div id="playerSiz" style="position:absolute;width:16px;cursor:col-resize" class="unselectable" title="Resize player">
-		<div style="position:absolute;width:32px;height:100%;left:-32px" class="unselectable"></div>
+		<div style="position:absolute;width:64px;height:100%;left:-64px" class="unselectable"></div>
 	</div>
 	<div id="contentDiv" style="position:absolute" class="contents unselectable">
 		<span class="labels">Contents</span><div id="contentsText" style="height:100%;overflow:auto;margin-top:16px"></div>
@@ -364,8 +364,8 @@
 		$("#transcriptText").on("click", function (e) {							// HANDLE TRANSCRIPT CLICK
 	  		var s=window.getSelection();										// Get selection
  			var y=transText.indexOf(s.focusNode.textContent);					// Char pos of paragraph
-	 		y=y+s.extentOffset;													// Position in text
- 			RunPlayer("scrub",GetTimeFromCharPos(y));							// Show
+	 		y=y+s.anchorOffset;													// Position in text
+ 			RunPlayer("scrub",GetTimeFromCharPos(y),true);						// Show
  			});
 
 		$("#transHgt").hover(													// If over transcript height control
@@ -453,7 +453,7 @@
 // ACTIONS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	function RunPlayer(what, param)
+	function RunPlayer(what, param, param2)								// PLAYER ACTIONS
 	{
 		if (what == "play") {												// Play
 			if ($("#playBut").attr("src") == "playbut.gif")	{				// If in pause
@@ -480,7 +480,7 @@
 			playerNow=Math.max(Math.min(param,playerTRT),0)					// Set now
 			if ((player) && (playerType == "youtube")) 						// If initted YouTube
 				player.seekTo(playerNow,true);								// Cue
-			RunPlayer("show");												// Show where we're at
+			RunPlayer("show",param2);										// Show where we're at
 			}
 		else if (what == "pause") {											// Pause
 			$("#playBut").attr("src","playbut.gif");						// Show pause but
@@ -495,7 +495,8 @@
 			$("#slider").slider("value",playerNow);							// Set slider
 			var max=$("#transcriptText")[0].scrollHeight;					// Max
 			var cp=GetCharPosTimeFrom(playerNow);							// Get char pos in transcript
-			$("#transcriptText").scrollTop(cp.pct*max-$("#transcriptText").height()/4);	// Set scroll
+			if (!param)														// If not inhibiting scroll
+				$("#transcriptText").scrollTop(cp.pct*max-$("#transcriptText").height()/4);	// Set scroll
 			HighlightText(cp.pos,cp.pos2);									// Highlight area
 			}
 		else if (what == "quality") {										// Quality
@@ -526,12 +527,10 @@
 				player.loadVideoById(param);								// Load video
 			}
 		else if (what == "ready") {											// When ready
+			RunPlayer("play",playerStart);									// Play
 			RunPlayer("resize");											// Resize player
  			ResizePanes();													// Resize panes
-			if (playerStart) {
-				RunPlayer("play",playerStart);								// Play
-				RunPlayer("pause");											// Pause
-				}
+			RunPlayer("pause");												// Pause
 			if (playerAuto == "true")										// If autoplay
 				RunPlayer("play",playerStart);								// Play
 			}
@@ -539,7 +538,8 @@
 		else if (what == "init") {											// Init player
  			if (playerType == "youtube") {									// If YouTube
 	       		player=new YT.Player("playerDiv", {							// Init player
-					playerVars:{ modestbranding:1, controls:0, disablekb:1},// No controls
+					playerVars:{ modestbranding:1, controls:0, 				// Settings
+						disablekb:1, rel:0, showinfo:0, autoplay:1 },
 	          		videoId: playerURL,										// Set url
 	         	 	events:{												// Add event handlers
 	            		"onStateChange": function(s) {						// Change of state

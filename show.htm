@@ -90,14 +90,16 @@
 
 	var shivaLib=null;															// Points to shiva library
 	var showWid;																// Width of entire player component
+	var showPanes=4;															// Number of panes in show
 	var showTitle="";															// Title of show
+	var showVectors=new Array();												// Timing vectors
 	var playerSlideRatio=.5;													// Ratio of player to slide windows
 	var transInfoRatio=.5;														// Ratio of conter/transcript to info windows
 	var transHgt=400;															// Height of transscript
 	var transLanguage="English";												// Transcript language
 	var transLangs="None|English|Spanish|French|Tibetan";						// Transcript languages
-	var transVectors=new Array();												// Transcript timing RLC
 	var transText;																// Text of transcript
+	var transPane=2;															// Pane number of transcript
 	
 	var player=null;															// Holds player object
 	var playerQuality="Default";												// Video quality
@@ -109,14 +111,22 @@
 	var playerTRT=367;															// Total running time in secs
 	var playerType="youtube";													// Type of player
 	var playerStart=0,playerStop=playerTRT;										// Start/end times
-	var playerURL="ft24bHtNJwY";												// Source
+	var playerCurSrc="ft24bHtNJwY";												// Source
 	var playerAuto="false";														// Auto play
 	var playerAspect=.5625;														// Player aspect ratio
 	var playerTime=null;														// Timer
+	var playerPane=0;															// Pane number of player
+
+	var slidePane=1;															// Pane number of slides
+	var slideCurSrc="";															// Current source
+
+	var infoPane=3;																// Pane number of info area
+	var infoCurSrc="";															// Current source
 		
 ///////// INIT  /////////////
 
 	$(document).ready(function() {												// When loaded
+		var i;
 		shivaLib=new SHIVA_Show("containerDiv",[{shivaGroup:"Video"}]);			// Load SHIVA lib
 		shivaLib.drupalMan=(""+window.location).match(/pr=d/);					// Drupal flag
 		if (window.addEventListener) 											// If supported this way
@@ -125,6 +135,8 @@
 			window.attachEvent("message",shivaEventHandler);					// Add handler
 		
 		showWid=$("#showDiv").width();											// Get width
+		for (i=0;i<showPanes;++i)												// For each show pane
+			showVectors[i]=[];													// Create timing vector arrays 
 		LoadContent();															// Load show content
 		RunPlayer("scrub",0);													// Show start/end times
 		$("#showDiv").show(1000);												// Show interface
@@ -220,26 +232,64 @@
 	toc.push({start:"05:45",title:"Health care"});
 	toc.push({start:"06:01",title:"Closing remarks"});
 	showTitle="Bill Clinton speaks at TED Conference";	
-	$("#slideDiv").html("<img width='100%' src='slide.jpg' onload='ResizePanes()'>");
 	$("#playerDiv").html("<img width='100%' src='video.jpg'onload='ResizePanes()'>");
 	$("#informationText").html("<img src='info.jpg'>");	
+
+	var tv=[ { a:0,   b:0, c:0 },
+			 { a:26,  b:0, c:60 },	
+			 { a:54,  b:262  },	
+			 { a:78,  b:648  },	
+			 { a:120, b:1246 },	
+			 { a:143, b:1584 },	
+			 { a:169, b:1899 },	
+			 { a:188, b:2085 },	
+			 { a:230, b:2736 },	
+			 { a:314, b:3926 },	
+			 { a:367, b:4554 } ];	
+
+	var sv=[ { a:0,   b:"//www.viseyes.org/shiva/qmedia/clinton01.jpg" },
+			 { a:26,  b:"//www.viseyes.org/shiva/qmedia/clinton02.jpg" },	
+			 { a:54,  b:"//www.viseyes.org/shiva/qmedia/clinton03.jpg" },	
+			 { a:78,  b:"//www.viseyes.org/shiva/qmedia/clinton04.jpg" },	
+			 { a:120, b:"//www.viseyes.org/shiva/qmedia/clinton05.jpg" },	
+			 { a:143, b:"//www.viseyes.org/shiva/qmedia/clinton06.jpg" },	
+			 { a:169, b:"//www.viseyes.org/shiva/qmedia/clinton07.jpg" },	
+			 { a:188, b:"//www.viseyes.org/shiva/qmedia/clinton08.jpg" },	
+			 { a:230, b:"//www.viseyes.org/shiva/qmedia/clinton09.jpg" },	
+			 { a:314, b:"//www.viseyes.org/shiva/qmedia/clinton10.jpg" },	
+			 { a:367, b:"" } ];	
+
+	var iv=[ { a:0,   b:"info.jpg" },
+			 { a:26,  b:"//www.viseyes.org/shiva/qmedia/clinton02.jpg" },	
+			 { a:54,  b:"//www.viseyes.org/shiva/qmedia/clinton03.jpg" },	
+			 { a:78,  b:"//www.viseyes.org/shiva/qmedia/clinton04.jpg" },	
+			 { a:120, b:"//www.viseyes.org/shiva/qmedia/clinton05.jpg" },	
+			 { a:143, b:"//www.viseyes.org/shiva/qmedia/clinton06.jpg" },	
+			 { a:169, b:"//www.viseyes.org/shiva/qmedia/clinton07.jpg" },	
+			 { a:188, b:"//www.viseyes.org/shiva/qmedia/clinton08.jpg" },	
+			 { a:230, b:"//www.viseyes.org/shiva/qmedia/clinton09.jpg" },	
+			 { a:314, b:"//www.viseyes.org/shiva/qmedia/clinton10.jpg" },	
+			 { a:367, b:"" } ];	
+
+	MakeVectors(1,sv);															// Make slides timing list
+	MakeVectors(2,tv);															// Make transcript timing list
+	MakeVectors(3,iv);															// Make info timing list
 	
 	$("#titleDiv").html(showTitle);												// Set titlw
 	MakeTOC(toc);																// Fill TOC contents
 	MakeTranscript();															// Load transcript
-	MakeTranscriptVectors();													// Make transcript timing list
 	if ((playerType != "youtube") && (playerType != "vimeo"))					// Doesn't resize on callback
 		ResizePanes();															// Resize panes
 	}
 
 	function ResizePanes()
 	{ 
-		var w=showWid*playerSlideRatio;											// Player width
+		var w=showWid*playerSlideRatio-4;										// Player width
 		var pt=$("#titleDiv").height()+32;										// Top of player
 		$("#playerDiv").css({ width:w+"px",top:pt+"px"});						// Set player pos
-		$("#slideDiv").css({ left:(w+16)+"px",width:(showWid-w)+"px",top:pt+"px"});		// Set slider pos/size
+		$("#slideDiv").css({ left:(w+20)+"px",width:(showWid-w-12)+"px",top:pt+"px"}); // Set slider pos/size
 		var h=Math.max($("#playerDiv").height(),$("#slideDiv").height());		// Player height
-		$("#playerSiz").css({ left:(w+8)+"px",height:h+"px",top:pt+"px"});		// Set sizer pos
+		$("#playerSiz").css({ left:(w+4)+"px",height:h+"px",top:pt+"px"});		// Set sizer pos
 		h+=pt;																	// Point at top of control bar
 		var ct=h+$("#controlDiv").height()+24;									// Contents top
 		$("#contentDiv").css({ top:ct+"px",height:transHgt+"px"});				// Position/size contents
@@ -257,31 +307,22 @@
 		$("#transHgt").css({ top:ct+transHgt+"px"});							// Set transcript height
 		$("#transSearchDiv").css("left",$("#transDiv").width()-104)+"px";		// Search div width
 		RunPlayer("resize");													// Resize player
+		RunSlide("resize");														// Resize slides
 		}		
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TRANSCRIPT
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	function MakeTranscriptVectors()										// CREATE TRANSCRIPT TIMIMG VECTORS
-	{
-		var ps=0;
-		var pd=playerTRT;
-		var cs=0;
-		var cd=transText.length;
-		transVectors.push( { ps:0,pd:26,cs:0,cd:0,w:0 } );
-		transVectors.push( { ps:26,pd:pd-26,cs:0,cd:cd,w:60 } );
-	}
-
-	function GetCharPosTimeFrom(t)											// GET CHARPOS IN TRANSCRIPT FROM TIME
+function GetCharPosTimeFrom(t)											// GET CHARPOS IN TRANSCRIPT FROM TIME
 	{
 		var i,o,cp={};
-		var n=transVectors.length-1;											// Last vector
+		var n=showVectors[transPane].length-1;									// Last vector
 		for (i=n;i>=0;i--) {													// For each vector
-			o=transVectors[i];													// Point at vector
+			o=showVectors[transPane][i];										// Point at vector
 			if (t >= o.ps) {													// In this one
 				cp.pos=(t-o.ps)/o.pd*o.cd+o.cs;									// Get char pos
-				cp.pos2=cp.pos+o.w;												// End
+				cp.pos2=cp.pos+o.c;												// End
 				cp.pct=cp.pos/transText.length;									// Percentage
 				return cp;														// Return pos
 				}																// Ratio into				
@@ -292,9 +333,9 @@
 	function GetTimeFromCharPos(p)											// GET TIME FROM CHARPOS IN TRANSCRIPT
 	{
 		var i,o,t;
-		var n=transVectors.length-1;											// Last vector
+		var n=showVectors[transPane].length-1;									// Last vector
 		for (i=n;i>=0;i--) {													// For each vector
-			o=transVectors[i];													// Point at vector
+			o=showVectors[transPane][i];										// Point at vector
 			if (p >= o.cs) {													// In this one
 				t=(p-o.cs)/o.cd*o.pd+o.ps;										// Get time
 				return t;														// Return time
@@ -449,6 +490,28 @@
 		$("#popup").show().delay(700).hide(300)
 		}
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// VECTORS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	function MakeVectors(pane, rlc)											// CREATE TIMIMG VECTOR ARRAY
+	{
+		var i,o,c=0;
+		for (i=0;i<rlc.length-1;++i) {											// For each run length
+			o={};																// New obj
+			o.ps=rlc[i].a;														// Time start
+			o.cs=rlc[i].b;														// Content start
+			if (rlc[i].c)														// If a width set
+				c=rlc[i].c;														// Use it
+			o.c=c;																// Set wid
+			o.pd=rlc[i+1].a-rlc[i].a;											// Set time duration
+			o.cd=rlc[i+1].b-rlc[i].b;											// Set content duration
+			showVectors[pane].push(o);											// Add to vector list
+			}
+	}
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ACTIONS
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -498,6 +561,8 @@
 			if (!param)														// If not inhibiting scroll
 				$("#transcriptText").scrollTop(cp.pct*max-$("#transcriptText").height()/4);	// Set scroll
 			HighlightText(cp.pos,cp.pos2);									// Highlight area
+			RunSlide("show");												// Show slide
+			RunInfo("show");												// Show Info
 			}
 		else if (what == "quality") {										// Quality
 			if ((player) && (playerType == "youtube")) {					// If initted YouTube
@@ -540,7 +605,7 @@
 	       		player=new YT.Player("playerDiv", {							// Init player
 					playerVars:{ modestbranding:1, controls:0, 				// Settings
 						disablekb:1, rel:0, showinfo:0, autoplay:1 },
-	          		videoId: playerURL,										// Set url
+	          		videoId: playerCurSrc,									// Set source
 	         	 	events:{												// Add event handlers
 	            		"onStateChange": function(s) {						// Change of state
 		         			if (s.data == 1) {
@@ -561,24 +626,51 @@
 
 	function RunSlide(what, param)
 	{
-		shivaLib.Sound("click");
-		Popup("Advance to "+what+" slide");
-	}
-
-	function RunTranscript(what, param)
-	{
-		trace(what,param);	
-	}
-
-	function RunContent(what, param)
-	{
-		trace(what,param);	
-	}
+		var i,o;
+		if (what == "show") {												// Show
+			var n=showVectors[slidePane].length-1;							// Last vector
+			for (i=n;i>=0;i--) {											// For each vector
+				o=showVectors[slidePane][i];								// Point at slide
+				if (playerNow >= o.ps) {									// In this one
+					if (slideCurSrc != o.cs) {								// A new slide
+						if (o.cs.match(/\.png|.gif|\.jpg|\.jpeg/i))			// An image
+							$("#slideDiv").html("<img width='100%' src='"+o.cs+"'>");	// Load as image
+						else
+							$("#slideDiv").html("<iframe id='slideIF' frameborder='0' height='"+($("#slideDiv").height()-2)+"' scrolling='no' width='100%' src='"+o.cs+"'></iframe>");	// Load in iframe
+							slideCurSrc=o.cs;									// Then is now
+						}						
+					break;
+					}																	
+				}
+			}
+		else if (what == "resize") {										// Resize
+			$("#slideIF").height($("#slideDiv").height()-2);				// Set iframe height, if any
+			}
+ 	}																		// End closure
 
 	function RunInfo(what, param)
 	{
-		trace(what,param);	
-	}
+		var i,o;
+		if (what == "show") {												// Show
+			var n=showVectors[infoPane].length-1;							// Last vector
+			for (i=n;i>=0;i--) {											// For each vector
+				o=showVectors[infoPane][i];									// Point at slide
+				if (playerNow >= o.ps) {									// In this one
+					if (infoCurSrc != o.cs) {								// A new slide
+						if (o.cs.match(/\.png|.gif|\.jpg|\.jpeg/i))			// An image
+							$("#infoDiv").html("<img width='100%' src='"+o.cs+"'>");	// Load as image
+						else
+							$("#infoDiv").html("<iframe id='infoIF' frameborder='0' height='"+($("#infoDiv").height()-2)+"' scrolling='no' width='100%' src='"+o.cs+"'></iframe>");	// Load in iframe
+							infoCurSrc=o.cs;								// Then is now
+						}						
+					break;
+					}																	
+				}
+			}
+		else if (what == "resize") {										// Resize
+			$("#infoIF").height($("#infoDiv").height()-2);					// Set iframe height, if any
+			}
+	}																		// End closure
 
 	
 </script>

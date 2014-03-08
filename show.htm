@@ -93,7 +93,8 @@
 	var showPanes=4;															// Number of panes in show
 	var showTitle="";															// Title of show
 	var showVectors=new Array();												// Timing vectors
-	var playerSlideRatio=.5;													// Ratio of player to slide windows
+	var showCurSource=new Array();												// Current sources
+	
 	var transInfoRatio=.5;														// Ratio of conter/transcript to info windows
 	var transHgt=400;															// Height of transscript
 	var transLanguage="English";												// Transcript language
@@ -116,12 +117,11 @@
 	var playerAspect=.5625;														// Player aspect ratio
 	var playerTime=null;														// Timer
 	var playerPane=0;															// Pane number of player
+	var playerSlideRatio=.5;													// Ratio of player to slide windows
 
 	var slidePane=1;															// Pane number of slides
-	var slideCurSrc="";															// Current source
 
 	var infoPane=3;																// Pane number of info area
-	var infoCurSrc="";															// Current source
 		
 ///////// INIT  /////////////
 
@@ -135,8 +135,10 @@
 			window.attachEvent("message",shivaEventHandler);					// Add handler
 		
 		showWid=$("#showDiv").width();											// Get width
-		for (i=0;i<showPanes;++i)												// For each show pane
+		for (i=0;i<showPanes;++i) {												// For each show pane
 			showVectors[i]=[];													// Create timing vector arrays 
+			showCurSource[i]="";												// No source yet
+			}
 		LoadContent();															// Load show content
 		RunPlayer("scrub",0);													// Show start/end times
 		$("#showDiv").show(1000);												// Show interface
@@ -254,21 +256,16 @@
 			 { a:120, b:"//www.viseyes.org/shiva/qmedia/clinton05.jpg" },	
 			 { a:143, b:"//www.viseyes.org/shiva/qmedia/clinton06.jpg" },	
 			 { a:169, b:"//www.viseyes.org/shiva/qmedia/clinton07.jpg" },	
-			 { a:188, b:"//www.viseyes.org/shiva/qmedia/clinton08.jpg" },	
+			 { a:188, b:"//www.viseyes.org/shiva/go.htm?e=1103"  },	
 			 { a:230, b:"//www.viseyes.org/shiva/qmedia/clinton09.jpg" },	
 			 { a:314, b:"//www.viseyes.org/shiva/qmedia/clinton10.jpg" },	
 			 { a:367, b:"" } ];	
 
 	var iv=[ { a:0,   b:"info.jpg" },
-			 { a:26,  b:"//www.viseyes.org/shiva/qmedia/clinton02.jpg" },	
-			 { a:54,  b:"//www.viseyes.org/shiva/qmedia/clinton03.jpg" },	
-			 { a:78,  b:"//www.viseyes.org/shiva/qmedia/clinton04.jpg" },	
-			 { a:120, b:"//www.viseyes.org/shiva/qmedia/clinton05.jpg" },	
-			 { a:143, b:"//www.viseyes.org/shiva/qmedia/clinton06.jpg" },	
-			 { a:169, b:"//www.viseyes.org/shiva/qmedia/clinton07.jpg" },	
-			 { a:188, b:"//www.viseyes.org/shiva/qmedia/clinton08.jpg" },	
-			 { a:230, b:"//www.viseyes.org/shiva/qmedia/clinton09.jpg" },	
-			 { a:314, b:"//www.viseyes.org/shiva/qmedia/clinton10.jpg" },	
+			 { a:93,  b:"//www.viseyes.org/shiva/go.htm?e=375" },	
+			 { a:108, b:"info.jpg"  },	
+			 { a:188, b:"//www.viseyes.org/shiva/qmedia/clinton08.jpg"  },	
+			 { a:314, b:"//www.clintonfoundation.org", c:"scroll" },	
 			 { a:367, b:"" } ];	
 
 	MakeVectors(1,sv);															// Make slides timing list
@@ -308,13 +305,14 @@
 		$("#transSearchDiv").css("left",$("#transDiv").width()-104)+"px";		// Search div width
 		RunPlayer("resize");													// Resize player
 		RunSlide("resize");														// Resize slides
+		RunInfo("resize");														// Resize info
 		}		
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // TRANSCRIPT
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-function GetCharPosTimeFrom(t)											// GET CHARPOS IN TRANSCRIPT FROM TIME
+function GetCharPosTimeFrom(t)												// GET CHARPOS IN TRANSCRIPT FROM TIME
 	{
 		var i,o,cp={};
 		var n=showVectors[transPane].length-1;									// Last vector
@@ -497,16 +495,18 @@ function GetCharPosTimeFrom(t)											// GET CHARPOS IN TRANSCRIPT FROM TIME
 
 	function MakeVectors(pane, rlc)											// CREATE TIMIMG VECTOR ARRAY
 	{
-		var i,o,c=0;
+		var i,o,c="";
 		for (i=0;i<rlc.length-1;++i) {											// For each run length
 			o={};																// New obj
 			o.ps=rlc[i].a;														// Time start
 			o.cs=rlc[i].b;														// Content start
 			if (rlc[i].c)														// If a width set
 				c=rlc[i].c;														// Use it
-			o.c=c;																// Set wid
+			if (c)																// If something there							
+				o.c=c;															// Set 3rd param
 			o.pd=rlc[i+1].a-rlc[i].a;											// Set time duration
-			o.cd=rlc[i+1].b-rlc[i].b;											// Set content duration
+			if (!isNaN(o.cs))													// If numeric content
+				o.cd=rlc[i+1].b-rlc[i].b;										// Set content duration
 			showVectors[pane].push(o);											// Add to vector list
 			}
 	}
@@ -624,54 +624,43 @@ function GetCharPosTimeFrom(t)											// GET CHARPOS IN TRANSCRIPT FROM TIME
 	        }
  	}																		// End closure
 
-	function RunSlide(what, param)
+	function RunSlide(what, param)										// SLIDE ACTIONS
 	{
-		var i,o;
-		if (what == "show") {												// Show
-			var n=showVectors[slidePane].length-1;							// Last vector
-			for (i=n;i>=0;i--) {											// For each vector
-				o=showVectors[slidePane][i];								// Point at slide
-				if (playerNow >= o.ps) {									// In this one
-					if (slideCurSrc != o.cs) {								// A new slide
-						if (o.cs.match(/\.png|.gif|\.jpg|\.jpeg/i))			// An image
-							$("#slideDiv").html("<img width='100%' src='"+o.cs+"'>");	// Load as image
-						else
-							$("#slideDiv").html("<iframe id='slideIF' frameborder='0' height='"+($("#slideDiv").height()-2)+"' scrolling='no' width='100%' src='"+o.cs+"'></iframe>");	// Load in iframe
-							slideCurSrc=o.cs;									// Then is now
-						}						
-					break;
-					}																	
-				}
-			}
-		else if (what == "resize") {										// Resize
-			$("#slideIF").height($("#slideDiv").height()-2);				// Set iframe height, if any
-			}
- 	}																		// End closure
-
-	function RunInfo(what, param)
-	{
-		var i,o;
-		if (what == "show") {												// Show
-			var n=showVectors[infoPane].length-1;							// Last vector
-			for (i=n;i>=0;i--) {											// For each vector
-				o=showVectors[infoPane][i];									// Point at slide
-				if (playerNow >= o.ps) {									// In this one
-					if (infoCurSrc != o.cs) {								// A new slide
-						if (o.cs.match(/\.png|.gif|\.jpg|\.jpeg/i))			// An image
-							$("#infoDiv").html("<img width='100%' src='"+o.cs+"'>");	// Load as image
-						else
-							$("#infoDiv").html("<iframe id='infoIF' frameborder='0' height='"+($("#infoDiv").height()-2)+"' scrolling='no' width='100%' src='"+o.cs+"'></iframe>");	// Load in iframe
-							infoCurSrc=o.cs;								// Then is now
-						}						
-					break;
-					}																	
-				}
-			}
-		else if (what == "resize") {										// Resize
-			$("#infoIF").height($("#infoDiv").height()-2);					// Set iframe height, if any
-			}
+		if (what == "show") 												// Show
+			ShowContent(slidePane,"slideDiv");								// Show content
+		else if (what == "resize") 											// Resize
+			$("#slideDivIF").height($("#slideDiv").height()-2);				// Set iframe height, if any
 	}																		// End closure
 
+	function RunInfo(what, param)										// INFO ACTIONS
+	{
+		if (what == "show") 												// Show
+			ShowContent(infoPane,"infoDiv");								// Show content
+		else if (what == "resize") 											// Resize
+			$("#infoDivIF").height($("#infoDiv").height()-2);					// Set iframe height, if any
+	}																		// End closure
+
+	function ShowContent(pane, div)										// SHOW IMAGE OR IFRAME
+	{
+		var i,o,extra="scrolling='no'";
+		var n=showVectors[pane].length-1;									// Last vector
+		for (i=n;i>=0;i--) {												// For each vector
+			o=showVectors[pane][i];											// Point at slide
+			if (playerNow >= o.ps) {										// In this one
+				if (showCurSource[pane] != o.cs) {							// A new item
+					if (o.cs.match(/\.png|.gif|\.jpg|\.jpeg/i))				// An image
+						$("#"+div).html("<img width='100%' src='"+o.cs+"'>");	// Load as image
+					else{													// An iframe
+						$("#"+div+"IF").remove();							// Remove any existing iframes
+						if ((o.c) && (o.c.match(/scroll/i))) 	extra="";	// Add scroll bars
+						$("#"+div).html("<iframe id='"+div+"IF' frameborder='0' height='"+$("#"+div).height()+"' "+extra+" width='100%' src='"+o.cs+"'></iframe>");	// Load in iframe
+						}
+					showCurSource[pane]=o.cs;								// Then is now
+					}						
+				break;														// Stop looking
+				}																	
+			}
+	}
 	
 </script>
 </body></html>

@@ -64,7 +64,7 @@
    		<img src="enddot.gif" onclick="RunSlide('next')" title="Go to next slide" style="vertical-align:-2px;cursor:pointer">
 	</div>
 	<div id="playerSiz" style="position:absolute;width:16px;cursor:col-resize" class="unselectable" title="Resize player">
-		<div style="position:absolute;width:64px;height:100%;left:-64px" class="unselectable"></div>
+		<div style="position:absolute;width:80px;height:100%;left:-40px" class="unselectable"></div>
 	</div>
 	<div id="contentDiv" style="position:absolute" class="contents unselectable">
 		<span class="labels">Contents</span><div id="contentsText" style="height:100%;overflow:auto;margin-top:16px"></div>
@@ -78,10 +78,14 @@
   		<div id="transcriptText" style="height:90%;overflow:auto;margin-top:16px;padding-right:8px"></div>
  	</div>
 	<div id="infoDiv" style="position:absolute" class="info">
-		<span class="labels">More information</span><div id="informationText" style="height:100%;overflow:auto;margin-top:16px"></div>
+		<span class="labels">More information</span><div id="informationText" style="height:100%;overflow:hidden;margin-top:16px"></div>
 	</div>
 	<div id="transHgt" style="position:absolute;width:1000px;height:16px;cursor:row-resize;border-bottom:3px solid #ccc" class="unselectable" title="Change transcript height"></div>
 	<div id="transSiz" style="position:absolute;width:16px;cursor:col-resize" class="unselectable" title="Resize transcript"></div>
+	<div id="cache0" style="display:none"></div>
+	<div id="cache1" style="display:none"></div>
+	<div id="cache2" style="display:none"></div>
+	<div id="cache3" style="display:none"></div>
 </div>
  
 <script>
@@ -120,7 +124,6 @@
 	var playerSlideRatio=.5;													// Ratio of player to slide windows
 
 	var slidePane=1;															// Pane number of slides
-
 	var infoPane=3;																// Pane number of info area
 		
 ///////// INIT  /////////////
@@ -151,7 +154,7 @@
 			});
 
 		$("#playerSiz").draggable({												// DRAG PLAYER WIDTH HANDLER
-			cursorAt:{left:8},
+			cursorAt:{left:16},													// Cursor offext
 			cursor: "col-resize", axis:"x",										// X-only
 			stop: ResizePanes,													// Resize panes when done
 			drag: function(event, ui) {											// On drag
@@ -224,14 +227,14 @@
 	function LoadContent()													// LOAD SHOW CONTENT
 	{
 	var toc=[];
-	toc.push({start:"00:00",title:"Opening remarks"});
-	toc.push({start:"01:02",title:"Clinton Global Initiative"});
-	toc.push({start:"02:08",title:"Health in Rwanda"});
-	toc.push({start:"03:33",title:"AIDS vaccines"});
-	toc.push({start:"04:12",title:"Malaria reduction"});
-	toc.push({start:"04:55",title:"Partners in Health"});
-	toc.push({start:"05:09",title:"Jobs"});
-	toc.push({start:"05:45",title:"Health care"});
+	toc.push({start:"00:00",title:"Opening credits"});
+	toc.push({start:"00:26",title:"My TED wish"});
+	toc.push({start:"00:54",title:"An unequal world"});
+	toc.push({start:"01:23",title:"An unstable world"});
+	toc.push({start:"02:23",title:"The world I want to see"});
+	toc.push({start:"03:08",title:"London"});
+	toc.push({start:"03:50",title:"Power of people"});
+	toc.push({start:"05:14",title:"Clinton foundation"});
 	toc.push({start:"06:01",title:"Closing remarks"});
 	showTitle="Bill Clinton speaks at TED Conference";	
 	$("#playerDiv").html("<img width='100%' src='video.jpg'onload='ResizePanes()'>");
@@ -282,9 +285,12 @@
 	function ResizePanes()
 	{ 
 		var w=showWid*playerSlideRatio-4;										// Player width
+		var w2=showWid-w-8;														// Slide width
+		if (w <= 0)				w=0,w2=showWid;									// Full slide											
+		else if (w2 <= 0)		w2=0,w=showWid;									// Full video											
 		var pt=$("#titleDiv").height()+32;										// Top of player
 		$("#playerDiv").css({ width:w+"px",top:pt+"px"});						// Set player pos
-		$("#slideDiv").css({ left:(w+20)+"px",width:(showWid-w-12)+"px",top:pt+"px"}); // Set slider pos/size
+		$("#slideDiv").css({ left:(showWid-w2+8)+"px",width:(w2)+"px",top:pt+"px"}); // Set slider pos/size
 		var h=Math.max($("#playerDiv").height(),$("#slideDiv").height());		// Player height
 		$("#playerSiz").css({ left:(w+4)+"px",height:h+"px",top:pt+"px"});		// Set sizer pos
 		h+=pt;																	// Point at top of control bar
@@ -488,28 +494,24 @@ function GetCharPosTimeFrom(t)												// GET CHARPOS IN TRANSCRIPT FROM TIME
 		$("#popup").show().delay(700).hide(300)
 		}
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// VECTORS
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	function MakeVectors(pane, rlc)											// CREATE TIMIMG VECTOR ARRAY
+	function MakeVectors(pane, rlc)										// CREATE TIMIMG VECTOR ARRAY
 	{
 		var i,o,c="";
-		for (i=0;i<rlc.length-1;++i) {											// For each run length
-			o={};																// New obj
-			o.ps=rlc[i].a;														// Time start
-			o.cs=rlc[i].b;														// Content start
-			if (rlc[i].c)														// If a width set
-				c=rlc[i].c;														// Use it
-			if (c)																// If something there							
-				o.c=c;															// Set 3rd param
-			o.pd=rlc[i+1].a-rlc[i].a;											// Set time duration
-			if (!isNaN(o.cs))													// If numeric content
-				o.cd=rlc[i+1].b-rlc[i].b;										// Set content duration
-			showVectors[pane].push(o);											// Add to vector list
+		for (i=0;i<rlc.length-1;++i) {										// For each run length
+			o={};															// New obj
+			o.ps=rlc[i].a;													// Time start
+			o.cs=rlc[i].b;													// Content start
+			if (rlc[i].c)													// If a width set
+				c=rlc[i].c;													// Use it
+			if (c)															// If something there							
+				o.c=c;														// Set 3rd param
+			o.pd=rlc[i+1].a-rlc[i].a;										// Set time duration
+			if (!isNaN(o.cs))												// If numeric content
+				o.cd=rlc[i+1].b-rlc[i].b;									// Set content duration
+			showVectors[pane].push(o);										// Add to vector list
 			}
 	}
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -626,8 +628,25 @@ function GetCharPosTimeFrom(t)												// GET CHARPOS IN TRANSCRIPT FROM TIME
 
 	function RunSlide(what, param)										// SLIDE ACTIONS
 	{
+		var i;
 		if (what == "show") 												// Show
 			ShowContent(slidePane,"slideDiv");								// Show content
+		else if (what == "last") { 											// Go to previous slide
+			var n=showVectors[slidePane].length-1;							// Last vector
+			for (i=n;i>0;i--) 												// For each vector
+				if (playerNow >= showVectors[slidePane][i].ps) {			// In this one
+					RunPlayer("scrub",showVectors[slidePane][i-1].ps);		// Go there
+					break;													// Quit looking
+					}
+			}
+		else if (what == "next") { 											// Go to next slide
+			var n=showVectors[slidePane].length-1;							// Last vector
+			for (i=n-1;i>=0;i--) 											// For each vector
+				if (playerNow >= showVectors[slidePane][i].ps) {			// In this one
+					RunPlayer("scrub",showVectors[slidePane][i+1].ps);		// Go there
+					break;													// Quit looking
+					}
+			}
 		else if (what == "resize") 											// Resize
 			$("#slideDivIF").height($("#slideDiv").height()-2);				// Set iframe height, if any
 	}																		// End closure
@@ -635,9 +654,9 @@ function GetCharPosTimeFrom(t)												// GET CHARPOS IN TRANSCRIPT FROM TIME
 	function RunInfo(what, param)										// INFO ACTIONS
 	{
 		if (what == "show") 												// Show
-			ShowContent(infoPane,"infoDiv");								// Show content
+			ShowContent(infoPane,"informationText");						// Show content
 		else if (what == "resize") 											// Resize
-			$("#infoDivIF").height($("#infoDiv").height()-2);					// Set iframe height, if any
+			$("#infoDivIF").height($("#informationText").height()-2);		// Set iframe height, if any
 	}																		// End closure
 
 	function ShowContent(pane, div)										// SHOW IMAGE OR IFRAME
@@ -649,13 +668,18 @@ function GetCharPosTimeFrom(t)												// GET CHARPOS IN TRANSCRIPT FROM TIME
 			if (playerNow >= o.ps) {										// In this one
 				if (showCurSource[pane] != o.cs) {							// A new item
 					if (o.cs.match(/\.png|.gif|\.jpg|\.jpeg/i))				// An image
-						$("#"+div).html("<img width='100%' src='"+o.cs+"'>");	// Load as image
+						$("#"+div).html("<img width='100%' src='"+o.cs+"'>"); // Load as image
 					else{													// An iframe
 						$("#"+div+"IF").remove();							// Remove any existing iframes
 						if ((o.c) && (o.c.match(/scroll/i))) 	extra="";	// Add scroll bars
 						$("#"+div).html("<iframe id='"+div+"IF' frameborder='0' height='"+$("#"+div).height()+"' "+extra+" width='100%' src='"+o.cs+"'></iframe>");	// Load in iframe
 						}
 					showCurSource[pane]=o.cs;								// Then is now
+					o=showVectors[pane][i+1];								// Point at next slide
+					if (o) {												// If not penulitimate image
+						if (o.cs.match(/\.png|.gif|\.jpg|\.jpeg/i))			// If an image				
+							$("#cache"+pane).html("<img src='"+o.cs+"'>"); 	// Load as image
+						}
 					}						
 				break;														// Stop looking
 				}																	

@@ -1468,10 +1468,11 @@ dh=dw*this.items[i].asp/1000;else
 dh=v[0]/1000*h;x=w*v[1]/1000-(dw/2);y=h*v[2]/1000-(dh/2);str="<div id='posterPane"+i+"' style='position:absolute;background:none transparent;";if(this.items[i].style)
 str+=this.items[i].style.replace(/\|/g,";").replace(/=/g,":");str+="'>"
 u=this.items[i].url;if(isImg=u.match(/\.jpg|\.jpeg|\.gif|\.png/i))
-str+="<img src='"+this.items[i].url+"' width='100%'>";else if(u){if(this.items[i].asp)
+str+="<img src='"+this.items[i].url+"' width='100%'>";else if(u){trace(u)
+if(this.items[i].asp)
 srs="go.htm?srs=100&";else
 srs="go.htm?";if(!isNaN(u))
-u=srs+"e="+u;else if((u.match(/e=/))||(u.match(/m=/)))
+u=srs+"e="+u;else if((u.match(/e=/))||(u.match(/M=/)))
 u=srs+u;if(u.match(/go.htm/))
 u+="&if="+i;str+="<iframe id='posterFrame-"+i+"' src='"+u+"'";if(this.items[i].scrollbars=="false")
 str+="scrolling='no' ";str+="frameborder='0' allowtransparency='true'></iframe>";}

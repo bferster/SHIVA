@@ -475,7 +475,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		
 		else if (options.chartType == "Tree") {							// Tree
 	
-		 	margins=[20,20,20,options.spacing/2];						// Margins
+		 	margins=[8,8,8,options.spacing/2];						// Margins
 	   	 	if (firstTime)
 		   	 	svg.attr("transform","translate("+margins[3]+","+margins[0]+")"); // Move into margin area
 	   	 	

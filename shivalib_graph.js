@@ -1027,8 +1027,9 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	
 			}															// End Chord
 
+	if (firstTime)														// If first time thru
+		shivaLib.SendReadyMessage(true);								// Send ready msg to drupal manager
 	firstTime=false;													// Not first time thru
-	shivaLib.SendReadyMessage(true);									// Send ready msg to drupal manager
 	}																	// End update
 
 

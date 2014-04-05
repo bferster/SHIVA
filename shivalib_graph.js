@@ -619,9 +619,9 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	     			.style("fill", function(d) { return  d.children ? "#"+options.gCol : "#"+options.nCol; })
 	 	  			.style("fill-opacity", function(d) { return  d.children ? .15 : 1})
 					.style("cursor", function(d) { return d.info ? "pointer" : "auto"; })	// Set cursor presence of info
-					.on("click",function(d) {							// Click on node
+					.on("click", function(d) {							// Click on node
 								shivaLib.SendShivaMessage("ShivaGraph=click",d.name+"|"+d.val); // Send message
-								AddPopup();								// Show popup
+								AddPopup(d);							// Show popup
 								});								
 				node.filter(function(d) { return !d.children; })		// Filter
 					.append("text")
@@ -666,7 +666,11 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				
 				node.append("circle")									// Add circle
 			      	.attr("r", function(d) { return d.r; })				// Set diameter
-			      	.style("fill", function(d) { return colors(d.packageName); });	// Set color
+			      	.style("fill", function(d) { return colors(d.packageName); })	// Set color
+					.on("click", function(d) {							// Click on node
+								shivaLib.SendShivaMessage("ShivaGraph=click",d.className+"|"+d.value); // Send message
+								AddPopup(d);							// Show popup
+								});								
 		
 		 		node.append("text")										// Add text
 			      	.attr("dy",".3em")									// Shift
@@ -777,8 +781,21 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			      		d3.select(this).attr("stroke-width","0px");		// Add border	
 			      		dataBar.style("visibility","hidden");			// Hide data bar
 			  			})
+				.on("click",function(d) {								// Click on node
+						var k,o,datearray=[];
+						var date=x.invert(d3.mouse(this)[0]);			// Get date from x pos
+				      	var now=date.getFullYear()*3650+date.getMonth()*300+date.getDate();	// Unique now
+				      	var selected=(d.values);						// Selected layer						
+				      	for (var k=0;k<selected.length;k++) { 			// For each data point
+				        	o=selected[k].date;							// Get date
+				        	datearray[k]=o.getFullYear()*3650+o.getMonth()*300+o.getDate();	// Make unique id
+				        	}
+					   	k=datearray.indexOf(now);						// Data item over
+					 	shivaLib.SendShivaMessage("ShivaGraph=click",shivaLib.FormatDate(date,options.dateFormat)+"|"+d.key+"|"+d.values[k].value); // Send message
+				 		});	
+
 			    
-			$("#startDate").text(shivaLib.FormatDate(x.invert(0),options.dateFormat));				// Set start date
+			$("#startDate").text(shivaLib.FormatDate(x.invert(0),options.dateFormat));		// Set start date
 			$("#endDate").text(shivaLib.FormatDate(x.invert(opWidth),options.dateFormat));	// Set end date
 			}															// End Stream
 	
@@ -979,7 +996,10 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		      	.style("stroke", function(d) { return cols[d.index%clen]; })	// Set edge color
 		      	.attr("d",arc)											// Draw grouping
 	   			.on("mouseover",function(d,i) { fade(.15,i);} )			// Fade down
-	  			.on("mouseout", function() { fade(.67,i);} );				// Fade up
+	  			.on("mouseout", function() { fade(.67,i);} )				// Fade up
+				.on("click",function(d) {								// Click on node
+				 		shivaLib.SendShivaMessage("ShivaGraph=click",nameByIndex.get(d.index)+"|"+d.index); // Send message
+				 		});	
 	    
 		  	g.append("text")											// Add node label						
 		  		.each(function(d) { d.angle=(d.startAngle+d.endAngle)/2; })	// Angle
@@ -1025,6 +1045,8 @@ function AddPopup(d)												// SHOW A POPUP
 	$("#d3Popup").css({left:x,top:y});									// Position
 	$("#d3Popup").html(shivaLib.LinkToAnchor(d.info));					// Add text										
 	$("#d3Popup").show();												// Show it
+	if (shivaLib.options.popupTime == undefined)						// If not defined
+		shivaLib.options.popupTime=2;									// Set default
 	$("#d3Popup").delay(shivaLib.options.popupTime*1000).fadeOut(400);	// Close after n seconds
 	}
 

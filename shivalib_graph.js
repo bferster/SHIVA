@@ -498,7 +498,6 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 						return  "translate("+dataSet.y0+","+dataSet.x0+")"; // Position to dataSet
 					})
 				.on("click", function(d) { 								// Add click handler
-			 		shivaLib.SendShivaMessage("ShivaGraph=click",d.name+"|"+d.val); // Send message
 					toggle(d); 	redraw(d); 								// Toggle and redraw
 					});	
 		
@@ -517,8 +516,11 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				.style("fill-opacity", 1e-6)							// Transparent
 				.style("fill",options.lCol)								// Color
 				.style("font-size",options.lSize)						// Size
-				.style(unselectable);									// Unselectable
-		
+//				.style(unselectable)									// Unselectable
+				.on("click", function(d) { 								// Add click handler
+			 		shivaLib.SendShivaMessage("ShivaGraph=click",d.name+"|"+d.val); // Send message
+					});	
+			
 			var nodeUpdate=node.transition()	  						// Transition nodes to their new position
 				.duration(options.trans)								// Set time
 				.attr("transform", function(d) { return "translate("+d.y+","+d.x+")"; });	// Move

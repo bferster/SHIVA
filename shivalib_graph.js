@@ -496,16 +496,16 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 						return  "translate("+d.parent.y+","+d.parent.x+")"; // Position to parent dot
 					else												// If dataSet
 						return  "translate("+dataSet.y0+","+dataSet.x0+")"; // Position to dataSet
-					})
-				.on("click", function(d) { 								// Add click handler
-					toggle(d); 	redraw(d); 								// Toggle and redraw
-					});	
+				});
 		
 			nodeEnter.append("circle")									// Add circle
 				.attr("r",1e-6)											// Set size
 				.style("stroke","#999")									// Edge
 				.style("cursor", function(d) { return d._children ? "pointer" : "auto"; })	// Set cursor based on children
-				.style("fill", function(d) { return d._children ? "#"+options.nCol : "#fff"; });	// Set color based on children
+				.style("fill", function(d) { return d._children ? "#"+options.nCol : "#fff"; })	// Set color based on children
+				.on("click", function(d) { 								// Add click handler
+					toggle(d); 	redraw(d); 								// Toggle and redraw
+					});	
 		
 			nodeEnter.append("text")									// Add label
 				.style("font-family","sans-serif")						// San serif

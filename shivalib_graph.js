@@ -420,7 +420,11 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					if (d.style && styles[d.style] && styles[d.style].alpha)	// If a style spec'd
 						return styles[d.style].alpha;					// Get alpha from options
 					})									
-				.on("click",function(d){ if (!d3.event.shiftKey) AddPopup(d); })	// Click on node unless dragging w/ shift
+				.on("click",function(d){								// Click on node
+			 		shivaLib.SendShivaMessage("ShivaGraph=click",d.name); // Send message
+				 	if (!d3.event.shiftKey)								// If not shift key down 
+				 		AddPopup(d); 									// Show popup, if one
+				 	})	
 				.call(force.drag);
 			nodes.append("title")									// CREATE EDGE TOOLTIPS
 		      	.text(function(d) { 
@@ -493,7 +497,10 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 					else												// If dataSet
 						return  "translate("+dataSet.y0+","+dataSet.x0+")"; // Position to dataSet
 					})
-				.on("click", function(d) { toggle(d); redraw(d); });	// Add click handler
+				.on("click", function(d) { 								// Add click handler
+			 		shivaLib.SendShivaMessage("ShivaGraph=click",d.name+"|"+d.val); // Send message
+					toggle(d); 	redraw(d); 								// Toggle and redraw
+					});	
 		
 			nodeEnter.append("circle")									// Add circle
 				.attr("r",1e-6)											// Set size
@@ -612,8 +619,10 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	     			.style("fill", function(d) { return  d.children ? "#"+options.gCol : "#"+options.nCol; })
 	 	  			.style("fill-opacity", function(d) { return  d.children ? .15 : 1})
 					.style("cursor", function(d) { return d.info ? "pointer" : "auto"; })	// Set cursor presence of info
-					.on("click",AddPopup)								// Click on node
-
+					.on("click",function(d) {							// Click on node
+								shivaLib.SendShivaMessage("ShivaGraph=click",d.name+"|"+d.val); // Send message
+								AddPopup();								// Show popup
+								});								
 				node.filter(function(d) { return !d.children; })		// Filter
 					.append("text")
 			      	.attr("dy",".3em")									// Shift
@@ -1009,7 +1018,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 
 function AddPopup(d)												// SHOW A POPUP
 {
-	if (!d.info)														// Nothing to show
+	if (!d || !d.info)													// Nothing to show
 		return;															// Quit
 	var x=d3.event.clientX+8;											// Set xPos
 	var y=d3.event.clientY+8;											// Y

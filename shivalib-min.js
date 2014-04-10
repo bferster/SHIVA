@@ -987,7 +987,7 @@ SHIVA_Show.prototype.AddBlankMapStyle=function(map)
 SHIVA_Show.prototype.DrawVideo=function()
 {var v,t,type="YouTube";var options=this.options;var container=this.container;var con="#"+container;var id=options.dataSourceUrl;if(typeof(Popcorn)!="function")
 return;if(typeof(Popcorn.smart)!="function")
-return;var base="http://www.youtube.com/watch?autoplay=1&v=";$(con).width(options.width);$(con).height(options.height);if((options.dataSourceUrl.match(/vimeo/))||(!isNaN(options.dataSourceUrl)))
+return;var base="http://www.youtube.com/watch?autoplay=1&controls=1&v=";$(con).width(options.width);$(con).height(options.height);if((options.dataSourceUrl.match(/vimeo/))||(!isNaN(options.dataSourceUrl)))
 base="http://vimeo.com/",type="Vimeo";else if(options.dataSourceUrl.match(/kaltura/)){var s=options.dataSourceUrl.indexOf("kaltura_player_");var flavor=487061;id=options.dataSourceUrl.substring(s+15);id="https://www.kaltura.com/p/2003471/sp/0/playManifest/entryId/"+id+"/format/url/flavorParamId/"+flavor+"/protocol/https/video.mp4"
 base="";type="Kaltura";}
 else if((options.dataSourceUrl.match(/http/g))&&(!options.dataSourceUrl.match(/youtube/g)))

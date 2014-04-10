@@ -41,7 +41,25 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 	var opWidth=$(con).width();											// Get width in pixels
  	var w=opWidth;														// Width
 	var h=opHeight;														// Height
+
+	// SVG /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
 	
+	svg=d3.select(con)													// Add SVG to container div
+		.append("svg")													// Add SVG shell
+		.attr("width",w-margins[0]-margins[2]).attr("height",h-margins[1]-margins[3])	// Set size
+		.call(d3Zoom=d3.behavior.zoom().scaleExtent([minZoom,maxZoom]).on("zoom",zoomed)) // Set zoom
+ 		.append("g")													// Needed for pan/zoom
+    	
+	svg.append("defs")													// Add defs section
+	    .append("clipPath")
+	    .attr("id","cp0")
+	    .append("rect").attr("width",w).attr("height",h).attr("x",100).attr("y",0)
+	    
+	svg.append("rect")													// Pan and zoom rect
+		.style({"fill":"none","pointer-events":"all"})					// Invisble
+    	.attr("id","underLayer")										// Set id
+    	.attr("width",w).attr("height",h)								// Set size
+    	.on("click",function(){ $("#d3Popup").hide(); });				// Hide any open popups				
 	
 	// DATA //////////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -54,6 +72,9 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				for (i=0;i<data.length;++i) {							// For each row
 					if (!data[i][0])									// If no data
 						continue;										// Skip
+					for (j=0;j<5;++j)									// For each possible field
+						if (data[i][j])									// If exists
+							data[i][j]=data[i][j].replace(/[\n|\r]/,"");// Remove CR/LFs							
 					if (data[i][0].match(/link-class/i)) {				// If a link-class
 						if (!styles[data[i][1]])						// If new
 							styles[data[i][1]]={};						// Create new style object
@@ -103,9 +124,10 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 						dataSet.edges.push(o);							// Add node to list
 						}
 					}
-	 			for (i=0;i<dataSet.edges.length;++i) {					// For each edge
-	 				dataSet.edges[i].source=ids[dataSet.edges[i].source];	// Convert id to index
-	 				dataSet.edges[i].target=ids[dataSet.edges[i].target];	// Convert id to index
+		
+	 			for (j=0;j<dataSet.edges.length;++j) {					// For each edge
+	 				dataSet.edges[j].source=ids[dataSet.edges[j].source];	// Convert id to index
+	 				dataSet.edges[j].target=ids[dataSet.edges[j].target];	// Convert id to index
 	 				}
 	  			redraw();												// Draw graph
 				});
@@ -280,26 +302,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 			},true);
 	}																	
 	
-	
-	// SVG /////////////////////////////////////////////////////////////////////////////////////////////////////////////////		
-	
-	svg=d3.select(con)													// Add SVG to container div
-		.append("svg")													// Add SVG shell
-		.attr("width",w-margins[0]-margins[2]).attr("height",h-margins[1]-margins[3])	// Set size
-		.call(d3Zoom=d3.behavior.zoom().scaleExtent([minZoom,maxZoom]).on("zoom",zoomed)) // Set zoom
- 		.append("g")													// Needed for pan/zoom
-     	
-	svg.append("defs")													// Add defs section
-	    .append("clipPath")
-	    .attr("id","cp0")
-	    .append("rect").attr("width",w).attr("height",h).attr("x",100).attr("y",0)
-	    
-	svg.append("rect")													// Pan and zoom rect
-		.style({"fill":"none","pointer-events":"all"})					// Invisble
-    	.attr("id","underLayer")										// Set id
-    	.attr("width",w).attr("height",h)								// Set size
-    	.on("click",function(){ $("#d3Popup").hide(); });				// Hide any open popups				
-	
+		
 	function zoomed() {													// ZOOM HANDLER
  		var t;
  		if (!canPan)

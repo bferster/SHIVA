@@ -62,6 +62,7 @@ SHIVA_Draw.prototype.DrawPalette=function(tool) 						//	DRAW
 		var h=225;															// Default height
 		str="<div id='shivaDrawPaletteDiv' style='position:absolute;left:"+left+"px;top:"+(top-12+Number(hgt)-100)+"px;width:180px;height:"+h+"px'>";
 		$("body").append("</div>"+str);										// Add palette to body
+		$("#shivaDrawPaletteDiv").css({ "background-color":"#eee","border-radius":"8px" });
 		$("#shivaDrawPaletteDiv").addClass("propTable");					// Style same as property menu
 		$("#shivaDrawPaletteDiv").draggable();								// Make it draggable
 		$("#shivaDrawPaletteDiv").css("z-index",2001);						// Force on top
@@ -478,6 +479,7 @@ SHIVA_Draw.prototype.SetTool=function(num) 								//	SET TOOL
 		$("#shivaDrawDiv").css("cursor","auto");							// Regular cursor
 		$("#shivaDrawDiv").css('pointer-events','none');					// Inibit pointer clicks if menu gone
 		$("#shivaDrawPaletteDiv").remove();									// Close it
+		shivaLib.SendShivaMessage("ShivaDraw=done"); 						// Send EVA message
 		}
 	else																	
 		shivaLib.Sound("click");											// Click sound

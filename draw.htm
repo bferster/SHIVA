@@ -76,6 +76,7 @@
 			str+="</select>"; 
 			$("#saveAsDiv").html(str);
 			}
+		shivaLib.SendReadyMessage(true);											
 	});
 
 	function shivaEventHandler(e)
@@ -90,7 +91,6 @@
 			e.source.postMessage("GetType="+shivaGroup,"*");
 		else if (e.data.indexOf("PutJSON") == 0) 
 			ReEdit($.parseJSON(e.data.substr(8)));
-	trace(e.data)
 	
 	}
 

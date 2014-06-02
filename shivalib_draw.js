@@ -253,7 +253,7 @@ SHIVA_Draw.prototype.SetMenuProperties=function() 						//	SET MENU PROPERTIES
 	$("#arrow").attr("checked",this.arrow);									// Check it
 	$("#edgeWidth").slider("value",this.edgeWidth); 						// Set edge width
 	$("#alpha").slider("value",this.alpha); 								// Set alpha
-	$("#restSize").slider("value",this.textSize); 							// Set edge width
+	$("#textSize").slider("value",this.textSize); 							// Set text size
 	$("#textAlign").val(this.textAlign); 									// Set text align
 	$("#imageURL").val(this.imageURL); 										// Set image url
 	$("#edgeWidth").val(this.edgeWidth); 									// Set edge width
@@ -308,6 +308,10 @@ SHIVA_Draw.prototype.SaveDrawData=function(json) 						// SAVE DRAWING AS ITEM L
 			str+="\",\n";													// Add ",LF
 		}
 	return str;																// Return added elements
+}
+
+SHIVA_Draw.prototype.SaveSVGData=function() 						// SAVE DRAWING AS SVG
+{
 }
 
 SHIVA_Draw.prototype.DrawWireframes=function(clear) 					// DRAW OVERLAY
@@ -963,6 +967,3 @@ SHIVA_Draw.prototype.IdeaDrop=function(from, to) 						//	HANDLE IDEA NODE DRAG 
 	this.segs[from].ideaParent=to;											// Connect
 	this.Sound("ding");														// Ding sound
 }
-
-                                                                     
-                                                                                  

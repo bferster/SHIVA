@@ -421,7 +421,7 @@ SHIVA_Show.prototype.DrawOverlay=function() 							// DRAW OVERLAY
 			str+="width:"+(Math.abs(o.x[1]-o.x[0])-18)+"px'/>";
 			$("#shivaDrawDiv").append(str);									// Add div
 			$("#shtx"+i).css("color",o.textColor).css("text-align",o.textAlign.toLowerCase());	// Color/align
-			$("#shtx"+i).css("font-size",Number(o.textSize)+12);			// Set font size
+			$("#shtx"+i).css("font-size",Number(o.textSize/2)+10);			// Set font size
 			$("#shtx"+i).html(o.text);										// Set text
 			$("#shtx"+i).bind("change input propertychange",function(e) {	// Change event
 				var i=e.target.id.substr(4);								// Extract index

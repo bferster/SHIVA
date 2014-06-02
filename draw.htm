@@ -112,6 +112,7 @@
 
 	function ShowHelp(att)
 	{
+		SaveSVG();
 		if (att == "startup") 
 			$("#helpDiv").html("<br/><p class='pb'>Built by SHANTI<br/>The University of Virginia</p>");
 		else
@@ -127,6 +128,123 @@
 	{ 
 		console.log(str) 
 	}
+	
+	
+function SaveSVG(h, w) 
+{
+	
+h=600;	w=800
+	var i,j,o,x,y,e;
+	if (!drObj) 	return;
+	var str="<svg><g transform='scale(10)'>\n";								// Header
+	for (i=0;i<drObj.segs.length;++i) {										// For each seg
+		o=drObj.segs[i];													// Point at it
+		e=Math.max((o.edgeWidth/100).toFixed(4),.05);						// Edge is .5-10							 															
+		if (o.type ==0) {													// Line
+			str+="<path style='";											// Start
+			if (o.color != -1)	str+=o.color+";";							// Fill color
+			else				str+="none;"								// No fill
+			if (o.edgeColor != -1)	 {										// If an edge
+				str+="stroke:"+o.edgeColor;									// Edge color
+				str+=";stroke-width:"+e+";";								// Edge width
+				}
+			str+="opacity:"+(o.alpha/100).toFixed(2)+"' d='";				// Alpha								
+			for (j=0;j<o.x.length;++k) {
+				x=(o.x[0]/h*100).toFixed(2);								// Pos x
+				y=(o.y[0]/h*100).toFixed(2);								// Pos y
+				}
+			str+="'/>\n";													// End rect
+			}
+		else if (o.type == 1) {												// Box
+			x=(Math.abs(o.x[1]-o.x[0])/w*100).toFixed(2);					// Calc wid
+			str+="<circle r='"+x+"' ";										// Size
+			x=(o.x[0]/w*100).toFixed(2);									// Pos x
+			y=(o.y[0]/w*100).toFixed(2);									// Pos y
+			str+="cx='"+x+"' cy='"+y+"' style='fill:";						// Pos
+			if (o.color != -1)	str+=o.color+";";							// Fill color
+			else				str+="none;"								// No fill
+			if (o.edgeColor != -1)	 {										// If an edge
+				str+="stroke:"+o.edgeColor;									// Edge color
+				str+=";stroke-width:"+e+";";								// Edge width
+				}
+			str+="opacity:"+(o.alpha/100).toFixed(2)+"'";					// Alpha								
+			str+="/>\n";													// End rect
+			}
+		else if (o.type == 2) {												// Box
+			x=(Math.abs(o.x[1]-o.x[0])/w*100).toFixed(2);					// Calc wid
+			y=(Math.abs(o.y[1]-o.y[0])/w*100).toFixed(2);					// Hgt
+			str+="<rect width='"+x+"' height='"+y+"' ";						// Size
+			x=(o.x[0]/w*100).toFixed(2);									// Pos x
+			y=(o.y[0]/w*100).toFixed(2);									// Pos y
+			str+="x='"+x+"' y='"+y+"' style='fill:";						// Pos
+			if (o.color != -1)	str+=o.color+";";							// Fill color
+			else				str+="none;"								// No fill
+			if (o.edgeColor != -1)	 {										// If an edge
+				str+="stroke:"+o.edgeColor;									// Edge color
+				str+=";stroke-width:"+e+";";								// Edge width
+				}
+			str+="opacity:"+(o.alpha/100).toFixed(2)+"'";					// Alpha								
+			if (o.curve)	str+=" rx='1' ry='1'";							// Round box
+			str+="/>\n";													// End rect
+			}
+		else if (o.type == 3) {												// Text
+			var th=(o.textSize/20).toFixed(4)-0+1;							// Text size							 															
+			if (o.boxColor != -1) {											// If a box
+				x=(Math.abs(o.x[1]-o.x[0])/w*100).toFixed(2);				// Calc wid
+				y=(Math.abs(o.y[1]-o.y[0])/w*100).toFixed(2);				// Hgt
+				str+="<rect width='"+x+"' height='"+y+"' ";					// Size
+				x=(o.x[0]/w*100).toFixed(2);								// Pos x
+				y=(o.y[0]/w*100).toFixed(2);								// Pos y
+				str+="x='"+x+"' y='"+y+"' style='fill:"+o.boxColor;			// Pos
+				str+=";opacity:"+(o.alpha/100).toFixed(2)+"'";				// Alpha								
+				if (o.curve)	str+=" rx='1' ry='1'";						// Round box
+				str+="/>\n";												// End rect
+				}
+			x=o.x[0]+10;													// Assume left
+			e="start";
+			if (o.textAlign == "Right")		x=o.x[1]-10,e="end";				// Right
+			if (o.textAlign == "Center")	x=o.x[0]-0+Math.abs(o.x[1]-o.x[0])/2,e="middle";	// Center
+			x=(x/w*100).toFixed(2);											// Pos x
+			y=((o.y[0])/w*100+th+1).toFixed(2);								// Pos y
+			str+="<text x='"+x+"' y='"+y+"' ";								// Text pos
+			str+="style='opacity:"+(o.alpha/100).toFixed(2);				// Alpha
+			str+=";text-anchor:"+e+";fill:"+o.textColor;					// Anchor / color
+			str+=";font-family:sans-serif;font-size:"+th+"'>";				// Style							
+			str+=o.text;													// String
+			str+="</text>\n";												// End text
+			}
+		else if (o.type == 4) {												// Image
+			x=(Math.abs(o.x[1]-o.x[0])/w*100).toFixed(2);					// Calc wid
+			y=(Math.abs(o.y[1]-o.y[0])/w*100).toFixed(2);					// Hgt
+			str+="<image width='"+x+"' height='"+y+"' ";					// Size
+			x=(o.x[0]/w*100).toFixed(2);									// Pos x
+			y=(o.y[0]/w*100).toFixed(2);									// Pos y
+			str+="x='"+x+"' y='"+y+"' style='";								// Pos
+			str+="opacity:"+(o.alpha/100).toFixed(2)+"'";					// Alpha								
+			str+=" xlink:href='"+o.imageURL+"'";							// Round box
+			str+="/>\n";													// End image
+			if (o.edgeColor != -1) {										// If a box
+				x=(Math.abs(o.x[1]-o.x[0])/w*100).toFixed(2);				// Calc wid
+				y=(Math.abs(o.y[1]-o.y[0])/w*100).toFixed(2);				// Hgt
+				str+="<rect width='"+x+"' height='"+y+"' ";					// Size
+				x=(o.x[0]/w*100).toFixed(2);								// Pos x
+				y=(o.y[0]/w*100).toFixed(2);								// Pos y
+				str+="x='"+x+"' y='"+y+"' style='";							// Pos
+				str+="fill:none;stroke:"+o.edgeColor;						// Edge color
+				str+=";stroke-width:"+e+";";								// Edge width
+				str+=";opacity:"+(o.alpha/100).toFixed(2)+"'";				// Alpha								
+				str+="/>\n";												// End rect
+				}
+			}
+		}
+	str+="</g></svg>";														// Close svg
+	trace(str)
+}
+	
+	
+	
+
+	
 
 </script>
 </body></html>

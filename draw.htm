@@ -141,17 +141,50 @@ h=600;	w=800
 		o=drObj.segs[i];													// Point at it
 		e=Math.max((o.edgeWidth/100).toFixed(4),.05);						// Edge is .5-10							 															
 		if (o.type ==0) {													// Line
-			str+="<path style='";											// Start
+			str+="<path style='fill:";										// Start
 			if (o.color != -1)	str+=o.color+";";							// Fill color
 			else				str+="none;"								// No fill
 			if (o.edgeColor != -1)	 {										// If an edge
 				str+="stroke:"+o.edgeColor;									// Edge color
 				str+=";stroke-width:"+e+";";								// Edge width
 				}
-			str+="opacity:"+(o.alpha/100).toFixed(2)+"' d='";				// Alpha								
-			for (j=0;j<o.x.length;++k) {
-				x=(o.x[0]/h*100).toFixed(2);								// Pos x
-				y=(o.y[0]/h*100).toFixed(2);								// Pos y
+			str+="opacity:"+(o.alpha/100).toFixed(2)+"' d='M";				// Alpha								
+			str+=(o.x[0]/w*100).toFixed(2)+",";								// Pos x
+			str+=(o.y[0]/w*100).toFixed(2)+" ";								// Pos y
+			
+			if (o.curve) {
+				var open=true;
+				if ((Math.abs(o.x[0]-o.x[o.x.length-1]) < 3) && (Math.abs(o.y[0]-o.y[o.y.length-1]) < 3)) {
+					o.x[x.length-1]=o.x[0];
+					o.y[y.length-1]=o.y[0];
+					open=false;
+					}
+				x=o.x[0]-0+((o.x[1]-o.x[0])/2)-0;
+				y=o.y[0]-0+((o.y[1]-o.y[0])/2)-0;
+				if (open) {
+					str+="L"+(x/w*100).toFixed(2)+",";						// Pos x
+					str+=(y/w*100).toFixed(2)+" ";							// Pos y
+			 		}			
+				for (j=1;j<o.x.length-1;++j) {								// For each coord
+					x=o.x[i]-0+((o.x[i+1]-o.x[i])/2)-0;												
+					y=o.y[i]-0+((o.y[i+1]-o.y[i])/2)-0;												
+					str+="Q";												// Line to
+					str+=(x/w*100).toFixed(2)+",";							// Control x
+					str+=(y/w*100).toFixed(2)+" ";							// Control y
+					str+=(o.x[j]/w*100).toFixed(2)+",";						// Pos x
+					str+=(o.y[j]/w*100).toFixed(2)+" ";						// Pos y
+					}
+				if (open) {
+					str+="L"+(o.x[j]/w*100).toFixed(2)+",";					// Pos x
+					str+=(o.y[j]/w*100).toFixed(2)+" ";						// Pos y
+			 		}			
+				}
+			else{
+				for (j=1;j<o.x.length;++j) {								// For each coord
+					str+="L";												// Line to
+					str+=(o.x[j]/w*100).toFixed(2)+",";						// Pos x
+					str+=(o.y[j]/w*100).toFixed(2)+" ";						// Pos y
+					}
 				}
 			str+="'/>\n";													// End rect
 			}

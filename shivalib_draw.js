@@ -69,10 +69,10 @@ SHIVA_Draw.prototype.DrawPalette=function(tool) 						//	DRAW
 		var h=225;															// Default height
 		str="<div id='shivaDrawPaletteDiv' style='position:absolute;left:"+left+"px;top:"+(top-12+Number(hgt)-100)+"px;width:180px;height:"+h+"px'>";
 		$("body").append("</div>"+str);										// Add palette to body
-		$("#shivaDrawPaletteDiv").css({ "background-color":"#eee","border-radius":"8px" });
+		$("#shivaDrawPaletteDiv").css({ "background-color":"#eee","border-radius":"8px","z-index":2001 });
 		$("#shivaDrawPaletteDiv").addClass("propTable");					// Style same as property menu
 		$("#shivaDrawPaletteDiv").draggable();								// Make it draggable
-		$("#shivaDrawPaletteDiv").css("z-index",2001);						// Force on top
+		$("#shivaDrawPaletteDiv").css({ "-moz-user-select":"none","-khtml-user-select":"none","-webkit-user-select":"none","-ms-user-select":"none","user-select":"none"});
 		}
 	this.SetTool(0);														// Draw lines
 	this.DrawMenu();														// Draw menu
@@ -639,7 +639,7 @@ SHIVA_Draw.prototype.onKeyUp=function(e)								// KEY UP HANDLER
 		return;																// Quit
 	if ((e.which == 67) && (e.ctrlKey))	{									// Copy
 		if (drObj.selectedItems.length) {									// If something selected
-			this.Sound("click");													// Play sound
+			drObj.Sound("click");											// Play sound
 			drObj.clipboard=[];												// Clear clipboard
 			}	
 		for (i=0;i<drObj.selectedItems.length;++i) 					
@@ -648,7 +648,7 @@ SHIVA_Draw.prototype.onKeyUp=function(e)								// KEY UP HANDLER
 	if ((e.which == 86) && (e.ctrlKey))	{									// Paste
 		if (drObj.clipboard.length) {										// If something in clipboard
 			drObj.selectedItems=[];											// Clear selects
-			this.Sound("ding");												// Play sound
+			drObj.Sound("ding");											// Play sound
 			for (i=0;i<drObj.clipboard.length;++i) {						// For each seg in clipboard				
 				drObj.selectedItems.push(drObj.segs.length);				// Add to selects
 				drObj.segs.push(shivaLib.Clone(drObj.clipboard[i])); 		// Add seg
@@ -669,11 +669,11 @@ SHIVA_Draw.prototype.onKeyUp=function(e)								// KEY UP HANDLER
 		drObj.lastX=o.x[o.x.length-1];										// Set last x to end point
 		drObj.lastY=o.y[o.y.length-1];										// Set last y to end point
 		drObj.DrawOverlay();												// Redraw	
-		this.Sound("delete");												// Play sound
+		drObj.Sound("delete");												// Play sound
 		}
 	if ((e.which == 27) && (num != -1))	{									// If ESC and an active seg
 		drObj.curSeg=-1;													// End current seg, if open
-		this.Sound("dclick");												// Play sound
+		drObj.Sound("dclick");												// Play sound
 		}
 	else if (drObj.curTool == 5) {											// In edit mode
 		if ((e.which == 8) || (e.which == 46)) {							// If DEL 
@@ -693,7 +693,7 @@ SHIVA_Draw.prototype.onKeyUp=function(e)								// KEY UP HANDLER
 
 				drObj.DrawOverlay();										// Redraw	
 				drObj.DrawWireframes(false);								// Draw wireframes
-				this.Sound("delete");										// Play sound
+				drObj.Sound("delete");										// Play sound
 				}
 			}
 	else if ((e.which == 40) && (e.shiftKey)) drObj.MoveSegs(0,0,-1);		// SH-Up to order up
@@ -784,11 +784,11 @@ SHIVA_Draw.prototype.AddSelect=function(x, y, shiftKey)					// SELECT SEGMENT/DO
 		if (this.selectedDot != -1)	{										// If a specific dot selected
 			$("#shivaDrawDiv").css("cursor","crosshair");					// Crosshair cursor
 			if (oldDot != this.selectedDot)									// If a new selection
-				this.Sound("dclick");										// Double-click
+				drObj.Sound("dclick");										// Double-click
 			}
 		else{																// Whole seg
 			$("#shivaDrawDiv").css("cursor","move");						// Move cursor
-			this.Sound("click");											// Click
+			drObj.Sound("click");											// Click
 			}
 		this.selectedItems.push(seg);										// Add seg to selects
 		this.alpha=o.alpha;													// Everyone has alpha
@@ -832,14 +832,14 @@ SHIVA_Draw.prototype.MoveSegs=function(dx, dy, dz)						// MOVE SELECTED SEGS
 			continue;														// Skip it
 		if (dz) {															// If shifting order
 			if ((this.selectedItems[i]+dz < 0) || (this.selectedItems[i]+dz >= this.segs.length)) {  // If out of range
-				this.Sound("delete");									// Delete
+				drObj.Sound("delete");										// Delete
 				continue;													// Skip
 				}
 			oo=this.segs[this.selectedItems[i]+dz];							// Sve dest seg
 			this.segs[this.selectedItems[i]+dz]=o;							// Move to dest
 			this.segs[this.selectedItems[i]]=oo;							// Copy dest to src 
 			this.selectedItems[i]+=dz;										// Dest is now selected one
-			this.Sound("click");											// Click
+			drObj.Sound("click");											// Click
 			}
 		if (this.selectedDot != -1)											// If single dot selected
 			o.x[this.selectedDot]-=dx,o.y[this.selectedDot]-=dy;			// Shift it

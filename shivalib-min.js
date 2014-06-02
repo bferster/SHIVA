@@ -547,7 +547,7 @@ this.DrawPalette();this.colorPicker="";this.ctx=$("#shivaDrawCanvas")[0].getCont
 SHIVA_Draw.prototype.Sound=function(snd)
 {shivaLib.Sound(snd);}
 SHIVA_Draw.prototype.DrawPalette=function(tool)
-{this.ctx=$("#shivaDrawCanvas")[0].getContext('2d');var hgt=$("#"+this.container).css("height").replace(/px/g,"");var top=$("#"+this.container).css("top").replace(/px/g,"");if(top=="auto")top=0;var left=$("#"+this.container).css("left").replace(/px/g,"")-0+12;if($("#shivaDrawPaletteDiv").length==0){var h=225;str="<div id='shivaDrawPaletteDiv' style='position:absolute;left:"+left+"px;top:"+(top-12+Number(hgt)-100)+"px;width:180px;height:"+h+"px'>";$("body").append("</div>"+str);$("#shivaDrawPaletteDiv").css({"background-color":"#eee","border-radius":"8px"});$("#shivaDrawPaletteDiv").addClass("propTable");$("#shivaDrawPaletteDiv").draggable();$("#shivaDrawPaletteDiv").css("z-index",2001);}
+{this.ctx=$("#shivaDrawCanvas")[0].getContext('2d');var hgt=$("#"+this.container).css("height").replace(/px/g,"");var top=$("#"+this.container).css("top").replace(/px/g,"");if(top=="auto")top=0;var left=$("#"+this.container).css("left").replace(/px/g,"")-0+12;if($("#shivaDrawPaletteDiv").length==0){var h=225;str="<div id='shivaDrawPaletteDiv' style='position:absolute;left:"+left+"px;top:"+(top-12+Number(hgt)-100)+"px;width:180px;height:"+h+"px'>";$("body").append("</div>"+str);$("#shivaDrawPaletteDiv").css({"background-color":"#eee","border-radius":"8px","z-index":2001});$("#shivaDrawPaletteDiv").addClass("propTable");$("#shivaDrawPaletteDiv").draggable();$("#shivaDrawPaletteDiv").css({"-moz-user-select":"none","-khtml-user-select":"none","-webkit-user-select":"none","-ms-user-select":"none","user-select":"none"});}
 this.SetTool(0);this.DrawMenu();}
 SHIVA_Draw.prototype.Clear=function()
 {shivaLib.overlay=[];this.segs=[];$("#shivaDrawDiv").html("");}
@@ -674,18 +674,18 @@ SHIVA_Draw.prototype.onKeyUp=function(e)
 {if($("#shivaDrawPaletteDiv").length==0)
 return;if((e.which==83)&&(e.ctrlKey)&&(e.altKey)){shivaLib.SaveData("eStore");return;}
 var i;if((e.target.tagName=="TEXTAREA")||(e.target.tagName=="INPUT"))
-return;if((e.which==67)&&(e.ctrlKey)){if(drObj.selectedItems.length){this.Sound("click");drObj.clipboard=[];}
+return;if((e.which==67)&&(e.ctrlKey)){if(drObj.selectedItems.length){drObj.Sound("click");drObj.clipboard=[];}
 for(i=0;i<drObj.selectedItems.length;++i)
 drObj.clipboard.push(shivaLib.Clone(drObj.segs[drObj.selectedItems[i]]));}
-if((e.which==86)&&(e.ctrlKey)){if(drObj.clipboard.length){drObj.selectedItems=[];this.Sound("ding");for(i=0;i<drObj.clipboard.length;++i){drObj.selectedItems.push(drObj.segs.length);drObj.segs.push(shivaLib.Clone(drObj.clipboard[i]));}}}
+if((e.which==86)&&(e.ctrlKey)){if(drObj.clipboard.length){drObj.selectedItems=[];drObj.Sound("ding");for(i=0;i<drObj.clipboard.length;++i){drObj.selectedItems.push(drObj.segs.length);drObj.segs.push(shivaLib.Clone(drObj.clipboard[i]));}}}
 if(drObj.curTool==6){num=drObj.selectedItems[0];if(((e.which==8)||(e.which==46))&&(num!=-1))
 drObj.DeleteIdea();}
-var num=drObj.curSeg;if(((e.which==8)||(e.which==46))&&(num!=-1)){var o=drObj.segs[num];o.x.pop();o.y.pop();drObj.lastX=o.x[o.x.length-1];drObj.lastY=o.y[o.y.length-1];drObj.DrawOverlay();this.Sound("delete");}
-if((e.which==27)&&(num!=-1)){drObj.curSeg=-1;this.Sound("dclick");}
+var num=drObj.curSeg;if(((e.which==8)||(e.which==46))&&(num!=-1)){var o=drObj.segs[num];o.x.pop();o.y.pop();drObj.lastX=o.x[o.x.length-1];drObj.lastY=o.y[o.y.length-1];drObj.DrawOverlay();drObj.Sound("delete");}
+if((e.which==27)&&(num!=-1)){drObj.curSeg=-1;drObj.Sound("dclick");}
 else if(drObj.curTool==5){if((e.which==8)||(e.which==46)){if(drObj.selectedItems.length){num=drObj.selectedItems[0];if((drObj.selectedDot!=-1)&&(drObj.segs[num].type==0)){drObj.segs[num].x.splice(drObj.selectedDot,1);drObj.segs[num].y.splice(drObj.selectedDot,1);}
 else if(e.target.id.indexOf("shtx")==-1)
 for(var i=0;i<drObj.selectedItems.length;++i){$("#shtx"+drObj.selectedItems[i]).remove();$("#shim"+drObj.selectedItems[i]).remove();drObj.segs.splice(drObj.selectedItems[i],1);}
-drObj.DrawOverlay();drObj.DrawWireframes(false);this.Sound("delete");}}
+drObj.DrawOverlay();drObj.DrawWireframes(false);drObj.Sound("delete");}}
 else if((e.which==40)&&(e.shiftKey))drObj.MoveSegs(0,0,-1);else if((e.which==38)&&(e.shiftKey))drObj.MoveSegs(0,0,1);else if(e.which==39)drObj.MoveSegs(-1,0,0);else if(e.which==37)drObj.MoveSegs(1,0,0);else if(e.which==40)drObj.MoveSegs(0,-1,0);else if(e.which==38)drObj.MoveSegs(0,1,0);}}
 SHIVA_Draw.prototype.AddSelect=function(x,y,shiftKey)
 {var i,j,o,seg=-1,asp;var oldDot=this.selectedDot;this.selectedDot=-1;var last=this.selectedItems[0];if(x!=-1){if(!shiftKey){this.selectedItems=[];$("#shivaDrawDiv").css("cursor","auto");}
@@ -703,8 +703,8 @@ for(j=0;j<o.x.length;++j){minx=Math.min(minx,o.x[j]);miny=Math.min(miny,o.y[j]);
 if((x>minx)&&(x<maxx)&&(y>miny)&&(y<maxy)){seg=i;break;}}}}
 else
 seg=y;if(seg!=-1){o=this.segs[seg];if(this.selectedDot!=-1){$("#shivaDrawDiv").css("cursor","crosshair");if(oldDot!=this.selectedDot)
-this.Sound("dclick");}
-else{$("#shivaDrawDiv").css("cursor","move");this.Sound("click");}
+drObj.Sound("dclick");}
+else{$("#shivaDrawDiv").css("cursor","move");drObj.Sound("click");}
 this.selectedItems.push(seg);this.alpha=o.alpha;this.curve=o.curve;if(o.type<3){this.arrow=o.arrow;this.curve=o.curve;this.color=o.color;this.edgeColor=o.edgeColor;this.edgeWidth=o.edgeWidth;}
 else if(o.type==3){this.curve=o.curve;this.textColor=o.textColor;this.boxColor=o.boxColor;this.textSize=o.textSize;this.textAlign=o.textAlign;}
 else if(o.type==4){o=this.segs[seg];asp=$("#shimi"+seg).height()/$("#shimi"+seg).width();if(!asp)asp=1;if(!isNaN(asp))
@@ -713,8 +713,8 @@ this.DrawMenu(o.type);this.SetMenuProperties();}
 this.DrawWireframes(false);}
 SHIVA_Draw.prototype.MoveSegs=function(dx,dy,dz)
 {var i,j,o,oo;for(i=0;i<this.selectedItems.length;++i){o=this.segs[this.selectedItems[i]];if(o.type==5)
-continue;if(dz){if((this.selectedItems[i]+dz<0)||(this.selectedItems[i]+dz>=this.segs.length)){this.Sound("delete");continue;}
-oo=this.segs[this.selectedItems[i]+dz];this.segs[this.selectedItems[i]+dz]=o;this.segs[this.selectedItems[i]]=oo;this.selectedItems[i]+=dz;this.Sound("click");}
+continue;if(dz){if((this.selectedItems[i]+dz<0)||(this.selectedItems[i]+dz>=this.segs.length)){drObj.Sound("delete");continue;}
+oo=this.segs[this.selectedItems[i]+dz];this.segs[this.selectedItems[i]+dz]=o;this.segs[this.selectedItems[i]]=oo;this.selectedItems[i]+=dz;drObj.Sound("click");}
 if(this.selectedDot!=-1)
 o.x[this.selectedDot]-=dx,o.y[this.selectedDot]-=dy;else
 for(j=0;j<o.x.length;++j)

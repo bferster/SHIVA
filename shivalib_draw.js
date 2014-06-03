@@ -478,7 +478,6 @@ SHIVA_Draw.prototype.SaveSVGData=function() 							// SAVE DRAWING AS SVG
 			}
 		}
 	str+="</g></svg>";														// Close svg
-	trace(str)
 	return str;
 }
 

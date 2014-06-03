@@ -112,7 +112,7 @@
 
 	function ShowHelp(att)
 	{
-		SaveSVG();
+		if (drObj)	drObj.SaveSVGData();
 		if (att == "startup") 
 			$("#helpDiv").html("<br/><p class='pb'>Built by SHANTI<br/>The University of Virginia</p>");
 		else
@@ -129,24 +129,22 @@
 		console.log(str) 
 	}
 	
-	
-function SaveSVG(h, w) 
+SHIVA_Draw.prototype.SaveSVGData=function() 							// SAVE DRAWING AS SVG
 {
-	
-h=600;	w=800
 	var i,j,o,x,y,e;
-	if (!drObj) 	return;
+	var w=$("#shivaDrawDiv").width();										// Container wid
+	var h=$("#shivaDrawDiv").height();										// Hgt
 	var str="<svg><g transform='scale(10)'>\n";								// Header
 	for (i=0;i<drObj.segs.length;++i) {										// For each seg
 		o=drObj.segs[i];													// Point at it
 		e=Math.max((o.edgeWidth/100).toFixed(4),.05);						// Edge is .5-10							 															
-		if (o.type ==0) {													// Line
+		if (o.type == 0) {													// Line
 			str+="<path style='fill:";										// Start
 			if (o.color != -1)	str+=o.color+";";							// Fill color
 			else				str+="none;"								// No fill
 			if (o.edgeColor != -1)	 {										// If an edge
 				str+="stroke:"+o.edgeColor;									// Edge color
-				str+=";stroke-width:"+e+";";								// Edge width
+				str+=";stroke-width:"+e+";fill";								// Edge width
 				}
 			str+="opacity:"+(o.alpha/100).toFixed(2)+"' d='M";				// Alpha								
 			str+=(o.x[0]/w*100).toFixed(2)+",";								// Pos x
@@ -166,13 +164,13 @@ h=600;	w=800
 					str+=(y/w*100).toFixed(2)+" ";							// Pos y
 			 		}			
 				for (j=1;j<o.x.length-1;++j) {								// For each coord
-					x=o.x[i]-0+((o.x[i+1]-o.x[i])/2)-0;						// Mid x										
-					y=o.y[i]-0+((o.y[i+1]-o.y[i])/2)-0;						// Mid y										
+					x=o.x[j]-0+((o.x[j+1]-o.x[j])/2)-0;						// Mid x										
+					y=o.y[j]-0+((o.y[j+1]-o.y[j])/2)-0;						// Mid y										
 					str+="Q";												// Line to
-					str+=(x/w*100).toFixed(2)+",";							// Control x
-					str+=(y/w*100).toFixed(2)+" ";							// Control y
 					str+=(o.x[j]/w*100).toFixed(2)+",";						// Pos x
 					str+=(o.y[j]/w*100).toFixed(2)+" ";						// Pos y
+					str+=(x/w*100).toFixed(2)+",";							// Control x
+					str+=(y/w*100).toFixed(2)+" ";							// Control y
 					}
 				if (open) {
 					str+="L"+(o.x[j]/w*100).toFixed(2)+",";					// Pos x
@@ -186,7 +184,8 @@ h=600;	w=800
 					str+=(o.y[j]/w*100).toFixed(2)+" ";						// Pos y
 					}
 				}
-			str+="'/>\n";													// End rect
+			if (o.color != -1)	str+="Z"									// If a filled polygon, close it
+				str+="'/>\n";												// End rect
 			}
 		else if (o.type == 1) {												// Box
 			x=(Math.abs(o.x[1]-o.x[0])/w*100).toFixed(2);					// Calc wid
@@ -272,12 +271,8 @@ h=600;	w=800
 		}
 	str+="</g></svg>";														// Close svg
 	trace(str)
+	return str;
 }
-	
-	
-	
-
-	
 
 </script>
 </body></html>

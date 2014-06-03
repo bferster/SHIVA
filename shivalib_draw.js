@@ -320,8 +320,8 @@ SHIVA_Draw.prototype.SaveSVGData=function() 							// SAVE DRAWING AS SVG
 {
 	var i,j,o,x,y,e;
 	var w=$("#shivaDrawDiv").width();										// Container wid
-	var h=$("#shivaDrawDiv").height();										// Hgt
-	var str="<svg><g id='svgGrp' oWid='"+w+"'>\n";							// Header
+	var h=$("#shivaDrawDiv").height();										// Container hht
+	var str="<svg width='100%' height='100%' viewBox='0 0 "+w+" "+h+"'>\n";	// Header
 	for (i=0;i<drObj.segs.length;++i) {										// For each seg
 		o=drObj.segs[i];													// Point at it
 		e=Math.max((o.edgeWidth/10),.5);									// Edge is .5-10							 															

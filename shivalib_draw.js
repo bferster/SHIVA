@@ -73,6 +73,11 @@ SHIVA_Draw.prototype.DrawPalette=function(tool) 						//	DRAW
 		$("#shivaDrawPaletteDiv").addClass("propTable");					// Style same as property menu
 		$("#shivaDrawPaletteDiv").draggable();								// Make it draggable
 		$("#shivaDrawPaletteDiv").css({ "-moz-user-select":"none","-khtml-user-select":"none","-webkit-user-select":"none","-ms-user-select":"none","user-select":"none"});
+		$("#shivaDrawPaletteDiv")[0].addEventListener('contextmenu', function(ev) {
+		    ev.preventDefault();
+			window.prompt("To copy graphics to clipboard: Hit Ctrl+C, then press OK",drObj.SaveSVGData());
+		    return false;
+			}, false);
 		}
 	this.SetTool(0);														// Draw lines
 	this.DrawMenu();														// Draw menu
@@ -316,17 +321,17 @@ SHIVA_Draw.prototype.SaveSVGData=function() 							// SAVE DRAWING AS SVG
 	var i,j,o,x,y,e;
 	var w=$("#shivaDrawDiv").width();										// Container wid
 	var h=$("#shivaDrawDiv").height();										// Hgt
-	var str="<svg><g transform='scale(10)'>\n";								// Header
+	var str="<svg><g id='svgGrp' oWid='"+w+"'>\n";							// Header
 	for (i=0;i<drObj.segs.length;++i) {										// For each seg
 		o=drObj.segs[i];													// Point at it
-		e=Math.max((o.edgeWidth/100).toFixed(4),.05);						// Edge is .5-10							 															
+		e=Math.max((o.edgeWidth/10),.5);									// Edge is .5-10							 															
 		if (o.type == 0) {													// Line
 			if (o.arrow) {													// If an arrow tip												
 				var aa=Math.atan2(o.y[n]-o.y[n-1],o.x[n]-o.x[n-1]);			// Angle of line
 				var xx=[],yy=[];											// Arrow arrays
 				var n=o.x.length-1;											// Last point
 				var aa=Math.atan2(o.y[n]-o.y[n-1],o.x[n]-o.x[n-1]);			// Angle of line
-				var hh=o.edgeWidth/4;										// Set size
+				var hh=o.edgeWidth/2;										// Set size
 				xx[0]=o.x[n]-hh*Math.cos(aa-Math.PI/6),
 				yy[0]=o.y[n]-hh*Math.sin(aa-Math.PI/6);			
 	 			xx[1]=o.x[n];	yy[1]=o.y[n];								// Tip point
@@ -342,9 +347,9 @@ SHIVA_Draw.prototype.SaveSVGData=function() 							// SAVE DRAWING AS SVG
 				str+="stroke:"+o.edgeColor;									// Edge color
 				str+=";stroke-width:"+e+";";								// Edge width
 				}
-			str+="opacity:"+(o.alpha/100).toFixed(2)+"' d='M";				// Alpha								
-			str+=(o.x[0]/w*100).toFixed(2)+",";								// Pos x
-			str+=(o.y[0]/w*100).toFixed(2)+" ";								// Pos y
+			str+="opacity:"+(o.alpha/100)+"' d='M";							// Alpha								
+			str+=o.x[0]+",";												// Pos x
+			str+=o.y[0]+" ";												// Pos y
 			
 			if (o.curve) {
 				var open=true;
@@ -356,28 +361,28 @@ SHIVA_Draw.prototype.SaveSVGData=function() 							// SAVE DRAWING AS SVG
 				x=o.x[0]-0+((o.x[1]-o.x[0])/2)-0;
 				y=o.y[0]-0+((o.y[1]-o.y[0])/2)-0;
 				if (open) {
-					str+="L"+(x/w*100).toFixed(2)+",";						// Pos x
-					str+=(y/w*100).toFixed(2)+" ";							// Pos y
+					str+="L"+x+",";											// Pos x
+					str+=y+" ";												// Pos y
 			 		}			
 				for (j=1;j<o.x.length-1;++j) {								// For each coord
 					x=o.x[j]-0+((o.x[j+1]-o.x[j])/2)-0;						// Mid x										
 					y=o.y[j]-0+((o.y[j+1]-o.y[j])/2)-0;						// Mid y										
 					str+="Q";												// Line to
-					str+=(o.x[j]/w*100).toFixed(2)+",";						// Pos x
-					str+=(o.y[j]/w*100).toFixed(2)+" ";						// Pos y
-					str+=(x/w*100).toFixed(2)+",";							// Control x
-					str+=(y/w*100).toFixed(2)+" ";							// Control y
+					str+=o.x[j]+",";										// Pos x
+					str+=o.y[j]+" ";										// Pos y
+					str+=x+",";												// Control x
+					str+=y+" ";												// Control y
 					}
 				if (open) {
-					str+="L"+(o.x[j]/w*100).toFixed(2)+",";					// Pos x
-					str+=(o.y[j]/w*100).toFixed(2)+" ";						// Pos y
+					str+="L"+o.x[j]+",";									// Pos x
+					str+=o.y[j]+" ";										// Pos y
 			 		}			
 				}
 			else{
 				for (j=1;j<o.x.length;++j) {								// For each coord
 					str+="L";												// Line to
-					str+=(o.x[j]/w*100).toFixed(2)+",";						// Pos x
-					str+=(o.y[j]/w*100).toFixed(2)+" ";						// Pos y
+					str+=o.x[j]+",";										// Pos x
+					str+=o.y[j]+" ";										// Pos y
 					}
 				}
 			if (o.color != -1)	str+="Z"									// If a filled polygon, close it
@@ -385,21 +390,21 @@ SHIVA_Draw.prototype.SaveSVGData=function() 							// SAVE DRAWING AS SVG
 			if ((o.x) && (o.arrow)) {										// If line arrow
 				o.x[n]=xx[1];	o.y[n]=yy[1];								// Restore last point
 				str+="<path style='fill:"+o.edgeColor;						// Start
-				str+=";opacity:"+(o.alpha/100).toFixed(2)+"' d='M";			// Alpha								
-				str+=(xx[0]/w*100).toFixed(2);								// Start x				
-				str+=","+(yy[0]/w*100).toFixed(2); 							// Start y
-	 			str+=" L"+(xx[1]/w*100).toFixed(2)+",";						// Tip x
-	 			str+=(yy[1]/w*100).toFixed(2);								// Tip y
-				str+=" L"+(xx[2]/w*100).toFixed(2); 						// End x
-				str+=","+(yy[2]/w*100).toFixed(2);							// End y	
+				str+=";opacity:"+(o.alpha/100)+"' d='M";					// Alpha								
+				str+=xx[0];													// Start x				
+				str+=","+yy[0]; 											// Start y
+	 			str+=" L"+xx[1]+",";										// Tip x
+	 			str+=yy[1];													// Tip y
+				str+=" L"+xx[2]; 											// End x
+				str+=","+yy[2];												// End y	
 	 			str+=" Z'/>\n";												// End arrow
 				}
 			}
 		else if (o.type == 1) {												// Box
-			x=(Math.abs(o.x[1]-o.x[0])/w*100).toFixed(2);					// Calc wid
+			x=Math.abs(o.x[1]-o.x[0]);										// Calc wid
 			str+="<circle r='"+x+"' ";										// Size
-			x=(o.x[0]/w*100).toFixed(2);									// Pos x
-			y=(o.y[0]/w*100).toFixed(2);									// Pos y
+			x=o.x[0];														// Pos x
+			y=o.y[0];														// Pos y
 			str+="cx='"+x+"' cy='"+y+"' style='fill:";						// Pos
 			if (o.color != -1)	str+=o.color+";";							// Fill color
 			else				str+="none;"								// No fill
@@ -407,15 +412,15 @@ SHIVA_Draw.prototype.SaveSVGData=function() 							// SAVE DRAWING AS SVG
 				str+="stroke:"+o.edgeColor;									// Edge color
 				str+=";stroke-width:"+e+";";								// Edge width
 				}
-			str+="opacity:"+(o.alpha/100).toFixed(2)+"'";					// Alpha								
+			str+="opacity:"+(o.alpha/100)+"'";								// Alpha								
 			str+="/>\n";													// End rect
 			}
 		else if (o.type == 2) {												// Box
-			x=(Math.abs(o.x[1]-o.x[0])/w*100).toFixed(2);					// Calc wid
-			y=(Math.abs(o.y[1]-o.y[0])/w*100).toFixed(2);					// Hgt
+			x=Math.abs(o.x[1]-o.x[0]);										// Calc wid
+			y=Math.abs(o.y[1]-o.y[0]);										// Hgt
 			str+="<rect width='"+x+"' height='"+y+"' ";						// Size
-			x=(o.x[0]/w*100).toFixed(2);									// Pos x
-			y=(o.y[0]/w*100).toFixed(2);									// Pos y
+			x=o.x[0];														// Pos x
+			y=o.y[0];														// Pos y
 			str+="x='"+x+"' y='"+y+"' style='fill:";						// Pos
 			if (o.color != -1)	str+=o.color+";";							// Fill color
 			else				str+="none;"								// No fill
@@ -423,56 +428,56 @@ SHIVA_Draw.prototype.SaveSVGData=function() 							// SAVE DRAWING AS SVG
 				str+="stroke:"+o.edgeColor;									// Edge color
 				str+=";stroke-width:"+e+";";								// Edge width
 				}
-			str+="opacity:"+(o.alpha/100).toFixed(2)+"'";					// Alpha								
-			if (o.curve)	str+=" rx='1' ry='1'";							// Round box
+			str+="opacity:"+(o.alpha/100)+"'";								// Alpha								
+			if (o.curve)	str+=" rx='10' ry='10'";						// Round box
 			str+="/>\n";													// End rect
 			}
 		else if (o.type == 3) {												// Text
-			var th=(o.textSize/20).toFixed(4)-0+1;							// Text size							 															
+			var th=(o.textSize/2)-0+10;										// Text size							 															
 			if (o.boxColor != -1) {											// If a box
-				x=(Math.abs(o.x[1]-o.x[0])/w*100).toFixed(2);				// Calc wid
-				y=(Math.abs(o.y[1]-o.y[0])/w*100).toFixed(2);				// Hgt
+				x=Math.abs(o.x[1]-o.x[0]);									// Calc wid
+				y=Math.abs(o.y[1]-o.y[0]);									// Hgt
 				str+="<rect width='"+x+"' height='"+y+"' ";					// Size
-				x=(o.x[0]/w*100).toFixed(2);								// Pos x
-				y=(o.y[0]/w*100).toFixed(2);								// Pos y
+				x=o.x[0];													// Pos x
+				y=o.y[0];													// Pos y
 				str+="x='"+x+"' y='"+y+"' style='fill:"+o.boxColor;			// Pos
-				str+=";opacity:"+(o.alpha/100).toFixed(2)+"'";				// Alpha								
-				if (o.curve)	str+=" rx='1' ry='1'";						// Round box
+				str+=";opacity:"+(o.alpha/100)+"'";							// Alpha								
+				if (o.curve)	str+=" rx='10' ry='10'";					// Round box
 				str+="/>\n";												// End rect
 				}
 			x=o.x[0]+10;													// Assume left
 			e="start";
-			if (o.textAlign == "Right")		x=o.x[1]-10,e="end";				// Right
+			if (o.textAlign == "Right")		x=o.x[1]-10,e="end";			// Right
 			if (o.textAlign == "Center")	x=o.x[0]-0+Math.abs(o.x[1]-o.x[0])/2,e="middle";	// Center
-			x=(x/w*100).toFixed(2);											// Pos x
-			y=((o.y[0])/w*100+th+1).toFixed(2);								// Pos y
+			x=x;															// Pos x
+			y=((o.y[0])+th+1);												// Pos y
 			str+="<text x='"+x+"' y='"+y+"' ";								// Text pos
-			str+="style='opacity:"+(o.alpha/100).toFixed(2);				// Alpha
+			str+="style='opacity:"+(o.alpha/100);							// Alpha
 			str+=";text-anchor:"+e+";fill:"+o.textColor;					// Anchor / color
 			str+=";font-family:sans-serif;font-size:"+th+"'>";				// Style							
 			str+=o.text;													// String
 			str+="</text>\n";												// End text
 			}
 		else if (o.type == 4) {												// Image
-			x=(Math.abs(o.x[1]-o.x[0])/w*100).toFixed(2);					// Calc wid
-			y=(Math.abs(o.y[1]-o.y[0])/w*100).toFixed(2);					// Hgt
+			x=Math.abs(o.x[1]-o.x[0]);										// Calc wid
+			y=Math.abs(o.y[1]-o.y[0]);										// Hgt
 			str+="<image width='"+x+"' height='"+y+"' ";					// Size
-			x=(o.x[0]/w*100).toFixed(2);									// Pos x
-			y=(o.y[0]/w*100).toFixed(2);									// Pos y
+			x=o.x[0];														// Pos x
+			y=o.y[0];														// Pos y
 			str+="x='"+x+"' y='"+y+"' style='";								// Pos
-			str+="opacity:"+(o.alpha/100).toFixed(2)+"'";					// Alpha								
+			str+="opacity:"+(o.alpha/100)+"'";								// Alpha								
 			str+=" xlink:href='"+o.imageURL+"'";							// Round box
 			str+="/>\n";													// End image
 			if (o.edgeColor != -1) {										// If a box
-				x=(Math.abs(o.x[1]-o.x[0])/w*100).toFixed(2);				// Calc wid
-				y=(Math.abs(o.y[1]-o.y[0])/w*100).toFixed(2);				// Hgt
+				x=Math.abs(o.x[1]-o.x[0]);									// Calc wid
+				y=Math.abs(o.y[1]-o.y[0]);									// Hgt
 				str+="<rect width='"+x+"' height='"+y+"' ";					// Size
-				x=(o.x[0]/w*100).toFixed(2);								// Pos x
-				y=(o.y[0]/w*100).toFixed(2);								// Pos y
+				x=o.x[0];													// Pos x
+				y=o.y[0];													// Pos y
 				str+="x='"+x+"' y='"+y+"' style='";							// Pos
 				str+="fill:none;stroke:"+o.edgeColor;						// Edge color
 				str+=";stroke-width:"+e+";";								// Edge width
-				str+=";opacity:"+(o.alpha/100).toFixed(2)+"'";				// Alpha								
+				str+=";opacity:"+(o.alpha/100)+"'";							// Alpha								
 				str+="/>\n";												// End rect
 				}
 			}

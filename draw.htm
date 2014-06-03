@@ -139,12 +139,26 @@ SHIVA_Draw.prototype.SaveSVGData=function() 							// SAVE DRAWING AS SVG
 		o=drObj.segs[i];													// Point at it
 		e=Math.max((o.edgeWidth/100).toFixed(4),.05);						// Edge is .5-10							 															
 		if (o.type == 0) {													// Line
+			if (o.arrow) {													// If an arrow tip												
+				var aa=Math.atan2(o.y[n]-o.y[n-1],o.x[n]-o.x[n-1]);			// Angle of line
+				var xx=[],yy=[];											// Arrow arrays
+				var n=o.x.length-1;											// Last point
+				var aa=Math.atan2(o.y[n]-o.y[n-1],o.x[n]-o.x[n-1]);			// Angle of line
+				var hh=o.edgeWidth/4;										// Set size
+				xx[0]=o.x[n]-hh*Math.cos(aa-Math.PI/6),
+				yy[0]=o.y[n]-hh*Math.sin(aa-Math.PI/6);			
+	 			xx[1]=o.x[n];	yy[1]=o.y[n];								// Tip point
+				xx[2]=o.x[n]-hh*Math.cos(aa+Math.PI/6),
+				yy[2]=o.y[n]-hh*Math.sin(aa+Math.PI/6);			
+				o.x[n]=((xx[2]-xx[0])/2)+xx[0];								// Mid x
+				o.y[n]=((yy[2]-yy[0])/2)+yy[0];								// Mid y
+				}
 			str+="<path style='fill:";										// Start
 			if (o.color != -1)	str+=o.color+";";							// Fill color
 			else				str+="none;"								// No fill
 			if (o.edgeColor != -1)	 {										// If an edge
 				str+="stroke:"+o.edgeColor;									// Edge color
-				str+=";stroke-width:"+e+";fill";								// Edge width
+				str+=";stroke-width:"+e+";";								// Edge width
 				}
 			str+="opacity:"+(o.alpha/100).toFixed(2)+"' d='M";				// Alpha								
 			str+=(o.x[0]/w*100).toFixed(2)+",";								// Pos x
@@ -186,6 +200,18 @@ SHIVA_Draw.prototype.SaveSVGData=function() 							// SAVE DRAWING AS SVG
 				}
 			if (o.color != -1)	str+="Z"									// If a filled polygon, close it
 				str+="'/>\n";												// End rect
+			if ((o.x) && (o.arrow)) {										// If line arrow
+				o.x[n]=xx[1];	o.y[n]=yy[1];								// Restore last point
+				str+="<path style='fill:"+o.edgeColor;						// Start
+				str+=";opacity:"+(o.alpha/100).toFixed(2)+"' d='M";			// Alpha								
+				str+=(xx[0]/w*100).toFixed(2);								// Start x				
+				str+=","+(yy[0]/w*100).toFixed(2); 							// Start y
+	 			str+=" L"+(xx[1]/w*100).toFixed(2)+",";						// Tip x
+	 			str+=(yy[1]/w*100).toFixed(2);								// Tip y
+				str+=" L"+(xx[2]/w*100).toFixed(2); 						// End x
+				str+=","+(yy[2]/w*100).toFixed(2);							// End y	
+	 			str+=" Z'/>\n";												// End arrow
+				}
 			}
 		else if (o.type == 1) {												// Box
 			x=(Math.abs(o.x[1]-o.x[0])/w*100).toFixed(2);					// Calc wid

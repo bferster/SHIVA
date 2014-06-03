@@ -170,8 +170,7 @@ SHIVA_Draw.prototype.DrawMenu=function(tool) 							//	DRAW
 			}		
 		str+="<tr height='20'><td>&nbsp;&nbsp;Visibility</td><td><div style='width:78px;margin-left:4px' id='alpha'/></td></tr>";
 		str+="<tr><td>&nbsp;&nbsp;Line color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='drObj.ColorPicker(\"edgeColor\")' onChange='drObj.SetVal(\"edgeColor\",this.value)' type='text' id='edgeColor'></td></tr>";
-		if (tool != 0)
-			str+="<tr><td>&nbsp;&nbsp;Fill color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='drObj.ColorPicker(\"color\")' onChange='drObj.SetVal(\"color\",this.value)' type='text' id='color'></td></tr>";
+		str+="<tr><td>&nbsp;&nbsp;Fill color</td><td>&nbsp;<input style='width:85px;height:12px' onFocus='drObj.ColorPicker(\"color\")' onChange='drObj.SetVal(\"color\",this.value)' type='text' id='color'></td></tr>";
 		str+="<tr height='20'><td>&nbsp;&nbsp;Line width</td><td><div style='width:78px;margin-left:6px' id='edgeWidth'/></td></tr>";
 		}
 	else if (tool == 3) {		// TEXT
@@ -315,7 +314,6 @@ SHIVA_Draw.prototype.SaveDrawData=function(json) 						// SAVE DRAWING AS ITEM L
 	return str;																// Return added elements
 }
 
-	
 SHIVA_Draw.prototype.SaveSVGData=function() 							// SAVE DRAWING AS SVG
 {
 	var i,j,o,x,y,e;

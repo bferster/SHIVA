@@ -128,5 +128,78 @@
 		console.log(str) 
 	}
 
+var svg="<rect width='86' height='98' x='40' y='76' style='fill:#FFFF00;stroke:#0000ff;stroke-width:10;opacity:0.56' rx='10' ry='10'/>"
+
+svg+=\n<circle r='98' cx='210' cy='188' style='fill:none;stroke:#0000ff;stroke-width:3;opacity:1'/>";
+
+ParseSVG(svg);
+
+	function ParseSVG(svg)
+	{
+	
+		var i,o;
+		var segs=[];
+		var lines=svg.split("\n");											// Split into segments
+		for (i=0;i<lines.length;++i) {										// For each segment
+			if (lines[i].match(/<rect/)) 									// A rect
+				o=parseSVGRect(lines[i]);									// Parse it
+			else if (lines[i].match(/<rect/)) 								// A circle
+				o=parseSVGCir(lines[i]);									// Parse it
+
+trace(o)
+				}
+
+		function parseSVGCir(l)
+		{			
+			var o={};
+			o.type=1;													// Circle
+			o.curve=false;		o.arrow=false;							// Defs
+			o.color="-1";		o.edgeColor="-1";						// Defs
+			o.x=[];				o.y=[];									// Alloc coord arrays
+			o.x[0]=l.match(/ x='(\d+)'/)[1]-0;							// Get x1
+			o.y[0]=l.match(/ y='(\d+)'/)[1]-0;							// Get y1
+			o.x[1]=l.match(/ r='(\d+)'/)[1]-0+o.x[0];					// Get x2
+			if (l.match(/stroke-width:/)) 								// If stroke width
+				o.edgeWidth=l.match(/stroke-width:(\d+)/)[1]*10;		// Get edge wid
+			if (l.match(/stroke:#/)) 									// If stroke
+				o.edgeColor=l.match(/stroke:(.......)/)[1];				// Get edge color
+			if (!l.match(/fill:none/)) 									// If no fill
+				o.color=l.match(/fill:(.......)/)[1];						// Get fill color
+			o.alpha=Math.round(l.match(/opacity:([\d|\.]+)/)[1]*100);	// Get alpha
+			return o;
+			}
+
+		function parseSVGRect(l)
+		{			
+			var o={};
+			o.type=2;													// Rect
+			o.curve=false;		o.arrow=false;							// Defs
+			o.color="-1";		o.edgeColor="-1";						// Defs
+			o.x=[];				o.y=[];									// Alloc coord arrays
+			o.x[0]=l.match(/ x='(\d+)'/)[1]-0;							// Get x1
+			o.y[0]=l.match(/ y='(\d+)'/)[1]-0;							// Get y1
+			o.x[1]=l.match(/ width='(\d+)'/)[1]-0+o.x[0];				// Get x2
+			o.y[1]=l.match(/ height='(\d+)'/)[1]-0+o.y[0];				// Get y2
+			if (l.match(/ [rx|ry]=/)) 									// If round
+				o.curve=true;											// Set flag
+			if (l.match(/stroke-width:/)) 								// If stroke width
+				o.edgeWidth=l.match(/stroke-width:(\d+)/)[1]*10;		// Get edge wid
+			if (l.match(/stroke:#/)) 									// If stroke
+				o.edgeColor=l.match(/stroke:(.......)/)[1];				// Get edge color
+			if (!l.match(/fill:none/)) 									// If no fill
+				o.color=l.match(/fill:(.......)/)[1];						// Get fill color
+			o.alpha=Math.round(l.match(/opacity:([\d|\.]+)/)[1]*100);	// Get alpha
+			return o;
+			}
+
+	}
+		
+		
+		
+		
+
+
+
+
 </script>
 </body></html>

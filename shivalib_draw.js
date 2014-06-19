@@ -44,7 +44,8 @@ function SHIVA_Draw(container, hidePalette) 							// CONSTRUCTOR
 	if (!hidePalette)														// If not hiding palette
 		this.DrawPalette();													// Draw palatte
 	this.colorPicker="";													// Not in color picker
-	this.ctx=$("#shivaDrawCanvas")[0].getContext('2d');						// Get context
+	if ($("#shivaDrawCanvas")[0])											// If canvas there
+		this.ctx=$("#shivaDrawCanvas")[0].getContext('2d');					// Get context
 	$("#shivaDrawDiv").css("cursor","crosshair");							// Crosshair cursor
 	$("#shivaDrawDiv").mouseup(this.onMouseUp);								// Mouseup listener
 	$("#shivaDrawDiv").mousedown(this.onMouseDown);							// Mousedown listener

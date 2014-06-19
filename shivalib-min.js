@@ -543,7 +543,8 @@ str+="ORDER BY "+$("#ord").val();this.query=str;this.DrawQuery();}
 var drObj=null;function SHIVA_Draw(container,hidePalette)
 {this.container=container;this.color="-1";this.clipboard=new Array();this.edgeColor="#0000ff";this.textColor="#000000";this.boxColor="-1";this.edgeWidth="30";this.arrow=false;this.alpha=100;this.curTool=0;this.imageURL="";this.imageWid=400;this.textAlign="Left";this.textStyle="";this.textSize=0;this.ideaShape="Round box";this.ideaGradient=true;this.ideaBold=false;this.ideaBackCol="#FFF2CC";this.ideaEdgeCol="#999999";this.ideaTextCol="#000000";this.selectedItems=new Array();this.selectedDot=-1;this.segs=new Array();if(shivaLib.overlay)
 this.segs=shivaLib.overlay;this.closeOnMouseUp=false;this.curSeg=-1;this.lastDotTime=0;this.snap=false;this.curve=false;this.snapSpan=20;this.leftClick=false;this.lastX=0;this.lastY=0;drObj=shivaLib.dr=this;if(!hidePalette)
-this.DrawPalette();this.colorPicker="";this.ctx=$("#shivaDrawCanvas")[0].getContext('2d');$("#shivaDrawDiv").css("cursor","crosshair");$("#shivaDrawDiv").mouseup(this.onMouseUp);$("#shivaDrawDiv").mousedown(this.onMouseDown);$("#shivaDrawDiv").mousemove(this.onMouseMove);document.onkeyup=this.onKeyUp;document.onkeydown=this.onKeyDown;}
+this.DrawPalette();this.colorPicker="";if($("#shivaDrawCanvas")[0])
+this.ctx=$("#shivaDrawCanvas")[0].getContext('2d');$("#shivaDrawDiv").css("cursor","crosshair");$("#shivaDrawDiv").mouseup(this.onMouseUp);$("#shivaDrawDiv").mousedown(this.onMouseDown);$("#shivaDrawDiv").mousemove(this.onMouseMove);document.onkeyup=this.onKeyUp;document.onkeydown=this.onKeyDown;}
 SHIVA_Draw.prototype.Sound=function(snd)
 {shivaLib.Sound(snd);}
 SHIVA_Draw.prototype.DrawPalette=function(tool)
@@ -1016,7 +1017,11 @@ base="http://vimeo.com/",type="Vimeo";else if(options.dataSourceUrl.match(/kaltu
 base="";type="Kaltura";}
 else if((options.dataSourceUrl.match(/http/g))&&(!options.dataSourceUrl.match(/youtube/g)))
 base="",type="HTML5";if(this.player){this.player.destroy();$(con).empty();this.player=null;}
-this.player=Popcorn.smart(con,base+id);this.player.smartPlayerType=type;this.player.media.src=base+id;if(options.end){v=options.end.split(":");if(v.length==1)
+this.player=Popcorn.smart(con,base+id);this.player.smartPlayerType=type;this.player.media.src=base+id;trace(666)
+this.VideoCue=function(mode,time,callback,num){if(mode=="add"){shivaLib.player.cue(time,callback);shivaLib.player.numCues++;}
+else if(mode=="delete"){for(var i=0;i<shivaLib.player.numCues;++i)
+shivaLib.player.removeTrackEvent(this.player.getLastTrackEventId());shivaLib.player.numCues=0;}}
+if(options.end){v=options.end.split(":");if(v.length==1)
 v[1]=v[0],v[0]=0;this.VideoCue("add",Number(v[0]*60)+Number(v[1]),function(){this.pause()
 shivaLib.SendShivaMessage("ShivaVideo=done");});}
 this.VideoPlay=function(time){if(time!=undefined){shivaLib.player.play();time=""+time;if(time.match(/:/))
@@ -1032,9 +1037,6 @@ this.VideoTime=function(time){if(time!=undefined){time=""+time;if(time.match(/:/
 time=shivaLib.TimecodeToSeconds(time);shivaLib.player.currentTime(time-0);}
 else
 time=shivaLib.player.currentTime();return(time);}
-this.VideoCue=function(mode,time,callback,num){if(mode=="add"){shivaLib.player.cue(time,callback);shivaLib.player.numCues++;}
-else if(mode=="delete"){for(var i=0;i<shivaLib.player.numCues;++i)
-shivaLib.player.removeTrackEvent(this.player.getLastTrackEventId());shivaLib.player.numCues=0;}}
 this.VideoEvent=function(mode,type,callback){if(mode=="add")
 shivaLib.player.on(type,callback);else
 shivaLib.player.off(type,callback);}

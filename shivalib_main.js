@@ -232,7 +232,7 @@ SHIVA_Show.prototype.ShivaEventHandler=function(e) 						//	HANDLE SHIVA EVENTS
 		}
 }
 
-SHIVA_Show.prototype.AddOverlay=function(data) 								// ADD OVERLAY
+SHIVA_Show.prototype.AddOverlay=function(data) 							// ADD OVERLAY
 {
 	var key;
    	this.overlay=new Array();												// Alloc new array

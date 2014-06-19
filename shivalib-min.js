@@ -1017,8 +1017,7 @@ base="http://vimeo.com/",type="Vimeo";else if(options.dataSourceUrl.match(/kaltu
 base="";type="Kaltura";}
 else if((options.dataSourceUrl.match(/http/g))&&(!options.dataSourceUrl.match(/youtube/g)))
 base="",type="HTML5";if(this.player){this.player.destroy();$(con).empty();this.player=null;}
-this.player=Popcorn.smart(con,base+id);this.player.smartPlayerType=type;this.player.media.src=base+id;trace(666)
-this.VideoCue=function(mode,time,callback,num){if(mode=="add"){shivaLib.player.cue(time,callback);shivaLib.player.numCues++;}
+this.player=Popcorn.smart(con,base+id);this.player.smartPlayerType=type;this.player.media.src=base+id;this.VideoCue=function(mode,time,callback,num){if(mode=="add"){shivaLib.player.cue(time,callback);shivaLib.player.numCues++;}
 else if(mode=="delete"){for(var i=0;i<shivaLib.player.numCues;++i)
 shivaLib.player.removeTrackEvent(this.player.getLastTrackEventId());shivaLib.player.numCues=0;}}
 if(options.end){v=options.end.split(":");if(v.length==1)

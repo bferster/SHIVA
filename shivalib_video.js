@@ -40,7 +40,6 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 	this.player=Popcorn.smart(con,base+id);
 	this.player.smartPlayerType=type;
 	this.player.media.src=base+id;
-	trace(666)
 
 	this.VideoCue=function(mode, time, callback, num) {						// SET VIDEO CUE
 		if (mode == "add") {												// If adding a new cue
@@ -53,7 +52,6 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 			shivaLib.player.numCues=0;										// Reset count
 			}
   		}
-
 
 	if (options.end) {
 		v=options.end.split(":");

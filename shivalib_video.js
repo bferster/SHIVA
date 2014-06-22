@@ -53,6 +53,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 			}
   		}
 
+	
 	if (options.end) {
 		v=options.end.split(":");
 		if (v.length == 1)

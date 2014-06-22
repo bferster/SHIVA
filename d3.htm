@@ -30,9 +30,7 @@
 	{
 		var apiKey="edc6ee9196af0ad174e8dd2141434de3";
 		var cols,photos,o,oo,i,str;
-		var curCollection=-1;
-		var curSet=-1;
-		var curPhoto=-1;
+		var curCollection=0,curSet,curPhoto;
 		
 		$("#alertBoxDiv").remove();												// Remove any old ones
 		$("body").append("<div class='unselectable' id='alertBoxDiv'></div>");														
@@ -96,7 +94,7 @@
 		   						cols.push(o);									// Add collection to array
  					 			str="<tr id='ida"+i+"' "+trsty+">";				// Row
 								str+="<td>"+o.title+"</td>"; 					// Add name
-								$("#collectTable").append(str);					// Add row
+								$("#collectTable").append(str);					// Add row								
 								
 								$("#ida"+(i++)).on("click", function() {		// On collection click
 			 	   					$("#picGal").html("<p style='text-align:center'><b>Choose set to view</b></p>");
@@ -142,7 +140,27 @@
 										}	
 									});											// End collection click
 	   						});
- 						}});													// Ajax get tree end	
+ 						if (!cols.length) {										// If no collections
+					 		str="<tr id='ida"+i+"' "+trsty+">";					// Row
+							str+="<td>None</td>"; 								// Add name
+							$("#collectTable").append(str);						// Add row
+	 	   					$("#picGal").html("<p style='text-align:center'><b>Choose set to view</b></p>");
+							$("#ida0").css({"color":"#990000","font-weight":"bold"});		// Color current
+/*
+	   							o={};											// New obj
+	   							o.sets=[];										// Array of sets
+	   							o.id=$(this).attr("id");						// Get id
+	   							o.title=$(this).attr("title");					// Get title
+	   							$(this).find("set").each( function() {			// For each set
+		   							oo={};										// New obj
+		   							oo.id=$(this).attr("id");					// Get set id
+		   							oo.title=$(this).attr("title");				// Get set title
+	   								o.sets.push(oo);							// Add set
+	   								});
+
+*/
+							}	
+						}});													// Ajax get tree end	
 					}});														// Ajax get id end
  			});																	// Click end
  

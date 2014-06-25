@@ -5,6 +5,7 @@
  	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>	
 	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+	<script src="//qmediaplayer.com/qfile.js"></script>
 </head>
 <style type="text/css">
 		body { 			font-family:Verdana,Geneva,sans-serif; font-size:10px;}
@@ -20,10 +21,41 @@
 <body>
 <script>
 
+	var qmf=new QmediaFile();												// Alloc file system
+
 	GetFlickrImage( function(s) { trace(s) } );
  
-  
-	function GetFlickrImage(callback)										// GET FLICKR IMAGE
+ 	function GetFlickrImage(callback)										// GET FLICKR IMAGE
+	{
+		$("#alertBoxDiv").remove();												// Remove any old ones
+		$("body").append("<div class='unselectable' id='alertBoxDiv'></div>");														
+		var str="<p><img src='images/qlogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
+		str+="<span style='font-size:18px;text-shadow:1px 1px #ccc;color:#000099'><b>Get Flickr Image</b></span><p>";
+		str+="<div style='font-size:14px;margin:14px'>";
+		str+="<br><br><div style='display:inline-block;width:300px;max-height:200px;overflow-y:auto;background-color:#f8f8f8;padding:8px;border:1px solid #999;border-radius:8px'>";		// Scrollable container
+		str+="<table id='collectTable' style='font-size:13px;width:100%;padding:0px;border-collapse:collapse;'>";	// Add table
+		str+="<tr><td><b>Collection</b></td><td width='20'></td></tr>";			// Add header
+		str+="<tr><td colspan='2'><hr></td></tr>";								// Add rule
+		str+="</table></div>&nbsp;&nbsp;&nbsp;"									// End table
+	
+		str+="<div style='vertical-align:top;display:inline-block;width:300px;max-height:200px;overflow-y:auto;background-color:#f8f8f8;padding:8px;border:1px solid #999;border-radius:8px'>";		// Scrollable container
+		str+="<dl id='setTable' style='font-size:13px;margin-top:2px;margin-bottom:2px'>";		// Add table
+		str+="<dt><b>Set</b></dt>";												// Add header
+		str+="<dt><hr></dt>";													// Add rule
+		str+="</dl></div><div style='font-size:12px'<br><p><hr></p>";			// End table
+	
+		$("#alertBoxDiv").append(str+"</div>");	
+		$("#alertBoxDiv").dialog({ width:800, buttons: {
+					            	"Done":  function() { $(this).remove(); }
+									}});	
+		$(".ui-dialog-titlebar").hide();
+		$(".ui-dialog-buttonpane.ui-widget-content.ui-helper-clearfix").css("border","none");
+		$(".ui-dialog").css({"border-radius":"14px", "box-shadow":"4px 4px 8px #ccc"});
+ 		$(".ui-button").css({"border-radius":"30px","outline":"none"});
+ 	}
+
+
+	function GetFlickrImage(callback, mapMode)								// GET FLICKR IMAGE
 	{
 		var apiKey="edc6ee9196af0ad174e8dd2141434de3";
 		var trsty=" style='cursor:pointer;background-color:#f8f8f8' onMouseOver='this.style.backgroundColor=\"#dee7f1\"' onMouseOut='this.style.backgroundColor=\"#f8f8f8\"'";
@@ -34,7 +66,7 @@
 		$("body").append("<div class='unselectable' id='alertBoxDiv'></div>");														
 		str="<p><img src='images/qlogo32.png' style='vertical-align:-10px'/>&nbsp;&nbsp;";								
 		str+="<span style='font-size:18px;text-shadow:1px 1px #ccc;color:#000099'><b>Get Image from Flickr</b></span><p>";
-		str+="<p style='text-align:right'>Flickr user name: <input id='idName' type='text'  value='shanti cohort' style='width:100px' class='is'> &nbsp;<button id='getBut' class='bs'>Get</button></p>";
+		str+="<p style='text-align:right'>Flickr user name: <input id='idName' type='text' value='"+qmf.GetCookie('flickr')+"' style='width:100px' class='is'> &nbsp;<button id='getBut' class='bs'>Get</button></p>";
 		str+="<div style='display:inline-block;width:365px;height:120px;overflow-y:auto;background-color:#f8f8f8;padding:8px;border:1px solid #999;border-radius:8px'>";		// Scrollable container
 		str+="<table id='collectTable' style='font-size:11px;width:100%;padding:0px;border-collapse:collapse;'>";	// Add table
 		str+="<tr><td><b>Collection</b></td><td width='20'></td></tr>";			// Add header
@@ -61,9 +93,11 @@
   		
  		$("#getBut").on("click",function() {									// ON GET CONTENT BUTTON
 	   		cols=[];															// Reset array of collections
+			Sound("click");														// Click
 			var id=$("#idName").val();											// ID name
  			var url="https://api.flickr.com/services/rest/?method=flickr.people.findByUsername&format=rest&api_key="+apiKey+"&username="+id;
-  			$.ajax({ type:"GET", url:url, dataType:"xml",						// Call REST to get user id
+	 		qmf.SetCookie("flickr",id,7);										// Save cookie
+ 			$.ajax({ type:"GET", url:url, dataType:"xml",						// Call REST to get user id
   				success: function(xml){											// Om XML
 	   				if ($(xml).find("err").length) {							// If an error tag
 	   					$("#picGal").html("<p style='text-align:center;color:990000'><b>"+$(xml).find("err").attr("msg")+"</b></p>");
@@ -74,10 +108,6 @@
 					}});														// Ajax get id end
  			});																	// Click end
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// HELPER FUNCTIONS
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	function GetContent(userId) 												// GET CONTENT
 	{
@@ -100,35 +130,40 @@
 						o.sets.push(oo);											// Add set
 						});
 					cols.push(o);													// Add collection to array
-		 			str="<tr id='ida"+i+"' "+trsty+">";								// Row
-					str+="<td>"+o.title+"</td>"; 									// Add name
-					$("#collectTable").append(str);									// Add row														
-				
-					$("#ida"+(i++)).on("click", function() {						// On collection click
-						$("#picGal").html("<p style='text-align:center'><b>Choose set to view</b></p>");
-						$("#ida"+curCollection).css({"color":"#000000","font-weight":"normal"});	// Uncolor last
-						curCollection=this.id.substr(3);							// Set cur collection
-						$("#ida"+curCollection).css({"color":"#990000","font-weight":"bold"});		// Color current
-						ChooseCollection(curCollection);							// Show current collection
-						});															// End collection click
 				});
 			
-	//		look for free sets
-			
-			
-			if (!cols.length) {														// If no collections
-		 		str="<tr id='ida0' "+trsty+">";										// Row
-				str+="<td>Uncategorized</td>"; 										// Add name
-				$("#collectTable").append(str);										// Add row
-				$("#picGal").html("<p style='text-align:center'><b>Choose set to view</b></p>");
-				
-				$("#ida0").on("click", function() {									// On collection click
-					$("#picGal").html("<p style='text-align:center'><b>Choose set to view</b></p>");
-					curCollection=0;												// Set cur collection
-					$("#ida0").css({"color":"#990000","font-weight":"bold"});		// Color current
-					ChooseCollection(0);											// Show current collection
-					});																// End collection click
-				}	
+			url="https://api.flickr.com/services/rest/?method=flickr.photosets.getList&format=rest&api_key="+apiKey+"&user_id="+userId;
+			$.ajax({ type:"GET", url:url, dataType:"xml",							// Call REST to get user tree	
+				success: function(xml) {											// On XML
+					o={};															// New obj
+					o.sets=[];														// Array of sets
+					o.title="All";													// Get title
+					$(xml).find("photoset").each( function() {						// For each set
+						oo={};														// New obj
+						oo.id=$(this).attr("id");									// Get set id
+						oo.title=$(this).text();									// Get set title
+						o.sets.push(oo);											// Add set
+						});
+					if (o.sets.length)												// If some sets
+						cols.push(o);												// Add to array
+					
+					for (i=0;i<cols.length;++i)	{									// For each collection
+			 			str="<tr id='fda"+i+"' "+trsty+">";							// Row
+						str+="<td>"+cols[i].title+"</td>"; 							// Add name
+						$("#collectTable").append(str);								// Add row														
+					
+						$("#fda"+i).on("click", function() {						// On collection click
+							Sound("click");											// Click
+							$("#picGal").html("<p style='text-align:center'><b>Choose set to view</b></p>");
+							$("#ida"+curCollection).css({"color":"#000000","font-weight":"normal"});	// Uncolor last
+							curCollection=this.id.substr(3);						// Set cur collection
+							$("#ida"+curCollection).css({"color":"#990000","font-weight":"bold"});		// Color current
+							ChooseCollection(curCollection);						// Show current collection
+							});														// End collection click
+						}
+				}});																// Ajax get sets end
+ 			
+ 	
 			}});																	// Ajax get tree end	
 	}
 
@@ -143,6 +178,7 @@
 			$("#setTable").append(str);											// Add row
 			
 			$("#ids"+j).on("click", function() { 								// On set click
+				Sound("click");													// Click
 				$("#ids"+curSet).css({"color":"#000000","font-weight":"normal"});	// Uncolor last
 				curSet=this.id.substr(3);										// Cur set
 				$("#ids"+curSet).css({"color":"#990000","font-weight":"bold"});	// Color current
@@ -176,6 +212,7 @@
 				$("#picGal").html(str);											// Add to gallery
 				for (i=0;i<photos.length;++i) {									// For each pic
 					$("#idp"+i).on("click", function(){							// ON PHOTO CLICK
+						Sound("click");											// Click
 						ChoosePhoto(this.id.substr(3));							// Preview and choose photo
 						});														// End photo click
 					}
@@ -184,7 +221,7 @@
 
  	function ChoosePhoto(id) 												// PREVIEW AND CHOOSE PHOTO SIZES
  	{
-		var o,sizes=[],i
+		var o,sizes=[],i;
 		var url="https://api.flickr.com/services/rest/?method=flickr.photos.getSizes&format=rest&api_key="+apiKey+"&photo_id="+photos[id].id;
 		$.ajax({ type:"GET", url:url, dataType:"xml",							// Call REST to get sizes
 			success: function(xml) {											// On XML
@@ -193,7 +230,7 @@
 					o.source=$(this).attr("source");							// Get source
 					o.label=$(this).attr("label");								// Get label
 					if (o.label == "Medium") 									// If medium pic
-						str="<img src='"+o.source+"' height='300'>";			// Start of image
+						str="<img style='border:1px solid #666' src='"+o.source+"' height='294'>";	// Image
 					sizes.push(o);												// Add size to array
 					});
 							
@@ -201,21 +238,57 @@
 				str+="<div style='position:absolute;top:"+t+"px;left:550px;width:232px;text-align:right'>";
 				str+="<p style='font-size:14px'><b>"+photos[id].title+"</b></p>";		
 				str+="<p style='font-size:11px'>Choose size below:</p>";		
+				for (i=0;i<sizes.length;++i) {									// For each size
+					if (mapMode)												// If making for MapScholar
+						str+=sizes[i].label+"<input type='checkbox' id='fdx"+i+"'><br>";
+					else														// Regular buttons			
+						str+="<button style='margin-bottom:5px' class='bs' id='fdx"+i+"'>"+sizes[i].label+"</button><br>"
+					}
+				if (mapMode)													// If making for MapScholar
+					str+="<br><textarea style='width:200px' id='ftbx'></textarea><br>";		// Holder for image names
+				$("#picGal").html(str+"</div>");								// Fill gallery
 				for (i=0;i<sizes.length;++i)									// For each size
-					str+="<button style='margin-bottom:5px' class='bs' id='idx"+i+"'>"+sizes[i].label+"</button><br>"
-					$("#picGal").html(str+"</div>");							// Fill gallery
-	
-				for (i=0;i<sizes.length;++i)									// For each size
-					$("#idx"+i).on("click", function() {						// On button click
+					$("#fdx"+i).on("click", function() {						// On button click
+						Sound("click");											// Click
+						
+						if (mapMode) {											// If making for MapScholar
+							str="";												// Clear
+							for (var j=0;j<sizes.length;++j)					// For each size
+								if ($("#fdx"+j).prop("checked"))				// If checked
+									str+=sizes[j].source+"\t";					// Add
+							$("#ftbx").val(str);								// Set it							
+							return;												// Quit
+							}
 						callback(sizes[this.id.substr(3)].source);				// Send url to cb
 						$("#alertBoxDiv").remove();								// Close dialog
 						});
 			}});																// Ajax get sizes end
+	  	}
+	}																			// End closure function
+
+	function AddEscapes(str)												// ESCAPE TEXT STRING
+	{
+		if (str) {																// If a string
+			str=""+str;															// Force as string
+			str=str.replace(/"/g,"\\\"");										// " to \"
+			str=str.replace(/'/g,"\\\'");										// ' to \'
+			}
+		return str;																// Return escaped string
+	}
 	
-  	}
-
-}																				// End closure function
-
+	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
+	{
+		if (p4 != undefined)
+			console.log(msg,p1,p2,p3,p4);
+		else if (p3 != undefined)
+			console.log(msg,p1,p2,p3);
+		else if (p2 != undefined)
+			console.log(msg,p1,p2);
+		else if (p1 != undefined)
+			console.log(msg,p1);
+		else
+			console.log(msg);
+	}
 	
 	
 	function trace(msg, p1, p2, p3, p4)										// CONSOLE 

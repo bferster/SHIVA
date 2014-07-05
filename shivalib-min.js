@@ -1,6 +1,6 @@
 
 function SHIVA_Show(container,options,editMode)
-{this.drupalMan=false;this.inGo=false;this.options=null;this.map=null;this.player=null;this.timeLine=null;this.container=container;this.editMode=editMode;this.items=null;this.overlay=null;this.g=null;this.qe=null;this.ev=null;this.jit=null;this.cvs=null;this.group=null;this.msgAction=new Array();if(options)
+{this.drupalMan=false;this.inGo=false;this.options=null;this.map=null;this.player=null;this.timeLine=null;this.container=container;this.editMode=editMode;this.items=null;this.overlay=null;this.g=null;this.qe=null;this.ev=null;this.jit=null;this.cvs=null;this.group=null;this.msgAction=new Array();this.ready=false;this.actionCache=new Array();if(options)
 this.Draw(options);}
 SHIVA_Show.prototype.Draw=function(ops)
 {if(!ops)
@@ -41,9 +41,9 @@ break;if(o&&(i==n))
 callback();else
 setTimeout(function(){shivaJSLoaded(obj,callback);},50);}
 SHIVA_Show.prototype.SendReadyMessage=function(mode)
-{if(shivaLib.drupalMan)
+{var i;if(shivaLib.drupalMan)
 window.parent.postMessage("ShivaReady="+mode.toString(),"*");var asp=$("#"+shivaLib.container).height()/$("#"+shivaLib.container).width();if(this.options.height&&this.options.width)
-asp=this.options.height/this.options.width;shivaLib.SendShivaMessage("ShivaChart=ready",Math.round(asp*1000));}
+asp=this.options.height/this.options.width;shivaLib.SendShivaMessage("ShivaChart=ready",Math.round(asp*1000));shivaLib.ready=true;shivaLib.actionCache=[];}
 SHIVA_Show.prototype.SendShivaMessage=function(src,msg)
 {var id=window.name;if(!id)
 id="posterFrame-"+(""+window.location.search.match(/&if=[0-9A-z]+/)).substr(4);var str=src+"|"+id;if(msg)
@@ -58,18 +58,22 @@ if(!e.data)
 return;for(var i=0;i<shivaLib.msgAction.length;++i)
 if(e.data.indexOf(shivaLib.msgAction[i].id)!=-1)
 shivaLib.msgAction[i].Do(i);if(!shivaLib.options)
-return;if(e.data.indexOf("ShivaAct")!=-1){if(shivaLib.options.shivaGroup=="Map")
-shivaLib.MapActions(e.data);else if(shivaLib.options.shivaGroup=="Earth")
-shivaLib.EarthActions(e.data);else if(shivaLib.options.shivaGroup=="Video")
-shivaLib.VideoActions(e.data);else if(shivaLib.options.shivaGroup=="Timeglider")
-shivaLib.TimeActions(e.data);else if(shivaLib.options.shivaGroup=="Visualization")
-shivaLib.ChartActions(e.data);else if(shivaLib.options.shivaGroup=="Image")
-shivaLib.ImageActions(e.data);else if(shivaLib.options.shivaGroup=="Network")
-shivaLib.NetworkActions(e.data);else if(shivaLib.options.shivaGroup=="WordCloud")
-shivaLib.WordActions(e.data);else if(shivaLib.options.shivaGroup=="Control")
-shivaLib.ControlActions(e.data);else if(shivaLib.options.shivaGroup=="HTML")
-shivaLib.HTMLActions(e.data);else if(shivaLib.options.shivaGroup=="Graph")
-shivaLib.GraphActions(e.data);}}
+return;if(e.data.indexOf("ShivaAct")!=-1){if(!shivaLib.ready)
+shivaLib.actionCache.push(e.data);else
+shivaLib.RunActions(e.data);}}
+SHIVA_Show.prototype.RunActions=function(data)
+{var group=shivaLib.options.shivaGroup;if(group=="Map")
+shivaLib.MapActions(data);else if(group=="Earth")
+shivaLib.EarthActions(data);else if(group=="Video")
+shivaLib.VideoActions(data);else if(group=="Timeglider")
+shivaLib.TimeActions(data);else if(group=="Visualization")
+shivaLib.ChartActions(data);else if(group=="Image")
+shivaLib.ImageActions(data);else if(group=="Network")
+shivaLib.NetworkActions(data);else if(group=="WordCloud")
+shivaLib.WordActions(data);else if(group=="Control")
+shivaLib.ControlActions(data);else if(group=="HTML")
+shivaLib.HTMLActions(data);else if(group=="Graph")
+shivaLib.GraphActions(data);}
 SHIVA_Show.prototype.AddOverlay=function(data)
 {var key;this.overlay=new Array();this.DrawOverlay();if(data){var v=data.split("&draw-");for(var i=0;i<v.length;++i)
 this.AddOverlaySeg(v[i].replace(/^[0-9]+=/,""),true);}

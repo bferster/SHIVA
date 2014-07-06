@@ -178,8 +178,8 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE 
 		asp=this.options.height/this.options.width;							// Calc asp
 	shivaLib.SendShivaMessage("ShivaChart=ready",Math.round(asp*1000)); 	// Send ready message to EvA with aspect ratio
 	shivaLib.ready=true;													// We're ready now
-//	for (i=0;i<shivaLib.actionCache.length;++i)								// For each action stored
-//		shivaLib.RunActions(shivaLib.actionCache[i]);						// Send command
+	for (i=0;i<shivaLib.actionCache.length;++i)								// For each action stored
+		shivaLib.RunActions(shivaLib.actionCache[i]);						// Send command
 	shivaLib.actionCache=[];												// Clear action store
 }
 
@@ -246,6 +246,7 @@ SHIVA_Show.prototype.RunActions=function(data) 							// ROUTE ACTIONS
 		shivaLib.HTMLActions(data);											// Route
 	else if (group == "Graph")												// If an graph action
 		shivaLib.GraphActions(data);										// Route
+
 }
 
 

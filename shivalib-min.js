@@ -43,7 +43,8 @@ setTimeout(function(){shivaJSLoaded(obj,callback);},50);}
 SHIVA_Show.prototype.SendReadyMessage=function(mode)
 {var i;if(shivaLib.drupalMan)
 window.parent.postMessage("ShivaReady="+mode.toString(),"*");var asp=$("#"+shivaLib.container).height()/$("#"+shivaLib.container).width();if(this.options.height&&this.options.width)
-asp=this.options.height/this.options.width;shivaLib.SendShivaMessage("ShivaChart=ready",Math.round(asp*1000));shivaLib.ready=true;shivaLib.actionCache=[];}
+asp=this.options.height/this.options.width;shivaLib.SendShivaMessage("ShivaChart=ready",Math.round(asp*1000));shivaLib.ready=true;for(i=0;i<shivaLib.actionCache.length;++i)
+shivaLib.RunActions(shivaLib.actionCache[i]);shivaLib.actionCache=[];}
 SHIVA_Show.prototype.SendShivaMessage=function(src,msg)
 {var id=window.name;if(!id)
 id="posterFrame-"+(""+window.location.search.match(/&if=[0-9A-z]+/)).substr(4);var str=src+"|"+id;if(msg)

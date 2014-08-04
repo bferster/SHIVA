@@ -122,15 +122,6 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		
 ////////////////////////// EVENTS ///////////////////////////////////////////////////
 	
-	if (this.ev) 															// If event lib is already loaded
-		t=this.ev.events;													// Get events from lib
-	else																	// Else
-		t=options["shivaEvents"];											// Get from options array
-	this.ev=new SHIVA_Event(this);											// Alloc event library
-	if ((t) && (t.length))	{												// If any events
-		this.ev.AddEvents(t);												// Add them
-		this.ev.HideAll(0);													// Hide boxes after load
-		}
 	this.VideoEvent("add","timeupdate",drawOverlay);						// Draw overlay when time changes
 	this.VideoEvent("add","loadeddata",onVidLoaded);						// Call when video is loaded
 	this.VideoEvent("add","ended",function(){ shivaLib.SendShivaMessage("ShivaVideo=done")});	// When video plays til end
@@ -151,7 +142,6 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
     		shivaLib.VideoPlay();
     	else
      		shivaLib.VideoPause();
-		$("#shivaEventDiv").height(Math.max(shivaLib.VideoMediaHeight()-40,0));
 		shivaLib.VideoNotes();
  		shivaLib.SendShivaMessage("ShivaVideo=ready");
    		setInterval(onVideoTimer,400);	

@@ -276,8 +276,7 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				for (j=1;j<nRows;++j) {									// For time point
 					o={};												// New obj
 					o.key=data[0][i];									// Set field name as key
-					o.date=new Date(data[j][0]).getTime();				// Set date
-	trace(o.date)
+					o.date=new Date(data[j][0]).getTime();				// Set date in milliseconds < 1970
 					o.value=data[j][i]-0;								// Set value
 					dataSet.push(o);									// Add item
 					}

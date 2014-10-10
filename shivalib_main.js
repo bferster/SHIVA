@@ -970,9 +970,10 @@ SHIVA_Show.prototype.ArrayToString=function(jsonArray) 					// SAVE JSON ARRAY A
 SHIVA_Show.prototype.LinkToAnchor=function(str) 						// CONVERT LINKS TO ANCHORS
 {
 	var i,v,vv,url,title;
+	if (!str)																// If no string
+		return "";															// Return null
 	if (str.match(/href=/)) 												// If an embedded <a> tag
 		return str;															// Don't convert
-
 	if (str.match(/http/)) {												// If an embedded url
 		v=(str+" ").match(/http.?:\/\/.*?\s/ig);							// Extract url(s)
 		for (i=0;i<v.length;++i) {											// For each url

@@ -255,7 +255,8 @@ str+="\""+val+"\",";}
 str=str.substr(0,str.length-1);if(i!=jsonArray.length-1)str+="},\n";else str+="}]";}
 return str;}
 SHIVA_Show.prototype.LinkToAnchor=function(str)
-{var i,v,vv,url,title;if(str.match(/href=/))
+{var i,v,vv,url,title;if(!str)
+return"";if(str.match(/href=/))
 return str;if(str.match(/http/)){v=(str+" ").match(/http.?:\/\/.*?\s/ig);for(i=0;i<v.length;++i){v[i]=$.trim(v[i]);vv=v[i].split("|");url=title=vv[0];if(vv.length>1)
 title=vv[1].replace(/_/g," ");str=str.replace(RegExp(v[i].replace(/[-[\]{}()*+?.,\\^$|#\s]/g,"\\$&"))," <a href='"+url+"' target='_blank'>"+title+"</a> ");}}
 return str;}

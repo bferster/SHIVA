@@ -6,7 +6,6 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 {
 	var v,t,type="YouTube";
 	var options=this.options;
-//	options.dataSourceUrl="kaltura_player_1_uyp6bkha"; 
 //	options.dataSourceUrl="http://player.vimeo.com/video/17853047"; 
 //	options.dataSourceUrl="http://www.primaryaccess.org/music.mp3";	
 	var container=this.container;
@@ -38,6 +37,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
     	this.player=null;
     	}
 	this.player=Popcorn.smart(con,base+id);
+	this.player.controls(true);
 	this.player.smartPlayerType=type;
 	this.player.media.src=base+id;
 

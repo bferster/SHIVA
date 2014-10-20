@@ -127,9 +127,9 @@ SHIVA_Show.prototype.ReEdit=function(jsonData, propertyList)
 			var items=new Array();
 			for (key in jsonData) {
 	 			if (key == "shivaEvents") {
-					if (!shivaLib.ev)
-						SHIVA_Event(this.container,this.player);
-					shivaLib.ev.AddEvents(jsonData[key]);										
+//					if (!shivaLib.ev)
+//						SHIVA_Event(this.container,this.player);
+//					shivaLib.ev.AddEvents(jsonData[key]);										
 		 			continue;
 	 				}
 	 			if (key.indexOf("item-") != -1) {

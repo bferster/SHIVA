@@ -361,8 +361,7 @@ str="<iframe width='600' height='400' src='"+encodeURI(str)+"'></iframe>";}
 $("#outputDiv").html("<br/><br/>Embed code:<br><textarea readonly='yes' rows='6' cols='60' id='tmptxt1'>"+str+"</textarea>");$("#tmptxt1").select();return str;}
 SHIVA_Show.prototype.ReEdit=function(jsonData,propertyList)
 {var p,v,i=0,j,k=0,pair,key,o;var query=window.location.search.substring(1);if(!query&&!jsonData)
-return;if(jsonData){var items=new Array();for(key in jsonData){if(key=="shivaEvents"){if(!shivaLib.ev)
-SHIVA_Event(this.container,this.player);shivaLib.ev.AddEvents(jsonData[key]);continue;}
+return;if(jsonData){var items=new Array();for(key in jsonData){if(key=="shivaEvents"){continue;}
 if(key.indexOf("item-")!=-1){v=jsonData[key].split(";");o=new Object;for(j=0;j<v.length;++j){p=v[j].split(":");o[p[0]]=p[1];}
 items.push(o);continue;}
 else if(key.indexOf("draw-")!=-1)

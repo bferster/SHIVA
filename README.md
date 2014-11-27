@@ -15,16 +15,10 @@ The annotation layer will enable the creating and sharing of hand-drawn and grap
 
 SHIVA was developed at the University of Virginia's Science, Humanities and Arts Network of Technological Initiatives (SHANTI). SHANTI promotes innovation at the University of Virginia through the use of advanced digital technologies in research, teaching, publishing, and collaborative engagement.
 
-Click here for SHIVA user's guide
 
 For more information about SHIVA:
 
-Bill Ferster, VisualEyes Project Director
-Sciences, Humanities & Arts Network of Technological Initiatives
-The University of Virginia
-bferster - @ - virginia.edu
-Twitter: @bferster
-+1 (540) 592-7001
+Bill Ferster, VisualEyes Project Director | Sciences, Humanities & Arts Network of Technological Initiatives | The University of Virginia | bferster - @ - virginia.edu | Twitter: @bferster 
 
 License
 =====

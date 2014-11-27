@@ -21,7 +21,7 @@ For more information about SHIVA:
 
 Bill Ferster, VisualEyes Project Director
 Sciences, Humanities & Arts Network of Technological Initiatives
-The University of Virginia 
+The University of Virginia
 bferster - @ - virginia.edu
 Twitter: @bferster
 +1 (540) 592-7001

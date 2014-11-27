@@ -18,6 +18,8 @@ SHIVA was developed at the University of Virginia's Science, Humanities and Arts
 
 For more information about SHIVA:
 
+www.viseyes.org/shiva
+
 Bill Ferster, VisualEyes Project Director | Sciences, Humanities & Arts Network of Technological Initiatives | The University of Virginia | bferster - @ - virginia.edu | Twitter: @bferster 
 
 License

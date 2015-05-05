@@ -57,7 +57,6 @@
 		var str="<ul>";
 		str+="<li><a href='#ifr'>Charts</a></li>";
 		str+="<li><a href='#ifr'>Maps</a></li>";
-		str+="<li><a href='#ifr'>Earth</a></li>";
 		str+="<li><a href='#ifr'>Timelines</a></li>";
 		str+="<li><a href='#ifr'>Videos</a></li>";
 		str+="<li><a href='#ifr'>Images</a></li>";
@@ -65,7 +64,6 @@
 		str+="<li><a href='#ifr'>Subway</a></li>";
 		str+="<li><a href='#ifr'>Words</a></li>";
 		str+="<li><a href='#ifr'>Text</a></li>";
-		str+="<li><a href='#ifr'>Poster</a></li>";
 		str+="<li><a href='#ifr'>About</a></li>";
 		str+="</ul>";
 		str+="<div id='ifr'><p><iframe id='shivaIf' src='chart.htm' width='100%' height='1000'  style='margin:0px;border:none'></iframe></p></div>";
@@ -76,16 +74,14 @@
 			switch (e.target.id) {
 				case "ui-id-1":	 $("#shivaIf").prop("src","chart.htm");			break;
 				case "ui-id-2":	 $("#shivaIf").prop("src","map.htm");			break;
-				case "ui-id-3":	 $("#shivaIf").prop("src","earth.htm");			break;
-				case "ui-id-4":	 $("#shivaIf").prop("src","timeglider.htm");	break;
-				case "ui-id-5":	 $("#shivaIf").prop("src","video.htm");			break;
-				case "ui-id-6":	 $("#shivaIf").prop("src","image.htm");			break;
-				case "ui-id-7":	 $("#shivaIf").prop("src","graph.htm");			break;
-				case "ui-id-8":	 $("#shivaIf").prop("src","subway.htm");		break;
-				case "ui-id-9": $("#shivaIf").prop("src","wordcloud.htm");		break;
-				case "ui-id-10": $("#shivaIf").prop("src","textedit.htm");		break;
-				case "ui-id-11": $("#shivaIf").prop("src","poster.htm");		break;
-				case "ui-id-12": $("#shivaIf").prop("src","about.htm");			break;
+				case "ui-id-3":	 $("#shivaIf").prop("src","timeglider.htm");	break;
+				case "ui-id-4":	 $("#shivaIf").prop("src","video.htm");			break;
+				case "ui-id-5":	 $("#shivaIf").prop("src","image.htm");			break;
+				case "ui-id-6":	 $("#shivaIf").prop("src","graph.htm");			break;
+				case "ui-id-7":	 $("#shivaIf").prop("src","subway.htm");		break;
+				case "ui-id-8": $("#shivaIf").prop("src","wordcloud.htm");		break;
+				case "ui-id-9": $("#shivaIf").prop("src","textedit.htm");		break;
+				case "ui-id-10": $("#shivaIf").prop("src","about.htm");			break;
 				}			
 			});
 	}

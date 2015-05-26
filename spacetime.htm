@@ -208,8 +208,7 @@ TSMap.prototype.InitMap=function()											// INIT OPENLAYERS MAP
 				var pos=Math.floor(c[1]*10000)/10000+"|"+Math.floor(c[0]*10000)/10000+"|"+o.getZoom()+"|";	
 				pos+=Math.floor((o.getRotation()*180/Math.PI)*1000)/-1000;	// Rotation
 				SendShivaMessage("ShivaMap=move",pos);						// Send that view has changed
- 				trace(pos)
- 				});
+  				});
 	}	
 
 TSMap.prototype.MakeMapImage=function(mob) 								// ADD MAP IMAGE TO PROJECT

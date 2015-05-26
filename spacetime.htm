@@ -346,7 +346,7 @@ TSMap.prototype.DrawMapImages=function()								// DRAW OL MAPS
 
 	$(document).ready(function() {												// When loaded
 		var i;
-		sd.lrRatio=.75;
+		sd.lrRatio=.66;
 		sd.bRatio=.75;
 		if (window.addEventListener) 											// If supported this way
 			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
@@ -376,8 +376,8 @@ TSMap.prototype.DrawMapImages=function()								// DRAW OL MAPS
 			drag: function(event, ui) {											// On drag
 				var wid=$("#showDiv").width();									// Max width
 			 	sd.lrRatio=Math.max(0,Math.min(1,(event.clientX-8)/wid));		// Set ratio between windows
-				if (Math.abs(sd.lrRatio-.75) < .015) 							// If close to center
-					sd.lrRatio=.75;												// Snap it there
+				if (Math.abs(sd.lrRatio-.66) < .015) 							// If close to center
+					sd.lrRatio=.66;												// Snap it there
 				ResizePanes();													// Resize panes
 				},
 			stop: function(event, ui) {											// On drag end

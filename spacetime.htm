@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<link REL="SHORTCUT ICON" HREF="UVALogo.ico">
+	<title>Qmedia Player</title>
+ 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>	
+	<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+	<script src="jquery.ui.touch-punch.min.js"></script>
+	<script type="text/javascript" src="//www.viseyes.org/shiva/shivalib-min.js"></script>
+ 
+	<style type="text/css">
+		body { 			font-family:Verdana,Geneva,sans-serif; font-size:9px; }
+		.ts-rounded-corners { -moz-border-radius:8px;-webkit-border-radius:8px;-khtml-border-radius:8px;border-radius:8px;}
+ 		.ts-unselectable { -moz-user-select: none;     -khtml-user-select: none;
+		   			 	-webkit-user-select: none;  -ms-user-select: none;   user-select: none;
+		   				}
+						}
+		.ts-base { 		font-family:Verdana,Geneva,sans-serif;
+						padding:0px; margin:0px;
+						}	
+		.ts-left { 		
+						}	
+		.ts-right { 	
+						}	
+		.ts-bottom { 	
+						}	
+		.ts-splash { 	text-align:center;position:absolute;top:100px;left:200px;
+						}
+		.ts-is {		border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
+						border:1px solid #999;font-size:12px;height;20px;width:200px;
+						}
+		.ts-bs {		border-radius:10px;padding-left:8px;padding-right:8px;padding-top:1px;
+						border:1px solid #999;font-size:12px;height;20px;color:#666;
+						}
+
+ 	</style>
+
+</head>
+<body>
+<div id="splashDiv" class="ts-splash"><img src="images/tslogo.png"></div>
+<div id="showDiv" style="padding:0px;margin:0px;opacity:0;" class="ts-base">
+	<div id="leftDiv" style="position:absolute;opacity:inherit" class="ts-left"></div>
+	<div id="rightDiv" style="position:absolute;opacity:inherit" class="ts-right"></div>
+	<div id="lrSiz" style="position:absolute;width:8px;cursor:col-resize;opacity:inherit" class="ts-unselectable" title="Resize">
+		<div id="lrSiz1" style="position:absolute;width:40px;height:100%;left:-16px" class="ts-unselectable"></div>
+	</div>
+	<div id="bottomDiv" style="position:absolute;top:0px;opacity:inherit" class="ts-bottom ts-unselectable">
+	<div id="bSiz" style="position:absolute;width:8px;cursor:col-resize;opacity:inherit" class="ts-unselectable" title="Resize transcript">
+		<div id="bSiz1" style="position:absolute;width:20px;height:100%;top:32px;left:0px" class="ts-unselectable"></div>
+	</div>
+</div>
+<script>
+	
+	var sd={};																	// Holds show data
+	var paneAnimationTimer=null;												// Times pane animations
+	var imageAnimationTimer=[];													// Times image animations
+	var isMobile=false;															// Flag for mobile devices
+	var host="//viseyes.org/";													// Set host
+	var userName="",password="",curShow=0;										// Login info
+	var lastClickTime=0;														// Store last click time
+	var drupalMan=false;														// Flag for drupal manager	
+
+	function ResizePanes()													// RESIZE PANES
+	{ 
+		var wid=$("body").width();												// Cap at screen size
+		trace(wid)
+	}		
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// EVENTS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	$(document).ready(function() {												// When loaded
+		var i;
+		sd.lrRatio=.75;
+		sd.bHgt=300;
+		if (window.addEventListener) 											// If supported this way
+			window.addEventListener("message",shivaEventHandler,false);			// Add event handler
+		else																	// Use other method
+			window.attachEvent("message",shivaEventHandler);					// Add handler
+		
+		isMobile=navigator.userAgent.match(/(ipad|iphone|ipod|android)/i) ? true : false; // Set mobile flag
+		var url=window.location.search.substring(1);							// Get query string
+		drupalMan=(""+url).match(/pr=d/);										// If called from Drupal manager
+		if (!url)																// Nothing on command line
+			url=1;																// Use default
+		if (drupalMan)	url="";													// If drupal, kill url
+		if (url && !isNaN(url)) {												// If a number
+			curShow=url;														// Save show number											
+			url="//qmediaplayer.com/loadshow.php?id="+url;						// Get from db
+			}	
+		else if ((url) && (!url.match(/\./)))									// No file extension
+			url+=".json";														// Add txt
+//		$.ajax({ url: url, dataType:'jsonp' });									// Get jsonp and call LoadShow() from it
+
+		$("#lrSiz").draggable({													// DRAG L-R WIDTH HANDLER
+			cursorAt:{left:16},	iframeFix:true,									// Cursor offset
+			cursor: "col-resize", axis:"x",										// X-only
+			start: function(event, ui) {										// On drag start
+				$("#lrSiz1").css({ width:"500px", left:"-500px" });				// Widen hiding div
+				},
+			drag: function(event, ui) {											// On drag
+				var wid=$("body").width();										// Cap at screen size
+			 	sd.lrRatio=Math.max(0,Math.min(1,(event.clientX-8)/(wid+16)));	// Set ratio between windows
+				if (Math.abs(sd.lrRatio-.75) < .01) 							// If close to center
+					sd.lrRatio=.5;												// Snap it there
+				ResizePanes();													// Resize panes
+				},
+			stop: function(event, ui) {											// On drag end
+				$("#lrSiz1").css({ width:"40px", left:"-16px" });				// Contract hiding div
+				ResizePanes();													// Resize panes
+				}
+			});
+			
+		$("#bSiz").draggable({												// DRAG TRANSCRIPT HEIGHT HANDLER		
+			cursor: "row-resize", axis:"y",										// Y-only
+			stop: function(event, ui) {											// When done
+				ResizePanes;													// Resize panes when done
+				},
+			drag: function(event, ui) {											// On drag
+				sd.bHgt=Math.max(event.clientY-$("#controlDiv").css("top").replace(/px/,"")*1-$("#controlDiv").height(),0)-32;  // Set hgt
+				ResizePanes();													// Resize panes
+				}
+			});
+		$("#lrSiz").hover(														// L-R width
+			function(){ $(this).css("background-color","#acc3db")},				// Highlight
+			function(){ $(this).css("background-color","transparent")			// Hide
+			});
+		
+		$("#bSiz").hover(														// Bottom height
+			function(){ $(this).css("background-color","#acc3db")},				// Highlight
+			function(){ $(this).css("background-color","transparent")			// Hide
+			});
+	
+		$("#splashDiv").animate({ opacity:0},400);								// Hide logo
+		$("#showDiv").animate({ opacity:1},1500, function() {					// Show interface
+				ResizePanes();													// Resize panes
+				});				
+		if (drupalMan) 															// If called from Drupal manager
+			window.parent.postMessage("ShivaReady=true","*");					// Send message to parent wind		
+	});
+
+	function shivaEventHandler(e)											// ON SHIVA EVENT
+	{
+		var str,i;
+	}
+
+	function trace(msg, p1, p2, p3, p4)										// CONSOLE 
+	{
+		if (p4 != undefined)
+			console.log(msg,p1,p2,p3,p4);
+		else if (p3 != undefined)
+			console.log(msg,p1,p2,p3);
+		else if (p2 != undefined)
+			console.log(msg,p1,p2);
+		else if (p1 != undefined)
+			console.log(msg,p1);
+		else
+			console.log(msg);
+	}
+
+</script>
+</body></html>
+

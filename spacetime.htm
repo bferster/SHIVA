@@ -21,8 +21,7 @@
 						}
 		.ts-base { 		position:absolute;height:100%;width:100%;
 						}	
-		.ts-left { 		background-color:#008000;
-						}	
+		.ts-left { 		}	
 		.ts-right { 	background-color:#eee;
 						}	
 		.ts-bottom { 	background-color:#ccc;width:100%;
@@ -67,6 +66,8 @@
 	var lastClickTime=0;														// Store last click time
 	var drupalMan=false;														// Flag for drupal manager	
 
+	var curSpanStart,curSpanEnd,curTime;
+	
 	function ResizePanes()													// RESIZE PANES
 	{ 
 		var wid=$("#showDiv").width();											// Width
@@ -89,6 +90,41 @@
 			map.updateSize();													// Update map
 	}		
 
+	function InitProject(data)
+	{
+		var i;
+		if (!data) {
+			sd.mobs=[];
+			o={};
+			o.id=102;
+			o.type="map";
+			o.title="La Floride Francoise";
+			o.desc="La Floride Francoise";
+			o.med="http://farm9.staticflickr.com/8019/7310697988_18eb47c466_z.jpg";
+			o.start=1665;
+			o.end=1665;
+			o.citation="P[ierre] Duval, La Floride Francoise ([Paris, 1665?]).  From Florida Map Collection, USF Digital Collections, http://digital.lib.usf.edu/?u15.9042. Cumming, 158; Burden I, 485-486.";
+			o.north=32.746269;
+			o.south=31.756859;
+			o.east=-80.332589;
+			o.west=-81.998319;
+			o.rotation="0";
+			o.goto="32.2359,-81.2021,173510,0,0.13";
+			sd.mobs.push(o);
+		}
+			
+		for (i=0;i<sd.mobs.length;++i) {	
+			mps.MakeMapImage(sd.mobs[i]);										 
+			mps.loadCounter++;
+			}											
+	}
+
+	function Draw()
+	{
+		$("#rightDiv").html("<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'>");
+		mps.DrawMapImages();
+	}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // MAP
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -110,8 +146,8 @@ TSMap.prototype.InitMap=function()											// INIT OPENLAYERS MAP
 		this.controlKey=mps.shiftKey=false;										// Shift/control key flags
 		this.showBoxes=false;													// Show boxes
 		this.showRoads=false;													// Hide Roads/borders
-		this.showScale=true;														// Hide or show scale
-		this.baseLayer="Earth";													// Default layer
+		this.showScale=true;													// Hide or show scale
+		this.baseLayer="Roadmap";												// Default layer
 		this.curProjection="EPSG:3857";											// Current projection
 		
 		this.layers=[															// Hold layers
@@ -161,54 +197,28 @@ TSMap.prototype.InitMap=function()											// INIT OPENLAYERS MAP
  					}),
 			];
 	
-			this.featureSelect=new ol.interaction.Select();						// Create select interaction
 
- 		    map=new ol.Map( { target: 'leftDiv',								// Alloc OL
-  				interactions: ol.interaction.defaults().extend([this.featureSelect]),	// Add feature select interaction
-		        layers:this.layers,												// Layers array									
-		        controls: ol.control.defaults({									// Controls
- 						}).extend([ new ol.control.ScaleLine() ]),				// Add scale
-		        view: new ol.View({												// Views
-		          		center: ol.proj.transform( [-77,34],'EPSG:4326',this.curProjection),
-		          		minZoom: 2, maxZoom: 16, zoom: 3 })
- 				});
+	    map=new ol.Map( { target: 'leftDiv',									// Alloc OL
+	        layers:this.layers,													// Layers array									
+	        controls: ol.control.defaults({										// Controls
+					}).extend([ new ol.control.ScaleLine() ]),					// Add scale
+	        view: new ol.View({													// Views
+	          		center: ol.proj.transform( [-77,34],'EPSG:4326',this.curProjection),
+	          		minZoom: 2, maxZoom: 16, zoom: 3 })
+			});
 
- 		   	for (i=0;i<this.layers.length;++i) 									// For each layer
-			    this.layers[i].set('visible',this.layers[i].get("title") == this.baseLayer); // Set visibility
-
-		  	this.CreateCanvasLayer();											// Canvas layer for map images
-	      	this.featureSelect.getFeatures().on("change:length", function(e) {	// ON FEATURE SELECT
-				var i,j,f;
-	  			if (e.target && e.target.item(0)) {							// If something there
-					f=e.target.item(0);										// Point at seg
-					var id=f.getId();										// Id of seg
-					if (f.getGeometry() && (f.getGeometry().getType() == "Point") && f.getStyle() && f.getStyle().getText())	// If a text label in seg, must be marker text
-						$("#annText").val(f.getStyle().getText().getText())	// Fill editing box for marker
-					
-					for (i=0;i<this.kmlLayers.length;++i) {					// For each KML layer
-						if (!this.kmlLayers[i].getSource().getFeatures)		// If no source features
-							continue;
-						f=this.kmlLayers[i].getSource().getFeatures();		// Get KML feature array
-						if (!f || !f.length)								// If no KML features
-							continue;										// Quit
-						for (j=0;j<f.length;++j) {							// For each feature 
-							if (f[j].getId() == id) {						// Found it
-								$("#mpsFind").val(j);						// Show id in Find: box
-									return;
-								}
-							}												// End feature
-						}													// End layer
-					}														// End got one
-  				});
-
-			map.on('moveend', function(e) {									// On end of move
-              	mps.DrawMapImages();										// Redraw maps in new extent, if moved
-				var o=map.getView();										// Point at view
-				var c=ol.proj.transform(ValidCenter(o.getCenter()),mps.curProjection,'EPSG:4326');		// Get center
-				var pos=Math.floor(c[1]*10000)/10000+"|"+Math.floor(c[0]*10000)/10000+"|"+o.getZoom()+"|";	
-				pos+=Math.floor((o.getRotation()*180/Math.PI)*1000)/-1000;	// Rotation
-				SendShivaMessage("ShivaMap=move",pos);						// Send that view has changed
-  				});
+	   	for (i=0;i<this.layers.length;++i) 										// For each layer
+		    this.layers[i].set('visible',this.layers[i].get("title") == this.baseLayer); // Set visibility
+	  	this.CreateCanvasLayer();												// Canvas layer for map images
+      	
+		map.on('moveend', function(e) {											// On end of move
+          	mps.DrawMapImages();												// Redraw maps in new extent, if moved
+			var o=map.getView();												// Point at view
+			var c=ol.proj.transform(ValidCenter(o.getCenter()),mps.curProjection,'EPSG:4326');		// Get center
+			var pos=Math.floor(c[1]*10000)/10000+"|"+Math.floor(c[0]*10000)/10000+"|"+o.getZoom()+"|";	
+			pos+=Math.floor((o.getRotation()*180/Math.PI)*1000)/-1000;			// Rotation
+			SendShivaMessage("ShivaMap=move",pos);								// Send that view has changed
+			});
 	}	
 
 TSMap.prototype.MakeMapImage=function(mob) 								// ADD MAP IMAGE TO PROJECT
@@ -247,8 +257,6 @@ TSMap.prototype.MakeMapImage=function(mob) 								// ADD MAP IMAGE TO PROJECT
 			this.img.src=mob.med;											// Set url
 		else if (mob.url)													// If a large
 			this.img.src=mob.url;											// Set url
-		else if (mob.small)													// If a small
-			this.img.src=mob.small;											// Set url
   	}
 	
 MapImage.prototype.drawImage=function(alpha)                   			// DRAW IMAGE
@@ -306,17 +314,17 @@ TSMap.prototype.CreateCanvasLayer=function()							// CREATE CANVAS LAYER
 TSMap.prototype.DrawMapImages=function()								// DRAW OL MAPS
 {
 	var i,m;
-/*	if (this.canvasContext && mps.mobs) {  									// If a canvas up      
+	if (this.canvasContext && map.mobs) {  									// If a canvas up      
 		this.canvasContext.clearRect(0,0,this.canvasWidth,this.canvasHeight);	// Clear canvas
-   		for (i=0;i<mps.mobs.length;i++) {									// For each mob
-            m=this.mobs[i];													// Get ptr
-            if (m.type != "map" || this.sh.mobVis[i] == 0)					// If not a visible map
-                continue;													// Skip it
+   		for (i=0;i<sd.mobs.length;i++) {									// For each mob
+            m=sd.mobs[i];													// Get ptr
+ //           if (m.type != "map" || this.sh.mobVis[i] == 0)					// If not a visible map
+  //              continue;													// Skip it
             if (m.mapImage)													// If an image alloc'd
            		m.mapImage.drawImage(100);   								// Draw it   
             }
         }
-*/}
+}
 
 	function ValidCenter(c)												// MAKE SURE COORDS STAY IN MAIN MAP COORD SPACE
   	{
@@ -408,13 +416,16 @@ TSMap.prototype.DrawMapImages=function()								// DRAW OL MAPS
 			function(){ $(this).css("background-color","transparent")			// Hide
 			});
 	
-		$("#splashDiv").animate({ opacity:0},400);								// Hide logo
-		$("#showDiv").animate({ opacity:1},1500, function() {					// Show interface
+		$("#splashDiv").animate({ opacity:0},2000);								// Hide logo
+		$("#showDiv").animate({ opacity:1},4000, function() {					// Show interface
 				ResizePanes();													// Resize panes
+				Draw();
 				});				
 		$(window).resize(ResizePanes);											// Dynamic resizing
 		mps=new TSMap;
 		mps.InitMap();															// Init openlayers
+		InitProject();															// Init project
+		ResizePanes();															// Resize panes
 		if (drupalMan) 															// If called from Drupal manager
 			window.parent.postMessage("ShivaReady=true","*");					// Send message to parent wind		
 	});

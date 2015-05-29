@@ -88,34 +88,48 @@
 		$("#bottomDiv").css("top",cy+"px");										// Set lr size pos
 		if (map)																// If OL initted
 			map.updateSize();													// Update map
-	}		
+		Draw();																	// Redraw
+}		
 
 	function InitProject(data)
 	{
 		var i;
 		if (!data) {
 			sd.mobs=[];
-			o={};
-			o.id=102;
-			o.type="map";
+			var o={};
 			o.title="La Floride Francoise";
 			o.desc="La Floride Francoise";
-			o.med="http://farm9.staticflickr.com/8019/7310697988_18eb47c466_z.jpg";
+			o.marker="http://farm9.staticflickr.com/8019/7310697988_18eb47c466_z.jpg";
 			o.start=1665;
 			o.end=1665;
 			o.citation="P[ierre] Duval, La Floride Francoise ([Paris, 1665?]).  From Florida Map Collection, USF Digital Collections, http://digital.lib.usf.edu/?u15.9042. Cumming, 158; Burden I, 485-486.";
-			o.north=32.746269;
-			o.south=31.756859;
-			o.east=-80.332589;
-			o.west=-81.998319;
-			o.rotation="0";
+			o.georef="32.746269,31.756859,-80.332589,-81.998319,0";
 			o.goto="32.2359,-81.2021,173510,0,0.13";
+			o.vis=1;
+			sd.mobs.push(o);
+
+			o={};
+			o.marker="test.kml";
+			o.start=1665;
+			o.end=1665;
+			o.vis=1;
 			sd.mobs.push(o);
 		}
 			
-		for (i=0;i<sd.mobs.length;++i) {	
-			mps.MakeMapImage(sd.mobs[i]);										 
-			mps.loadCounter++;
+		for (i=0;i<sd.mobs.length;++i) {									// For each mob	
+			o=sd.mobs[i];													// Point at mob
+			if (o.marker) {													// If a marker spec'd
+				if (o.marker.match(/\.kml/i)) {								// A KML file
+					o.type="kml";											// Set type
+					mps.AddKMLLayer(o);										// Add KML layer								 
+					mps.loadCounter++;										// Add to count
+					}
+				else if (o.marker.match(/\.png|.gif|\.jpg|\.jpeg/i)) {		// An image file
+					o.type="image";											// Set type
+					mps.MakeMapImage(o);									// Make map image								 
+					mps.loadCounter++;										// Add to count
+					}
+				}
 			}											
 	}
 
@@ -123,6 +137,11 @@
 	{
 		$("#rightDiv").html("<img src='http://www.viseyes.org/efolio/declaration.JPG' width='100%'>");
 		mps.DrawMapImages();
+		var seg=mps.kmlLayers[0];
+		seg.set("opacity",1);									// Set alpha
+		seg.set('visible',true);								// Show it
+
+		
 	}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -139,6 +158,7 @@ function TSMap()														// CONSTRUCTOR
 	Sound("click","init");													// Init sound
 	Sound("ding","init");													// Init sound
 	Sound("delete","init");													// Init sound
+	this.kmlLayers=[];															// Holds KML layers
 }
 
 TSMap.prototype.InitMap=function()											// INIT OPENLAYERS MAP
@@ -221,11 +241,51 @@ TSMap.prototype.InitMap=function()											// INIT OPENLAYERS MAP
 			});
 	}	
 
+TSMap.prototype.AddKMLLayer=function(mob) 								// ADD KML LAYER TO PROJECT
+{
+	var u=mob.marker;														
+	if (u && u.match(/\/\//)) 												// If cross-domain
+		u="proxy.php?url="+u;												// Add proxy
+
+	this.kmlLayers.push(new ol.layer.Vector({  source: new ol.source.KML({	// New layer
+							title: "LAYER-"+this.kmlLayers.length,			// Set name
+				   			projection: ol.proj.get(mps.curProjection),		// Set KML projection
+				    		url:u,											// URL
+				  			visible:false									// Hide it
+				  			})
+						}));
+
+	map.addLayer(this.kmlLayers[this.kmlLayers.length-1]);					// Add to map	
+
+	this.kmlLayers[this.kmlLayers.length-1].getSource().once("change",function() {	// WHEN KML IS LOADED						
+       	mps.loadCounter--; 													// Dec
+		this.forEachFeature(function(f) {									// For each feature in KML
+			if ((f.getGeometry().getType() == "Point") && f.get("name")){	// If a marker with a label
+				var sty=new ol.style.Style({								// Add style
+			      image: new ol.style.Icon( { src: "img/marker.png"	}),		// Add icon
+			      text:	new ol.style.Text( {								// Text style
+				    	textAlign: "left", textBaseline: "middle",			// Set alignment
+				    	font: "bold 14px Arial",							// Set font
+				    	text: f.get("name"),								// Get label
+				   	 	fill: new ol.style.Fill({color: "#fff" }),			// Set color
+						stroke: new ol.style.Stroke( { color: "#000",width: 1 }),	// Set edge		   
+				    	offsetX: 16											// Set offset
+				 		})
+					});
+					f.setStyle(sty);										// Set style to show label	
+					}
+				});
+		});
+
+}
+
+
 TSMap.prototype.MakeMapImage=function(mob) 								// ADD MAP IMAGE TO PROJECT
 {    
     mob.mapImage=new MapImage(mob);											// Alloc mapimage obj
 
 	function MapImage(mob) {												// MAPIMAGE CONSTRUCTOR
+	    
 	    this.img=new Image();												// Alloc image
 		
 		function progress() {												// SHOW LOAD PROGRESS
@@ -234,15 +294,16 @@ TSMap.prototype.MakeMapImage=function(mob) 								// ADD MAP IMAGE TO PROJECT
        		if (mps.loadCounter)											// If stuff to load
  				str=mps.loadCounter+" maps to load";						// Set progress
  			$("#loadProgress").text(str);									// Show status
-        	}					
+         	}					
 
 	    this.img.onload=progress;											// Add handler to remove from count after loaded
         this.img.onerror=progress;											// Add handler to remove from count if error
         this.imgWidth;	 this.imgHeight;									// Set size, if any
-        this.n=mob.north-0;													// Set bounds
-        this.s=mob.south-0;
-        this.e=mob.east-0;
-        this.w=mob.west-0;
+        var v=mob.georef.split(",");										// Split into parts
+        this.n=v[0]-0;														// Set bounds
+        this.s=v[1]-0;
+        this.e=v[2]-0;
+        this.w=v[3]-0;
         var ne = ol.proj.transform([this.e, this.n], 'EPSG:4326', mps.curProjection);	// Project
         var sw = ol.proj.transform([this.w, this.s], 'EPSG:4326', mps.curProjection);
         this.north = ne[1];
@@ -252,11 +313,8 @@ TSMap.prototype.MakeMapImage=function(mob) 								// ADD MAP IMAGE TO PROJECT
         this.centerXCoord = this.w + (Math.abs(this.e - this.w) / 2);
         this.centerYCoord = this.s + (Math.abs(this.n - this.s) / 2);
         this.center=ol.proj.transform([this.centerXCoord, this.centerYCoord], 'EPSG:4326', mps.curProjection);	// Get center
-        this.rotation=mob.rotation*-1;										// Reverse direction
-		if (mob.med)														// If a medium available
-			this.img.src=mob.med;											// Set url
-		else if (mob.url)													// If a large
-			this.img.src=mob.url;											// Set url
+        this.rotation=v[4]*-1;												// Reverse direction
+		this.img.src=mob.marker;											// Set url
   	}
 	
 MapImage.prototype.drawImage=function(alpha)                   			// DRAW IMAGE
@@ -311,16 +369,14 @@ TSMap.prototype.CreateCanvasLayer=function()							// CREATE CANVAS LAYER
     map.addLayer(this.canvasLayer);											// Add layer to map
 }
 
-TSMap.prototype.DrawMapImages=function()								// DRAW OL MAPS
+TSMap.prototype.DrawMapImages=function()								// DRAW OL IMAGES
 {
 	var i,m;
-	if (this.canvasContext && map.mobs) {  									// If a canvas up      
+	if (this.canvasContext && sd.mobs) {  									// If a canvas up      
 		this.canvasContext.clearRect(0,0,this.canvasWidth,this.canvasHeight);	// Clear canvas
    		for (i=0;i<sd.mobs.length;i++) {									// For each mob
             m=sd.mobs[i];													// Get ptr
- //           if (m.type != "map" || this.sh.mobVis[i] == 0)					// If not a visible map
-  //              continue;													// Skip it
-            if (m.mapImage)													// If an image alloc'd
+            if (m.mapImage && m.vis)										// If an image alloc'd amd visible
            		m.mapImage.drawImage(100);   								// Draw it   
             }
         }
@@ -419,7 +475,6 @@ TSMap.prototype.DrawMapImages=function()								// DRAW OL MAPS
 		$("#splashDiv").animate({ opacity:0},2000);								// Hide logo
 		$("#showDiv").animate({ opacity:1},4000, function() {					// Show interface
 				ResizePanes();													// Resize panes
-				Draw();
 				});				
 		$(window).resize(ResizePanes);											// Dynamic resizing
 		mps=new TSMap;

@@ -85,7 +85,7 @@ SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
 		}
 
 	this.VideoDuration=function() {											// GET CLIP DURATION
-   		return (shivaLib.player.duration());								// Get duration
+    		return (shivaLib.player.duration());								// Get duration
 		}
 
 	this.VideoVolume=function(vol) {										// SET VOLUME

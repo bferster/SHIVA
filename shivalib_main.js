@@ -116,10 +116,6 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
 			obj="d3.select";												// Object to test for
 			lib="d3.v3.min.js";  											// Lib to load
            	break;
-		case "Video": 														// Popcorn
-			obj="Popcorn.smart";											// Object to test for
-			lib="popcorn-complete.min.js";  								// Lib to load
-          	break;
 		case "Map": 														// Google maps		
   			obj="google.maps.Map";											// Object to test for
         	lib="//maps.googleapis.com/maps/api/js?sensor=false&callback=shivaJSLoaded"; 		// Lib to load

@@ -50,7 +50,7 @@
 	var props={
 		dataSourceUrl: 				{	def:'zDZFcDGpL4U', 	opt:'string',			des:'Source of video'}, 
 		start: 						{	def:'0:0', 			opt:'string',			des:'Starting time (m:s)'}, 
-		end: 						{	def:'', 			opt:'string',			des:'Ending time (m:s)'}, 
+		end: 						{	def:'', 			opt:'hidden',			des:'Ending time (m:s)'}, 
 		autoplay: 					{	def:'false', 		opt:'true|false',		des:'Auto-play?'}, 
 		volume: 					{	def:'50', 			opt:'number',			des:'Audio volume'}, 
 		height:		 				{	def:'366', 			opt:'number',		 	des:'Height of player'}, 
@@ -123,6 +123,37 @@
 			e.source.postMessage("GetType="+shivaGroup,"*");
 		else if (e.data.indexOf("PutJSON") == 0)
 			ReEdit($.parseJSON(e.data.substr(8)));
+		else if (e.origin.match(/vimeo/i)) {									// From vimeo
+    		var ev=$.parseJSON(e.data);											// Parse json
+			var o=shivaLib.playerOps;											// Point at player object
+			if (ev.event == "playProgress") {									// If playing			
+				o.playerCurTime=ev.data.seconds;								// Set current time
+				}
+			else if (ev.method == "getDuration") {								// If duration	
+   				o.playerTRT=ev.value;											// Get duration
+ 				}
+ 			else if (ev.method == "getVideoHeight") {							// If height	
+ 				o.playerHgt=ev.value;											// Set it
+ 				if (o.playerWid)												// If have both parts
+ 					o.playerAspect=o.playerHgt/o.playerWid;						// Calc asp		
+				}
+			else if (ev.method == "getVideoWidth") {							// If width	
+ 				o.playerWid=ev.value;											// Set it
+ 				if (o.playerHgt)												// If have both parts
+ 					o.playerAspect=o.playerHgt/o.playerWid;						// Calc asp		
+				}
+ 			else if (ev.event == "ready"){										// If ready			
+	 			var f=$("#vplayer");											// Point at iframe
+				f[0].contentWindow.postMessage("{\"method\":\"addEventListener\",\"value\":\"play\"}","*");
+				f[0].contentWindow.postMessage("{\"method\":\"addEventListener\",\"value\":\"pause\"}","*");
+ 				f[0].contentWindow.postMessage("{\"method\":\"addEventListener\",\"value\":\"playProgress\"}","*");
+ 				f[0].contentWindow.postMessage("{\"method\":\"getVideoHeight\"}","*");
+ 				f[0].contentWindow.postMessage("{\"method\":\"getVideoWidth\"}","*");
+ 				f[0].contentWindow.postMessage("{\"method\":\"getDuration\"}","*");
+ 				o.playerCurTime=0;
+ 				shivaLib.RunPlayer("ready");									// Show status
+				}
+		}	
 	}
  
 	function Draw(mode)
@@ -134,11 +165,7 @@
 
 	function SaveData(mode)
 	{
-		var re=/id="kaltura_([^"]+)"/;
-		var v=re.exec($("#propInput0").val());
-		if (v)	
-			$("#propInput0").val("kaltura_"+v[1])
-
+		$("#propInput0").val(GetKalturaDirectLink($("#propInput0").val()));
 		var n=$("#shivaNotesTbl tr").length;						
 		if (n) {
 			var str="";
@@ -149,6 +176,28 @@
 		return shivaLib.SaveData(mode,shivaGroup,null,props);
 	}	
 
+	function GetKalturaDirectLink(url) 											// GET DRECT LINK TO KALTURA MEDIA
+	{
+			if (!url)																// If no url
+				return "";															// Return null
+			if (!url.match(/kaltura_player/))										// Not Kaltura
+				return url;															// Return original
+			var mid=0;																// Media id
+			var pid=2003471;														// Collab partner id
+			var flv=301971;															// Collab video flavor
+			if (url.match(/<object/i)) {											// Object-style embed code
+				mid=url.match(/kaltura_player_([^"]+)/i)[1];						// Get media id
+				url="//www.kaltura.com/p/"+pid+"/sp/0/playManifest/entryId/"+mid+"/format/url/flavorParamId/"+pid+"/video.mp4"
+				}
+			else if (url.match(/<iframe/i)) {										// Iframe-style embed code
+				pid=url.match(/partner_id\/(\d+)/i)[1];								// Get partner id
+				mid=url.match(/entry_id=([^&]+)/)[1];								// Get media id
+				flv="0_ithj599o";													// MP4 used by mediabase
+				url="//cfvod.kaltura.com/pd/p/"+pid+"/sp/"+pid+"00/serveFlavor/entryId/"+mid+"/v/2/flavorId/"+flv+"/name/a.mp4";
+				}
+			return url;																// Return converted url
+	}
+
 	function ReEdit(jsonData)
 	{
 		shivaLib.ReEdit(jsonData,props);
@@ -157,19 +206,14 @@
 
 	function ShowHelp(att)
 	{
-		if (shivaLib.player){
-			if (shivaLib.VideoDuration()) {
-				var str=Math.floor(shivaLib.player.duration()/60)+":";
-				str+=Math.ceil(shivaLib.VideoDuration()%60);	
-				$("#propInput7").val(str);
-				}
-			}
+		var t;
+		if ((t=shivaLib.VideoDuration()) != -1) 
+			$("#propInput7").val(Math.floor(t/60)+":"+Math.ceil(t%60));
 		if (att == "startup") 
 			$("#helpDiv").html("<br/><p class='pb'><br/>Built by SHANTI<br/>The University of Virginia</p>");
 		else
 			shivaLib.ShowHelp(att,helpText);
 	}	
-
 
 	function SetAttributes()
 	{

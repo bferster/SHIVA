@@ -2,196 +2,292 @@
 //  SHIVALIB VIDEO
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-SHIVA_Show.prototype.DrawVideo=function() 												//	DRAW VIDEO
+SHIVA_Show.prototype.DrawVideo=function() 										//	DRAW VIDEO
 {
-	var v,t,type="YouTube";
 	var options=this.options;
-//	options.dataSourceUrl="http://player.vimeo.com/video/17853047"; 
+//	options.dataSourceUrl="17853047"; 
 //	options.dataSourceUrl="http://www.primaryaccess.org/music.mp3";	
-	var container=this.container;
-	var con="#"+container;
-	var id=options.dataSourceUrl;
-	if (typeof(Popcorn) != "function")
-		return;
-	if (typeof(Popcorn.smart) != "function")
-		return;
-	var base="http://www.youtube.com/watch?autoplay=0&controls=1&v=";
-	
+//	options.dataSourceUrl="//www.kaltura.com/p/2003471/sp/0/playManifest/entryId/1_c7z7zuiv/format/url/flavorParamId/2003471/video.mp4";
+	var con="#"+this.container;
 	$(con).width(options.width);
 	$(con).height(options.height);
-	if ((options.dataSourceUrl.match(/vimeo/)) || (!isNaN(options.dataSourceUrl)))
-		base="http://vimeo.com/",type="Vimeo";
-	else if (options.dataSourceUrl.match(/kaltura/)) {
-		var s=options.dataSourceUrl.indexOf("kaltura_player_");
-		var flavor=487061;		// Was 301951
-		id=options.dataSourceUrl.substring(s+15);
-		id="https://www.kaltura.com/p/2003471/sp/0/playManifest/entryId/"+id+"/format/url/flavorParamId/"+flavor+"/protocol/https/video.mp4"
-		base="";
-		type="Kaltura";
-		}
-	else if ((options.dataSourceUrl.match(/http/g)) && (!options.dataSourceUrl.match(/youtube/g)))
-		base="",type="HTML5";
-	if (this.player) {
-    	this.player.destroy();
-    	$(con).empty();
-    	this.player=null;
-    	}
-	this.player=Popcorn.smart(con,base+id);
-	this.player.controls(true);
-	this.player.smartPlayerType=type;
-	this.player.media.src=base+id;
-
-	this.VideoCue=function(mode, time, callback, num) {						// SET VIDEO CUE
-		if (mode == "add") {												// If adding a new cue
-			shivaLib.player.cue(time,callback);								// Add end cue
-			shivaLib.player.numCues++;										// Add to count
+	
+	var o=this.playerOps={};													// Holds options
+	o.playerAuto=options.autoplay;												// Autoplay?
+	o.playerStart=o.playerEnd=0;												// Start/end
+	o.playerVolume=options.volume;												// Default volume
+	o.playerSpeed=1;
+	o.playerAspect=.5625;
+	o.playerControls="true";
+	o.player=null;																// Holds player object
+	o.playerNow=0;																// Current time in secs
+	o.playerMode="empty";														// State of player
+	o.playerType="";															// Type of player
+	o.isMobile=false;															// Flag for mobile devices
+	o.playerSource=options.dataSourceUrl;										// Source
+	if (!o.playerSource)		
+		return;																	// Quit if missing
+	if (options.start)															// Start defined
+		o.playerStart=shivaLib.TimecodeToSeconds(options.start);				// Convert tc -> secs
+	if (options.end)															// End defined
+		o.playerEnd=shivaLib.TimecodeToSeconds(options.start);					// Convert tc -> secs
+	
+	if (o.playerSource.match(/\/\//i)) {										// If HTML5
+			if (this.player && (o.playerType == "html5")) {						// Player not active loaded
+				if (this.player.currentSrc.indexOf(o.playerSource) == -1) {		// Different clip
+					var base=o.playerSource.match(/(.*)\.[^.]+$/i)[1];			// Extract base
+					if (o.playerSource.match(/\.mp3/i)) 						// If audio
+						this.player.src=base+".mp3";							// MP3 Source
+					else{														// VIDEO
+						this.player.src=base+".mp4";							// MP4 Source
+						this.player.src=base+".ogg";							// OGG Source
+						this.player.src=base+".webm";							// WEBM Source
+						}
+					this.player.load();											// Load it
+					}
+				}
+			else{
+				o.playerType="html5";											// Set type
+				this.RunPlayer("init");											// Init player
+				}
 			}
- 		else if (mode == "delete") {										// If removing them
-			for (var i=0;i<shivaLib.player.numCues;++i)						// For each cue
- 				shivaLib.player.removeTrackEvent(this.player.getLastTrackEventId()); // Remove last
-			shivaLib.player.numCues=0;										// Reset count
+		else if (!isNaN(o.playerSource)) {										// If Vimeo
+			o.playerType="vimeo";												// Set type
+			this.RunPlayer("init");												// Init player
 			}
-  		}
-
-	
-	if (options.end) {
-		v=options.end.split(":");
-		if (v.length == 1)
-			v[1]=v[0],v[0]=0;
-    	this.VideoCue("add",Number(v[0]*60)+Number(v[1]),function() { 
-     		this.pause()
-			shivaLib.SendShivaMessage("ShivaVideo=done");
-    		});
-    	}
-
-////////////////////////// VIDEO WRAPPER ///////////////////////////////////////////////////
-
-	this.VideoPlay=function(time) {											// PLAY A CLIP
-		if (time != undefined) {											// If a time set
-			shivaLib.player.play();											// Start it playing first for some unknown reason
-			time=""+time;													// Cast to string
- 			if (time.match(/:/))											// If a timecode
- 				time=shivaLib.TimecodeToSeconds(time);						// Convert to seconds
+		else{																	// If YouTube
+			o.playerType="youtube";												// Set type
+			if (this.player) {													// Player active 
+				if (!this.player.pauseVideo)	{								// If not YT player set
+					if (YT.Player)												// If library is loaded
+						this.RunPlayer("init");									// Re-init
+					else{														// Load YT api
+						var tag=document.createElement('script');				// Create script
+						tag.src="//www.youtube.com/iframe_api";					// Set api url
+						var firstScriptTag=document.getElementsByTagName('script')[0];	// Find 1st script
+						firstScriptTag.parentNode.insertBefore(tag,firstScriptTag);		// Load
+						}
+					}
+				else{															// Player is active
+					if (this.player.getVideoUrl().indexOf(o.playerSource) == -1) // Different clip
+						player.loadVideoById(o.playerSource);					// Reload clip
+					else
+						this.player.seekTo(o.playerStart);						// Seek to start point
+					if (o.playerAuto == "true")									// If autoplay
+						this.player.playVideo();								// Play video
+					}
+				}
+			else{																// API not loaded yet
+				var tag=document.createElement('script');						// Create script
+				tag.src="//www.youtube.com/iframe_api";							// Set api url
+				var firstScriptTag=document.getElementsByTagName('script')[0];	// Find 1st script
+				firstScriptTag.parentNode.insertBefore(tag,firstScriptTag);		// Load
+				}
 			}
-		shivaLib.player.play(time);											// Send timecode
-		}
+		shivaLib.RunPlayer("resize");											// Size player
+		shivaLib.RunPlayer("volume",o.playerVolume);							// Set volume
+		shivaLib.VideoNotes();													// Show notes if active
+}																				// End DrawVideo() closure
 
-	this.VideoPause=function() {											// PAUSE A CLIP
-   		shivaLib.player.pause();											// Send pause
-		}
-	
-	this.VideoPaused=function() {											// IS CLIP PAUSED?
-   		return (shivaLib.player.paused());									// Get state
-		}
-
-	this.VideoDuration=function() {											// GET CLIP DURATION
-    		return (shivaLib.player.duration());								// Get duration
-		}
-
-	this.VideoVolume=function(vol) {										// SET VOLUME
-   		shivaLib.player.volume(vol);										// Send pause
-		}
-
-	this.VideoLoad=function(clip) {											// LOAD A CLIP
-   		shivaLib.player.load();												// Send pause
-		}
-	
-	this.VideoMediaHeight=function() {										// GET MEDIA HEIGHT
-  		return (shivaLib.player.media.clientHeight);						// Return height
-  		}
-
-	this.VideoTime=function(time) {											// GET/SET CURRENT TIME
- 		if (time != undefined) {											// If setting time
- 			time=""+time;													// Cast to string
- 			if (time.match(/:/))											// If a timecode
- 				time=shivaLib.TimecodeToSeconds(time);						// Convert to seconds
-		   	shivaLib.player.currentTime(time-0);							// Send timecode
-			}
-		else																// Getting time
-			time=shivaLib.player.currentTime();								// Get time
-		return(time);														// Return time
-	}
-
-
-	this.VideoEvent=function(mode, type, callback) {						// SET VIDEO EENT
-		if (mode == "add") 													// If adding a new cue
-			shivaLib.player.on(type,callback);								// Add event listener
-		else																// Remove it
-			shivaLib.player.off(type,callback);								// Remove event listener
-		}
-		
-////////////////////////// EVENTS ///////////////////////////////////////////////////
-	
-	this.VideoEvent("add","timeupdate",drawOverlay);						// Draw overlay when time changes
-	this.VideoEvent("add","loadeddata",onVidLoaded);						// Call when video is loaded
-	this.VideoEvent("add","ended",function(){ shivaLib.SendShivaMessage("ShivaVideo=done")});	// When video plays til end
-	this.VideoEvent("add","playing",function(){ shivaLib.SendShivaMessage("ShivaVideo=play")});	// When video starts to play
-	this.VideoEvent("add","pause",function(){ shivaLib.SendShivaMessage("ShivaVideo=pause")});	// When video is paused
-
-////////////////////////// CALBACKS ///////////////////////////////////////////////////
-
- 	function onVidLoaded()	{
-		shivaLib.SendReadyMessage(true);									// Ready										
-		var v=shivaLib.options.start.split(":");
-		if (v.length == 1)
-			v[1]=v[0],v[0]=0;
-    	var time=Math.max(Number(v[0]*60)+Number(v[1]),.25);
-   		shivaLib.VideoTime(time);
-  		shivaLib.VideoVolume(shivaLib.options.volume/100);
-	   	if (shivaLib.options.autoplay == "true")
-    		shivaLib.VideoPlay();
-    	else
-     		shivaLib.VideoPause();
-		shivaLib.VideoNotes();
- 		shivaLib.SendShivaMessage("ShivaVideo=ready");
-   		setInterval(onVideoTimer,400);	
-    	}
-
-  	function onVideoTimer(e) {											// VIDEO TIMER HANDLER
-		if ($("#shivaNotesDiv").length) {									// If open
-			var t,i,j,next;
-			var now=shivaLib.VideoTime();									// Get current time
-			for (i=0;i<500;++i) {											// Loop
-				if (!$("#ntc-"+i).length)									// If no more                                  
-					break;													// Quit
-				$("#ntc-"+i).css("color","#009900");						// Clear it
-	        	t=shivaLib.TimecodeToSeconds($("#ntc-"+i).text());			// Convert to seconds      
-				if (now >= t) {												// Post start
-	        		next=shivaLib.TimecodeToSeconds($("#ntc-"+(i+1)).text()); // Next tc in secs    
-					if (now < next) {										// If before next
-						$("#ntc-"+i).css("color","#ff0000");				// Highlight it
-			            break;                                         		// Quit
-	            		}
-       				}
-       			}
-       		}
-	}
-	
-  	function drawOverlay()	{											// ON TIME CHANGE										
-		if (!$("#shivaDrawPaletteDiv").length)								// If not drawing
-   			shivaLib.DrawOverlay();											// Refresh overlay
-   		}		
+function onYouTubeIframeAPIReady() 											// YOUTUBE PLAYER READY
+{   
+	shivaLib.RunPlayer("init");													// Init player								
 }
-  
-SHIVA_Show.prototype.VideoActions=function(msg)							// REACT TO SHIVA ACTION MESSAGE
+
+SHIVA_Show.prototype.RunPlayer=function(what, param, param2)				//	DRAW VIDEO
 {
-	var v=msg.split("|");													// Split msg into parts
-	if (v[0] == "ShivaAct=resize") { 										// RESIZE
-		if (v[1] == "100") {												// If forcing 100%
-			$("#containerDiv").width("100%");								// Set container 100%
-			$("#containerDiv").height("100%");								// Set container 100%
+		var i,str;
+		var o=this.playerOps;													// Point at options
+		var con="#"+this.container;
+		if ((what == "play") || (what == "jump")) {								// Play/jump
+			if ((o.playerMode == "empty") && o.isMobile)						// Mobiles need user to initiate touch before controlled play
+				return;															// Quit
+			o.playerMode="play";												// Set mode
+ 			if (param != undefined) {											// If playing to a time
+				if ((""+param).match(/:/))										// In tc format
+					param=TimecodeToSeconds(param);								// Convert to secs
+				o.playerNow=param;												// Set cur time
+				}	
+			if (!this.player) {													// If no player yet
+				return;															// Quit
+				}
+			if (o.playerType == "youtube") {									// If YouTube
+				this.player.seekTo(o.playerNow,true);							// Cue
+				if (o.playerMode == "play")			this.player.playVideo();	// Play
+				else if (o.playerMode == "pause")	this.player.pauseVideo();	// Pause
+				}
+			else if (o.playerType == "vimeo") {									// If Vimeo
+				
+				this.player.contentWindow.postMessage("{\"method\":\"seekTo\",\"value\":\""+o.playerNow+"\"}","*")
+				if (o.playerMode == "play")										// Play
+					this.player.contentWindow.postMessage("{\"method\":\"play\"}","*");	// Send
+				if (o.playerMode == "pause")									// Pause
+					this.player.contentWindow.postMessage("{\"method\":\"pause\"}","*");	// Send
+ 				}
+			else if (o.playerType == "html5") {									// If HTML5
+				if (param != undefined) 										// If playing to a time
+					this.player.currentTime=o.playerNow;						// Cue
+				if (o.playerMode == "play")  	this.player.play(); 			// Play
+				if (o.playerMode == "pause")	this.player.pause();			// Pause
+				}
+			if (o.playerMode == "play")	o.playerStarted=o.playerNow;			// Save start point
+			
 			}
-		}
-	else if (v[0] == "ShivaAct=play") {										// PLAY
-		this.VideoPlay();													// Play from current spot
-		if (v[1] != undefined)												// If a time set
-			this.Videoplay(v[1]);											// Play from then
+		else if ((what == "scrub") || (what == "seek"))  {						// Scrub
+			if ((o.playerMode == "empty") && o.isMobile)						// Mobiles need user to initiate touch before controlled play
+				return;															// Quit
+			o.playerNow=param;													// Set now
+			if (!this.player) {													// If no player yet
+				return;															// Quit
+				}
+			if (o.playerType == "youtube") 										// If YouTube
+				this.player.seekTo(o.playerNow,true);							// Cue
+			else if (o.playerType == "vimeo") 									// If Vimeo
+				this.player.contentWindow.postMessage("{\"method\":\"seekTo\",\"value\":\""+o.playerNow+"\"}","*");
+			else if (o.playerType == "html5") 									// If HTML5
+				this.player.currentTime=o.playerNow;							// Cue
+				}
+		else if (what == "pause") {												// Pause
+			$("#playBut").attr("src","images/playbut.gif");						// Show pause but
+			o.playerMode="pause";												// Set mode
+			if (!this.player)	return;											// If no player yet, quit
+			if (o.playerType == "youtube") 										// If YouTube
+				this.player.pauseVideo();										// Pause
+			else if (o.playerType == "vimeo") 									// If Vimeo
+				this.player.contentWindow.postMessage("{\"method\":\"pause\"}","*");	// Send
+ 			else if (o.playerType == "html5") 									// If HTML5
+				this.player.pause(); 											// Pause
 			}
-	else if (v[0] == "ShivaAct=pause")										// PAUSE
-		this.VideoPause();													// Pause
-	else if (v[0] == "ShivaAct=load") {										// LOAD
-		this.VideoLoad(v[1]); 												// Load
-		}
+		else if (what == "time") {												// Time
+			if (!this.player)	return;											// If no player yet, quit
+			if (o.playerType == "youtube") 										// If YouTube
+				return this.player.getCurrentTime();							// Return time			
+			else if (o.playerType == "vimeo") 									// If Vimeo
+				return o.playerCurTime;											// Return time			
+			else if (o.playerType == "html5") 									// If HTML5
+				return this.player.currentTime;									// Return time			
+			}
+
+		else if (what == "volume") {											// Volume
+			if (!this.player)	return;											// If no player yet, quit
+			if (o.playerType == "youtube") 										// If YouTube
+				this.player.setVolume(o.playerVolume-0);						// Set it
+			else if (o.playerType == "vimeo") 									// If Vimeo
+				this.player.contentWindow.postMessage("{\"method\":\"setVolume\",\"value\":\""+o.playerVolume/100+"\"}","*"); // Send
+			else if (o.playerType == "html5") 									// If HTML5
+				this.player.volume=o.playerVolume/100;							// Set
+			}
+		else if (what == "speed") {												// Speed
+			if (!this.player)	return;											// If no player yet, quit
+			s=Math.max(.25,o.playerSpeed/50);									// Speed set .25 to 2
+			if (o.playerType == "youtube") 										// If initted YouTube
+				this.player.setPlaybackRate(s);									// Set speed
+			else if (o.playerType == "html5") 									// If HTML5
+				this.player.playbackRate=s;										// Set speed
+			}
+		else if (what == "resize") {											// Resize
+			if (!this.player)	return;											// If no player yet, quit
+			var w=$(con).width();												// Get width
+			$("#vplayer").width(w);												// Set width
+			$("#vplayer").height(w*o.playerAspect);								// Set height
+			}
+		else if (what == "ready") {												// When ready
+			shivaLib.RunPlayer("pause");										// Pause
+			shivaLib.RunPlayer("resize");										// Size player
+			if (o.playerAuto == "true")	{										// If autoplay
+				shivaLib.RunPlayer("play",o.playerStart);						// Seek
+				}
+			else if (o.playerStart) {											// Normal pause start
+				shivaLib.RunPlayer("scrub",o.playerStart);						// Seek
+				shivaLib.RunPlayer("pause");									// Pause
+				}
+	 		shivaLib.SendReadyMessage(true);									// Ready										
+			}
+
+		else if (what == "init") {												// Init player
+			if (o.playerType == "youtube") {									// If YouTube
+				$(con).html("<div id='vplayer'></div>");						// Add holder div
+	       		var pc=o.playerControls == "true" ? 1 : 0;						// Set player controls?
+	       		this.player=new YT.Player("vplayer", {							// Init player
+					playerVars:{ modestbranding:1, controls:pc, 				// Settings	
+						disablekb:1, rel:0, showinfo:0, html5:1, autoplay:1 },
+	          		videoId: o.playerSource,									// Set source
+	         	 	events:{													// Add event handlers
+	            		"onReady": function(s) { shivaLib.RunPlayer("ready") }	// When ready
+		 	   			}});
+					}
+			else if (o.playerType == "vimeo") {									// If Vimeo
+				str="<iframe id='vplayer' src='//player.vimeo.com/video/";		// Iframe start
+				str+=o.playerSource;											// Add source
+				str+="?api=1&player_id=vplayer' width='500' height='281' frameborder='0' webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>";
+				$(con).html(str);												// Add vimeo iframe
+		       	this.player=$("#vplayer")[0];										// Point to iframe
+				}
+			else if (o.playerType == "html5") {									// If HTML5
+ 				$(con).html("");												// Add video tag
+				var base=o.playerSource.match(/(.*)\.[^.]+$/i)[1];				// Extract base
+				str="<video id='vplayer' width='100%' height='100%'";			// Video tag
+				if ((o.playerControls == "true") || o.isMobile)					// If has controls or mobile
+					str+= " controls";											// Add native controls to player
+				str+=">";														// Close tag
+				if (o.playerSource.match(/\.mp3/i)) {							// If audio
+					str+="<source src='"+base+".mp3'  type='audio/mp3'>";		// MP3 Source
+					}
+				else{															// VIDEO
+					str+="<source src='"+base+".mp4'  type='video/mp4'>";		// MP4 Source
+					str+="<source src='"+base+".ogg'  type='video/ogg'>";		// OGG Source
+					str+="<source src='"+base+".webm' type='video/webm'>";		// WEBM Source
+					}
+				str+="</video>"
+				$(con).html(str);												// Add video tag
+  				var myVid=document.getElementById("vplayer");					// Point ar player	
+ 				
+ 				
+ 				myVid.onloadstart=function() {									// When loaded
+ 					shivaLib.player=$("#vplayer")[0];							// Point to player
+ 					shivaLib.RunPlayer("ready");								// Set up player		
+					};
+								
+				myVid.oncanplay=function() {									// When ready
+       				o.playerAspect=shivaLib.player.videoHeight/shivaLib.player.videoWidth;	// Set aspect 				
+ 					};
+
+ 				myVid.onended= function() {										// When done
+  					shivaLib.RunPlayer("pause");								// Pause
+ 					};
+
+				myVid.onplay= function() {										// When playing
+					$("#playBut").attr("src","images/pausebut.gif");			// Show pause but
+ 						o.playerMode="play";									// Set mode
+					o.playerStarted=o.playerNow;								// Save start point
+					};
+
+				myVid.onpause= function() {										// When paused
+					$("#playBut").attr("src","images/playbut.gif");				// Show play but
+ 						o.playerMode="pause";									// Set mode
+   					};
+  		 		
+ 			  	myVid.addEventListener("loadstart",myVid.onloadstart);	 		// Add listener for safari
+ 		 		myVid.addEventListener("canplay",myVid.oncanplay);	 			// Add listener for safari
+			  	myVid.addEventListener("ended",myVid.onended);	 				// Add listener for safari
+ 			  	myVid.addEventListener("play",myVid.onplay);	 				// Add listener for safari
+ 			  	myVid.addEventListener("pause",myVid.onpause);	 				// Add listener for safari
+ 	    		}
+			}																	// End init
+ 	}																			// End closure
+   
+SHIVA_Show.prototype.VideoDuration=function()							//	GET VIDEO DURATION
+{
+	var o=this.playerOps;														// Point at options
+	if (!this.player)															// If not initted yet	
+		return -1;																// No time
+	if (o.playerType == "html5")  												// If HTML5 
+		return document.getElementById("vplayer").duration;						// Return duration											
+	else if (o.playerType == "vimeo")											// Vimeo
+		return o.playerTRT-0;													// Return duration		
+	else if (o.playerType == "youtube") 										// If YouTube
+		return this.player.getDuration();										// Return duration	
+	return -1;																	// No time
 }
   
 SHIVA_Show.prototype.TimecodeToSeconds=function(timecode) 				// CONVERT TIMECODE TO SECONDS
@@ -262,11 +358,11 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 					if (e.shiftKey)											// If shift key pressed
 						$("#"+e.target.id).text(shivaLib.SecondsToTimecode(shivaLib.VideoTime()));	// Set new time
 					else
-						shivaLib.VideoTime(shivaLib.TimecodeToSeconds(time));	// Cue player
+						shivaLib.RunPlayer("scrub",shivaLib.TimecodeToSeconds(time));	// Cue player
 					});
 			$("#ntc-"+i).dblclick(function(e){								// Add d-click handler
 				   	var time=$("#"+e.target.id).text();						// Get time
-					shivaLib.VideoPlay(time);								// Play
+					shivaLib.RunPlayer("play",time);						// Play
 					});
 			}
 		}
@@ -308,7 +404,7 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 			$("#shivaNotesTbl").append(str);								// Add row
 			$("#ntx-"+id).focus();											// Focus on new one
 			if ($("#notesPause").prop('checked') && !cap) 					// If checked and not capped
-				shivaLib.VideoPlay();										// Resume player
+				shivaLib.RunPlayer("play",shivaLib.RunPlayer("time"));		// Play
 			if (cap)														// If line is capped
 				$("#ntc-"+id).text($("#ntc-"+rowNum).text());				// Set to same time
 			}
@@ -321,23 +417,22 @@ SHIVA_Show.prototype.VideoNotes=function() 								//	ADD NOTES TO VIDEO
 				}			
 			}
 		else if (!$("#ntx-"+rowNum).val()) {								// A key and nothing in the field yet
-			$("#ntc-"+rowNum).text(shivaLib.SecondsToTimecode(shivaLib.VideoTime()));	// Set new time
+			$("#ntc-"+rowNum).text(shivaLib.SecondsToTimecode(shivaLib.RunPlayer("time")));	// Set new time
 			if ($("#notesPause").prop('checked')) 							// If checked
-				shivaLib.VideoPause();										// Pause player
+				shivaLib.RunPlayer("pause");								// Pause
 			
 			$("#ntc-"+rowNum).click(function(e){							// Add click handler
 				   	var time=$("#"+e.target.id).text();						// Get time
 					if (e.shiftKey)											// If shift key pressed
-						$("#"+e.target.id).text(shivaLib.SecondsToTimecode(shivaLib.VideoTime()));	// Set new time
+						$("#"+e.target.id).text(shivaLib.SecondsToTimecode(shivaLib.RunPlayer("time")));	// Set new time
 					else
-						shivaLib.VideoTime(shivaLib.TimecodeToSeconds(time));	// Cue player
+						shivaLib.RunPlayer("scrub",shivaLib.TimecodeToSeconds(time));	// Cue player
 					});
 			
 			$("#ntc-"+rowNum).dblclick(function(e){							// Add  d-click handler
 				   	var time=$("#"+e.target.id).text();						// Get time
-					shivaLib.VideoPlay(time);								// Play
+					shivaLib.RunPlayer("play",time);						// Play
 					});
 			}
 		});
 };
-

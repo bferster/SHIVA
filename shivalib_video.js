@@ -79,7 +79,7 @@ SHIVA_Show.prototype.DrawVideo=function() 										//	DRAW VIDEO
 				}
 			else{																// API not loaded yet
 */	
-				if (this.player)												// If it already exists				
+				if (this.player && player.destroy)))							// If it already exists				
 					player.destroy();											// Kill it
 				var tag=document.createElement('script');						// Create script
 				tag.src="//www.youtube.com/iframe_api";							// Set api url

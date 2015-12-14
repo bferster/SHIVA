@@ -1022,7 +1022,7 @@ this.player.src=base+".mp3";else{this.player.src=base+".mp4";this.player.src=bas
 this.player.load();}}
 else{o.playerType="html5";this.RunPlayer("init");}}
 else if(!isNaN(o.playerSource)){o.playerType="vimeo";this.RunPlayer("init");}
-else{o.playerType="youtube";if(this.player)
+else{o.playerType="youtube";if(this.player&&player.destroy)))
 player.destroy();var tag=document.createElement('script');tag.src="//www.youtube.com/iframe_api";var firstScriptTag=document.getElementsByTagName('script')[0];firstScriptTag.parentNode.insertBefore(tag,firstScriptTag);}
 shivaLib.RunPlayer("resize");shivaLib.RunPlayer("volume",o.playerVolume);shivaLib.VideoNotes();}
 function onYouTubeIframeAPIReady()

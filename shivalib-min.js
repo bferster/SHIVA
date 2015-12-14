@@ -1022,8 +1022,13 @@ this.player.src=base+".mp3";else{this.player.src=base+".mp4";this.player.src=bas
 this.player.load();}}
 else{o.playerType="html5";this.RunPlayer("init");}}
 else if(!isNaN(o.playerSource)){o.playerType="vimeo";this.RunPlayer("init");}
-else{o.playerType="youtube";if(this.player&&typeof(player.destroy)=="function")
-player.destroy();var tag=document.createElement('script');tag.src="//www.youtube.com/iframe_api";var firstScriptTag=document.getElementsByTagName('script')[0];firstScriptTag.parentNode.insertBefore(tag,firstScriptTag);}
+else{o.playerType="youtube";if(this.player){if(!this.player.pauseVideo){if(YT.Player)
+this.RunPlayer("init");else{var tag=document.createElement('script');tag.src="//www.youtube.com/iframe_api";var firstScriptTag=document.getElementsByTagName('script')[0];firstScriptTag.parentNode.insertBefore(tag,firstScriptTag);}}
+else{if(this.player.getVideoUrl().indexOf(o.playerSource)==-1)
+this.player.loadVideoById(o.playerSource);else
+this.player.seekTo(o.playerStart);if(o.playerAuto=="true")
+this.player.playVideo();}}
+else{var tag=document.createElement('script');tag.src="//www.youtube.com/iframe_api";var firstScriptTag=document.getElementsByTagName('script')[0];firstScriptTag.parentNode.insertBefore(tag,firstScriptTag);}}
 shivaLib.RunPlayer("resize");shivaLib.RunPlayer("volume",o.playerVolume);shivaLib.VideoNotes();}
 function onYouTubeIframeAPIReady()
 {shivaLib.RunPlayer("init");}

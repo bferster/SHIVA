@@ -57,7 +57,7 @@ SHIVA_Show.prototype.DrawVideo=function() 										//	DRAW VIDEO
 			}
 		else{																	// If YouTube
 			o.playerType="youtube";												// Set type
-			if (this.player) {													// Player active 
+/*			if (this.player) {													// Player active 
 				if (!this.player.pauseVideo)	{								// If not YT player set
 					if (YT.Player)												// If library is loaded
 						this.RunPlayer("init");									// Re-init
@@ -78,11 +78,14 @@ SHIVA_Show.prototype.DrawVideo=function() 										//	DRAW VIDEO
 					}
 				}
 			else{																// API not loaded yet
+*/	
+				if (this.player)												// If it already exists				
+					player.destroy();											// Kill it
 				var tag=document.createElement('script');						// Create script
 				tag.src="//www.youtube.com/iframe_api";							// Set api url
 				var firstScriptTag=document.getElementsByTagName('script')[0];	// Find 1st script
 				firstScriptTag.parentNode.insertBefore(tag,firstScriptTag);		// Load
-				}
+//				}
 			}
 		shivaLib.RunPlayer("resize");											// Size player
 		shivaLib.RunPlayer("volume",o.playerVolume);							// Set volume

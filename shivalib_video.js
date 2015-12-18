@@ -31,7 +31,6 @@ SHIVA_Show.prototype.DrawVideo=function() 										//	DRAW VIDEO
 		o.playerStart=shivaLib.TimecodeToSeconds(options.start);				// Convert tc -> secs
 	if (options.end)															// End defined
 		o.playerEnd=shivaLib.TimecodeToSeconds(options.start);					// Convert tc -> secs
-
 	
 	if (o.playerSource.match(/\/\//i) && !o.playerSource.match(/youtu.*be/)) {	// If HTML5 and not a Youtube link
 			if (this.player && (o.playerType == "html5")) {						// Player not active loaded

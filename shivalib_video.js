@@ -31,8 +31,9 @@ SHIVA_Show.prototype.DrawVideo=function() 										//	DRAW VIDEO
 		o.playerStart=shivaLib.TimecodeToSeconds(options.start);				// Convert tc -> secs
 	if (options.end)															// End defined
 		o.playerEnd=shivaLib.TimecodeToSeconds(options.start);					// Convert tc -> secs
+
 	
-	if (o.playerSource.match(/\/\//i)) {										// If HTML5
+	if (o.playerSource.match(/\/\//i) && !o.playerSource.match(/youtu.*be/)) {	// If HTML5 and not a Youtube link
 			if (this.player && (o.playerType == "html5")) {						// Player not active loaded
 				if (this.player.currentSrc.indexOf(o.playerSource) == -1) {		// Different clip
 					var base=o.playerSource.match(/(.*)\.[^.]+$/i)[1];			// Extract base
@@ -56,6 +57,11 @@ SHIVA_Show.prototype.DrawVideo=function() 										//	DRAW VIDEO
 			this.RunPlayer("init");												// Init player
 			}
 		else{																	// If YouTube
+			if (o.playerSource.match(/v=/i)) 									// Direct link
+				o.playerSource=o.playerSource.match(/v=(.+)/i)[1];				// Extract id
+			else if (o.playerSource.match(/youtu\.be/i)) 						// Share link
+				o.playerSource=o.playerSource.match(/youtu\.be\/(.+)/i)[1];		// Extract id
+
 			o.playerType="youtube";												// Set type
 			if (this.player) {													// Player active 
 				if (!this.player.pauseVideo)	{								// If not YT player set

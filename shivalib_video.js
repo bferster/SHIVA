@@ -32,7 +32,14 @@ SHIVA_Show.prototype.DrawVideo=function() 										//	DRAW VIDEO
 	if (options.end)															// End defined
 		o.playerEnd=shivaLib.TimecodeToSeconds(options.start);					// Convert tc -> secs
 	
-	if (o.playerSource.match(/\/\//i) && !o.playerSource.match(/youtu.*be/)) {	// If HTML5 and not a Youtube link
+	if (!isNaN(o.playerSource) || o.playerSource.match(/vimeo\.com/i)) {		// If Vimeo or simple number
+			o.playerType="vimeo";												// Set type
+			if (o.playerSource.match(/vimeo\.com\//i))							// A url or embed code
+				o.playerSource=o.playerSource.match(/vimeo\.com(\/video)*\/(\d*)\?*/i)[2];	// Extract id
+			trace(o.playerSource)
+			this.RunPlayer("init");												// Init player
+			}
+	else if (o.playerSource.match(/\/\//i) && !o.playerSource.match(/youtu.*be/)) {	// If HTML5 and not a Youtube link
 			if (this.player && (o.playerType == "html5")) {						// Player not active loaded
 				if (this.player.currentSrc.indexOf(o.playerSource) == -1) {		// Different clip
 					var base=o.playerSource.match(/(.*)\.[^.]+$/i)[1];			// Extract base
@@ -50,10 +57,6 @@ SHIVA_Show.prototype.DrawVideo=function() 										//	DRAW VIDEO
 				o.playerType="html5";											// Set type
 				this.RunPlayer("init");											// Init player
 				}
-			}
-		else if (!isNaN(o.playerSource)) {										// If Vimeo
-			o.playerType="vimeo";												// Set type
-			this.RunPlayer("init");												// Init player
 			}
 		else{																	// If YouTube
 			if (o.playerSource.match(/v=/i)) 									// Direct link

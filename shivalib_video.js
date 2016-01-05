@@ -35,8 +35,7 @@ SHIVA_Show.prototype.DrawVideo=function() 										//	DRAW VIDEO
 	if (!isNaN(o.playerSource) || o.playerSource.match(/vimeo\.com/i)) {		// If Vimeo or simple number
 			o.playerType="vimeo";												// Set type
 			if (o.playerSource.match(/vimeo\.com\//i))							// A url or embed code
-				o.playerSource=o.playerSource.match(/vimeo\.com(\/video)*\/(\d*)\?*/i)[2];	// Extract id
-			trace(o.playerSource)
+				o.playerSource=o.playerSource.match(/\d+/);						// Extract id
 			this.RunPlayer("init");												// Init player
 			}
 	else if (o.playerSource.match(/\/\//i) && !o.playerSource.match(/youtu.*be/)) {	// If HTML5 and not a Youtube link

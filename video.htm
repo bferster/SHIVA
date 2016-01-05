@@ -181,7 +181,7 @@
 			if (!url)																// If no url
 				return "";															// Return null
 			if (url.match(/vimeo\.com\//i))											// A Vimeo url or embed code
-				return url.match(/vimeo\.com(\/video)*\/(\d*)\?*/i)[2];				// Extract id
+				return url.match(/\d+/);												// Extract id
 			if (!url.match(/kaltura_player/))										// Not Kaltura
 				return url;															// Return original
 			var mid=0;																// Media id

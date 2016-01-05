@@ -1018,8 +1018,7 @@ SHIVA_Show.prototype.DrawVideo=function()
 return;if(options.start)
 o.playerStart=shivaLib.TimecodeToSeconds(options.start);if(options.end)
 o.playerEnd=shivaLib.TimecodeToSeconds(options.start);if(!isNaN(o.playerSource)||o.playerSource.match(/vimeo\.com/i)){o.playerType="vimeo";if(o.playerSource.match(/vimeo\.com\//i))
-o.playerSource=o.playerSource.match(/vimeo\.com(\/video)*\/(\d*)\?*/i)[2];trace(o.playerSource)
-this.RunPlayer("init");}
+o.playerSource=o.playerSource.match(/\d+/);this.RunPlayer("init");}
 else if(o.playerSource.match(/\/\//i)&&!o.playerSource.match(/youtu.*be/)){if(this.player&&(o.playerType=="html5")){if(this.player.currentSrc.indexOf(o.playerSource)==-1){var base=o.playerSource.match(/(.*)\.[^.]+$/i)[1];if(o.playerSource.match(/\.mp3/i))
 this.player.src=base+".mp3";else{this.player.src=base+".mp4";this.player.src=base+".ogg";this.player.src=base+".webm";}
 this.player.load();}}

@@ -695,7 +695,7 @@ SHIVA_Show.prototype.ColorPicker = function(mode, attr) {
 
 			if (str[str.length - 1] != ",")
 				str += ",";
-			if (str.match(/NaN/))
+			if (str.match(/NaN/))		
 				str="none";
 			inputBox.val(str);
 		}

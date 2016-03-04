@@ -1283,7 +1283,8 @@ self.setColor(color[0],color[1],color[2]);else
 self.setColor(0,0,0);}
 self.position_bar();}
 this.drawColors=function(color_HEX){if(mode!=0){var colors=inputBox.val().split(",");colors[cp_current]=color_HEX.slice(1);var boxChip=colors[cp_current];boxChip="#"+boxChip;inputBox.css('border-color',boxChip);inputBoxChip.css('background-color',boxChip);var str=colors.toString();if(str[str.length-1]!=",")
-str+=",";inputBox.val(str);}
+str+=",";if(str.match(/NaN/))
+str="none";inputBox.val(str);}
 else{var boxChip=color_HEX;inputBox.css('border-color',boxChip);inputBoxChip.css('background-color',boxChip);inputBox.val(boxChip.slice(1,boxChip.length));}
 Draw();}
 this.setColor=function(h,s,v){self.update("hue",h);self.update("saturation",s);self.update("brightness",v);self.drawColors(self.HSV_to_HEX(h,s,v));}

@@ -1021,7 +1021,11 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 		            	+(d.angle > Math.PI ? "rotate(180)" : "");		// Flip if over 180 degrees
 		     		 })
 		      	.style("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })	// Flip anchor is > 180 degrees
-		      	.text(function(d) { return nameByIndex.get(d.index); });
+		      	.text(function(d) { return nameByIndex.get(d.index); });  
+	           
+                g.append("title").text(function(d, i) {					// Adds mouse over title for nodes.
+                    return dataSet.nodes[d.index].info;
+              		});
 	
 			svg.selectAll(".chord")										// Add chords
 				.data(chord.chords)										// For each chord
@@ -1031,8 +1035,16 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 				.style("opacity",.67)
 			    .style("stroke", function(d) { return d3.rgb(cols[d.source.index%clen]).darker(); }) // Darker color edge 
 			    .style("fill",   function(d) { return options.fill == "false" ?  "none" : cols[d.source.index%clen] })	// Set fill color
-			    .attr("d", d3.svg.chord().radius(innerRadius));			// Position
-	
+			    .attr("d", d3.svg.chord().radius(innerRadius))			// Position
+	            .append("title").text(function(d, i) {
+	                 var nid1 = d.target.index,
+	                       nid2 = d.target.subindex,
+	                       rel = FindRelationship(nid1, nid2);
+                    return (typeof(rel.label) == "string") ? rel.label : false;
+                });
+
+
+
 			}															// End Chord
 
 	if (firstTime)														// If first time thru
@@ -1058,6 +1070,25 @@ function AddPopup(d)												// SHOW A POPUP
 		shivaLib.options.popupTime=2;									// Set default
 	$("#d3Popup").delay(shivaLib.options.popupTime*1000).fadeOut(400);	// Close after n seconds
 	}
+
+function FindRelationship(n1, n2) 
+{
+    var rel = {}
+	for (var dn in dataSet.edges) {
+		var edge = dataSet.edges[dn];
+		if ((edge.source == n1 && edge.target == n2)) {
+               rel.color = (edge.style in styles) ? styles[edge.style].col : false;
+               rel.label = dataSet.nodes[n1].name + " " + edge.style + " " + dataSet.nodes[n2].name;
+                break;
+           } else if ((edge.source == n2 && edge.target == n1)) {
+               rel.color = (edge.style in styles) ? styles[edge.style].col : false;
+               rel.label = dataSet.nodes[n2].name + " " + edge.style + " " + dataSet.nodes[n1].name;
+               break;
+          } 
+        }
+	return rel;
+}
+
 
 function DrawSVGShape(shape, size)									// DRAW A SHAPE
 {

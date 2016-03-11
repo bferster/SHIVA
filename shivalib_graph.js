@@ -939,12 +939,12 @@ SHIVA_Show.prototype.DrawGraph=function() 							//	DRAW GRAPH
 
 		else if (options.chartType == "Chord") {						// Chord graph
 			canPan=false;												// No pan/zoom
-			opHeight=opWidth;								// Got to be square
-			var outerRadius=opWidth/2;							// Radius
+			opHeight=opWidth;											// Got to be square
+			var outerRadius=opWidth/2;									// Radius
 			var innerRadius=outerRadius-options.padding;				// Real chart area
 	
 			var cols=[];												// Holds chart colors
-			if (options.sCol != "none") {								// Using a specified color set
+			if (options.sCol && (options.sCol != "none")) {				// Using a specified color set
 				var v=options.sCol.split(",");							// Get from optiona
 				for (i=0;i<v.length;++i)	cols.push("#"+v[i]);		// Add to array
 				}

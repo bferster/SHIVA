@@ -393,8 +393,9 @@ SHIVA_Show.prototype.SetAttributes=function(props,items,keepData)
 atts.push(o);if(keepData){oldData=new Array()
 for(i=0;i<atts.length;++i){if(atts[i]=="item")
 break;oldData.push($("#propInput"+i).val());}}
-$('#propertyTable tr:gt(0)').remove();for(i=0;i<atts.length;++i){o=atts[i];id="propInput"+i;var str="<tr style='height:28px'><td width='12'></td><td width='200' onClick='ShowHelp(this.innerHTML)'>"+props[o].des.split("::")[0];if((this.drupalMan)&&(o=="dataSourceUrl"))
-str+="&nbsp;&nbsp;<img src='databutton.gif' title='Click to find data set' style='vertical-align:bottom' onclick='shivaLib.GetDataFromManager(\"gdoc\",0)'/>";str+="</td><td></td><td>";if(props[o].opt=="query")
+$('#propertyTable tr:gt(0)').remove();for(i=0;i<atts.length;++i){o=atts[i];id="propInput"+i;var str="<tr style='height:28px'><td width='12'></td><td width='200' onClick='ShowHelp(this.innerHTML)'>"+props[o].des.split("::")[0];if(o=="dataSourceUrl")
+str+="&nbsp;&nbsp;&nbsp;<img src='gdrive.png' width='12' title='Load from Google Drive' style='vertical-align:bottom;cursor:pointer' onclick='shivaLib.GoogleDriveLoad(\"propInput"+i+"\")'>"
+str+="</td><td></td><td>";if(props[o].opt=="query")
 str+="<input type='password' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.QueryEditor(\""+id+"\")' id='"+id+"'/>";else if(props[o].opt=="advanced")
 str+="<input tabIndex='-1' onChange='Draw()' onFocus='shivaLib.SetAdvancedAttributes(\""+id+"\",\""+o+"\")' id='"+id+"'/>";else if((props[o].opt=="color")||(props[o].opt=="colors")){str+="<div style='max-height:26px'><input onChange='Draw()' style='position:relative;text-align:center;height:16px;top:2px; padding-left: 20px' id='"+id+"'/>";str+="<div style='position:relative;border:1px solid #999;height:10px;width:10px;top:-15px;left:8px;background-color:white'"
 if(props[o].opt=="colors")
@@ -426,8 +427,8 @@ str+="</div>";}}
 else{str+="<select id='"+id+"' onChange='Draw()' onFocus='ShowHelp(\""+props[o].des+"\")'>";for(j=0;j<v.length;++j){if(v[j])
 str+="<option>"+v[j]+"</option>";}
 str+="</select>";}}
-else
-str+="<input size='14' style='height:16px' onChange='Draw()' type='text' id='"+id+"' onFocus='ShowHelp(\""+props[o].des+"\")'/>";str+="<td width='12'></td ></td></tr>";$(str).appendTo("#propertyTable tbody")
+else{str+="<input size='14' style='height:16px' onChange='Draw()' type='text' id='"+id+"' onFocus='ShowHelp(\""+props[o].des+"\")'/>";}
+str+="<td width='12'></td ></td></tr>";$(str).appendTo("#propertyTable tbody")
 $("#"+id).val(props[o].def);if(keepData)
 $("#"+id).val(oldData[i]);else
 $("#"+id).val(props[o].def);if(props[o].opt=="color")
@@ -475,6 +476,8 @@ SHIVA_Show.prototype.GetDataFromManager=function(type,index)
 {if(type=="gdoc")
 window.parent.postMessage("dataSourceUrl","*");if(type=="kml")
 window.parent.postMessage("GetFile=KML="+index,"*");}
+SHIVA_Show.prototype.GoogleDriveLoad=function(id)
+{trace(id)}
 SHIVA_Show.prototype.QueryEditor=function(id)
 {if($("#propInput0").val())
 new SHIVA_QueryEditor($("#propInput0").val(),$("#"+id).val(),id,false);else

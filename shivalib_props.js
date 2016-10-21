@@ -237,8 +237,8 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 		o=atts[i];
 		id="propInput"+i;
    		var str="<tr style='height:28px'><td width='12'></td><td width='200' onClick='ShowHelp(this.innerHTML)'>"+props[o].des.split("::")[0];
-		if ((this.drupalMan) && (o == "dataSourceUrl")) 
-			str+="&nbsp;&nbsp;<img src='databutton.gif' title='Click to find data set' style='vertical-align:bottom' onclick='shivaLib.GetDataFromManager(\"gdoc\",0)'/>";
+		if (o == "dataSourceUrl") 
+			str+="&nbsp;&nbsp;&nbsp;<img src='gdrive.png' width='12' title='Load from Google Drive' style='vertical-align:bottom;cursor:pointer' onclick='shivaLib.GoogleDriveLoad(\"propInput"+i+"\")'>"					
    		str+="</td><td></td><td>";
    		if (props[o].opt == "query") 
    			str+="<input type='password' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.QueryEditor(\""+id+"\")' id='"+id+"'/>";
@@ -325,8 +325,9 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 				str+="</select>";
 	   			}
 	   		}
-	   		else
+	   		else{
    				str+="<input size='14' style='height:16px' onChange='Draw()' type='text' id='"+id+"' onFocus='ShowHelp(\""+props[o].des+"\")'/>";
+			}
 		str+="<td width='12'></td ></td></tr>";
 		$(str).appendTo("#propertyTable tbody")
 	  	$("#"+id).val(props[o].def);  
@@ -538,6 +539,11 @@ SHIVA_Show.prototype.GetDataFromManager=function(type, index)
 		window.parent.postMessage("dataSourceUrl","*");
 	if (type == "kml")
 		window.parent.postMessage("GetFile=KML="+index,"*");
+}
+
+SHIVA_Show.prototype.GoogleDriveLoad=function(id)
+{
+	trace(id)
 }
 
 /////// QUERY EDITOR

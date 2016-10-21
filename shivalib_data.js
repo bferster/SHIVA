@@ -2,6 +2,11 @@
 //  SHIVALIB DATA ACCESS (CSV/GOOGLE DOCS)
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
+SHIVA_Show.prototype.GoogleDriveLoad=function(id)
+{
+	trace(id)
+}
+
 SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback, addHeader, sendError) 		//	GET GOOGLE DOCS SPREADSHEET
 {
 	this.spreadsheetError=null;

@@ -476,8 +476,6 @@ SHIVA_Show.prototype.GetDataFromManager=function(type,index)
 {if(type=="gdoc")
 window.parent.postMessage("dataSourceUrl","*");if(type=="kml")
 window.parent.postMessage("GetFile=KML="+index,"*");}
-SHIVA_Show.prototype.GoogleDriveLoad=function(id)
-{trace(id)}
 SHIVA_Show.prototype.QueryEditor=function(id)
 {if($("#propInput0").val())
 new SHIVA_QueryEditor($("#propInput0").val(),$("#"+id).val(),id,false);else
@@ -1563,6 +1561,8 @@ else if(v[0]=="ShivaAct=play"){if(!shivaLib.imageMob.interval)
 $("#"+this.container+"PlyBut").trigger("click");}
 else if(v[0]=="ShivaAct=pause"){if(shivaLib.imageMob.interval)
 shivaLib.DrawImage();}}
+SHIVA_Show.prototype.GoogleDriveLoad=function(id)
+{trace(id)}
 SHIVA_Show.prototype.GetSpreadsheet=function(url,fields,query,callback,addHeader,sendError)
 {this.spreadsheetError=null;if(url.indexOf("google.com")!=-1){var query=new google.visualization.Query(url);query.send(handleGoogleResponse);}
 else{$.ajax({type:'GET',url:'proxy.php',data:{url:url},async:false}).complete(handleCSVResponse);}

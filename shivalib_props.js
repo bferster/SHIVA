@@ -541,11 +541,6 @@ SHIVA_Show.prototype.GetDataFromManager=function(type, index)
 		window.parent.postMessage("GetFile=KML="+index,"*");
 }
 
-SHIVA_Show.prototype.GoogleDriveLoad=function(id)
-{
-	trace(id)
-}
-
 /////// QUERY EDITOR
 
 SHIVA_Show.prototype.QueryEditor=function(id)

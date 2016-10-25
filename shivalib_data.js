@@ -1,11 +1,74 @@
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// GOOGLE
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+SHIVA_Show.prototype.GoogleDriveLoad=function(allFiles, id, callback)			// GOOGLE IMPORTER
+{
+	var _this=this;																	// Save context
+ 	
+	LoadGoogleDrive( true, function(s) {
+	    if (s.embedUrl)																// If Google native
+	    	o.src=s.embedUrl;														// Use embed
+		});
+	
+ 	function LoadGoogleDrive(allFiles, callback)								// LOAD PICKER FOR GOOGLE DRIVE
+	{
+	  	var pickerApiLoaded=false;
+		var oauthToken;
+		gapi.load('auth', { 'callback': function() {
+				window.gapi.auth.authorize( {
+	              	'client_id': "81792849751-1c76v0vunqu0ev9fgqsfgg9t2sehcvn2.apps.googleusercontent.com",
+	             	'scope': ['https://www.googleapis.com/auth/drive'],
+	              	'immediate': false }, function(authResult) {
+							if (authResult && !authResult.error) {
+	          					oauthToken=authResult.access_token;
+	          					createPicker();
+	          					}
+	          				});
+				}
+			});
+		
+		gapi.load('picker', {'callback': function() {
+				pickerApiLoaded=true;
+		        createPicker();
+	    	   	}
+			});
+	
+		function createPicker() {
+	        if (pickerApiLoaded && oauthToken) {
+	           	var upview=new google.picker.DocsUploadView();
+	           	var view=new google.picker.DocsView().
+	           		setOwnedByMe(allFiles).
+					setIncludeFolders(true);
+	          	var picker=new google.picker.PickerBuilder().
+	          		addView(view).
+	          		addView(upview).
+					setOAuthToken(oauthToken).
+					setDeveloperKey("AIzaSyAVjuoRt0060MnK_5_C-xenBkgUaxVBEug").
+					setCallback(pickerCallback).
+					build();
+				picker.setVisible(true);
+	       		}
+	    	}
+	
+		function pickerCallback(data) {
+	        if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
+         		var doc=data[google.picker.Response.DOCUMENTS][0];
+	      		// name, desc, url, type, id, [ embedUrl ]	
+   				// 		type = [ photo, files, doc, document ]
+	      		callback(doc)
+	       		}
+			}
+	   
+	}	// End closure
+ }
+
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 //  SHIVALIB DATA ACCESS (CSV/GOOGLE DOCS)
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-SHIVA_Show.prototype.GoogleDriveLoad=function(id)
-{
-	trace(id)
-}
 
 SHIVA_Show.prototype.GetSpreadsheet=function(url, fields, query, callback, addHeader, sendError) 		//	GET GOOGLE DOCS SPREADSHEET
 {

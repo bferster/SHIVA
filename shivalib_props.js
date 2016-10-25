@@ -238,7 +238,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 		id="propInput"+i;
    		var str="<tr style='height:28px'><td width='12'></td><td width='200' onClick='ShowHelp(this.innerHTML)'>"+props[o].des.split("::")[0];
 		if (o == "dataSourceUrl") 
-			str+="&nbsp;&nbsp;&nbsp;<img src='gdrive.png' width='12' title='Load from Google Drive' style='vertical-align:bottom;cursor:pointer' onclick='shivaLib.GoogleDriveLoad(\"propInput"+i+"\")'>"					
+			str+="&nbsp;&nbsp;&nbsp;<img src='gdrive.png' title='Load from Google Drive' style='vertical-align:bottom;cursor:pointer' onclick='shivaLib.GoogleDriveLoad(\"propInput"+i+"\")'>"					
    		str+="</td><td></td><td>";
    		if (props[o].opt == "query") 
    			str+="<input type='password' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.QueryEditor(\""+id+"\")' id='"+id+"'/>";

@@ -221,8 +221,6 @@ SHIVA_Show.prototype.RunActions=function(data) 							// ROUTE ACTIONS
 	var group=shivaLib.options.shivaGroup;									// Get group
 	if (group == "Map")														// If a map action
 		shivaLib.MapActions(data);											// Route
-	else if (group == "Earth")												// If a earth action
-		shivaLib.EarthActions(data);										// Route 
 	else if (group == "Video")												// If a video action
 		shivaLib.VideoActions(data);										// Route 
 	else if (group == "Timeglider")											// If a timeline action

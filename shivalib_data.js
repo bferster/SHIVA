@@ -3,13 +3,12 @@
 // GOOGLE
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-SHIVA_Show.prototype.GoogleDriveLoad=function(allFiles, id, callback)			// GOOGLE IMPORTER
+SHIVA_Show.prototype.GoogleDriveLoad=function(allFiles, callback)			// GOOGLE IMPORTER
 {
-	var _this=this;																	// Save context
+	var _this=this;																// Save context
  	
-	LoadGoogleDrive( true, function(s) {
-	    if (s.embedUrl)																// If Google native
-	    	o.src=s.embedUrl;														// Use embed
+	LoadGoogleDrive(true, function(s) {
+		console.log(s);
 		});
 	
  	function LoadGoogleDrive(allFiles, callback)								// LOAD PICKER FOR GOOGLE DRIVE
@@ -43,7 +42,7 @@ SHIVA_Show.prototype.GoogleDriveLoad=function(allFiles, id, callback)			// GOOGL
 					setIncludeFolders(true);
 	          	var picker=new google.picker.PickerBuilder().
 	          		addView(view).
-	          		addView(upview).
+	//         		addView(upview).
 					setOAuthToken(oauthToken).
 					setDeveloperKey("AIzaSyAVjuoRt0060MnK_5_C-xenBkgUaxVBEug").
 					setCallback(pickerCallback).
@@ -55,14 +54,14 @@ SHIVA_Show.prototype.GoogleDriveLoad=function(allFiles, id, callback)			// GOOGL
 		function pickerCallback(data) {
 	        if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
          		var doc=data[google.picker.Response.DOCUMENTS][0];
-	      		// name, desc, url, type, id, [ embedUrl ]	
-   				// 		type = [ photo, files, doc, document ]
-	      		callback(doc)
+	      		console.log("pre");
+	      		callback(doc.embedUrl)
+	      		console.log("post");
 	       		}
 			}
 	   
 	}	// End closure
- }
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////

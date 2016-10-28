@@ -238,7 +238,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 		id="propInput"+i;
    		var str="<tr style='height:28px'><td width='12'></td><td width='200' onClick='ShowHelp(this.innerHTML)'>"+props[o].des.split("::")[0];
 		if (o == "dataSourceUrl") 
-			str+="&nbsp;&nbsp;&nbsp;<img src='gdrive.png' title='Load from Google Drive' style='vertical-align:bottom;cursor:pointer' onclick='shivaLib.GoogleDriveLoad(\"propInput"+i+"\")'>"					
+			str+="&nbsp;&nbsp;&nbsp;<img src='gdrive.png' id='gDriveLoadBut' title='Load from Google Drive' style='vertical-align:bottom;cursor:pointer'>"					
    		str+="</td><td></td><td>";
    		if (props[o].opt == "query") 
    			str+="<input type='password' tabIndex='-1' onChange='Draw()' onFocus='shivaLib.QueryEditor(\""+id+"\")' id='"+id+"'/>";
@@ -346,6 +346,12 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 	str="<tr height='8'><td></td></tr>";
 	$(str).appendTo("#propertyTable tbody")
 	$("#accord").accordion({ collapsible:true, active:false, autoHeight:false, change:this.callback});
+	$("#gDriveLoadBut").on("click",function() {
+		shivaLib.GoogleDriveLoad(true, function(file) {
+			if (file) $("propInput0").val(file);
+			Draw();
+			})
+		});
 	if (items) {
 		for (j=0;j<items.length;++j) {
 			for (k=i+1;k<atts.length;++k) {

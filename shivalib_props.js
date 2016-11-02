@@ -366,7 +366,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 			}
 		for (i=0;i<atts.length;++i) 
 			if (atts[i] == "item") {
-				atts[i]="name";S
+				atts[i]="name";
 				break;
 			}
 		for (j=0;j<items.length;++j) 

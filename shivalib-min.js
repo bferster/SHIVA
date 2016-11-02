@@ -438,8 +438,7 @@ str="<tr height='8'><td></td></tr>";$(str).appendTo("#propertyTable tbody")
 $("#accord").accordion({collapsible:true,active:false,autoHeight:false,change:this.callback});$("#gDriveLoadBut").on("click",function(){shivaLib.GoogleDriveLoad(true,function(file){if(file)$("#propInput0").val(file);Draw();})});if(items){for(j=0;j<items.length;++j){for(k=i+1;k<atts.length;++k){o=atts[k];id2="itemInput"+j+"-"+(k-i);if(props[o].opt=="color")
 if(props[o].def.toLowerCase()!='auto'){$("#"+id2).css('border-color',"#"+items[j][atts[k]]);$("#"+id2+"C").css('background-color',"#"+items[j][atts[k]]);}}}
 for(i=0;i<atts.length;++i)
-if(atts[i]=="item"){atts[i]="name";S
-break;}
+if(atts[i]=="item"){atts[i]="name";break;}
 for(j=0;j<items.length;++j)
 for(k=i;k<atts.length;++k)
 $("#itemInput"+j+"-"+(k-i)).val(items[j][atts[k]]);}

@@ -237,7 +237,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 		o=atts[i];
 		id="propInput"+i;
    		var str="<tr style='height:28px'><td width='12'></td><td width='200' onClick='ShowHelp(this.innerHTML)'>"+props[o].des.split("::")[0];
-		if (props[o].des.split("::")[0] == "Data Source URL") 
+		if (o == "dataSourceUrl") 
 			str+="&nbsp;&nbsp;&nbsp;<img src='gdrive.png' id='gDriveLoadBut' title='Load from Google Drive' style='vertical-align:bottom;cursor:pointer'>"					
    		str+="</td><td></td><td>";
    		if (props[o].opt == "query") 

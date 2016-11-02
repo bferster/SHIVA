@@ -8,16 +8,19 @@ SHIVA_Show.prototype.GoogleDriveLoad=function(allFiles, callback)			// GOOGLE IM
 	var _this=this;																// Save context
  	
 	LoadGoogleDrive(true, function(s) {
-		console.log(s);
+		callback(s.url);
 		});
 	
  	function LoadGoogleDrive(allFiles, callback)								// LOAD PICKER FOR GOOGLE DRIVE
 	{
 	  	var pickerApiLoaded=false;
 		var oauthToken;
+		var id="81792849751-1c76v0vunqu0ev9fgqsfgg9t2sehcvn2.apps.googleusercontent.com";
+		if (window.location.hostname.match("virginia.edu"))
+			id="81792849751-1c76v0vunqu0ev9fgqsfgg9t2sehcvn2.apps.googleusercontent.com"; // REPLACE WITH UVA CLIENT ID
 		gapi.load('auth', { 'callback': function() {
 				window.gapi.auth.authorize( {
-	              	'client_id': "81792849751-1c76v0vunqu0ev9fgqsfgg9t2sehcvn2.apps.googleusercontent.com",
+	              	'client_id': id,
 	             	'scope': ['https://www.googleapis.com/auth/drive'],
 	              	'immediate': false }, function(authResult) {
 							if (authResult && !authResult.error) {
@@ -36,7 +39,7 @@ SHIVA_Show.prototype.GoogleDriveLoad=function(allFiles, callback)			// GOOGLE IM
 	
 		function createPicker() {
 	        if (pickerApiLoaded && oauthToken) {
-	           	var upview=new google.picker.DocsUploadView();
+	//         	var upview=new google.picker.DocsUploadView();
 	           	var view=new google.picker.DocsView().
 	           		setOwnedByMe(allFiles).
 					setIncludeFolders(true);
@@ -54,9 +57,7 @@ SHIVA_Show.prototype.GoogleDriveLoad=function(allFiles, callback)			// GOOGLE IM
 		function pickerCallback(data) {
 	        if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
          		var doc=data[google.picker.Response.DOCUMENTS][0];
-	      		console.log("pre");
-	      		callback(doc.embedUrl)
-	      		console.log("post");
+	      		callback(doc)
 	       		}
 			}
 	   

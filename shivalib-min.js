@@ -435,10 +435,11 @@ if(props[o].def.toLowerCase()!='auto'){$("#"+id).css('border-color',"#"+props[o]
 if(o=="item")
 break;}
 str="<tr height='8'><td></td></tr>";$(str).appendTo("#propertyTable tbody")
-$("#accord").accordion({collapsible:true,active:false,autoHeight:false,change:this.callback});$("#gDriveLoadBut").on("click",function(){shivaLib.GoogleDriveLoad(true,function(file){if(file)$("propInput0").val(file);Draw();})});if(items){for(j=0;j<items.length;++j){for(k=i+1;k<atts.length;++k){o=atts[k];id2="itemInput"+j+"-"+(k-i);if(props[o].opt=="color")
+$("#accord").accordion({collapsible:true,active:false,autoHeight:false,change:this.callback});$("#gDriveLoadBut").on("click",function(){shivaLib.GoogleDriveLoad(true,function(file){if(file)$("#propInput0").val(file);Draw();})});if(items){for(j=0;j<items.length;++j){for(k=i+1;k<atts.length;++k){o=atts[k];id2="itemInput"+j+"-"+(k-i);if(props[o].opt=="color")
 if(props[o].def.toLowerCase()!='auto'){$("#"+id2).css('border-color',"#"+items[j][atts[k]]);$("#"+id2+"C").css('background-color',"#"+items[j][atts[k]]);}}}
 for(i=0;i<atts.length;++i)
-if(atts[i]=="item"){atts[i]="name";break;}
+if(atts[i]=="item"){atts[i]="name";S
+break;}
 for(j=0;j<items.length;++j)
 for(k=i;k<atts.length;++k)
 $("#itemInput"+j+"-"+(k-i)).val(items[j][atts[k]]);}
@@ -1561,10 +1562,10 @@ $("#"+this.container+"PlyBut").trigger("click");}
 else if(v[0]=="ShivaAct=pause"){if(shivaLib.imageMob.interval)
 shivaLib.DrawImage();}}
 SHIVA_Show.prototype.GoogleDriveLoad=function(allFiles,callback)
-{var _this=this;LoadGoogleDrive(true,function(s){console.log(s);});function LoadGoogleDrive(allFiles,callback)
-{var pickerApiLoaded=false;var oauthToken;gapi.load('auth',{'callback':function(){window.gapi.auth.authorize({'client_id':"81792849751-1c76v0vunqu0ev9fgqsfgg9t2sehcvn2.apps.googleusercontent.com",'scope':['https://www.googleapis.com/auth/drive'],'immediate':false},function(authResult){if(authResult&&!authResult.error){oauthToken=authResult.access_token;createPicker();}});}});gapi.load('picker',{'callback':function(){pickerApiLoaded=true;createPicker();}});function createPicker(){if(pickerApiLoaded&&oauthToken){var upview=new google.picker.DocsUploadView();var view=new google.picker.DocsView().setOwnedByMe(allFiles).setIncludeFolders(true);var picker=new google.picker.PickerBuilder().addView(view).setOAuthToken(oauthToken).setDeveloperKey("AIzaSyAVjuoRt0060MnK_5_C-xenBkgUaxVBEug").setCallback(pickerCallback).build();picker.setVisible(true);}}
-function pickerCallback(data){if(data[google.picker.Response.ACTION]==google.picker.Action.PICKED){var doc=data[google.picker.Response.DOCUMENTS][0];console.log("pre");callback(doc.embedUrl)
-console.log("post");}}}}
+{var _this=this;LoadGoogleDrive(true,function(s){callback(s.url);});function LoadGoogleDrive(allFiles,callback)
+{var pickerApiLoaded=false;var oauthToken;var id="81792849751-1c76v0vunqu0ev9fgqsfgg9t2sehcvn2.apps.googleusercontent.com";if(window.location.hostname.match("virginia.edu"))
+id="81792849751-1c76v0vunqu0ev9fgqsfgg9t2sehcvn2.apps.googleusercontent.com";gapi.load('auth',{'callback':function(){window.gapi.auth.authorize({'client_id':id,'scope':['https://www.googleapis.com/auth/drive'],'immediate':false},function(authResult){if(authResult&&!authResult.error){oauthToken=authResult.access_token;createPicker();}});}});gapi.load('picker',{'callback':function(){pickerApiLoaded=true;createPicker();}});function createPicker(){if(pickerApiLoaded&&oauthToken){var view=new google.picker.DocsView().setOwnedByMe(allFiles).setIncludeFolders(true);var picker=new google.picker.PickerBuilder().addView(view).setOAuthToken(oauthToken).setDeveloperKey("AIzaSyAVjuoRt0060MnK_5_C-xenBkgUaxVBEug").setCallback(pickerCallback).build();picker.setVisible(true);}}
+function pickerCallback(data){if(data[google.picker.Response.ACTION]==google.picker.Action.PICKED){var doc=data[google.picker.Response.DOCUMENTS][0];callback(doc)}}}}
 SHIVA_Show.prototype.GetSpreadsheet=function(url,fields,query,callback,addHeader,sendError)
 {this.spreadsheetError=null;if(url.indexOf("google.com")!=-1){var query=new google.visualization.Query(url);query.send(handleGoogleResponse);}
 else{$.ajax({type:'GET',url:'proxy.php',data:{url:url},async:false}).complete(handleCSVResponse);}

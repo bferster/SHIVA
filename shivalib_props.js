@@ -348,7 +348,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 	$("#accord").accordion({ collapsible:true, active:false, autoHeight:false, change:this.callback});
 	$("#gDriveLoadBut").on("click",function() {
 		shivaLib.GoogleDriveLoad(true, function(file) {
-			if (file) $("propInput0").val(file);
+			if (file) $("#propInput0").val(file);
 			Draw();
 			})
 		});
@@ -366,7 +366,7 @@ SHIVA_Show.prototype.SetAttributes=function(props, items, keepData)
 			}
 		for (i=0;i<atts.length;++i) 
 			if (atts[i] == "item") {
-				atts[i]="name";
+				atts[i]="name";S
 				break;
 			}
 		for (j=0;j<items.length;++j) 

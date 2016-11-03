@@ -876,43 +876,6 @@ ctx.font=bold+" "+ital+" "+size+" "+font;return size.substring(0,size.length-2);
 SHIVA_Graphics.prototype.DrawText=function(ctx,text,x,y,format)
 {try{if(format)
 this.SetTextFormat(ctx,format);ctx.fillText(text,x,y);}catch(e){};}
-SHIVA_Show.prototype.DrawEarth=function()
-{if(!this.map){this.map="no";google.earth.createInstance(this.container,$.proxy(initCB,this));return;}
-if(this.map=="no")
-return;if(!this.options)
-return;var ops=this.options;this.items=[];for(var key in ops){if(ops[key]=="true")ops[key]=true;if(ops[key]=="false")ops[key]=false;if(key.indexOf("item-")!=-1){var o=new Object;v=ops[key].split(';');for(i=0;i<v.length;++i){vv=v[i].split(':');if(vv[1].indexOf("http")==-1)
-vv[1]=vv[1].replace(/~/g,"=");o[vv[0]]=vv[1].replace(/\^/g,"&").replace(/\`/g,":");}
-this.items.push(o);}}
-$("#"+this.container).height(ops.height);$("#"+this.container).width(ops.width);var ge=this.map;var lookAt=ge.createLookAt('');var v=ops.mapcenter.split(",");lookAt.setLatitude(Number(v[0]));lookAt.setLongitude(Number(v[1]));lookAt.setRange(Number(ops.range));lookAt.setTilt(Number(ops.tilt));lookAt.setHeading(Number(ops.heading));ge.getView().setAbstractView(lookAt);if(ops.panControl)
-ge.getNavigationControl().setVisibility(ge.VISIBILITY_AUTO);else
-ge.getNavigationControl().setVisibility(ge.VISIBILITY_HIDE);ge.getNavigationControl().getScreenXY().setYUnits(ge.UNITS_INSET_PIXELS);ge.getNavigationControl().getScreenXY().setXUnits(ge.UNITS_PIXELS);ge.getOptions().setOverviewMapVisibility((ops.overviewMapControl));ge.getOptions().setMouseNavigationEnabled((ops.draggable));if(ops.scrollwheel)
-ge.getOptions().setScrollWheelZoomSpeed(1);else
-ge.getOptions().setScrollWheelZoomSpeed(.0000000001)
-ge.getOptions().setTerrainExaggeration(Number(ops.terrainexag));ge.getLayerRoot().enableLayerById(ge.LAYER_BORDERS,ops.borders);ge.getLayerRoot().enableLayerById(ge.LAYER_ROADS,ops.roads);ge.getLayerRoot().enableLayerById(ge.LAYER_TERRAIN,true);this.DrawEarthOverlays();this.DrawLayerControlBox(this.items,ops.controlbox);function initCB(instance){this.map=instance;this.map.getWindow().setVisibility(true);this.DrawEarth();if(typeof(ShivaPostInit)=="function")
-ShivaPostInit();google.earth.addEventListener(this.map.getGlobe(),'click',function(e){var str=e.getLatitude()+"|"+e.getLongitude()+"|"+e.getClientX()+"|"+e.getClientY();shivaLib.SendShivaMessage("ShivaEarth=click",str);});google.earth.addEventListener(shivaLib.map.getView(),'viewchangeend',function(){var lookAt=shivaLib.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);var view=Math.floor(lookAt.getLatitude()*10000)/10000+"|"+Math.floor(lookAt.getLongitude()*10000)/10000+"|";view+=Math.floor(lookAt.getRange())+"|"+Math.floor(lookAt.getTilt()*100)/100+"|"+Math.floor(lookAt.getHeading()*100)/100;shivaLib.SendShivaMessage("ShivaEarth=move",view);});}
-this.SendReadyMessage(true);}
-SHIVA_Show.prototype.DrawEarthOverlays=function()
-{var i,v,opacity,obj;var items=this.items;var lookAt=this.map.getView().copyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);lookAt.setLatitude(Number(this.options.mapcenter.split(",")[0]));lookAt.setLongitude(Number(this.options.mapcenter.split(",")[1]));lookAt.setRange(Number(this.options.range));lookAt.setTilt(Number(this.options.tilt));lookAt.setHeading(Number(this.options.heading));for(i=0;i<items.length;++i){opacity=1;obj=shivaLib.map.getElementById("Layer-"+(i+1));if(items[i].layerType=="GoTo"){v=items[i].layerSource.split(",");if((v.length>1)&&(items[i].visible=="true")){if(v[0]!=undefined)lookAt.setLatitude(Number(v[0]));if(v[1]!=undefined)lookAt.setLongitude(Number(v[1]));if(v[2]!=undefined)lookAt.setRange(Number(v[2]));if(v[3]!=undefined)lookAt.setTilt(Number(v[3]));if(v[4]!=undefined)lookAt.setHeading(Number(v[4]));}}
-if(items[i].layerType=="Overlay"){if(!obj){obj=this.map.createGroundOverlay("Layer-"+(i+1));this.map.getFeatures().appendChild(obj);}
-if(items[i].listener)
-google.earth.removeEventListener(obj,'click',null)
-v=items[i].layerOptions.split(",");var icon=this.map.createIcon('');icon.setHref(items[i].layerSource);obj.setIcon(icon);var latLonBox=this.map.createLatLonBox('');latLonBox.setBox(Number(v[2]),Number(v[0]),Number(v[1]),Number(v[3]),0);obj.setLatLonBox(latLonBox);if(v.length==5)
-opacity=v[4]/100;}
-if(items[i].layerType=="KML"){var link=this.map.createLink('');link.setHref(items[i].layerSource);if(!obj){obj=this.map.createNetworkLink("Layer-"+(i+1));this.map.getFeatures().appendChild(obj);}
-var fly=(items[i].layerOptions.toLowerCase().indexOf("port")==-1)
-obj.set(link,true,fly);items[i].listener=google.earth.addEventListener(obj,'click',function(e){var str=i+"|"+e.getLatitude()+"|"+e.getLongitude();shivaLib.SendShivaMessage("ShivaEarth=kml",str);});}
-if(items[i].layerType=="MarkerSet"){this.items[i].obj=[];this.markerData=i;this.GetSpreadsheet(items[i].layerSource,true,null,function(d){_this.EarthAddMarkers(d,_this.items[_this.markerData].obj)});}
-if(obj){obj.setOpacity(opacity);obj.setVisibility(items[i].visible=="true");}}
-this.map.getView().setAbstractView(lookAt);}
-SHIVA_Show.prototype.EarthActions=function(msg)
-{var v=msg.split("|");if(v[0]=="ShivaAct=goto"){var lookAt=shivaLib.map.getView().co
-pyAsLookAt(shivaLib.map.ALTITUDE_RELATIVE_TO_GROUND);if(v[1]!=undefined)lookAt.setLatitude(Number(v[1]));if(v[2]!=undefined)lookAt.setLongitude(Number(v[2]));if(v[3]!=undefined)lookAt.setRange(Number(v[3]));if(v[4]!=undefined)lookAt.setTilt(Number(v[4]));if(v[5]!=undefined)lookAt.setHeading(Number(v[5]));shivaLib.map.getView().setAbstractView(lookAt);}
-else if((v[0]=="ShivaAct=show")||(v[0]=="ShivaAct=hide")){if(this.items[v[1]])
-this.items[v[1]].visible=(v[0]=="ShivaAct=show").toString();this.DrawEarthOverlays();}
-else if(v[0]=="ShivaAct=data"){if(v[1])
-this.EarthAddMarkers(v[1]);}}
-SHIVA_Show.prototype.EarthAddMarkers=function(json,mData)
-{}
 SHIVA_Show.prototype.DrawMap=function()
 {var v,vv,i;var container=this.container;var ops=this.options;var latlng=new google.maps.LatLng(-34.397,150.644);var mapType=ops.mapTypeId.toUpperCase();if(mapType=="LAND")
 ops.mapTypeId=mapType;else
@@ -1013,6 +976,9 @@ SHIVA_Show.prototype.AddClearMapStyle=function(map)
 {var style=[{featureType:"road",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"transit",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"poi",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"administrative",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"landscape",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"all",elementType:"labels",stylers:[{visibility:"off"}]},{featureType:"all",elementType:"geometry",stylers:[{lightness:-20}]}];var type=new google.maps.StyledMapType(style,{name:"Land"});map.mapTypes.set("LAND",type);}
 SHIVA_Show.prototype.AddBlankMapStyle=function(map)
 {var style=[{featureType:"road",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"transit",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"poi",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"administrative",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"landscape",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"water",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"all",elementType:"labels",stylers:[{visibility:"off"}]},{featureType:"all",elementType:"geometry",stylers:[{lightness:-20}]}];var type=new google.maps.StyledMapType(style,{name:"Blank"});map.mapTypes.set("BLANK",type);}
+SHIVA_Show.prototype.DrawEarth=function(){}
+SHIVA_Show.prototype.EarthActions=function(msg){}
+SHIVA_Show.prototype.EarthAddMarkers=function(json,mData){}
 SHIVA_Show.prototype.DrawVideo=function()
 {var options=this.options;var con="#"+this.container;$(con).width(options.width);$(con).height(options.height);var o=this.playerOps={};o.playerAuto=options.autoplay;o.playerStart=o.playerEnd=0;o.playerVolume=options.volume;o.playerSpeed=1;o.playerAspect=.5625;o.playerControls="true";o.player=null;o.playerNow=0;o.playerMode="empty";o.playerType="";o.isMobile=false;o.playerSource=options.dataSourceUrl;if(!o.playerSource)
 return;if(options.start)

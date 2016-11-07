@@ -15,9 +15,12 @@ SHIVA_Show.prototype.GoogleDriveLoad=function(allFiles, callback)			// GOOGLE IM
 	{
 	  	var pickerApiLoaded=false;
 		var oauthToken;
+		var key="AIzaSyAVjuoRt0060MnK_5_C-xenBkgUaxVBEug";
 		var id="81792849751-1c76v0vunqu0ev9fgqsfgg9t2sehcvn2.apps.googleusercontent.com";
-		if (window.location.hostname.match("virginia.edu"))
-			id="81792849751-1c76v0vunqu0ev9fgqsfgg9t2sehcvn2.apps.googleusercontent.com"; // REPLACE WITH UVA CLIENT ID
+		if (window.location.hostname.match("virginia.edu") || window.location.hostname.match("visuals.dd")) {
+			id="783824671276-f555r8jak4qqrunab0ksmn1elg01hjhc.apps.googleusercontent.com"; 			// UVA client id & api key
+			key="AIzaSyDO7EDm14EXi44pLkarnB8jjqI90LSa61g";
+			}
 		gapi.load('auth', { 'callback': function() {
 				window.gapi.auth.authorize( {
 	              	'client_id': id,
@@ -47,7 +50,7 @@ SHIVA_Show.prototype.GoogleDriveLoad=function(allFiles, callback)			// GOOGLE IM
 	          		addView(view).
 	//         		addView(upview).
 					setOAuthToken(oauthToken).
-					setDeveloperKey("AIzaSyAVjuoRt0060MnK_5_C-xenBkgUaxVBEug").
+					setDeveloperKey(key).
 					setCallback(pickerCallback).
 					build();
 				picker.setVisible(true);

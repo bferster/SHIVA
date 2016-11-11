@@ -45,6 +45,8 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode)
 window.parent.postMessage("ShivaReady="+mode.toString(),"*");var asp=$("#"+shivaLib.container).height()/$("#"+shivaLib.container).width();if(this.options.height&&this.options.width)
 asp=this.options.height/this.options.width;shivaLib.SendShivaMessage("ShivaChart=ready",Math.round(asp*1000));shivaLib.ready=true;for(i=0;i<shivaLib.actionCache.length;++i)
 shivaLib.RunActions(shivaLib.actionCache[i]);shivaLib.actionCache=[];}
+SHIVA_Show.prototype.GetPageSize=function(mode)
+{trace($("#containerDiv").width()+308+","+$("body").height())}
 SHIVA_Show.prototype.SendShivaMessage=function(src,msg)
 {var id=window.name;if(!id)
 id="posterFrame-"+(""+window.location.search.match(/&if=[0-9A-z]+/)).substr(4);var str=src+"|"+id;if(msg)

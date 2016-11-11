@@ -178,6 +178,12 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE 
 	shivaLib.actionCache=[];												// Clear action store
 }
 
+
+SHIVA_Show.prototype.GetPageSize=function(mode) 						// GET PAGE SIZE
+{
+	trace($("#containerDiv").width()+308+","+$("body").height())
+}
+
 SHIVA_Show.prototype.SendShivaMessage=function(src, msg) 				// SEND SHIVA MESSAGE 
 {
 	var id=window.name;														// Get from name

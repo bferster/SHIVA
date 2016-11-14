@@ -50,6 +50,7 @@ SHIVA_Show.prototype.DrawMap=function() 													//	DRAW MAP
 	this.AddBlankMapStyle(this.map);
 	this.DrawMapOverlays();
 	this.DrawLayerControlBox(this.items,this.options.controlbox);
+	window.postMessage("InitGeocoder","*");								// Init geocoder	
 	this.SendReadyMessage(true);											
 	google.maps.event.addListener(this.map,'click', function(e) {
 	 	var l=e.latLng.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");

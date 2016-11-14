@@ -92,6 +92,8 @@ SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
 		}
 }
 
+var jslibLoading="";
+
 SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
 {
  	var i,obj,lib="";
@@ -117,12 +119,19 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
 			lib="d3.v3.min.js";  											// Lib to load
            	break;
 		case "Map": 														// Google maps		
-  			obj="google.maps.Map";											// Object to test for
-        	lib="//maps.googleapis.com/maps/api/js?sensor=false&callback=shivaJSLoaded"; 		// Lib to load
-            break;
+ 	 		var key="AIzaSyAVjuoRt0060MnK_5_C-xenBkgUaxVBEug";
+			if (window.location.hostname.match("virginia.edu") || window.location.hostname.match("visuals.dd")) {
+				key="AIzaSyDO7EDm14EXi44pLkarnB8jjqI90LSa61g";
+				}
+ 			obj="google.maps.LatLng";										// Object to test for
+         	lib="//maps.googleapis.com/maps/api/js?callback=shivaJSLoaded&key="+key; // Lib to load
+         	if (jslibLoading == lib)										// If already loading it
+         		return;														// Quit
+             break;
        case "WordCloud":
             obj="d3.layout.cloud";
             lib="d3_cloud_combined.js";
+            break;
 		}
 	if (lib) {																// If a lib to load
 		var v=obj.split(".");												// Split by parts
@@ -139,7 +148,8 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
 		var script=document.createElement('script');						// Point at script
    		script.type="text/javascript";										// Set type
        	script.src=lib; 													// URL
-    	script.onload=shivaJSLoaded(obj,callback);							// Set callback
+    	jslibLoading=lib;													// Save current loading library
+     	script.onload=shivaJSLoaded(obj,callback);							// Set callback
        	head.appendChild(script);											// Add to script
 		}
 	else																	// No lib
@@ -176,12 +186,6 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode) 					// SEND READY MESSAGE 
 	for (i=0;i<shivaLib.actionCache.length;++i)								// For each action stored
 		shivaLib.RunActions(shivaLib.actionCache[i]);						// Send command
 	shivaLib.actionCache=[];												// Clear action store
-}
-
-
-SHIVA_Show.prototype.GetPageSize=function(mode) 						// GET PAGE SIZE
-{
-	trace($("#containerDiv").width()+308+","+$("body").height())
 }
 
 SHIVA_Show.prototype.SendShivaMessage=function(src, msg) 				// SEND SHIVA MESSAGE 

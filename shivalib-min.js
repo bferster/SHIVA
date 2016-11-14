@@ -25,12 +25,14 @@ this.DrawWordCloud();else if(group=='Poster')
 this.DrawPoster();else if(group=='Graph')
 this.DrawGraph();if(ops["draw-1"])
 this.AddOverlay();var ud=ops["ud"];if(ud=="true")ud=true;else if(ud=="false")ud=false;if((ud)&&(this.inGo)){var h=$("#"+this.container).css("height").replace(/px/g,"");var str="<img  id='shivaAnnotateBut' src='annotate.gif' style='position:absolute";str+=";top:"+(h-0+12)+"px'>";$("body").append(str);$("#shivaAnnotateBut").click(function(){_this.Annotate();});$("#shivaAnnotateBut").css('pointer-events','auto');}}
-SHIVA_Show.prototype.LoadJSLib=function(which,callback)
-{var i,obj,lib="";switch(which){case"Timeline":obj="Timeline.DefaultEventSource";lib="//api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true";break;case"Timeglider":obj="timeglider";lib="timeglider-all.js";break;case"Image":obj="jQuery.prototype.adGallery";lib="jquery.ad-gallery.min.js";break;case"Network":obj="$jit.id";lib="jit-yc.js";break;case"Graph":obj="d3.select";lib="d3.v3.min.js";break;case"Map":obj="google.maps.Map";lib="//maps.googleapis.com/maps/api/js?sensor=false&callback=shivaJSLoaded";break;case"WordCloud":obj="d3.layout.cloud";lib="d3_cloud_combined.js";}
+var jslibLoading="";SHIVA_Show.prototype.LoadJSLib=function(which,callback)
+{var i,obj,lib="";switch(which){case"Timeline":obj="Timeline.DefaultEventSource";lib="//api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true";break;case"Timeglider":obj="timeglider";lib="timeglider-all.js";break;case"Image":obj="jQuery.prototype.adGallery";lib="jquery.ad-gallery.min.js";break;case"Network":obj="$jit.id";lib="jit-yc.js";break;case"Graph":obj="d3.select";lib="d3.v3.min.js";break;case"Map":var key="AIzaSyAVjuoRt0060MnK_5_C-xenBkgUaxVBEug";if(window.location.hostname.match("virginia.edu")||window.location.hostname.match("visuals.dd")){key="AIzaSyDO7EDm14EXi44pLkarnB8jjqI90LSa61g";}
+obj="google.maps.LatLng";lib="//maps.googleapis.com/maps/api/js?callback=shivaJSLoaded&key="+key;if(jslibLoading==lib)
+return;break;case"WordCloud":obj="d3.layout.cloud";lib="d3_cloud_combined.js";break;}
 if(lib){var v=obj.split(".");var n=v.length;var o=$(window)[0];for(i=0;i<n;++i)
 if(!(o=o[v[i]]))
 break;if(o&&(i==n)){callback();return;}
-var head=document.getElementsByTagName('head')[0];var script=document.createElement('script');script.type="text/javascript";script.src=lib;script.onload=shivaJSLoaded(obj,callback);head.appendChild(script);}
+var head=document.getElementsByTagName('head')[0];var script=document.createElement('script');script.type="text/javascript";script.src=lib;jslibLoading=lib;script.onload=shivaJSLoaded(obj,callback);head.appendChild(script);}
 else
 callback();}
 function shivaJSLoaded(obj,callback)
@@ -45,8 +47,6 @@ SHIVA_Show.prototype.SendReadyMessage=function(mode)
 window.parent.postMessage("ShivaReady="+mode.toString(),"*");var asp=$("#"+shivaLib.container).height()/$("#"+shivaLib.container).width();if(this.options.height&&this.options.width)
 asp=this.options.height/this.options.width;shivaLib.SendShivaMessage("ShivaChart=ready",Math.round(asp*1000));shivaLib.ready=true;for(i=0;i<shivaLib.actionCache.length;++i)
 shivaLib.RunActions(shivaLib.actionCache[i]);shivaLib.actionCache=[];}
-SHIVA_Show.prototype.GetPageSize=function(mode)
-{trace($("#containerDiv").width()+308+","+$("body").height())}
 SHIVA_Show.prototype.SendShivaMessage=function(src,msg)
 {var id=window.name;if(!id)
 id="posterFrame-"+(""+window.location.search.match(/&if=[0-9A-z]+/)).substr(4);var str=src+"|"+id;if(msg)
@@ -885,7 +885,7 @@ ops.mapTypeId=google.maps.MapTypeId[mapType];var ll=ops.mapcenter.split(",")
 latlng=new google.maps.LatLng(ll[0],ll[1]);ops.center=latlng;ops.zoom=Number(ll[2]);this.mapsInfoWindow=new google.maps.InfoWindow({maxWidth:300});this.items=[];for(var key in ops){if(ops[key]=="true")ops[key]=true;if(ops[key]=="false")ops[key]=false;if(key.indexOf("item-")!=-1){var o=new Object;v=ops[key].split(';');for(i=0;i<v.length;++i){vv=v[i].split(':');if(vv[1].indexOf("http")==-1)
 vv[1]=vv[1].replace(/~/g,"=");o[vv[0]]=vv[1].replace(/\^/g,"&").replace(/\`/g,":");}
 this.items.push(o);}}
-$("#"+this.container).height(ops.height);$("#"+this.container).width(ops.width);ops["mapTypeControlOptions"]={"mapTypeIds":[google.maps.MapTypeId.ROADMAP,google.maps.MapTypeId.TERRAIN,google.maps.MapTypeId.SATELLITE,google.maps.MapTypeId.HYBRID,"LAND"],style:google.maps.MapTypeControlStyle.DROPDOWN_MENU};this.map=new google.maps.Map(document.getElementById(container),ops);this.AddClearMapStyle(this.map);this.AddBlankMapStyle(this.map);this.DrawMapOverlays();this.DrawLayerControlBox(this.items,this.options.controlbox);this.SendReadyMessage(true);google.maps.event.addListener(this.map,'click',function(e){var l=e.latLng.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");var p=e.pixel.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");shivaLib.SendShivaMessage("ShivaMap=click",l+"|"+p);});google.maps.event.addListener(this.map,'center_changed',function(e){var map=shivaLib.map;var lat=map.getCenter();shivaLib.SendShivaMessage("ShivaMap=move",lat.lat()+"|"+lat.lng()+"|"+map.getZoom());});}
+$("#"+this.container).height(ops.height);$("#"+this.container).width(ops.width);ops["mapTypeControlOptions"]={"mapTypeIds":[google.maps.MapTypeId.ROADMAP,google.maps.MapTypeId.TERRAIN,google.maps.MapTypeId.SATELLITE,google.maps.MapTypeId.HYBRID,"LAND"],style:google.maps.MapTypeControlStyle.DROPDOWN_MENU};this.map=new google.maps.Map(document.getElementById(container),ops);this.AddClearMapStyle(this.map);this.AddBlankMapStyle(this.map);this.DrawMapOverlays();this.DrawLayerControlBox(this.items,this.options.controlbox);window.postMessage("InitGeocoder","*");this.SendReadyMessage(true);google.maps.event.addListener(this.map,'click',function(e){var l=e.latLng.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");var p=e.pixel.toString().replace(/\(/,"").replace(/, /,"|").replace(/\)/,"");shivaLib.SendShivaMessage("ShivaMap=click",l+"|"+p);});google.maps.event.addListener(this.map,'center_changed',function(e){var map=shivaLib.map;var lat=map.getCenter();shivaLib.SendShivaMessage("ShivaMap=move",lat.lat()+"|"+lat.lng()+"|"+map.getZoom());});}
 SHIVA_Show.prototype.AddInternalOptions=function(options,newOps)
 {var i,vv;if(newOps){var v=newOps.split(',');for(i=0;i<v.length;++i){vv=v[i].split("=");if(vv[1]=='true')vv[1]=true;if(vv[1]=='false')vv[1]=false;options[vv[0]]=vv[1];}}}
 SHIVA_Show.prototype.DrawMapOverlays=function()

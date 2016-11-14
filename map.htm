@@ -7,7 +7,6 @@
 	<link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.8.16.custom.css">
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
 	<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
-	<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?sensor=false&key=AIzaSyAVjuoRt0060MnK_5_C-xenBkgUaxVBEug"></script>
 	<script type="text/javascript" src='//www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
 	<script type="text/javascript" src="shivalib-min.js"></script>
 	<style type="text/css">
@@ -179,23 +178,10 @@ shivaLib.ShivaEventHandler("init");										// Init shivaevent listener
  	       		$("#itemInput"+v[2]+"-2").val(v[3]);
 			Draw();
 			}
-	}
- 
-	function ProjectionHelperOverlay(map)
-	{ 
-	    google.maps.OverlayView.call(this); 
-	    this.setMap(map); 
-	} 
-	ProjectionHelperOverlay.prototype=new google.maps.OverlayView(); 
-	geocoder=new google.maps.Geocoder();
-	ProjectionHelperOverlay.prototype.draw=function() {};
- 
-	function Draw()
-	{	
-		if (shivaLib.drupalMan)  
-			window.parent.postMessage("DataChanged=true","*");
-		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
-		if (shivaLib.map) {
+		else if (e.data.indexOf("InitGeocoder") == 0) {
+			ProjectionHelperOverlay.prototype=new google.maps.OverlayView(); 
+			geocoder=new google.maps.Geocoder();
+			ProjectionHelperOverlay.prototype.draw=function() {};
 			projection=new ProjectionHelperOverlay(shivaLib.map);
 			if (oldEventListener)
 				google.maps.event.removeListener(oldEventListener);
@@ -206,6 +192,19 @@ shivaLib.ShivaEventHandler("init");										// Init shivaevent listener
 				$('#helpDiv').html(str);
 				});
 			}
+	}
+ 
+	function ProjectionHelperOverlay(map)
+	{ 
+	    google.maps.OverlayView.call(this); 
+	    this.setMap(map); 
+	} 
+	
+  	function Draw()
+	{	
+		if (shivaLib.drupalMan)  
+			window.parent.postMessage("DataChanged=true","*");
+		shivaLib.Draw($.parseJSON(SaveData("GetJSON")));
 	}
 
 	function CenterMap(lon,lat,zoom)

@@ -167,8 +167,10 @@ function shivaJSLoaded(obj, callback) 									// RECURSE UNTIL JS METHOD/PROPER
 	for (i=0;i<n;++i) 														// For each part
 		if (!(o=o[v[i]])) 													// Not a match
 			break;															// Quit looking
-	if (o && (i == n)) 														// Got them all		
+	if (o && (i == n)) { 													// Got them all		
+		jslibLoading="";													// Reset loading flag
 		callback();															// Call callback
+		}
 	else																	// No loaded yet
 		setTimeout(function() { shivaJSLoaded(obj,callback); },50);			// Recurse		
 }

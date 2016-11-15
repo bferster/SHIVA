@@ -39,8 +39,8 @@ function shivaJSLoaded(obj,callback)
 {var i;if(!obj)
 return;var v=obj.split(".");var n=v.length;var o=$(window)[0];for(i=0;i<n;++i)
 if(!(o=o[v[i]]))
-break;if(o&&(i==n))
-callback();else
+break;if(o&&(i==n)){jslibLoading="";callback();}
+else
 setTimeout(function(){shivaJSLoaded(obj,callback);},50);}
 SHIVA_Show.prototype.SendReadyMessage=function(mode)
 {var i;if(shivaLib.drupalMan)

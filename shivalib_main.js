@@ -97,11 +97,18 @@ var jslibLoading="";
 SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
 {
  	var i,obj,lib="";
- 	switch(which) {															// Route on type
+  	switch(which) {															// Route on type
 		case "Timeline": 													// Simile			
 			obj="Timeline.DefaultEventSource";								// Object to test for
 			lib="//api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true";  // Lib to load
           	break;
+		case "Visualization": 												// Google charts
+ 			if (!google.charts.versionSpecific) {
+	 			google.charts.load('current', {packages: ['corechart']});	// Load package
+				google.charts.setOnLoadCallback(callback); 					// Set callback
+				return;														// Quit
+				}
+			break;
 		case "Timeglider": 													// Time glider			
 			obj="timeglider";								    			// Object to test for
 			lib="timeglider-all.js";										// Lib to load

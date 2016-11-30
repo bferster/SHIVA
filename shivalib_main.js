@@ -31,8 +31,11 @@ SHIVA_Show.prototype.Draw=function(ops) 								//	DRAW LOADER/DIRECTOR
 {
 	if (!ops)
 		return;
+	_this=this;
 	this.options=ops;
-	this.LoadJSLib(ops.shivaGroup,$.proxy(function() { this.DrawElement(ops) },this))
+	this.LoadJSLib("Visualization",$.proxy(function() {
+			_this.LoadJSLib(ops.shivaGroup,$.proxy(function() { _this.DrawElement(ops) },_this))
+			},_this));
 }
 
 SHIVA_Show.prototype.DrawElement=function(ops) 							//	DRAW DIRECTOR
@@ -103,7 +106,7 @@ SHIVA_Show.prototype.LoadJSLib=function(which, callback) 				// LOAD JS LIBRARY
 			lib="//api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true";  // Lib to load
           	break;
 		case "Visualization": 												// Google charts
- 			if (!google.charts.versionSpecific) {
+  			if (!google.charts.versionSpecific) {
 	 			google.charts.load('current', {packages: ['corechart']});	// Load package
 				google.charts.setOnLoadCallback(callback); 					// Set callback
 				return;														// Quit

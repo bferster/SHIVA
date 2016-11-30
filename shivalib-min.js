@@ -4,7 +4,7 @@ function SHIVA_Show(container,options,editMode)
 this.Draw(options);}
 SHIVA_Show.prototype.Draw=function(ops)
 {if(!ops)
-return;this.options=ops;this.LoadJSLib(ops.shivaGroup,$.proxy(function(){this.DrawElement(ops)},this))}
+return;_this=this;this.options=ops;this.LoadJSLib("Visualization",$.proxy(function(){_this.LoadJSLib(ops.shivaGroup,$.proxy(function(){_this.DrawElement(ops)},_this))},_this));}
 SHIVA_Show.prototype.DrawElement=function(ops)
 {var _this=this;this.group=group=ops.shivaGroup;if(group=='Visualization')
 this.DrawChart();else if(group=='Map')

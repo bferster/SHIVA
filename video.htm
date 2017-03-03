@@ -177,13 +177,16 @@
 		return shivaLib.SaveData(mode,shivaGroup,null,props);
 	}	
 
+
+
+
 	function GetKalturaDirectLink(url) 											// GET DRECT LINK TO KALTURA MEDIA
 	{
 			if (!url)																// If no url
 				return "";															// Return null
 			if (url.match(/vimeo\.com\//i))											// A Vimeo url or embed code
-				return url.match(/\d+/);												// Extract id
-			if (!url.match(/kaltura_player/))										// Not Kaltura
+				return url.match(/\d+/);											// Extract id
+			if (!url.match(/kaltura/))												// Not Kaltura
 				return url;															// Return original
 			var mid=0;																// Media id
 			var pid=2003471;														// Collab partner id
@@ -196,10 +199,11 @@
 				pid=url.match(/partner_id\/(\d+)/i)[1];								// Get partner id
 				mid=url.match(/entry_id=([^&]+)/)[1];								// Get media id
 				flv="0_ithj599o";													// MP4 used by mediabase
-				url="//cfvod.kaltura.com/pd/p/"+pid+"/sp/"+pid+"00/serveFlavor/entryId/"+mid+"/v/2/flavorId/"+flv+"/name/a.mp4";
+				url="//www.kaltura.com/p/"+pid+"/sp/0/playManifest/entryId/"+mid+"/format/url/flavorParamId/"+pid+"/video.mp4"
 				}
 			return url;																// Return converted url
 	}
+
 
 	function ReEdit(jsonData)
 	{

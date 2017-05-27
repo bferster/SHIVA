@@ -2,7 +2,7 @@
 	header('Cache-Control: no-cache, no-store, must-revalidate'); 
 	header('Expires: Sun, 01 Jul 2005 00:00:00 GMT'); 
 	header('Pragma: no-cache'); 
-	require_once('../teacher/config.php');
+	require_once('config.php');
 	$email=mysql_real_escape_string($_REQUEST['email']);			
 	$title=mysql_real_escape_string($_REQUEST['title']);			
 	$data=($_REQUEST['data']);			

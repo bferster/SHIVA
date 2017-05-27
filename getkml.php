@@ -3,7 +3,7 @@
 	header('Cache-Control: no-cache, no-store, must-revalidate'); 
 	header('Expires: Sun, 01 Jul 2005 00:00:00 GMT'); 
 	header('Pragma: no-cache'); 
-	require_once('../teacher/config.php');
+	require_once('config.php');
 	$id=mysql_real_escape_string($_GET['id']);
 	if (!is_nan($id)) {
 		$query="SELECT * FROM easyfile WHERE id = '$id'";

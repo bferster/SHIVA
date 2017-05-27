@@ -15,4 +15,8 @@ shivalib_image.js \
 shivalib_data.js \
 shivalib_graph.js \
 > tmp
-jsmin <tmp > shivalib-min.js
+C:/Bill/CC/js/shiva/jsmin.exe <tmp > shivalib-min.js
+
+
+
+

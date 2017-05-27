@@ -283,12 +283,12 @@ if(!$("#ez-title").length){str="<tr><td>Title</td><td><input type='text' size='4
 if(!_title){alert("Please type title to save under");return;}
 document.cookie="ez-email="+_email;$("#shivaLightBoxDiv").remove();if($("#containerDiv").height()<10)
 $("#containerDiv").height($("#containerDiv").height()*100);str="\",\n\t\"shivaTitle\": \""+_title+"\"\n}";if((type!="Canvas")&&(type!="KML"))
-_data=_data.substr(0,_data.lastIndexOf("\""))+str;$.post("http://www.primaryaccess.org/REST/addeasyfile.php",{email:_email,type:_type,title:_title,data:_data.replace(/'/g,"\\'")});});$("#loadBut").button().click(function(){email=$("#email").val();if(!email){alert("Please type your email");return;}
+_data=_data.substr(0,_data.lastIndexOf("\""))+str;$.post("http://www.stagetools.com/shiva/addeasyfile.php",{email:_email,type:_type,title:_title,data:_data.replace(/'/g,"\\'")});});$("#loadBut").button().click(function(){email=$("#email").val();if(!email){alert("Please type your email");return;}
 if(!isNaN(email)){shivaLib.LoadEasyFile(email,callback);return;}
 document.cookie="ez-email="+email;var dat={email:email};if(type!="all")
-dat["type"]=type;str="http://www.primaryaccess.org/REST/listeasyfile.php";shivaLib.ezcb=callback;shivaLib.ezmode="load";$.ajax({url:str,data:dat,dataType:'jsonp'});});$("#linkBut").button().click(function(){email=$("#email").val();if(!email){alert("Please type your email");return;}
+dat["type"]=type;str="http://www.stagetools.com/shiva/listeasyfile.php";shivaLib.ezcb=callback;shivaLib.ezmode="load";$.ajax({url:str,data:dat,dataType:'jsonp'});});$("#linkBut").button().click(function(){email=$("#email").val();if(!email){alert("Please type your email");return;}
 document.cookie="ez-email="+email;var dat={email:email};if(type!="all")
-dat["type"]=type;str="http://www.primaryaccess.org/REST/listeasyfile.php";shivaLib.ezcb="";shivaLib.ezmode="link";$.ajax({url:str,data:dat,dataType:'jsonp'});});}
+dat["type"]=type;str="http://www.stagetools.com/shiva/listeasyfile.php";shivaLib.ezcb="";shivaLib.ezmode="link";$.ajax({url:str,data:dat,dataType:'jsonp'});});}
 SHIVA_Show.prototype.ShowEasyFile=function(files,callback,mode)
 {var i;var str="<br/><div style='overflow:auto;overflow-x:hidden;height:200px;font-size:x-small;padding:8px;border:1px solid #cccccc'>";str+="<table id='ezFilesTable' cellspacing=0 cellpadding=4><tr><td></td></tr></table></div>";$("#shivaLightContentDiv").html(str);str="<div align='right' style='font-size:x-small'><br>Show only with this in title: <input type='text' size='10' id='ezFileFilter'/>";str+=" <button id='cancelBut'>Cancel</button></div>";$("#shivaLightContentDiv").append(str);$("#cancelBut").button().click(function(){$("#shivaLightBoxDiv").remove();if($("#containerDiv").height()<10)
 $("#containerDiv").height($("#containerDiv").height()*100);});this.MakeEasyFileList(files,"",callback,mode);$("#ezFileFilter").keyup($.proxy(function(){var filter=$("#ezFileFilter").val();$("#ezFilesTable tbody").empty();this.MakeEasyFileList(files,filter,callback,mode);},this));}
@@ -296,12 +296,12 @@ SHIVA_Show.prototype.MakeEasyFileList=function(files,filter,callback,mode)
 {var i,str,type;files.sort(function(a,b){var A=new Date(a.created.substr(0,5)+"/2012 "+a.created.substr(6));var B=new Date(b.created.substr(0,5)+"/2012 "+b.created.substr(6));return B-A;});for(i=0;i<files.length;++i){if((filter)&&(files[i].title.toLowerCase().indexOf(filter.toLowerCase())==-1))
 continue;str="<tr id='ezfile-"+files[i].id+"'><td>"+files[i].created.replace(/ /,"&nbsp")+"</td>";str+="<td width='100%'><img  src='adddot.gif'  height='11'> &nbsp;";str+=files[i].id+" "+files[i].title+"</td></tr>";$(str).appendTo("#ezFilesTable tbody");$("#ezFilesTable tr:odd").addClass("odd");}
 for(i=0;i<files.length;++i){type=files[i].type;$("#ezfile-"+files[i].id).click(function(){if((mode=="link")&&(type=="KML"))
-prompt("Press Ctrl-C to copy link","http://www.primaryaccess.org/REST/getkml.php?id="+this.id.substr(7));if((mode=="link")&&(type!="KML"))
-prompt("Press Ctrl-C to copy link","www.viseyes.org/shiva/go.htm?e="+this.id.substr(7));else{var dat={id:this.id.substr(7)};str="http://www.primaryaccess.org/REST/geteasyfile.php";shivaLib.ezcb=callback;shivaLib.ezmode=this.id.substr(7);$.ajax({url:str,data:dat,dataType:'jsonp'});}
+prompt("Press Ctrl-C to copy link","http://www.stagetools.com/shiva/getkml.php?id="+this.id.substr(7));if((mode=="link")&&(type!="KML"))
+prompt("Press Ctrl-C to copy link","www.viseyes.org/shiva/go.htm?e="+this.id.substr(7));else{var dat={id:this.id.substr(7)};str="http://www.stagetools.com/shiva/geteasyfile.php";shivaLib.ezcb=callback;shivaLib.ezmode=this.id.substr(7);$.ajax({url:str,data:dat,dataType:'jsonp'});}
 $("#shivaLightBoxDiv").remove();if($("#containerDiv").height()<10)
 $("#containerDiv").height($("#containerDiv").height()*100);});}}
 SHIVA_Show.prototype.LoadEasyFile=function(num,callback)
-{var str="http://www.primaryaccess.org/REST/geteasyfile.php";shivaLib.ezcb=callback;shivaLib.ezmode=num;$.ajax({url:str,data:{id:num},dataType:'jsonp'});$("#shivaLightBoxDiv").remove();if($("#containerDiv").height()<10)
+{var str="http://www.stagetools.com/shiva/geteasyfile.php";shivaLib.ezcb=callback;shivaLib.ezmode=num;$.ajax({url:str,data:{id:num},dataType:'jsonp'});$("#shivaLightBoxDiv").remove();if($("#containerDiv").height()<10)
 $("#containerDiv").height($("#containerDiv").height()*100);}
 function easyFileListWrapper(data)
 {shivaLib.ShowEasyFile(data,shivaLib.ezcb,shivaLib.ezmode);}

@@ -450,7 +450,8 @@ SHIVA_Event.prototype.SaveEditedEvent=function(num, remove) 			// SAVE EDITED EV
 	this.DrawEventDots();													// Update event dots
 	this.UpdatePlayerEvents();												// Update player
 }
-
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //   EVENT CREATION   
@@ -807,7 +808,7 @@ SHIVA_Event.prototype.SaveResponse=function(num, val) 					// SAVE RESPONSE TO A
 	if (isNaN(id))	 id=id.replace(/'/g,"\\'")								// Remove apos's
 	if (isNaN(val))	 val=val.replace(/'/g,"\\'")							// Remove apos's
 	if (res.toLowerCase().match(/estore/))									// If saving to eStore
-		$.post("http://www.primaryaccess.org/REST/addeasyfile.php",{ email:name, type: "Response", title:id,data:val });
+		$.post("http://www.stagetools.com/shiva/addeasyfile.php",{ email:name, type: "Response", title:id,data:val });
 }
 
 SHIVA_Event.prototype.HideAll=function(now) 							// HIDE ALL EVENTS

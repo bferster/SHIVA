@@ -1083,7 +1083,7 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 		str="\",\n\t\"shivaTitle\": \""+_title+"\"\n}";						// Add title
 		if ((type != "Canvas") && (type != "KML"))							// Not for canvas or KML
 			_data=_data.substr(0,_data.lastIndexOf("\""))+str;				// Remove last "\n}
-		$.post("http://www.viseyes.org/shiva/addeasyfile.php",{ email:_email, type: _type, title:_title,data:_data.replace(/'/g,"\\'") });
+		$.post("http://www.stagetools.com/vis/shiva/addeasyfile.php",{ email:_email, type: _type, title:_title,data:_data.replace(/'/g,"\\'") });
 		});
 	
 	$("#loadBut").button().click(function() {								// LOAD
@@ -1100,7 +1100,7 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 		var dat={ email:email };											// Set email to look for
 		if (type != "all")													// If not loading all
 			dat["type"]=type;												// Filter by type
-		str="http://www.viseyes.org/shiva/listeasyfile.php";				// eStore list url
+		str="http://www.stagetools.com/vis/shiva/listeasyfile.php";				// eStore list url
 		shivaLib.ezcb=callback;		shivaLib.ezmode="load";					// Set callback and mode
 		$.ajax({ url: str, data:dat, dataType:'jsonp' });					// Get jsonp
 		});
@@ -1115,7 +1115,7 @@ SHIVA_Show.prototype.EasyFile=function(_data, callback, type) 			// EASYFILE MEN
 		var dat={ email:email };											// Set emila to look for
 		if (type != "all")													// If not loading all
 			dat["type"]=type;												// Filter by type
-		str="http://www.viseyes.org/shiva/listeasyfile.php";				// eStore list url
+		str="http://www.stagetools.com/vis/shiva/listeasyfile.php";				// eStore list url
 		shivaLib.ezcb="";		shivaLib.ezmode="link";						// Set callback and mode
 		$.ajax({ url: str, data:dat, dataType:'jsonp' });					// Get jsonp
 		});
@@ -1163,12 +1163,12 @@ SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	/
 		type=files[i].type;													// Set type
 		$("#ezfile-"+files[i].id).click(function() {						// Add click handler
 			if ((mode == "link") && (type == "KML"))						// If a KML link
-				prompt("Press Ctrl-C to copy link","http://www.viseyes.org/shiva/getkml.php?id="+this.id.substr(7));	// Show url
+				prompt("Press Ctrl-C to copy link","http://www.stagetools.com/vis/shiva/getkml.php?id="+this.id.substr(7));	// Show url
 			if ((mode == "link") && (type != "KML"))						// If a SHIVA link
 				prompt("Press Ctrl-C to copy link","www.viseyes.org/shiva/go.htm?e="+this.id.substr(7));	// Show url
 			else{															// If a load
 				var dat={ id:this.id.substr(7) };							// Set id to look for
-				str="http://www.viseyes.org/shiva/geteasyfile.php";	// eStore list url
+				str="http://www.stagetools.com/vis/shiva/geteasyfile.php";	// eStore list url
 				shivaLib.ezcb=callback;										// Set callback
 				shivaLib.ezmode=this.id.substr(7);	 						// Set ID
 				$.ajax({ url: str, data:dat, dataType:'jsonp' });			// Get jsonp
@@ -1182,7 +1182,7 @@ SHIVA_Show.prototype.MakeEasyFileList=function(files, filter, callback, mode) 	/
 
 SHIVA_Show.prototype.LoadEasyFile=function(num, callback) 				// GET SINGLE EASYFILE 
 {
-	var str="http://www.viseyes.org/shiva/geteasyfile.php";			// eStore url
+	var str="http://www.stagetools.com/vis/shiva/geteasyfile.php";			// eStore url
 	shivaLib.ezcb=callback;													// Set callback
 	shivaLib.ezmode=num;	 												// Set ID
 	$.ajax({ url: str, data:{id:num}, dataType:'jsonp' });					// Get jsonp

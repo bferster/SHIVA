@@ -17,8 +17,9 @@
 		echo "Can't load file!";
 	else{
 		$r=mysql_result($result,0,"data");
-		if (!strstr($r,"<?xml"))
+/*		if (!strstr($r,"<?xml"))
 			echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+*/
 		echo $r;
 		}
 ?>

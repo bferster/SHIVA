@@ -80,7 +80,7 @@
 		if (vars.length > 2) 												// If all options set in query string
 			shivaLib.Draw(options);											// Draw it
 		else if (query.indexOf("e=") != -1) 								// If data in eStore
-			$.getJSON("http://www.stagetools.com/vis/shiva/geteasyfile.php?id="+query.substr(2)+"&callback=?");	// Get data from eStore
+			$.getJSON("http://www.sviseyes.org/shiva/geteasyfile.php?id="+query.substr(2)+"&callback=?");	// Get data from eStore
 		else if (query.indexOf("m=") != -1) {								// If data in Drupal node
 			if (query.indexOf("?") == -1)									// If no ? in url
 				$.getJSON(query.substr(2)+"?callback=?");					// Get data from node

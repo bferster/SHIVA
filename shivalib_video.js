@@ -6,7 +6,6 @@ SHIVA_Show.prototype.DrawVideo=function() 										//	DRAW VIDEO
 {
 	var options=this.options;
 //	options.dataSourceUrl="17853047"; 
-//	options.dataSourceUrl="http://www.primaryaccess.org/music.mp3";	
 //	options.dataSourceUrl="//www.kaltura.com/p/2003471/sp/0/playManifest/entryId/1_c7z7zuiv/format/url/flavorParamId/2003471/video.mp4";
 	var con="#"+this.container;
 	$(con).width(options.width);

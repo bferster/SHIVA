@@ -505,7 +505,7 @@ SHIVA_Show.prototype.SizingBox=function(div, id, pos, alpha, col, edge)		// SIZI
 		Draw();																// Redraw
 		return;																// Quit
 		}
-	Draw();																	// Redraw
+//	Draw();																	// Redraw
 	if (id.indexOf("Input")!= -1) 											// If an id
 		pos=$("#"+id).val();												// Get value
 	var v,top=0,left=0,wid=10000;											// Defs

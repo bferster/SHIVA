@@ -26,7 +26,7 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 	else if ((options.chartType == "Zoomable") && (options.dataSourceUrl)) 					// If zoomable
 		this.DrawPoster("Image");															// Draw poster
 	else if (options.chartType == "Montage") {												// If montage
-		var items=new Array();																// Alloc iteems array
+		var items=new Array();																// Alloc items array
 	   	for (var key in options) {															// For each item
 			if (key.indexOf("item-") != -1) {												// If an item
 				o={};																		// Alloc obj
@@ -61,7 +61,7 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
 		if (options.audio) {																// If an audio file
 			var file=options.audio.substr(0,options.audio.length-4);						// Remove extension
 			str="<audio id='"+this.container+"Snd'";										// Base
-			str+="><source src='"+file+".ogg' type='audio/ogg'><source src='"+file+".mp3' type='audio/mpeg'></audio>";	// Add sources
+			str+="><source src='"+file+".mp3' type='audio/mpeg'></audio>";					// Add sources
 			$(con).append(str);																// Add audio to container
 			this.imageMob.snd=document.getElementById(this.container+"Snd");				// Point at audio object
 			this.imageMob.snd.volume=options.volume/100;									// Set volume
@@ -91,10 +91,6 @@ SHIVA_Show.prototype.DrawImage=function() 												//	DRAW IMAGE
   	    	});
  		}
 
-  
-  http://127.0.0.1:8020/SHIVA/go.htm?shivaGroup=Poster&item-1=name:Pane-1;data:250|437|285;url:599;asp:654;layerTitle:Montage;scrollbars:false;caption:Montage%20-%20Demo;style:border`3px%20solid%20white&item-2=name:Pane-2;data:250|438|621;asp:1000;url:610;layerTitle:Network;scrollbars:false;caption:Network%20-%20Demo;style:border`3px%20solid%20white&item-3=name:Pane-3;data:272|720|284;asp:610;url:500;layerTitle:Video%20-%20Demo;scrollbars:false;caption:Video%20-%20Demo;style:border`3px%20solid%20white&item-4=name:Pane-4;asp:764;data:356|761|588;url:586;layerTitle:Timeline%20-%20Demo;scrollbars:false;caption:Timeline%20-%20Demo;style:border`3px%20solid%20white&pos=1000|500|500&eva=&height=900&width=1400&backCol=fffcf2&dataSourceUrl=https://lh6.googleusercontent.com/-O-8_RgU9WCU/UoYskYStOyI/AAAAAAAAL_0/gwopG2GnaLo/w1440-h900-no/Creative-Sanford-Background-300.png&overview=true&grid=false&controlbox=false&ud=false
-   
-  
    	function AddImages(data, imgHgt, showImage, showSlide, transition, wid)				// ADD IMAGES TO GALLERY
  	{
 		var str="<div id='gallery' class='ad-gallery'>"
@@ -224,5 +220,3 @@ SHIVA_Show.prototype.ImageActions=function(msg)									// REACT TO SHIVA ACTION
 			shivaLib.DrawImage();													// Redraw image to pause
 		}
 }
-
-                      

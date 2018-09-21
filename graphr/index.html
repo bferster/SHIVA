@@ -1,0 +1,77 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	<title>Graphr - The JavaScript Graphing Calculator</title>
+	<link rel="stylesheet" type="text/css" href="jsgcalc.css" />
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>	
+	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="calc.js"></script>
+	<script type="text/javascript" src="parser.js"></script>
+	<script type="text/javascript" src="jsgcalc.js"></script>
+	<script type="text/javascript" src="jsgui.js"></script>
+</head>
+<body>
+<script>	
+	$(document).ready(function() {
+		$("#sidewrapper2").draggable();
+		var q=window.location.search.substring(1);						
+		if (q.match(/hide/i)) {
+			q=q.replace(/hide/i,"");
+			$("#sidewrapper2").hide();
+			}
+		var e={ data:"ShivaAct=data|"+q };
+		shivaEventHandler(e);
+		if (window.addEventListener) 
+			window.addEventListener("message",shivaEventHandler,false);
+		else
+			window.attachEvent("message",shivaEventHandler);
+		});												
+
+	function shivaEventHandler(e)
+	{
+		var v=e.data.split("|");														
+		if (v[0] == "ShivaAct=data") { 												
+			for (var i=0;i<v.length-1;++i) {
+				if (!$("#graph_input_"+i).length)
+					jsgui.addInput();
+				$("#graph_input_"+i).val(v[i+1]);
+				jsgui.updateInputData();
+				jsgcalc.draw();
+				jsgui.refreshInputs();
+				}
+			}
+		}
+</script>		
+	
+<div id="wrapper">
+	<div id="sidewrapper2">
+		<div id="graph_sidebar">
+			<div id="graph_inputs"></div><br>
+			<div id="buttonbar" style="text-align:center">
+				<a class="fancybutton" href="javascript:void(0)" onclick="jsgui.evaluate()">Draw</a>&nbsp;
+				<a class="fancybutton" href="javascript:void(0)" onclick="jsgui.addInput()">+</a>&nbsp; 
+				<a class="fancybutton greybutton" href="javascript:void(0)" id="settings_button" onclick="$('#settings').toggle(400)"><img src='images/settings.png' alt='Settings' /></a>
+			</div>
+			<div id="settings">
+				<hr>
+				<div id="angle_select" class="options_list">
+					Type: 
+					<a href="javascript:void(0)" onclick="jsgui.setAngles('degrees')" id="angle_select_degrees" class="option">DEG</a>
+					<a href="javascript:void(0)" onclick="jsgui.setAngles('radians')" id="angle_select_radians" class="option option_selected">RAD</a>
+					<a href="javascript:void(0)" onclick="jsgui.setAngles('gradians')" id="angle_select_gradians" class="option">GRAD</a>
+				</div>
+				<div id="gridlines_select" class="options_list">
+					Grid: 
+					<a href="javascript:void(0)" onclick="jsgui.setGridlines('normal')" id="gridlines_select_normal" class="option option_selected">MORE</a>
+					<a href="javascript:void(0)" onclick="jsgui.setGridlines('less')" id="gridlines_select_less" class="option">LESS</a>
+					<a href="javascript:void(0)" onclick="jsgui.setGridlines('off')" id="gridlines_select_off" class="option">OFF</a>
+				</div>
+				<p>Based on work by <a href="http://www.yerich.net">Richard Ye</a>
+			</div>	
+		</div>
+	</div>
+	<div id="graph_wrapper"><canvas id="graph"></canvas></div>
+</div>
+</body>
+</html>
